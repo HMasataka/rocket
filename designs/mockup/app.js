@@ -993,38 +993,361 @@ function getSettingsModalHTML() {
           <div class="settings-nav-item" onclick="switchSettingsTab(this, 'tools')">External Tools</div>
         </nav>
         <div class="settings-content">
-          <div class="settings-section">
-            <h3>Theme</h3>
-            <div class="theme-selector">
-              <label class="theme-option selected">
-                <input type="radio" name="theme" value="dark" checked>
-                <span class="theme-preview dark"></span>
-                <span>Dark</span>
-              </label>
-              <label class="theme-option">
-                <input type="radio" name="theme" value="light">
-                <span class="theme-preview light"></span>
-                <span>Light</span>
-              </label>
+          <!-- Appearance Tab -->
+          <div class="settings-tab" data-tab="appearance">
+            <div class="settings-section">
+              <h3>Theme</h3>
+              <div class="theme-selector">
+                <label class="theme-option selected">
+                  <input type="radio" name="theme" value="dark" checked>
+                  <span class="theme-preview dark"></span>
+                  <span>Dark</span>
+                </label>
+                <label class="theme-option">
+                  <input type="radio" name="theme" value="light">
+                  <span class="theme-preview light"></span>
+                  <span>Light</span>
+                </label>
+              </div>
+            </div>
+            <div class="settings-section">
+              <h3>Color Theme</h3>
+              <div class="color-picker">
+                <div class="color-option selected" style="--color: #58a6ff" data-theme="cobalt"></div>
+                <div class="color-option" style="--color: #34d399" data-theme="emerald"></div>
+                <div class="color-option" style="--color: #f472b6" data-theme="rose"></div>
+                <div class="color-option" style="--color: #f59e0b" data-theme="amber"></div>
+                <div class="color-option" style="--color: #a5a5b4" data-theme="slate"></div>
+                <div class="color-option" style="--color: #a78bfa" data-theme="violet"></div>
+              </div>
+            </div>
+            <div class="settings-section">
+              <h3>Font Size</h3>
+              <div class="setting-row">
+                <label>UI</label>
+                <input type="range" min="10" max="18" value="13">
+                <span>13px</span>
+              </div>
+            </div>
+            <div class="settings-section">
+              <h3>Layout</h3>
+              <div class="setting-row">
+                <label>Sidebar Position</label>
+                <select class="modal-select">
+                  <option value="left" selected>Left</option>
+                  <option value="right">Right</option>
+                </select>
+              </div>
+              <div class="setting-row" style="margin-top: 8px;">
+                <label>Tab Style</label>
+                <select class="modal-select">
+                  <option value="default" selected>Default</option>
+                  <option value="compact">Compact</option>
+                </select>
+              </div>
             </div>
           </div>
-          <div class="settings-section">
-            <h3>Color Theme</h3>
-            <div class="color-picker">
-              <div class="color-option selected" style="--color: #58a6ff" data-theme="cobalt"></div>
-              <div class="color-option" style="--color: #34d399" data-theme="emerald"></div>
-              <div class="color-option" style="--color: #f472b6" data-theme="rose"></div>
-              <div class="color-option" style="--color: #f59e0b" data-theme="amber"></div>
-              <div class="color-option" style="--color: #a5a5b4" data-theme="slate"></div>
-              <div class="color-option" style="--color: #a78bfa" data-theme="violet"></div>
+
+          <!-- Editor Tab -->
+          <div class="settings-tab" data-tab="editor" style="display: none;">
+            <div class="settings-section">
+              <h3>Font</h3>
+              <div class="setting-row">
+                <label>Font Family</label>
+                <select class="modal-select">
+                  <option value="jetbrains" selected>JetBrains Mono</option>
+                  <option value="firacode">Fira Code</option>
+                  <option value="sourcecodepro">Source Code Pro</option>
+                  <option value="cascadia">Cascadia Code</option>
+                  <option value="iosevka">Iosevka</option>
+                </select>
+              </div>
+              <div class="setting-row" style="margin-top: 8px;">
+                <label>Font Size</label>
+                <input type="range" min="10" max="24" value="14">
+                <span>14px</span>
+              </div>
+              <div class="setting-row" style="margin-top: 8px;">
+                <label>Line Height</label>
+                <input type="range" min="12" max="30" value="20">
+                <span>20px</span>
+              </div>
+            </div>
+            <div class="settings-section">
+              <h3>Display</h3>
+              <div class="settings-toggle-row">
+                <label>Show Line Numbers</label>
+                <div class="settings-toggle active" onclick="toggleSettingSwitch(this)"><div class="settings-toggle-knob"></div></div>
+              </div>
+              <div class="settings-toggle-row">
+                <label>Word Wrap</label>
+                <div class="settings-toggle" onclick="toggleSettingSwitch(this)"><div class="settings-toggle-knob"></div></div>
+              </div>
+              <div class="settings-toggle-row">
+                <label>Show Whitespace</label>
+                <div class="settings-toggle" onclick="toggleSettingSwitch(this)"><div class="settings-toggle-knob"></div></div>
+              </div>
+              <div class="settings-toggle-row">
+                <label>Minimap</label>
+                <div class="settings-toggle active" onclick="toggleSettingSwitch(this)"><div class="settings-toggle-knob"></div></div>
+              </div>
+            </div>
+            <div class="settings-section">
+              <h3>Indentation</h3>
+              <div class="setting-row">
+                <label>Indent Style</label>
+                <select class="modal-select">
+                  <option value="spaces" selected>Spaces</option>
+                  <option value="tabs">Tabs</option>
+                </select>
+              </div>
+              <div class="setting-row" style="margin-top: 8px;">
+                <label>Tab Size</label>
+                <select class="modal-select">
+                  <option value="2" selected>2</option>
+                  <option value="4">4</option>
+                  <option value="8">8</option>
+                </select>
+              </div>
             </div>
           </div>
-          <div class="settings-section">
-            <h3>Font Size</h3>
-            <div class="setting-row">
-              <label>Editor</label>
-              <input type="range" min="10" max="20" value="13">
-              <span>13px</span>
+
+          <!-- AI Settings Tab -->
+          <div class="settings-tab" data-tab="ai" style="display: none;">
+            <div class="settings-section">
+              <h3>Provider</h3>
+              <div class="setting-row">
+                <label>AI Provider</label>
+                <select class="modal-select">
+                  <option value="openai" selected>OpenAI</option>
+                  <option value="anthropic">Anthropic</option>
+                  <option value="ollama">Ollama (Local)</option>
+                </select>
+              </div>
+              <div class="setting-row" style="margin-top: 8px;">
+                <label>Model</label>
+                <select class="modal-select">
+                  <option value="gpt-4o" selected>gpt-4o</option>
+                  <option value="gpt-4o-mini">gpt-4o-mini</option>
+                  <option value="o1-mini">o1-mini</option>
+                </select>
+              </div>
+            </div>
+            <div class="settings-section">
+              <h3>API Key</h3>
+              <div class="settings-input-row">
+                <input type="password" class="settings-input" value="sk-••••••••••••••••••••••" placeholder="Enter API key">
+                <button class="btn btn-secondary btn-sm" onclick="showToast('info', 'API key visibility toggled')">Show</button>
+              </div>
+              <div class="settings-hint">Your API key is stored locally and never sent to our servers.</div>
+            </div>
+            <div class="settings-section">
+              <h3>Features</h3>
+              <div class="settings-toggle-row">
+                <label>Auto-generate Commit Messages</label>
+                <div class="settings-toggle active" onclick="toggleSettingSwitch(this)"><div class="settings-toggle-knob"></div></div>
+              </div>
+              <div class="settings-toggle-row">
+                <label>AI Code Review</label>
+                <div class="settings-toggle active" onclick="toggleSettingSwitch(this)"><div class="settings-toggle-knob"></div></div>
+              </div>
+              <div class="settings-toggle-row">
+                <label>Smart Conflict Resolution</label>
+                <div class="settings-toggle" onclick="toggleSettingSwitch(this)"><div class="settings-toggle-knob"></div></div>
+              </div>
+            </div>
+            <div class="settings-section">
+              <h3>Commit Message</h3>
+              <div class="setting-row">
+                <label>Style</label>
+                <select class="modal-select">
+                  <option value="conventional" selected>Conventional Commits</option>
+                  <option value="descriptive">Descriptive</option>
+                  <option value="brief">Brief</option>
+                </select>
+              </div>
+              <div class="setting-row" style="margin-top: 8px;">
+                <label>Language</label>
+                <select class="modal-select">
+                  <option value="en" selected>English</option>
+                  <option value="ja">Japanese</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Keybindings Tab -->
+          <div class="settings-tab" data-tab="keybindings" style="display: none;">
+            <div class="settings-section">
+              <h3>Preset</h3>
+              <div class="setting-row">
+                <label>Keybinding Preset</label>
+                <select class="modal-select">
+                  <option value="default" selected>Default</option>
+                  <option value="vim">Vim</option>
+                  <option value="emacs">Emacs</option>
+                </select>
+              </div>
+            </div>
+            <div class="settings-section">
+              <h3>General</h3>
+              <div class="keybinding-list">
+                <div class="keybinding-row">
+                  <span class="keybinding-action">Open Settings</span>
+                  <kbd class="keybinding-key">⌘ ,</kbd>
+                </div>
+                <div class="keybinding-row">
+                  <span class="keybinding-action">Search</span>
+                  <kbd class="keybinding-key">⌘ F</kbd>
+                </div>
+                <div class="keybinding-row">
+                  <span class="keybinding-action">Toggle Sidebar</span>
+                  <kbd class="keybinding-key">⌘ B</kbd>
+                </div>
+                <div class="keybinding-row">
+                  <span class="keybinding-action">New Tab</span>
+                  <kbd class="keybinding-key">⌘ T</kbd>
+                </div>
+                <div class="keybinding-row">
+                  <span class="keybinding-action">Close Tab</span>
+                  <kbd class="keybinding-key">⌘ W</kbd>
+                </div>
+              </div>
+            </div>
+            <div class="settings-section">
+              <h3>Git Operations</h3>
+              <div class="keybinding-list">
+                <div class="keybinding-row">
+                  <span class="keybinding-action">Commit</span>
+                  <kbd class="keybinding-key">⌘ Enter</kbd>
+                </div>
+                <div class="keybinding-row">
+                  <span class="keybinding-action">Push</span>
+                  <kbd class="keybinding-key">⌘ ⇧ P</kbd>
+                </div>
+                <div class="keybinding-row">
+                  <span class="keybinding-action">Pull</span>
+                  <kbd class="keybinding-key">⌘ ⇧ L</kbd>
+                </div>
+                <div class="keybinding-row">
+                  <span class="keybinding-action">Fetch</span>
+                  <kbd class="keybinding-key">⌘ ⇧ F</kbd>
+                </div>
+                <div class="keybinding-row">
+                  <span class="keybinding-action">Stage All</span>
+                  <kbd class="keybinding-key">⌘ ⇧ A</kbd>
+                </div>
+                <div class="keybinding-row">
+                  <span class="keybinding-action">Unstage All</span>
+                  <kbd class="keybinding-key">⌘ ⇧ U</kbd>
+                </div>
+              </div>
+            </div>
+            <div class="settings-section">
+              <h3>Navigation</h3>
+              <div class="keybinding-list">
+                <div class="keybinding-row">
+                  <span class="keybinding-action">Changes</span>
+                  <kbd class="keybinding-key">⌘ 1</kbd>
+                </div>
+                <div class="keybinding-row">
+                  <span class="keybinding-action">History</span>
+                  <kbd class="keybinding-key">⌘ 2</kbd>
+                </div>
+                <div class="keybinding-row">
+                  <span class="keybinding-action">Branches</span>
+                  <kbd class="keybinding-key">⌘ 3</kbd>
+                </div>
+                <div class="keybinding-row">
+                  <span class="keybinding-action">Stash</span>
+                  <kbd class="keybinding-key">⌘ 4</kbd>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- External Tools Tab -->
+          <div class="settings-tab" data-tab="tools" style="display: none;">
+            <div class="settings-section">
+              <h3>Diff Tool</h3>
+              <div class="setting-row">
+                <label>External Diff Tool</label>
+                <select class="modal-select">
+                  <option value="builtin" selected>Built-in</option>
+                  <option value="vscode">VS Code</option>
+                  <option value="meld">Meld</option>
+                  <option value="kaleidoscope">Kaleidoscope</option>
+                  <option value="beyond-compare">Beyond Compare</option>
+                </select>
+              </div>
+            </div>
+            <div class="settings-section">
+              <h3>Merge Tool</h3>
+              <div class="setting-row">
+                <label>External Merge Tool</label>
+                <select class="modal-select">
+                  <option value="builtin" selected>Built-in</option>
+                  <option value="vscode">VS Code</option>
+                  <option value="meld">Meld</option>
+                  <option value="kaleidoscope">Kaleidoscope</option>
+                  <option value="beyond-compare">Beyond Compare</option>
+                </select>
+              </div>
+            </div>
+            <div class="settings-section">
+              <h3>Terminal</h3>
+              <div class="setting-row">
+                <label>Terminal Emulator</label>
+                <select class="modal-select">
+                  <option value="default" selected>System Default</option>
+                  <option value="iterm">iTerm2</option>
+                  <option value="warp">Warp</option>
+                  <option value="alacritty">Alacritty</option>
+                  <option value="kitty">Kitty</option>
+                </select>
+              </div>
+            </div>
+            <div class="settings-section">
+              <h3>Editor</h3>
+              <div class="setting-row">
+                <label>External Editor</label>
+                <select class="modal-select">
+                  <option value="vscode" selected>VS Code</option>
+                  <option value="cursor">Cursor</option>
+                  <option value="zed">Zed</option>
+                  <option value="sublime">Sublime Text</option>
+                  <option value="vim">Vim</option>
+                  <option value="neovim">Neovim</option>
+                </select>
+              </div>
+              <div class="settings-toggle-row" style="margin-top: 8px;">
+                <label>Open in Editor on double-click</label>
+                <div class="settings-toggle active" onclick="toggleSettingSwitch(this)"><div class="settings-toggle-knob"></div></div>
+              </div>
+            </div>
+            <div class="settings-section">
+              <h3>Git</h3>
+              <div class="setting-row">
+                <label>Git Path</label>
+                <div class="settings-input-row">
+                  <input type="text" class="settings-input" value="/usr/bin/git" placeholder="Path to git binary">
+                  <button class="btn btn-secondary btn-sm" onclick="showToast('info', 'Browsing for git binary')">Browse</button>
+                </div>
+              </div>
+              <div class="settings-toggle-row" style="margin-top: 8px;">
+                <label>Auto-fetch on open</label>
+                <div class="settings-toggle active" onclick="toggleSettingSwitch(this)"><div class="settings-toggle-knob"></div></div>
+              </div>
+              <div class="setting-row" style="margin-top: 8px;">
+                <label>Auto-fetch Interval</label>
+                <select class="modal-select">
+                  <option value="0">Disabled</option>
+                  <option value="60">1 minute</option>
+                  <option value="300" selected>5 minutes</option>
+                  <option value="600">10 minutes</option>
+                  <option value="1800">30 minutes</option>
+                </select>
+              </div>
             </div>
           </div>
         </div>
@@ -1037,6 +1360,7 @@ function getSettingsModalHTML() {
       .settings-nav-item:hover { background: var(--bg-tertiary); }
       .settings-nav-item.active { background: var(--accent-dim); color: var(--accent); }
       .settings-content { display: flex; flex-direction: column; gap: 24px; }
+      .settings-tab { display: flex; flex-direction: column; gap: 24px; }
       .settings-section h3 { font-size: 14px; font-weight: 600; margin-bottom: 12px; }
       .theme-selector { display: flex; gap: 12px; }
       .theme-option { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 12px; background: var(--bg-tertiary); border: 2px solid transparent; border-radius: 8px; cursor: pointer; }
@@ -1053,6 +1377,21 @@ function getSettingsModalHTML() {
       .setting-row label { flex: 1; font-size: 13px; }
       .setting-row input[type="range"] { width: 150px; }
       .setting-row span { font-size: 12px; color: var(--text-muted); width: 40px; }
+      .settings-toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; }
+      .settings-toggle-row label { font-size: 13px; color: var(--text-primary); }
+      .settings-toggle { width: 36px; height: 20px; background: var(--bg-hover); border-radius: 10px; cursor: pointer; position: relative; transition: background 0.2s; flex-shrink: 0; }
+      .settings-toggle.active { background: var(--accent); }
+      .settings-toggle-knob { width: 16px; height: 16px; background: #fff; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: left 0.2s; }
+      .settings-toggle.active .settings-toggle-knob { left: 18px; }
+      .keybinding-list { display: flex; flex-direction: column; gap: 0; }
+      .keybinding-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); }
+      .keybinding-row:last-child { border-bottom: none; }
+      .keybinding-action { font-size: 13px; color: var(--text-primary); }
+      .keybinding-key { font-family: inherit; font-size: 11px; padding: 3px 8px; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 4px; color: var(--text-secondary); }
+      .settings-input-row { display: flex; gap: 8px; align-items: center; }
+      .settings-input { flex: 1; padding: 8px 12px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 6px; color: var(--text-primary); font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+      .settings-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
+      .settings-hint { font-size: 11px; color: var(--text-muted); margin-top: 6px; }
     </style>
   `;
 }
@@ -2288,6 +2627,13 @@ function togglePreviewDiff(element, fileId) {
 function switchSettingsTab(element, tab) {
   document.querySelectorAll('.settings-nav-item').forEach(item => item.classList.remove('active'));
   element.classList.add('active');
+  document.querySelectorAll('.settings-tab').forEach(t => t.style.display = 'none');
+  const target = document.querySelector(`.settings-tab[data-tab="${tab}"]`);
+  if (target) target.style.display = 'flex';
+}
+
+function toggleSettingSwitch(element) {
+  element.classList.toggle('active');
 }
 
 function useGeneratedMessage() {
