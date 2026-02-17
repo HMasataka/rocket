@@ -1619,7 +1619,10 @@ function getResetViewHTML() {
       .reset-commit-row:hover { background: var(--bg-tertiary); }
       .reset-commit-row.selected { background: var(--danger-dim); border-left: 3px solid var(--danger); }
       .reset-radio { margin-right: 12px; padding-top: 2px; }
-      .reset-radio input { width: 16px; height: 16px; accent-color: var(--danger); }
+      .reset-radio input { width: 1.15em; height: 1.15em; appearance: none; -webkit-appearance: none; border-radius: 50%; border: 0.1em solid #6b6b76; background: transparent; cursor: pointer; display: grid; place-content: center; }
+      .reset-radio input::before { content: ""; width: 0.65em; height: 0.65em; border-radius: 50%; transform: scale(0); transition: 120ms transform ease-in-out; background-color: var(--danger); }
+      .reset-radio input:checked { border-color: var(--danger); }
+      .reset-radio input:checked::before { transform: scale(1); }
       .reset-graph { width: 24px; display: flex; flex-direction: column; align-items: center; margin-right: 12px; }
       .graph-node.reset { width: 12px; height: 12px; background: linear-gradient(135deg, #f87171, #ef4444); border-radius: 50%; }
       .reset-info { flex: 1; }

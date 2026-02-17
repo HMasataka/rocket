@@ -514,13 +514,53 @@ body {
 .diff-line:hover { background: var(--bg-hover); }
 
 .line-checkbox {
-  width: 20px;
+  width: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
+  opacity: 0;
+  transition: opacity 0.15s ease;
 }
 
-.line-checkbox input { accent-color: var(--accent); }
+.diff-line:hover .line-checkbox { opacity: 1; }
+.line-checkbox:has(input:checked) { opacity: 1; }
+
+.line-checkbox input {
+  width: 14px;
+  height: 14px;
+  appearance: none;
+  -webkit-appearance: none;
+  border: 1.5px solid var(--text-muted);
+  border-radius: 3px;
+  background: var(--bg-secondary);
+  cursor: pointer;
+  position: relative;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.line-checkbox input:hover {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+  box-shadow: 0 0 0 3px var(--accent-dim);
+}
+
+.line-checkbox input:checked {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.line-checkbox input:checked::after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 1px;
+  width: 4px;
+  height: 8px;
+  border: solid var(--bg);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
 
 .line-num {
   width: 40px;
