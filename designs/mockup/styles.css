@@ -989,6 +989,11 @@ body {
   font-size: 12px;
 }
 
+.btn-xs {
+  padding: 3px 8px;
+  font-size: 11px;
+}
+
 .btn-primary { background: var(--accent); color: #fff; }
 .btn-primary:hover { filter: brightness(1.1); }
 

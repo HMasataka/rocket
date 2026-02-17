@@ -537,6 +537,10 @@ function stageAll() {
   showToast('success', 'All files staged');
 }
 
+function unstageAll() {
+  showToast('success', 'All files unstaged');
+}
+
 function stageHunk(index) {
   showToast('success', `Hunk ${index + 1} staged`);
 }
