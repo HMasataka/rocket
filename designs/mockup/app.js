@@ -1377,18 +1377,29 @@ function getCherryPickViewHTML() {
         <div class="operation-sidebar">
           <div class="operation-options">
             <h3>Options</h3>
-            <label class="option-item">
-              <input type="checkbox" checked>
-              <span>Create commit (-x)</span>
-            </label>
-            <label class="option-item">
-              <input type="checkbox">
-              <span>Apply changes only (--no-commit)</span>
-            </label>
-            <label class="option-item">
-              <input type="checkbox">
-              <span>Allow merge commits (-m)</span>
-            </label>
+            <div class="option-selector">
+              <label class="option-card selected">
+                <input type="checkbox" checked>
+                <div class="option-content">
+                  <div class="option-title">Create commit (-x)</div>
+                  <div class="option-desc">Record original commit info in the message</div>
+                </div>
+              </label>
+              <label class="option-card">
+                <input type="checkbox">
+                <div class="option-content">
+                  <div class="option-title">Apply changes only (--no-commit)</div>
+                  <div class="option-desc">Apply changes without creating a commit</div>
+                </div>
+              </label>
+              <label class="option-card">
+                <input type="checkbox">
+                <div class="option-content">
+                  <div class="option-title">Allow merge commits (-m)</div>
+                  <div class="option-desc">Allow cherry-picking merge commits</div>
+                </div>
+              </label>
+            </div>
           </div>
           <div class="operation-preview">
             <h3>Selected</h3>
@@ -1430,8 +1441,17 @@ function getCherryPickViewHTML() {
       .cherry-hash { font-family: 'JetBrains Mono', monospace; color: var(--accent); }
       .operation-sidebar { width: 320px; border-left: 1px solid var(--border); display: flex; flex-direction: column; padding: 20px; gap: 20px; overflow-y: auto; }
       .operation-options h3, .operation-preview h3 { font-size: 13px; font-weight: 600; margin-bottom: 12px; color: var(--text-secondary); }
-      .option-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; font-size: 13px; cursor: pointer; }
-      .option-item input { accent-color: var(--accent); }
+      .option-selector { display: flex; flex-direction: column; gap: 8px; }
+      .option-card { display: flex; align-items: flex-start; gap: 10px; padding: 12px; background: var(--bg-tertiary); border: 2px solid transparent; border-radius: 8px; cursor: pointer; transition: all 0.15s; }
+      .option-card:hover { background: var(--bg-secondary); }
+      .option-card.selected { border-color: var(--accent); }
+      .option-card input { width: 1.15em; height: 1.15em; margin-top: 2px; appearance: none; -webkit-appearance: none; border-radius: 50%; border: 0.1em solid #6b6b76; background: transparent; cursor: pointer; display: grid; place-content: center; }
+      .option-card input::before { content: ""; width: 0.65em; height: 0.65em; border-radius: 50%; transform: scale(0); transition: 120ms transform ease-in-out; background-color: var(--accent); }
+      .option-card input:checked { border-color: var(--accent); }
+      .option-card input:checked::before { transform: scale(1); }
+      .option-content { flex: 1; }
+      .option-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+      .option-desc { font-size: 11px; color: var(--text-muted); }
       .selected-commits { padding: 12px; background: var(--bg-tertiary); border-radius: 8px; min-height: 60px; }
       .empty-hint { color: var(--text-muted); font-size: 12px; text-align: center; margin: 0; }
       .selected-item { display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: 12px; }
@@ -1485,18 +1505,29 @@ function getRevertViewHTML() {
         <div class="operation-sidebar">
           <div class="operation-options">
             <h3>Options</h3>
-            <label class="option-item">
-              <input type="checkbox" checked>
-              <span>Create revert commit</span>
-            </label>
-            <label class="option-item">
-              <input type="checkbox">
-              <span>Apply changes only (--no-commit)</span>
-            </label>
-            <label class="option-item">
-              <input type="checkbox">
-              <span>Open editor (--edit)</span>
-            </label>
+            <div class="option-selector">
+              <label class="option-card selected">
+                <input type="checkbox" checked>
+                <div class="option-content">
+                  <div class="option-title">Create revert commit</div>
+                  <div class="option-desc">Automatically create a revert commit</div>
+                </div>
+              </label>
+              <label class="option-card">
+                <input type="checkbox">
+                <div class="option-content">
+                  <div class="option-title">Apply changes only (--no-commit)</div>
+                  <div class="option-desc">Apply changes without creating a commit</div>
+                </div>
+              </label>
+              <label class="option-card">
+                <input type="checkbox">
+                <div class="option-content">
+                  <div class="option-title">Open editor (--edit)</div>
+                  <div class="option-desc">Edit the commit message before committing</div>
+                </div>
+              </label>
+            </div>
           </div>
           <div class="operation-preview">
             <h3>Revert commit message</h3>
@@ -1529,6 +1560,17 @@ function getRevertViewHTML() {
       .revert-hash { font-family: 'JetBrains Mono', monospace; color: var(--warning); }
       .revert-message-input { width: 100%; height: 120px; padding: 12px; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 8px; color: var(--text-primary); font-family: 'JetBrains Mono', monospace; font-size: 12px; resize: none; }
       .revert-message-input:focus { outline: none; border-color: var(--warning); }
+      .option-selector { display: flex; flex-direction: column; gap: 8px; }
+      .option-card { display: flex; align-items: flex-start; gap: 10px; padding: 12px; background: var(--bg-tertiary); border: 2px solid transparent; border-radius: 8px; cursor: pointer; transition: all 0.15s; }
+      .option-card:hover { background: var(--bg-secondary); }
+      .option-card.selected { border-color: var(--warning); }
+      .option-card input { width: 1.15em; height: 1.15em; margin-top: 2px; appearance: none; -webkit-appearance: none; border-radius: 50%; border: 0.1em solid #6b6b76; background: transparent; cursor: pointer; display: grid; place-content: center; }
+      .option-card input::before { content: ""; width: 0.65em; height: 0.65em; border-radius: 50%; transform: scale(0); transition: 120ms transform ease-in-out; background-color: var(--warning); }
+      .option-card input:checked { border-color: var(--warning); }
+      .option-card input:checked::before { transform: scale(1); }
+      .option-content { flex: 1; }
+      .option-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+      .option-desc { font-size: 11px; color: var(--text-muted); }
       .btn-warning { background: var(--warning); color: #000; }
       .btn-warning:hover { background: #d97706; }
     </style>
@@ -1632,10 +1674,13 @@ function getResetViewHTML() {
       .reset-meta { display: flex; gap: 12px; font-size: 11px; color: var(--text-muted); }
       .reset-hash { font-family: 'JetBrains Mono', monospace; color: var(--danger); }
       .reset-mode-selector { display: flex; flex-direction: column; gap: 8px; }
-      .reset-mode { display: flex; align-items: flex-start; gap: 10px; padding: 12px; background: var(--bg-tertiary); border: 2px solid transparent; border-radius: 8px; cursor: pointer; }
+      .reset-mode { display: flex; align-items: flex-start; gap: 10px; padding: 12px; background: var(--bg-tertiary); border: 2px solid transparent; border-radius: 8px; cursor: pointer; transition: all 0.15s; }
       .reset-mode:hover { background: var(--bg-secondary); }
       .reset-mode.selected { border-color: var(--accent); }
-      .reset-mode input { margin-top: 2px; accent-color: var(--accent); }
+      .reset-mode input { width: 1.15em; height: 1.15em; margin-top: 2px; appearance: none; -webkit-appearance: none; border-radius: 50%; border: 0.1em solid #6b6b76; background: transparent; cursor: pointer; display: grid; place-content: center; }
+      .reset-mode input::before { content: ""; width: 0.65em; height: 0.65em; border-radius: 50%; transform: scale(0); transition: 120ms transform ease-in-out; background-color: var(--accent); }
+      .reset-mode input:checked { border-color: var(--accent); }
+      .reset-mode input:checked::before { transform: scale(1); }
       .mode-content { flex: 1; }
       .mode-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
       .mode-desc { font-size: 11px; color: var(--text-muted); }
