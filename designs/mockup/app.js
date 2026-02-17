@@ -1701,20 +1701,30 @@ function getHistoryViewHTML() {
             </div>
           </div>
 
-          <div class="detail-actions">
-            <button class="btn btn-secondary">
-              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 3a5 5 0 1 1-4.546 2.914.5.5 0 0 0-.908-.417A6 6 0 1 0 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 0-.41-.192L5.23 2.308a.25.25 0 0 0 0 .384l2.36 1.966A.25.25 0 0 0 8 4.466z"/></svg>
-              Revert
-            </button>
-            <button class="btn btn-secondary">
-              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 1.5a2.5 2.5 0 1 1 5 0 2.5 2.5 0 0 1-5 0zM6.5 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/></svg>
-              Cherry-pick
-            </button>
-          </div>
         </div>
       </div>
     </div>
     </div>
+      <div class="operation-footer">
+        <div class="operation-summary" id="history-summary">
+          <span class="summary-stat"><strong>a1b2c3d</strong></span>
+          <span class="summary-divider"></span>
+          <span class="summary-stat additions">+127</span>
+          <span class="summary-stat deletions">-23</span>
+          <span class="summary-divider"></span>
+          <span class="summary-stat">5 files</span>
+        </div>
+        <div class="operation-buttons">
+          <button class="btn btn-secondary" onclick="showView('revert')">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 3a5 5 0 1 1-4.546 2.914.5.5 0 0 0-.908-.417A6 6 0 1 0 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 0-.41-.192L5.23 2.308a.25.25 0 0 0 0 .384l2.36 1.966A.25.25 0 0 0 8 4.466z"/></svg>
+            Revert
+          </button>
+          <button class="btn btn-primary" onclick="showView('cherry-pick')">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/></svg>
+            Cherry-pick
+          </button>
+        </div>
+      </div>
     <style>
       .history-content { display: grid; grid-template-columns: 50% 50%; flex: 1; width: 100%; height: 100%; min-width: 0; overflow: hidden; }
       .history-content > * { min-width: 0; width: 100%; height: 100%; }
@@ -1939,24 +1949,38 @@ function getBranchesViewHTML() {
               </div>
             </div>
 
-            <div class="branch-actions-footer">
-              <button class="btn btn-secondary">
-                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/><path d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z"/></svg>
-                Rebase
-              </button>
-              <button class="btn btn-secondary">
-                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M5 3.5h6A1.5 1.5 0 0 1 12.5 5v6a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 11V5A1.5 1.5 0 0 1 5 3.5z"/></svg>
-                Rename
-              </button>
-              <button class="btn btn-danger-outline">
-                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/><path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1z"/></svg>
-                Delete
-              </button>
-            </div>
           </div>
         </div>
       </div>
     </div>
+      <div class="operation-footer">
+        <div class="operation-summary" id="branch-summary">
+          <span class="summary-stat"><strong id="branch-name-summary">${defaultBranch.name}</strong></span>
+          <span class="summary-divider"></span>
+          <span class="summary-stat">${defaultBranch.ahead > 0 ? `<span class="additions">↑${defaultBranch.ahead}</span>` : '<span style="color:var(--text-muted)">↑0</span>'}</span>
+          <span class="summary-stat">${defaultBranch.behind > 0 ? `<span class="deletions">↓${defaultBranch.behind}</span>` : '<span style="color:var(--text-muted)">↓0</span>'}</span>
+          <span class="summary-divider"></span>
+          <span class="summary-stat">${defaultBranch.remote || 'Local only'}</span>
+        </div>
+        <div class="operation-buttons">
+          <button class="btn btn-secondary">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/><path d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z"/></svg>
+            Rebase
+          </button>
+          <button class="btn btn-secondary">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/></svg>
+            Rename
+          </button>
+          <button class="btn btn-danger">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/><path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1z"/></svg>
+            Delete
+          </button>
+          <button class="btn btn-primary" onclick="checkoutBranch('${defaultBranch.name}')">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/></svg>
+            Checkout
+          </button>
+        </div>
+      </div>
     <style>
       .branches-content { display: grid; grid-template-columns: 50% 50%; flex: 1; width: 100%; height: 100%; overflow: hidden; }
       .branches-content > * { min-width: 0; height: 100%; }
@@ -2023,9 +2047,7 @@ function getBranchesViewHTML() {
       .branch-commit-message { flex: 1; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
       .branch-commit-meta { display: flex; gap: 8px; font-size: 11px; color: var(--text-muted); flex-shrink: 0; }
 
-      .branch-actions-footer { display: flex; gap: 8px; padding-top: 16px; border-top: 1px solid var(--border); }
-      .btn-danger-outline { background: transparent; color: var(--danger); border: 1px solid var(--danger); }
-      .btn-danger-outline:hover { background: var(--danger); color: #fff; }
+      .operation-buttons { display: flex; gap: 8px; }
     </style>
   `;
 }
@@ -2105,21 +2127,19 @@ function selectBranch(element, branchName) {
           ${recentCommitsHTML}
         </div>
       </div>
+    `;
+  }
 
-      <div class="branch-actions-footer">
-        <button class="btn btn-secondary">
-          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/><path d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z"/></svg>
-          Rebase
-        </button>
-        <button class="btn btn-secondary">
-          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M5 3.5h6A1.5 1.5 0 0 1 12.5 5v6a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 11V5A1.5 1.5 0 0 1 5 3.5z"/></svg>
-          Rename
-        </button>
-        <button class="btn btn-danger-outline">
-          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/><path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1z"/></svg>
-          Delete
-        </button>
-      </div>
+  // Update footer summary
+  const branchSummary = document.getElementById('branch-summary');
+  if (branchSummary) {
+    branchSummary.innerHTML = `
+      <span class="summary-stat"><strong id="branch-name-summary">${branch.name}</strong></span>
+      <span class="summary-divider"></span>
+      <span class="summary-stat">${branch.ahead > 0 ? `<span class="additions">↑${branch.ahead}</span>` : '<span style="color:var(--text-muted)">↑0</span>'}</span>
+      <span class="summary-stat">${branch.behind > 0 ? `<span class="deletions">↓${branch.behind}</span>` : '<span style="color:var(--text-muted)">↓0</span>'}</span>
+      <span class="summary-divider"></span>
+      <span class="summary-stat">${branch.remote || 'Local only'}</span>
     `;
   }
 }
@@ -3284,15 +3304,34 @@ function getStashViewHTML() {
             </div>
           </div>
 
-          <div class="stash-actions">
-            <button class="btn btn-primary" id="stash-apply-btn" onclick="applyStash(0)">Apply</button>
-            <button class="btn btn-secondary" id="stash-pop-btn" onclick="popStash(0)">Pop</button>
-            <button class="btn btn-danger" id="stash-drop-btn" onclick="dropStash(0)">Drop</button>
-          </div>
         </div>
       </div>
     </div>
     </div>
+      <div class="operation-footer">
+        <div class="operation-summary" id="stash-summary">
+          <span class="summary-stat"><strong>1</strong> stash selected</span>
+          <span class="summary-divider"></span>
+          <span class="summary-stat additions">+${totalAdditions}</span>
+          <span class="summary-stat deletions">-${totalDeletions}</span>
+          <span class="summary-divider"></span>
+          <span class="summary-stat">${firstStash.files.length} files</span>
+        </div>
+        <div class="operation-buttons">
+          <button class="btn btn-secondary" id="stash-pop-btn" onclick="popStash(0)">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L7.5 2.707V14.5a.5.5 0 0 0 .5.5z"/></svg>
+            Pop
+          </button>
+          <button class="btn btn-danger" id="stash-drop-btn" onclick="dropStash(0)">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/><path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1z"/></svg>
+            Drop
+          </button>
+          <button class="btn btn-primary" id="stash-apply-btn" onclick="applyStash(0)">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/></svg>
+            Apply
+          </button>
+        </div>
+      </div>
 
     ${getOperationStyles()}
     <style>
@@ -3316,7 +3355,7 @@ function getStashViewHTML() {
       .stash-index-label { font-family: 'JetBrains Mono', monospace; color: var(--accent); }
 
       .preview-hash.stash { color: var(--accent); }
-      .stash-actions { display: flex; gap: 8px; padding-top: 16px; border-top: 1px solid var(--border); margin-top: 16px; }
+      .operation-buttons { display: flex; gap: 8px; }
     </style>
   `;
 }
