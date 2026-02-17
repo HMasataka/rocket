@@ -1532,35 +1532,21 @@ function getHistoryViewHTML() {
       </div>
       <div class="history-content">
         <div class="history-panel">
-          <div class="panel-header">
-            <span class="panel-title">Commit History</span>
+          <div class="panel-toolbar">
             <div class="branch-legend">
               <span class="legend-item"><span class="legend-dot" style="background: #58a6ff;"></span>main</span>
               <span class="legend-item"><span class="legend-dot" style="background: #f78166;"></span>feature/auth</span>
               <span class="legend-item"><span class="legend-dot" style="background: #a371f7;"></span>feature/ui</span>
               <span class="legend-item"><span class="legend-dot" style="background: #7ee787;"></span>hotfix</span>
             </div>
-          <div class="panel-actions">
             <input type="text" class="search-input" placeholder="Search...">
           </div>
-        </div>
         <div class="commit-list-wrapper">
           <div class="graph-column">${graphSVG}</div>
           <div class="commit-list">${commitList}</div>
         </div>
         </div>
         <div class="commit-detail-panel">
-          <div class="panel-header">
-          <span class="panel-title">Commit Details</span>
-          <div class="panel-actions">
-            <button class="icon-btn" title="Copy SHA">
-              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
-            </button>
-            <button class="icon-btn" title="Browse files">
-              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M1 3.5A1.5 1.5 0 0 1 2.5 2h3.879a1.5 1.5 0 0 1 1.06.44l1.122 1.12A1.5 1.5 0 0 0 9.62 4H13.5A1.5 1.5 0 0 1 15 5.5v8a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 1 13.5v-10Z"/></svg>
-            </button>
-          </div>
-        </div>
         <div class="commit-detail" id="commit-detail-content">
           <div class="detail-header">
             <div class="detail-avatar">
@@ -1893,20 +1879,9 @@ function getBranchesViewHTML() {
       </div>
       <div class="branches-content">
         <div class="branches-list-panel">
-          <div class="panel-header">
-            <span class="panel-title">All Branches</span>
-            <span class="branch-count">${sampleData.branches.length}</span>
-          </div>
           <div class="branch-list">${branchList}</div>
         </div>
         <div class="branch-detail-panel" id="branch-detail-panel">
-          <div class="panel-header">
-            <span class="panel-title">Branch Details</span>
-            <div class="panel-actions">
-              <button class="btn btn-secondary btn-sm" onclick="checkoutBranch('${defaultBranch.name}')">Checkout</button>
-              <button class="btn btn-secondary btn-sm" onclick="mergeBranch('${defaultBranch.name}')">Merge</button>
-            </div>
-          </div>
           <div class="branch-detail-content" id="branch-detail-content">
             <div class="branch-detail-header">
               <div class="branch-detail-icon ${defaultBranch.current ? 'current' : ''}">
@@ -1917,6 +1892,10 @@ function getBranchesViewHTML() {
                 <div class="branch-detail-tracking">${defaultBranch.remote || 'Local only'}</div>
               </div>
               ${defaultBranch.current ? '<span class="current-badge">HEAD</span>' : ''}
+              <div class="branch-detail-actions">
+                <button class="btn btn-secondary btn-sm" onclick="checkoutBranch('${defaultBranch.name}')">Checkout</button>
+                <button class="btn btn-secondary btn-sm" onclick="mergeBranch('${defaultBranch.name}')">Merge</button>
+              </div>
             </div>
 
             <div class="branch-sync-status">
@@ -2004,7 +1983,8 @@ function getBranchesViewHTML() {
       .branch-detail-panel { display: flex; flex-direction: column; overflow: hidden; }
       .branch-detail-content { flex: 1; padding: 20px; overflow-y: auto; }
 
-      .branch-detail-header { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+      .branch-detail-header { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+      .branch-detail-actions { display: flex; gap: 8px; margin-left: auto; }
       .branch-detail-icon { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; background: var(--bg-tertiary); border-radius: 12px; color: var(--text-muted); }
       .branch-detail-icon.current { background: var(--accent-dim); color: var(--accent); }
       .branch-detail-icon svg { width: 24px; height: 24px; }
