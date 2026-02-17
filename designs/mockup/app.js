@@ -1940,7 +1940,9 @@ function getSubmodulesViewHTML() {
   const rows = submodules.map(s => `
     <div class="submodule-card ${s.status}">
       <div class="submodule-header">
-        <div class="submodule-icon">📦</div>
+        <div class="submodule-icon">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8.5 1a.5.5 0 0 1 .5.5v.5h2a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h2v-.5a.5.5 0 0 1 .5-.5zM5 3a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H5z"/><path d="M6 7a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3A.5.5 0 0 1 6 7zm0 2a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3A.5.5 0 0 1 6 9z"/></svg>
+        </div>
         <div class="submodule-info">
           <div class="submodule-path">${s.path}</div>
           <div class="submodule-url">${s.url}</div>
@@ -2001,7 +2003,8 @@ function getSubmodulesViewHTML() {
       .submodule-card { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
       .submodule-card.behind { border-left: 3px solid var(--warning); }
       .submodule-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-      .submodule-icon { font-size: 24px; }
+      .submodule-icon { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: var(--accent-dim); border-radius: 8px; color: var(--accent); }
+      .submodule-icon svg { width: 18px; height: 18px; }
       .submodule-info { flex: 1; }
       .submodule-path { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
       .submodule-url { font-size: 12px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
@@ -2028,7 +2031,12 @@ function getWorktreesViewHTML() {
   const rows = worktrees.map(w => `
     <div class="worktree-card ${w.isMain ? 'main' : ''} ${w.status}">
       <div class="worktree-header">
-        <div class="worktree-icon">${w.isMain ? '🏠' : '🌲'}</div>
+        <div class="worktree-icon ${w.isMain ? 'main' : ''}">
+          ${w.isMain
+            ? '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M8.354 1.146a.5.5 0 0 0-.708 0l-6 6A.5.5 0 0 0 1.5 7.5v7a.5.5 0 0 0 .5.5h4.5a.5.5 0 0 0 .5-.5v-4h2v4a.5.5 0 0 0 .5.5H14a.5.5 0 0 0 .5-.5v-7a.5.5 0 0 0-.146-.354L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293L8.354 1.146z"/></svg>'
+            : '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M1 3.5A1.5 1.5 0 0 1 2.5 2h3.879a1.5 1.5 0 0 1 1.06.44l1.122 1.12A1.5 1.5 0 0 0 9.62 4H13.5A1.5 1.5 0 0 1 15 5.5v8a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 1 13.5v-10z"/></svg>'
+          }
+        </div>
         <div class="worktree-info">
           <div class="worktree-path">${w.path}</div>
           <div class="worktree-branch">
@@ -2085,7 +2093,9 @@ function getWorktreesViewHTML() {
       .worktree-card { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
       .worktree-card.main { border-color: var(--accent); }
       .worktree-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-      .worktree-icon { font-size: 24px; }
+      .worktree-icon { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: var(--bg-tertiary); border-radius: 8px; color: var(--text-muted); }
+      .worktree-icon.main { background: var(--accent-dim); color: var(--accent); }
+      .worktree-icon svg { width: 18px; height: 18px; }
       .worktree-info { flex: 1; }
       .worktree-path { font-size: 14px; font-weight: 600; margin-bottom: 4px; font-family: 'JetBrains Mono', monospace; }
       .worktree-branch { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--accent); }
