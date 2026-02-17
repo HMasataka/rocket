@@ -145,8 +145,31 @@ const sampleData = {
     }
   ],
   stashes: [
-    { index: 0, message: 'WIP: Auth feature in progress', branch: 'feature/auth', date: '1 hour ago' },
-    { index: 1, message: 'WIP: UI adjustments', branch: 'main', date: 'yesterday' }
+    {
+      index: 0,
+      message: 'WIP: Auth feature in progress',
+      branch: 'feature/auth',
+      date: '1 hour ago',
+      dateAbsolute: 'Feb 17, 2026 15:32',
+      files: [
+        { path: 'src/auth/login.go', status: 'M', additions: 45, deletions: 12 },
+        { path: 'src/auth/session.go', status: 'M', additions: 23, deletions: 8 },
+        { path: 'src/auth/oauth.go', status: 'A', additions: 156, deletions: 0 },
+        { path: 'tests/auth_test.go', status: 'M', additions: 67, deletions: 15 }
+      ]
+    },
+    {
+      index: 1,
+      message: 'WIP: UI adjustments',
+      branch: 'main',
+      date: 'yesterday',
+      dateAbsolute: 'Feb 16, 2026 18:45',
+      files: [
+        { path: 'src/ui/components/Button.vue', status: 'M', additions: 18, deletions: 25 },
+        { path: 'src/ui/components/Modal.vue', status: 'M', additions: 34, deletions: 12 },
+        { path: 'src/ui/styles/theme.css', status: 'M', additions: 56, deletions: 42 }
+      ]
+    }
   ],
   tags: [
     { name: 'v1.0.0', commit: 'a1b2c3d', message: 'Initial release', date: '1 week ago' },
@@ -260,6 +283,9 @@ function loadViewContent(viewName) {
       break;
     case 'worktrees':
       view.innerHTML = getWorktreesViewHTML();
+      break;
+    case 'stash':
+      view.innerHTML = getStashViewHTML();
       break;
   }
   view.dataset.loaded = 'true';
@@ -2985,6 +3011,250 @@ function getWorktreesViewHTML() {
       .worktree-actions { display: flex; gap: 8px; }
     </style>
   `;
+}
+
+// ===== Stash View =====
+
+function getStashViewHTML() {
+  const stashes = sampleData.stashes;
+  const firstStash = stashes[0];
+
+  const stashList = stashes.map((stash, index) => `
+    <div class="stash-row ${index === 0 ? 'selected' : ''}" onclick="selectStash(this, ${stash.index})">
+      <div class="stash-radio">
+        <input type="radio" name="stash-select" ${index === 0 ? 'checked' : ''} data-index="${stash.index}">
+      </div>
+      <div class="stash-graph">
+        <div class="graph-node stash"></div>
+      </div>
+      <div class="stash-info">
+        <div class="stash-message">${stash.message}</div>
+        <div class="stash-meta">
+          <span class="stash-index-label">stash@{${stash.index}}</span>
+          <span>${stash.branch}</span>
+          <span>${stash.date}</span>
+          <span>${stash.files.length} files</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  const getStashFilesHTML = (files, stashIndex) => files.map((file, idx) => {
+    const statusIcon = file.status === 'A' ? '+' : file.status === 'D' ? '-' : '~';
+    const statusClass = file.status === 'A' ? 'added' : file.status === 'D' ? 'deleted' : 'modified';
+    const fileId = `stash-file-${stashIndex}-${idx}`;
+    const isFirst = idx === 0;
+
+    return `
+      <div class="preview-file ${isFirst ? 'expanded' : ''}" onclick="togglePreviewDiff(this, '${fileId}')">
+        <div class="preview-file-status ${statusClass}">${statusIcon}</div>
+        <div class="preview-file-path">${file.path}</div>
+        <div class="preview-file-stats">
+          <span class="stat-add">+${file.additions}</span>
+          <span class="stat-del">-${file.deletions}</span>
+        </div>
+        <div class="preview-file-expand">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 6.646a.5.5 0 0 1 .708 0L8 9.293l2.646-2.647a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708z"/></svg>
+        </div>
+      </div>
+      <div class="preview-file-diff" id="preview-diff-${fileId}" style="display: ${isFirst ? 'block' : 'none'};">
+        <div class="diff-preview-content">
+          <div class="diff-hunk">
+            <div class="diff-hunk-header">@@ -1,${file.deletions} +1,${file.additions} @@ ${file.path.split('/').pop()}</div>
+            ${file.status === 'A' ? `
+              <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">1</span><span class="line-code">// New file: ${file.path.split('/').pop()}</span></div>
+              <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">2</span><span class="line-code">// +${file.additions} lines added</span></div>
+            ` : `
+              <div class="diff-line context"><span class="line-num old">1</span><span class="line-num new">1</span><span class="line-code">package ${file.path.split('/')[1] || 'main'}</span></div>
+              <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">2</span><span class="line-code">// Stashed changes</span></div>
+              <div class="diff-line del"><span class="line-num old">2</span><span class="line-num new"></span><span class="line-code">// Previous version</span></div>
+            `}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  const firstStashFiles = getStashFilesHTML(firstStash.files, 0);
+  const totalAdditions = firstStash.files.reduce((sum, f) => sum + f.additions, 0);
+  const totalDeletions = firstStash.files.reduce((sum, f) => sum + f.deletions, 0);
+
+  return `
+    <div class="operation-header" style="flex-shrink: 0;">
+      <h2>Stash</h2>
+      <div class="header-actions">
+        <button class="btn btn-secondary" onclick="createStash()">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/></svg>
+          Stash Changes
+        </button>
+      </div>
+    </div>
+
+    <div class="operation-two-column">
+      <div class="operation-left-panel">
+        <div class="operation-panel">
+          <div class="stash-list">
+            ${stashList}
+          </div>
+        </div>
+      </div>
+
+      <div class="operation-right-panel" id="stash-preview-panel">
+        <div class="changes-preview">
+          <div class="preview-header">
+            <div class="preview-commit-info">
+              <div class="preview-hash stash" id="stash-preview-index">stash@{0}</div>
+              <div class="preview-message" id="stash-preview-message">${firstStash.message}</div>
+              <div class="preview-author" id="stash-preview-meta">${firstStash.branch} · ${firstStash.dateAbsolute}</div>
+            </div>
+          </div>
+
+          <div class="preview-section">
+            <div class="section-header">
+              <span class="section-title">Changed Files</span>
+              <span class="section-count" id="stash-file-count">${firstStash.files.length}</span>
+            </div>
+            <div class="preview-files-list" id="stash-files-list">
+              ${firstStashFiles}
+            </div>
+          </div>
+
+          <div class="preview-stats-bar">
+            <div class="stats-label">Impact</div>
+            <div class="stats-visual">
+              <div class="stats-bar">
+                <div class="stats-bar-add" id="stash-bar-add" style="width: ${(totalAdditions / (totalAdditions + totalDeletions || 1)) * 100}%"></div>
+                <div class="stats-bar-del" id="stash-bar-del" style="width: ${(totalDeletions / (totalAdditions + totalDeletions || 1)) * 100}%"></div>
+              </div>
+              <div class="stats-numbers">
+                <span class="additions" id="stash-additions">+${totalAdditions}</span>
+                <span class="deletions" id="stash-deletions">-${totalDeletions}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="stash-actions">
+            <button class="btn btn-primary" id="stash-apply-btn" onclick="applyStash(0)">Apply</button>
+            <button class="btn btn-secondary" id="stash-pop-btn" onclick="popStash(0)">Pop</button>
+            <button class="btn btn-danger" id="stash-drop-btn" onclick="dropStash(0)">Drop</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    ${getOperationStyles()}
+    <style>
+      .stash-list { flex: 1; overflow-y: auto; }
+      .stash-row { display: flex; align-items: flex-start; padding: 14px 16px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.15s; }
+      .stash-row:hover { background: var(--bg-tertiary); }
+      .stash-row.selected { background: var(--accent-dim); border-left: 3px solid var(--accent); }
+
+      .stash-radio { margin-right: 12px; padding-top: 2px; }
+      .stash-radio input { width: 1.15em; height: 1.15em; appearance: none; -webkit-appearance: none; border-radius: 50%; border: 0.1em solid #6b6b76; background: transparent; cursor: pointer; display: grid; place-content: center; }
+      .stash-radio input::before { content: ""; width: 0.65em; height: 0.65em; border-radius: 50%; transform: scale(0); transition: 120ms transform ease-in-out; background-color: var(--accent); }
+      .stash-radio input:checked { border-color: var(--accent); }
+      .stash-radio input:checked::before { transform: scale(1); }
+
+      .stash-graph { width: 24px; display: flex; flex-direction: column; align-items: center; margin-right: 12px; }
+      .graph-node.stash { width: 12px; height: 12px; background: linear-gradient(135deg, #60a5fa, #3b82f6); border-radius: 50%; }
+
+      .stash-info { flex: 1; min-width: 0; }
+      .stash-message { font-size: 13px; font-weight: 500; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .stash-meta { display: flex; gap: 12px; font-size: 11px; color: var(--text-muted); }
+      .stash-index-label { font-family: 'JetBrains Mono', monospace; color: var(--accent); }
+
+      .preview-hash.stash { color: var(--accent); }
+      .stash-actions { display: flex; gap: 8px; padding-top: 16px; border-top: 1px solid var(--border); margin-top: 16px; }
+    </style>
+  `;
+}
+
+function selectStash(element, index) {
+  document.querySelectorAll('.stash-row').forEach(r => {
+    r.classList.remove('selected');
+    r.querySelector('input').checked = false;
+  });
+  element.classList.add('selected');
+  element.querySelector('input').checked = true;
+
+  const stash = sampleData.stashes.find(s => s.index === index);
+  if (!stash) return;
+
+  // Update preview header
+  document.getElementById('stash-preview-index').textContent = `stash@{${index}}`;
+  document.getElementById('stash-preview-message').textContent = stash.message;
+  document.getElementById('stash-preview-meta').textContent = `${stash.branch} · ${stash.dateAbsolute}`;
+
+  // Update files list
+  const totalAdditions = stash.files.reduce((sum, f) => sum + f.additions, 0);
+  const totalDeletions = stash.files.reduce((sum, f) => sum + f.deletions, 0);
+
+  document.getElementById('stash-file-count').textContent = stash.files.length;
+  document.getElementById('stash-additions').textContent = `+${totalAdditions}`;
+  document.getElementById('stash-deletions').textContent = `-${totalDeletions}`;
+
+  const total = totalAdditions + totalDeletions || 1;
+  document.getElementById('stash-bar-add').style.width = `${(totalAdditions / total) * 100}%`;
+  document.getElementById('stash-bar-del').style.width = `${(totalDeletions / total) * 100}%`;
+
+  const filesList = document.getElementById('stash-files-list');
+  filesList.innerHTML = stash.files.map((file, idx) => {
+    const statusIcon = file.status === 'A' ? '+' : file.status === 'D' ? '-' : '~';
+    const statusClass = file.status === 'A' ? 'added' : file.status === 'D' ? 'deleted' : 'modified';
+    const fileId = `stash-file-${index}-${idx}`;
+    const isFirst = idx === 0;
+
+    return `
+      <div class="preview-file ${isFirst ? 'expanded' : ''}" onclick="togglePreviewDiff(this, '${fileId}')">
+        <div class="preview-file-status ${statusClass}">${statusIcon}</div>
+        <div class="preview-file-path">${file.path}</div>
+        <div class="preview-file-stats">
+          <span class="stat-add">+${file.additions}</span>
+          <span class="stat-del">-${file.deletions}</span>
+        </div>
+        <div class="preview-file-expand">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 6.646a.5.5 0 0 1 .708 0L8 9.293l2.646-2.647a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708z"/></svg>
+        </div>
+      </div>
+      <div class="preview-file-diff" id="preview-diff-${fileId}" style="display: ${isFirst ? 'block' : 'none'};">
+        <div class="diff-preview-content">
+          <div class="diff-hunk">
+            <div class="diff-hunk-header">@@ -1,${file.deletions} +1,${file.additions} @@ ${file.path.split('/').pop()}</div>
+            ${file.status === 'A' ? `
+              <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">1</span><span class="line-code">// New file: ${file.path.split('/').pop()}</span></div>
+              <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">2</span><span class="line-code">// +${file.additions} lines added</span></div>
+            ` : `
+              <div class="diff-line context"><span class="line-num old">1</span><span class="line-num new">1</span><span class="line-code">package ${file.path.split('/')[1] || 'main'}</span></div>
+              <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">2</span><span class="line-code">// Stashed changes</span></div>
+              <div class="diff-line del"><span class="line-num old">2</span><span class="line-num new"></span><span class="line-code">// Previous version</span></div>
+            `}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  // Update action buttons
+  document.getElementById('stash-apply-btn').setAttribute('onclick', `applyStash(${index})`);
+  document.getElementById('stash-pop-btn').setAttribute('onclick', `popStash(${index})`);
+  document.getElementById('stash-drop-btn').setAttribute('onclick', `dropStash(${index})`);
+}
+
+function createStash() {
+  const message = prompt('Stash message (optional):');
+  showToast('success', message ? `Stashed: ${message}` : 'Changes stashed');
+}
+
+function applyStash(index) {
+  showToast('success', `Applied stash@{${index}}`);
+}
+
+function popStash(index) {
+  showToast('success', `Popped stash@{${index}}`);
+}
+
+function dropStash(index) {
+  showToast('warning', `Dropped stash@{${index}}`);
 }
 
 // ===== Advanced Operation Handlers =====

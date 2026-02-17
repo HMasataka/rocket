@@ -56,11 +56,6 @@
         </button>
       </div>
       <div class="toolbar-group">
-        <button class="toolbar-btn" onclick="openModal('stash')" title="Stash">
-          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M14.5 3a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h13zm-13-1A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-13z"/></svg>
-          <span>Stash</span>
-          <span class="badge">2</span>
-        </button>
         <button class="toolbar-btn" onclick="openModal('tag')" title="Tags">
           <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 2a1 1 0 0 1 1-1h4.586a1 1 0 0 1 .707.293l7 7a1 1 0 0 1 0 1.414l-4.586 4.586a1 1 0 0 1-1.414 0l-7-7A1 1 0 0 1 2 6.586V2zm3.5 4a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"/></svg>
           <span>Tags</span>
@@ -103,6 +98,11 @@
           <div class="nav-item" data-view="remotes" onclick="switchView('remotes')">
             <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1.002 1.002 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4.018 4.018 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243L6.586 4.672z"/></svg>
             Remotes
+          </div>
+          <div class="nav-item" data-view="stash" onclick="switchView('stash')">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M14.5 3a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h13zm-13-1A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-13z"/></svg>
+            Stash
+            <span class="nav-badge">2</span>
           </div>
         </div>
         <div class="sidebar-section">
@@ -331,6 +331,11 @@
 
         <!-- Worktrees View -->
         <div class="view" id="view-worktrees">
+          <!-- Will be loaded dynamically -->
+        </div>
+
+        <!-- Stash View -->
+        <div class="view" id="view-stash">
           <!-- Will be loaded dynamically -->
         </div>
       </main>
