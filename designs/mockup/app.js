@@ -1414,83 +1414,103 @@ function getHistoryViewHTML() {
           </div>
 
           <div class="detail-files">
-            <div class="detail-section-title">Changed Files</div>
-            <div class="changed-file added" onclick="selectChangedFile(this, 'handler')">
-              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/></svg>
-              <span class="file-path">internal/auth/handler.go</span>
-              <span class="file-stats">+89 -0</span>
-              <span class="file-expand-icon">
-                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 6.646a.5.5 0 0 1 .708 0L8 9.293l2.646-2.647a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708z"/></svg>
-              </span>
+            <div class="section-header">
+              <span class="section-title">Changed Files</span>
+              <span class="section-count">5</span>
             </div>
-            <div class="changed-file modified selected" onclick="selectChangedFile(this, 'middleware')">
-              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z"/></svg>
-              <span class="file-path">internal/auth/middleware.go</span>
-              <span class="file-stats">+24 -8</span>
-              <span class="file-expand-icon">
-                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 6.646a.5.5 0 0 1 .708 0L8 9.293l2.646-2.647a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708z"/></svg>
-              </span>
-            </div>
-            <div class="file-diff-preview">
-              <div class="diff-preview-header">
-                <span class="diff-preview-path">internal/auth/middleware.go</span>
-                <div class="diff-preview-actions">
-                  <button class="icon-btn" title="View full file">
-                    <svg viewBox="0 0 16 16" fill="currentColor"><path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/><path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/></svg>
-                  </button>
-                  <button class="icon-btn" title="Copy path">
-                    <svg viewBox="0 0 16 16" fill="currentColor"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
-                  </button>
+            <div class="unified-files-list">
+              <div class="unified-file added" onclick="toggleFileDiff(this, 'handler')">
+                <div class="unified-file-status added">+</div>
+                <div class="unified-file-path">internal/auth/handler.go</div>
+                <div class="unified-file-stats">
+                  <span class="stat-add">+89</span>
+                  <span class="stat-del">-0</span>
+                </div>
+                <div class="unified-file-expand">
+                  <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 6.646a.5.5 0 0 1 .708 0L8 9.293l2.646-2.647a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708z"/></svg>
                 </div>
               </div>
-              <div class="diff-preview-content">
-                <div class="diff-hunk">
-                  <div class="diff-hunk-header">@@ -12,6 +12,18 @@ func NewAuthMiddleware(config *Config) *AuthMiddleware {</div>
-                  <div class="diff-line context"><span class="line-num old">12</span><span class="line-num new">12</span><span class="line-code">    return &AuthMiddleware{config: config}</span></div>
-                  <div class="diff-line context"><span class="line-num old">13</span><span class="line-num new">13</span><span class="line-code">}</span></div>
-                  <div class="diff-line context"><span class="line-num old">14</span><span class="line-num new">14</span><span class="line-code"></span></div>
-                  <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">15</span><span class="line-code">// ValidateToken checks if the token is valid and not expired</span></div>
-                  <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">16</span><span class="line-code">func (m *AuthMiddleware) ValidateToken(token string) (*Claims, error) {</span></div>
-                  <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">17</span><span class="line-code">    claims, err := jwt.ParseWithClaims(token, &Claims{}, func(t *jwt.Token) (interface{}, error) {</span></div>
-                  <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">18</span><span class="line-code">        return m.config.SecretKey, nil</span></div>
-                  <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">19</span><span class="line-code">    })</span></div>
-                  <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">20</span><span class="line-code">    if err != nil {</span></div>
-                  <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">21</span><span class="line-code">        return nil, fmt.Errorf("invalid token: %w", err)</span></div>
-                  <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">22</span><span class="line-code">    }</span></div>
-                  <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">23</span><span class="line-code">    return claims.(*Claims), nil</span></div>
-                  <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">24</span><span class="line-code">}</span></div>
-                  <div class="diff-line context"><span class="line-num old">15</span><span class="line-num new">25</span><span class="line-code"></span></div>
-                  <div class="diff-line del"><span class="line-num old">16</span><span class="line-num new"></span><span class="line-code">// Deprecated: Use ValidateToken instead</span></div>
-                  <div class="diff-line del"><span class="line-num old">17</span><span class="line-num new"></span><span class="line-code">func (m *AuthMiddleware) CheckToken(token string) bool {</span></div>
-                  <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">26</span><span class="line-code">// Middleware returns the HTTP middleware handler</span></div>
-                  <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">27</span><span class="line-code">func (m *AuthMiddleware) Middleware() func(http.Handler) http.Handler {</span></div>
-                  <div class="diff-line context"><span class="line-num old">18</span><span class="line-num new">28</span><span class="line-code">    return func(next http.Handler) http.Handler {</span></div>
+              <div class="unified-file modified expanded" onclick="toggleFileDiff(this, 'middleware')">
+                <div class="unified-file-status modified">~</div>
+                <div class="unified-file-path">internal/auth/middleware.go</div>
+                <div class="unified-file-stats">
+                  <span class="stat-add">+24</span>
+                  <span class="stat-del">-8</span>
+                </div>
+                <div class="unified-file-expand">
+                  <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 6.646a.5.5 0 0 1 .708 0L8 9.293l2.646-2.647a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708z"/></svg>
                 </div>
               </div>
-            </div>
-            <div class="changed-file modified" onclick="selectChangedFile(this, 'user')">
-              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z"/></svg>
-              <span class="file-path">internal/models/user.go</span>
-              <span class="file-stats">+12 -15</span>
-              <span class="file-expand-icon">
-                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 6.646a.5.5 0 0 1 .708 0L8 9.293l2.646-2.647a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708z"/></svg>
-              </span>
-            </div>
-            <div class="changed-file added" onclick="selectChangedFile(this, 'token')">
-              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/></svg>
-              <span class="file-path">internal/auth/token.go</span>
-              <span class="file-stats">+45 -0</span>
-              <span class="file-expand-icon">
-                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 6.646a.5.5 0 0 1 .708 0L8 9.293l2.646-2.647a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708z"/></svg>
-              </span>
-            </div>
-            <div class="changed-file deleted" onclick="selectChangedFile(this, 'legacy')">
-              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8z"/></svg>
-              <span class="file-path">internal/auth/legacy.go</span>
-              <span class="file-stats">+0 -23</span>
-              <span class="file-expand-icon">
-                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 6.646a.5.5 0 0 1 .708 0L8 9.293l2.646-2.647a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708z"/></svg>
-              </span>
+              <div class="unified-file-diff" id="diff-middleware">
+                <div class="diff-preview-header">
+                  <span class="diff-preview-path">internal/auth/middleware.go</span>
+                  <div class="diff-preview-actions">
+                    <button class="icon-btn" title="View full file">
+                      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/><path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/></svg>
+                    </button>
+                    <button class="icon-btn" title="Copy path">
+                      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
+                    </button>
+                  </div>
+                </div>
+                <div class="diff-preview-content">
+                  <div class="diff-hunk">
+                    <div class="diff-hunk-header">@@ -12,6 +12,18 @@ func NewAuthMiddleware(config *Config) *AuthMiddleware {</div>
+                    <div class="diff-line context"><span class="line-num old">12</span><span class="line-num new">12</span><span class="line-code">    return &AuthMiddleware{config: config}</span></div>
+                    <div class="diff-line context"><span class="line-num old">13</span><span class="line-num new">13</span><span class="line-code">}</span></div>
+                    <div class="diff-line context"><span class="line-num old">14</span><span class="line-num new">14</span><span class="line-code"></span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">15</span><span class="line-code">// ValidateToken checks if the token is valid and not expired</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">16</span><span class="line-code">func (m *AuthMiddleware) ValidateToken(token string) (*Claims, error) {</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">17</span><span class="line-code">    claims, err := jwt.ParseWithClaims(token, &Claims{}, func(t *jwt.Token) (interface{}, error) {</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">18</span><span class="line-code">        return m.config.SecretKey, nil</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">19</span><span class="line-code">    })</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">20</span><span class="line-code">    if err != nil {</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">21</span><span class="line-code">        return nil, fmt.Errorf("invalid token: %w", err)</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">22</span><span class="line-code">    }</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">23</span><span class="line-code">    return claims.(*Claims), nil</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">24</span><span class="line-code">}</span></div>
+                    <div class="diff-line context"><span class="line-num old">15</span><span class="line-num new">25</span><span class="line-code"></span></div>
+                    <div class="diff-line del"><span class="line-num old">16</span><span class="line-num new"></span><span class="line-code">// Deprecated: Use ValidateToken instead</span></div>
+                    <div class="diff-line del"><span class="line-num old">17</span><span class="line-num new"></span><span class="line-code">func (m *AuthMiddleware) CheckToken(token string) bool {</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">26</span><span class="line-code">// Middleware returns the HTTP middleware handler</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">27</span><span class="line-code">func (m *AuthMiddleware) Middleware() func(http.Handler) http.Handler {</span></div>
+                    <div class="diff-line context"><span class="line-num old">18</span><span class="line-num new">28</span><span class="line-code">    return func(next http.Handler) http.Handler {</span></div>
+                  </div>
+                </div>
+              </div>
+              <div class="unified-file modified" onclick="toggleFileDiff(this, 'user')">
+                <div class="unified-file-status modified">~</div>
+                <div class="unified-file-path">internal/models/user.go</div>
+                <div class="unified-file-stats">
+                  <span class="stat-add">+12</span>
+                  <span class="stat-del">-15</span>
+                </div>
+                <div class="unified-file-expand">
+                  <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 6.646a.5.5 0 0 1 .708 0L8 9.293l2.646-2.647a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708z"/></svg>
+                </div>
+              </div>
+              <div class="unified-file added" onclick="toggleFileDiff(this, 'token')">
+                <div class="unified-file-status added">+</div>
+                <div class="unified-file-path">internal/auth/token.go</div>
+                <div class="unified-file-stats">
+                  <span class="stat-add">+45</span>
+                  <span class="stat-del">-0</span>
+                </div>
+                <div class="unified-file-expand">
+                  <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 6.646a.5.5 0 0 1 .708 0L8 9.293l2.646-2.647a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708z"/></svg>
+                </div>
+              </div>
+              <div class="unified-file deleted" onclick="toggleFileDiff(this, 'legacy')">
+                <div class="unified-file-status deleted">-</div>
+                <div class="unified-file-path">internal/auth/legacy.go</div>
+                <div class="unified-file-stats">
+                  <span class="stat-add">+0</span>
+                  <span class="stat-del">-23</span>
+                </div>
+                <div class="unified-file-expand">
+                  <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 6.646a.5.5 0 0 1 .708 0L8 9.293l2.646-2.647a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708z"/></svg>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -1575,19 +1595,29 @@ function getHistoryViewHTML() {
       .stat-item.files { color: var(--text-muted); }
 
       .detail-files { margin-bottom: 20px; }
-      .detail-section-title { font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
-      .changed-file { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 6px; font-size: 12px; transition: all 0.15s; cursor: pointer; }
-      .changed-file:hover { background: var(--bg-tertiary); }
-      .changed-file.selected { background: var(--accent-dim); border-left: 2px solid var(--accent); }
-      .changed-file > svg { width: 14px; height: 14px; flex-shrink: 0; }
-      .changed-file.added > svg { color: var(--success); }
-      .changed-file.modified > svg { color: var(--warning); }
-      .changed-file.deleted > svg { color: var(--danger); }
-      .file-path { flex: 1; font-family: 'JetBrains Mono', monospace; color: var(--text-secondary); }
-      .file-stats { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted); }
-      .file-expand-icon { width: 16px; height: 16px; color: var(--text-muted); transition: transform 0.2s; }
-      .file-expand-icon svg { width: 16px; height: 16px; }
-      .changed-file.selected .file-expand-icon { transform: rotate(180deg); color: var(--accent); }
+      .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+      .section-title { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+      .section-count { background: var(--bg-tertiary); padding: 2px 8px; border-radius: 10px; font-size: 11px; color: var(--text-muted); }
+
+      .unified-files-list { display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: var(--bg-primary); }
+      .unified-file { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--border); font-size: 12px; cursor: pointer; transition: background 0.15s; }
+      .unified-file:last-child { border-bottom: none; }
+      .unified-file:hover { background: var(--bg-tertiary); }
+      .unified-file.expanded { background: var(--accent-dim); }
+      .unified-file-status { width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; border-radius: 4px; font-weight: 700; font-size: 11px; flex-shrink: 0; }
+      .unified-file-status.added { background: rgba(34, 197, 94, 0.2); color: var(--success); }
+      .unified-file-status.deleted { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+      .unified-file-status.modified { background: rgba(59, 130, 246, 0.2); color: var(--accent); }
+      .unified-file-path { flex: 1; font-family: 'JetBrains Mono', monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-secondary); }
+      .unified-file-stats { display: flex; gap: 8px; font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+      .unified-file-stats .stat-add { color: var(--success); }
+      .unified-file-stats .stat-del { color: var(--danger); }
+      .unified-file-expand { width: 16px; height: 16px; color: var(--text-muted); transition: transform 0.2s; flex-shrink: 0; }
+      .unified-file-expand svg { width: 16px; height: 16px; }
+      .unified-file.expanded .unified-file-expand { transform: rotate(180deg); color: var(--accent); }
+
+      .unified-file-diff { border-bottom: 1px solid var(--border); background: var(--bg-secondary); overflow: hidden; animation: slideDown 0.2s ease; }
+      .unified-file-diff:last-child { border-bottom: none; }
 
       .file-diff-preview { margin: 4px 0 8px 0; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; animation: slideDown 0.2s ease; }
       @keyframes slideDown { from { opacity: 0; max-height: 0; } to { opacity: 1; max-height: 500px; } }
@@ -2011,20 +2041,41 @@ function selectCommit(hash) {
   event.currentTarget.classList.add('selected');
 }
 
-function selectChangedFile(element, fileId) {
+function toggleFileDiff(element, fileId) {
   event.stopPropagation();
-  const wasSelected = element.classList.contains('selected');
+  const wasExpanded = element.classList.contains('expanded');
 
-  // Remove all selections and hide all previews
-  document.querySelectorAll('.changed-file').forEach(f => f.classList.remove('selected'));
-  document.querySelectorAll('.file-diff-preview').forEach(p => p.style.display = 'none');
+  // Collapse all and hide all diffs
+  document.querySelectorAll('.unified-file').forEach(f => f.classList.remove('expanded'));
+  document.querySelectorAll('.unified-file-diff').forEach(d => d.style.display = 'none');
 
-  // Toggle selection
-  if (!wasSelected) {
-    element.classList.add('selected');
-    const preview = element.nextElementSibling;
-    if (preview && preview.classList.contains('file-diff-preview')) {
-      preview.style.display = 'block';
+  // Toggle expansion
+  if (!wasExpanded) {
+    element.classList.add('expanded');
+    const diffPanel = element.nextElementSibling;
+    if (diffPanel && diffPanel.classList.contains('unified-file-diff')) {
+      diffPanel.style.display = 'block';
+    }
+  }
+}
+
+function togglePreviewDiff(element, fileId) {
+  event.stopPropagation();
+  const wasExpanded = element.classList.contains('expanded');
+
+  // Collapse all and hide all diffs in the preview panel
+  const container = element.closest('.preview-files-list');
+  if (container) {
+    container.querySelectorAll('.preview-file').forEach(f => f.classList.remove('expanded'));
+    container.querySelectorAll('.preview-file-diff').forEach(d => d.style.display = 'none');
+  }
+
+  // Toggle expansion
+  if (!wasExpanded) {
+    element.classList.add('expanded');
+    const diffPanel = document.getElementById(`preview-diff-${fileId}`);
+    if (diffPanel) {
+      diffPanel.style.display = 'block';
     }
   }
 }
@@ -2203,11 +2254,13 @@ function getChangesPreviewHTML(commit, type) {
   const totalAdditions = commit.changedFiles.reduce((a, f) => a + f.additions, 0);
   const totalDeletions = commit.changedFiles.reduce((a, f) => a + f.deletions, 0);
 
-  const filesHTML = commit.changedFiles.map(f => {
+  const filesHTML = commit.changedFiles.map((f, index) => {
     const statusIcon = f.status === 'A' ? '+' : f.status === 'D' ? '-' : '~';
     const statusClass = f.status === 'A' ? 'added' : f.status === 'D' ? 'deleted' : 'modified';
+    const fileId = f.path.replace(/[^a-zA-Z0-9]/g, '-');
+    const isFirst = index === 0;
     return `
-      <div class="preview-file ${f.conflict ? 'has-conflict' : ''}">
+      <div class="preview-file ${f.conflict ? 'has-conflict' : ''} ${isFirst ? 'expanded' : ''}" onclick="togglePreviewDiff(this, '${fileId}')">
         <div class="preview-file-status ${statusClass}">${statusIcon}</div>
         <div class="preview-file-path">${f.path}</div>
         <div class="preview-file-stats">
@@ -2215,6 +2268,27 @@ function getChangesPreviewHTML(commit, type) {
           <span class="stat-del">-${f.deletions}</span>
         </div>
         ${f.conflict ? '<div class="conflict-badge">Conflict</div>' : ''}
+        <div class="preview-file-expand">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 6.646a.5.5 0 0 1 .708 0L8 9.293l2.646-2.647a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708z"/></svg>
+        </div>
+      </div>
+      <div class="preview-file-diff" id="preview-diff-${fileId}" style="display: ${isFirst ? 'block' : 'none'};">
+        <div class="diff-preview-content">
+          <div class="diff-hunk">
+            <div class="diff-hunk-header">@@ -1,${f.deletions} +1,${f.additions} @@ ${f.path.split('/').pop()}</div>
+            ${f.status === 'A' ? `
+              <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">1</span><span class="line-code">// New file: ${f.path.split('/').pop()}</span></div>
+              <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">2</span><span class="line-code">// +${f.additions} lines added</span></div>
+            ` : f.status === 'D' ? `
+              <div class="diff-line del"><span class="line-num old">1</span><span class="line-num new"></span><span class="line-code">// Deleted file: ${f.path.split('/').pop()}</span></div>
+              <div class="diff-line del"><span class="line-num old">2</span><span class="line-num new"></span><span class="line-code">// -${f.deletions} lines removed</span></div>
+            ` : `
+              <div class="diff-line context"><span class="line-num old">1</span><span class="line-num new">1</span><span class="line-code">// Modified file: ${f.path.split('/').pop()}</span></div>
+              <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">2</span><span class="line-code">// +${f.additions} lines added</span></div>
+              <div class="diff-line del"><span class="line-num old">2</span><span class="line-num new"></span><span class="line-code">// -${f.deletions} lines removed</span></div>
+            `}
+          </div>
+        </div>
       </div>
     `;
   }).join('');
@@ -2336,10 +2410,12 @@ function getOperationStyles() {
       .section-count { background: var(--bg-tertiary); padding: 2px 8px; border-radius: 10px; font-size: 11px; color: var(--text-muted); }
 
       .preview-files-list { display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: var(--bg-primary); }
-      .preview-file { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--border); font-size: 12px; }
-      .preview-file:last-child { border-bottom: none; }
+      .preview-file { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--border); font-size: 12px; cursor: pointer; transition: background 0.15s; }
+      .preview-file:hover { background: var(--bg-tertiary); }
+      .preview-file.expanded { background: var(--accent-dim); }
       .preview-file.has-conflict { background: rgba(239, 68, 68, 0.05); }
-      .preview-file-status { width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; border-radius: 4px; font-weight: 700; font-size: 11px; }
+      .preview-file.has-conflict:hover { background: rgba(239, 68, 68, 0.1); }
+      .preview-file-status { width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; border-radius: 4px; font-weight: 700; font-size: 11px; flex-shrink: 0; }
       .preview-file-status.added { background: rgba(34, 197, 94, 0.2); color: var(--success); }
       .preview-file-status.deleted { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
       .preview-file-status.modified { background: rgba(59, 130, 246, 0.2); color: var(--accent); }
@@ -2347,7 +2423,22 @@ function getOperationStyles() {
       .preview-file-stats { display: flex; gap: 8px; font-family: 'JetBrains Mono', monospace; font-size: 11px; }
       .stat-add { color: var(--success); }
       .stat-del { color: var(--danger); }
-      .conflict-badge { padding: 2px 8px; background: var(--danger); color: #fff; border-radius: 4px; font-size: 10px; font-weight: 600; text-transform: uppercase; }
+      .conflict-badge { padding: 2px 8px; background: var(--danger); color: #fff; border-radius: 4px; font-size: 10px; font-weight: 600; text-transform: uppercase; flex-shrink: 0; }
+      .preview-file-expand { width: 16px; height: 16px; color: var(--text-muted); transition: transform 0.2s; flex-shrink: 0; }
+      .preview-file-expand svg { width: 16px; height: 16px; }
+      .preview-file.expanded .preview-file-expand { transform: rotate(180deg); color: var(--accent); }
+      .preview-file-diff { border-bottom: 1px solid var(--border); background: var(--bg-secondary); overflow: hidden; animation: slideDown 0.2s ease; }
+      .preview-file-diff .diff-preview-content { max-height: 200px; overflow-y: auto; }
+      .preview-file-diff .diff-hunk { font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+      .preview-file-diff .diff-hunk-header { padding: 6px 12px; background: var(--purple-dim); color: var(--purple); font-size: 10px; }
+      .preview-file-diff .diff-line { display: flex; }
+      .preview-file-diff .diff-line .line-num { width: 32px; padding: 2px 8px; text-align: right; color: var(--text-muted); background: var(--bg-tertiary); flex-shrink: 0; }
+      .preview-file-diff .diff-line .line-code { flex: 1; padding: 2px 12px; white-space: pre; }
+      .preview-file-diff .diff-line.add { background: rgba(34, 197, 94, 0.1); }
+      .preview-file-diff .diff-line.add .line-code { color: var(--success); }
+      .preview-file-diff .diff-line.del { background: rgba(239, 68, 68, 0.1); }
+      .preview-file-diff .diff-line.del .line-code { color: var(--danger); }
+      .preview-file-diff .diff-line.context .line-code { color: var(--text-secondary); }
 
       .preview-stats-bar { display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--bg-primary); border: 1px solid var(--border); border-radius: 10px; }
       .stats-label { font-size: 12px; font-weight: 600; color: var(--text-muted); }
