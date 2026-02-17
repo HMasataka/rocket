@@ -118,7 +118,9 @@ function switchView(viewName) {
 
 function loadViewContent(viewName) {
   const view = document.getElementById(`view-${viewName}`);
-  if (!view || view.dataset.loaded) return;
+  if (!view) return;
+  // Reset loaded flag to allow re-rendering during development
+  // if (view.dataset.loaded) return;
 
   switch (viewName) {
     case 'history':
@@ -1236,9 +1238,9 @@ function getHistoryViewHTML() {
           <div class="graph-column">${graphSVG}</div>
           <div class="commit-list">${commitList}</div>
         </div>
-      </div>
-      <div class="commit-detail-panel">
-        <div class="panel-header">
+        </div>
+        <div class="commit-detail-panel">
+          <div class="panel-header">
           <span class="panel-title">Commit Details</span>
           <div class="panel-actions">
             <button class="icon-btn" title="Copy SHA">
@@ -1395,10 +1397,11 @@ function getHistoryViewHTML() {
           </div>
         </div>
       </div>
-      </div>
+    </div>
     </div>
     <style>
-      .history-content { display: grid; grid-template-columns: 1fr 400px; flex: 1; overflow: hidden; }
+      .history-content { display: grid; grid-template-columns: 50% 50%; flex: 1; width: 100%; height: 100%; min-width: 0; overflow: hidden; }
+      .history-content > * { min-width: 0; width: 100%; height: 100%; }
       .history-panel { display: flex; flex-direction: column; overflow: hidden; border-right: 1px solid var(--border); }
 
       /* Branch legend */
@@ -1431,8 +1434,8 @@ function getHistoryViewHTML() {
       .ref-remote { background: var(--purple-dim); color: var(--purple); }
       .ref-version { background: var(--warning-dim); color: var(--warning); }
 
-      .commit-detail-panel { display: flex; flex-direction: column; overflow: hidden; }
-      .commit-detail { flex: 1; padding: 20px; overflow-y: auto; }
+      .commit-detail-panel { display: flex; flex-direction: column; overflow: hidden; width: 100%; }
+      .commit-detail { flex: 1; padding: 20px; overflow-y: auto; width: 100%; box-sizing: border-box; }
 
       .detail-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
       .detail-avatar { width: 40px; height: 40px; background: var(--bg-tertiary); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
@@ -1501,8 +1504,6 @@ function getHistoryViewHTML() {
 
       .detail-actions { display: flex; gap: 8px; padding-top: 16px; border-top: 1px solid var(--border); }
       .detail-actions .btn { flex: 1; }
-      .commit-detail-panel { display: flex; flex-direction: column; overflow: hidden; }
-      .commit-detail { flex: 1; padding: 16px; overflow-y: auto; }
       .empty-state { color: var(--text-muted); text-align: center; padding: 40px; }
     </style>
   `;
