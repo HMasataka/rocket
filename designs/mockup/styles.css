@@ -117,6 +117,9 @@ body {
 
 .tab:hover { color: var(--text-secondary); }
 .tab.active { background: var(--bg-tertiary); color: var(--text-primary); }
+.tab-add { padding: 4px 6px; border: 1px dashed var(--border); color: var(--text-muted); display: flex; align-items: center; justify-content: center; }
+.tab-add svg { width: 14px; height: 14px; }
+.tab-add:hover { border-color: var(--text-secondary); color: var(--text-secondary); background: var(--bg-tertiary); }
 
 .titlebar-actions {
   margin-left: auto;
