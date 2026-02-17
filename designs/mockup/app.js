@@ -2722,7 +2722,8 @@ function selectOperationCommit(element, hash, type) {
 }
 
 function getRevertViewHTML() {
-  const commits = sampleData.commits;
+  const currentBranch = sampleData.branches.find(b => b.current)?.name || 'main';
+  const commits = sampleData.commits.filter(c => c.branch === currentBranch);
   const defaultCommit = commits[0];
   const commitRows = commits.map((c, i) => `
     <div class="revert-commit-row ${i === 0 ? 'selected' : ''}" onclick="selectOperationCommit(this, '${c.hash}', 'revert')" data-hash="${c.hash}">
@@ -2816,7 +2817,8 @@ function getRevertViewHTML() {
 }
 
 function getResetViewHTML() {
-  const commits = sampleData.commits;
+  const currentBranch = sampleData.branches.find(b => b.current)?.name || 'main';
+  const commits = sampleData.commits.filter(c => c.branch === currentBranch);
   const defaultCommit = commits[0];
   const commitRows = commits.map((c, i) => `
     <div class="reset-commit-row ${i === 0 ? 'selected' : ''}" onclick="selectOperationCommit(this, '${c.hash}', 'reset')" data-hash="${c.hash}">
