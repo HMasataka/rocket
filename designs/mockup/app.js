@@ -3248,17 +3248,20 @@ function getStashViewHTML() {
   const totalDeletions = firstStash.files.reduce((sum, f) => sum + f.deletions, 0);
 
   return `
-    <div class="operation-header" style="flex-shrink: 0;">
-      <h2>Stash</h2>
-      <div class="header-actions">
-        <button class="btn btn-secondary" onclick="createStash()">
-          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/></svg>
-          Stash Changes
-        </button>
+    <div class="operation-layout">
+      <div class="operation-header">
+        <div class="operation-info">
+          <h2 class="operation-title">Stash</h2>
+          <span class="operation-desc">Temporarily save changes without committing</span>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-secondary" onclick="createStash()">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/></svg>
+            Stash Changes
+          </button>
+        </div>
       </div>
-    </div>
-
-    <div class="operation-two-column">
+      <div class="operation-two-column">
       <div class="operation-left-panel">
         <div class="operation-panel">
           <div class="stash-list">
@@ -3308,6 +3311,7 @@ function getStashViewHTML() {
           </div>
         </div>
       </div>
+    </div>
     </div>
 
     ${getOperationStyles()}
