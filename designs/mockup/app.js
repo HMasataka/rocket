@@ -725,28 +725,36 @@ function getAIAssistModalHTML() {
     <div class="modal-body">
       <div class="ai-options">
         <div class="ai-option" onclick="openModal('ai-commit')">
-          <div class="ai-option-icon">✍️</div>
+          <div class="ai-option-icon">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z"/></svg>
+          </div>
           <div class="ai-option-info">
             <div class="ai-option-title">Generate Commit Message</div>
             <div class="ai-option-desc">Auto-generate from staged changes</div>
           </div>
         </div>
         <div class="ai-option" onclick="openModal('ai-review')">
-          <div class="ai-option-icon">🔍</div>
+          <div class="ai-option-icon">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg>
+          </div>
           <div class="ai-option-info">
             <div class="ai-option-title">Code Review</div>
             <div class="ai-option-desc">Analyze diff and suggest review comments</div>
           </div>
         </div>
         <div class="ai-option" onclick="showToast('info', 'Starting patch generation')">
-          <div class="ai-option-icon">🔧</div>
+          <div class="ai-option-icon">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M1 0L0 1l2.2 2.2a5.5 5.5 0 0 0 7.794 7.794L12.2 13.2l1-1-2.206-2.206A5.5 5.5 0 0 0 3.206 2.206L1 0zm10.5 5.5a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0z"/><path d="M8.5 2.5a.5.5 0 0 0-1 0V5H5a.5.5 0 0 0 0 1h2.5v2.5a.5.5 0 0 0 1 0V6H11a.5.5 0 0 0 0-1H8.5V2.5z"/></svg>
+          </div>
           <div class="ai-option-info">
             <div class="ai-option-title">Generate Patch</div>
             <div class="ai-option-desc">Generate fix patches from review comments</div>
           </div>
         </div>
         <div class="ai-option" onclick="showToast('info', 'Generating PR description')">
-          <div class="ai-option-icon">📝</div>
+          <div class="ai-option-icon">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M14 4.5V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h5.5L14 4.5zm-3 0A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4.5h-2z"/><path d="M4.5 12.5A.5.5 0 0 1 5 12h3a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5zm0-2A.5.5 0 0 1 5 10h6a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5zm0-2A.5.5 0 0 1 5 8h6a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5zm0-2A.5.5 0 0 1 5 6h6a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5z"/></svg>
+          </div>
           <div class="ai-option-info">
             <div class="ai-option-title">Generate PR Description</div>
             <div class="ai-option-desc">Generate PR description from branch changes</div>
@@ -766,7 +774,8 @@ function getAIAssistModalHTML() {
       .ai-options { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
       .ai-option { display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--bg-tertiary); border-radius: 10px; cursor: pointer; transition: all 0.15s; }
       .ai-option:hover { background: var(--purple-dim); border-color: var(--purple); }
-      .ai-option-icon { font-size: 24px; }
+      .ai-option-icon { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: var(--accent-dim); border-radius: 10px; color: var(--accent); }
+      .ai-option-icon svg { width: 20px; height: 20px; }
       .ai-option-info { flex: 1; }
       .ai-option-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
       .ai-option-desc { font-size: 12px; color: var(--text-muted); }
@@ -1410,7 +1419,10 @@ function getCherryPickViewHTML() {
       .cherry-commit-row:hover { background: var(--bg-tertiary); }
       .cherry-commit-row.selected { background: var(--accent-dim); }
       .cherry-checkbox { margin-right: 12px; padding-top: 2px; }
-      .cherry-checkbox input { width: 16px; height: 16px; accent-color: var(--accent); }
+      .cherry-checkbox input { width: 1.15em; height: 1.15em; appearance: none; -webkit-appearance: none; border-radius: 50%; border: 0.1em solid #6b6b76; background: transparent; cursor: pointer; display: grid; place-content: center; }
+      .cherry-checkbox input::before { content: ""; width: 0.65em; height: 0.65em; border-radius: 50%; transform: scale(0); transition: 120ms transform ease-in-out; background-color: var(--accent); }
+      .cherry-checkbox input:checked { border-color: var(--accent); }
+      .cherry-checkbox input:checked::before { transform: scale(1); }
       .cherry-graph { width: 24px; display: flex; flex-direction: column; align-items: center; margin-right: 12px; }
       .graph-node.cherry { width: 12px; height: 12px; background: linear-gradient(135deg, #f472b6, #ec4899); border-radius: 50%; }
       .cherry-info { flex: 1; }
@@ -1421,9 +1433,9 @@ function getCherryPickViewHTML() {
       .operation-options h3, .operation-preview h3 { font-size: 13px; font-weight: 600; margin-bottom: 12px; color: var(--text-secondary); }
       .option-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; font-size: 13px; cursor: pointer; }
       .option-item input { accent-color: var(--accent); }
-      .selected-commits { padding: 12px; background: var(--bg-tertiary); border-radius: 8px; min-height: 80px; }
+      .selected-commits { padding: 12px; background: var(--bg-tertiary); border-radius: 8px; min-height: 60px; }
       .empty-hint { color: var(--text-muted); font-size: 12px; text-align: center; margin: 0; }
-      .selected-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; font-size: 12px; }
+      .selected-item { display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: 12px; }
       .selected-item .hash { font-family: 'JetBrains Mono', monospace; color: var(--accent); }
       .operation-actions { margin-top: auto; display: flex; gap: 8px; padding-top: 20px; border-top: 1px solid var(--border); }
       .operation-actions .btn { flex: 1; }
