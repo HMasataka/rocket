@@ -1115,13 +1115,122 @@ function getSettingsModalHTML() {
           <!-- AI Settings Tab -->
           <div class="settings-tab" data-tab="ai" style="display: none;">
             <div class="settings-section">
-              <h3>Provider</h3>
+              <h3>Provider Priority</h3>
+              <div class="settings-hint" style="margin-bottom: 10px;">AI requests are routed in priority order. The highest available provider is used.</div>
+              <div class="provider-priority-list">
+                <div class="provider-priority-item active">
+                  <span class="provider-priority-num">1</span>
+                  <span class="provider-priority-name">LLM CLI</span>
+                  <span class="provider-priority-desc">Installed CLI tools (no extra cost with subscriptions)</span>
+                  <span class="provider-priority-status available">Detected</span>
+                </div>
+                <div class="provider-priority-item">
+                  <span class="provider-priority-num">2</span>
+                  <span class="provider-priority-name">Local LLM</span>
+                  <span class="provider-priority-desc">Ollama (private, offline capable)</span>
+                  <span class="provider-priority-status available">Running</span>
+                </div>
+                <div class="provider-priority-item">
+                  <span class="provider-priority-num">3</span>
+                  <span class="provider-priority-name">API</span>
+                  <span class="provider-priority-desc">Direct API calls (requires API key)</span>
+                  <span class="provider-priority-status">Configured</span>
+                </div>
+              </div>
+            </div>
+            <div class="settings-section">
+              <h3>LLM CLI Adapters</h3>
+              <div class="settings-hint" style="margin-bottom: 10px;">CLI tools detected in PATH. Per-feature assignment available.</div>
+              <div class="cli-adapter-list">
+                <div class="cli-adapter-item">
+                  <div class="cli-adapter-info">
+                    <span class="cli-adapter-name">Claude Code</span>
+                    <code class="cli-adapter-cmd">claude -p</code>
+                  </div>
+                  <span class="provider-priority-status available">Detected</span>
+                </div>
+                <div class="cli-adapter-item">
+                  <div class="cli-adapter-info">
+                    <span class="cli-adapter-name">Gemini CLI</span>
+                    <code class="cli-adapter-cmd">gemini</code>
+                  </div>
+                  <span class="provider-priority-status available">Detected</span>
+                </div>
+                <div class="cli-adapter-item">
+                  <div class="cli-adapter-info">
+                    <span class="cli-adapter-name">GitHub Copilot</span>
+                    <code class="cli-adapter-cmd">gh copilot</code>
+                  </div>
+                  <span class="provider-priority-status unavailable">Not found</span>
+                </div>
+                <div class="cli-adapter-item">
+                  <div class="cli-adapter-info">
+                    <span class="cli-adapter-name">Aider</span>
+                    <code class="cli-adapter-cmd">aider</code>
+                  </div>
+                  <span class="provider-priority-status unavailable">Not found</span>
+                </div>
+                <div class="cli-adapter-item">
+                  <div class="cli-adapter-info">
+                    <span class="cli-adapter-name">LLM CLI</span>
+                    <code class="cli-adapter-cmd">llm</code>
+                  </div>
+                  <span class="provider-priority-status unavailable">Not found</span>
+                </div>
+                <div class="cli-adapter-item">
+                  <div class="cli-adapter-info">
+                    <span class="cli-adapter-name">Codex CLI</span>
+                    <code class="cli-adapter-cmd">codex</code>
+                  </div>
+                  <span class="provider-priority-status unavailable">Not found</span>
+                </div>
+              </div>
+              <button class="btn btn-secondary btn-sm" style="margin-top: 8px;" onclick="showToast('info', 'Opening cli-adapters.yaml')">Add Custom Adapter...</button>
+            </div>
+            <div class="settings-section">
+              <h3>Feature Assignment</h3>
+              <div class="settings-hint" style="margin-bottom: 10px;">Assign specific CLI tools to each AI feature.</div>
               <div class="setting-row">
-                <label>AI Provider</label>
+                <label>Commit Message</label>
+                <select class="modal-select">
+                  <option value="auto" selected>Auto (Priority Order)</option>
+                  <option value="claude">Claude Code</option>
+                  <option value="gemini">Gemini CLI</option>
+                </select>
+              </div>
+              <div class="setting-row" style="margin-top: 8px;">
+                <label>Code Review</label>
+                <select class="modal-select">
+                  <option value="auto" selected>Auto (Priority Order)</option>
+                  <option value="claude">Claude Code</option>
+                  <option value="gemini">Gemini CLI</option>
+                </select>
+              </div>
+              <div class="setting-row" style="margin-top: 8px;">
+                <label>Patch Generation</label>
+                <select class="modal-select">
+                  <option value="auto" selected>Auto (Priority Order)</option>
+                  <option value="claude">Claude Code</option>
+                  <option value="gemini">Gemini CLI</option>
+                </select>
+              </div>
+              <div class="setting-row" style="margin-top: 8px;">
+                <label>Conflict Resolution</label>
+                <select class="modal-select">
+                  <option value="auto" selected>Auto (Priority Order)</option>
+                  <option value="claude">Claude Code</option>
+                  <option value="gemini">Gemini CLI</option>
+                </select>
+              </div>
+            </div>
+            <div class="settings-section">
+              <h3>API Settings</h3>
+              <div class="settings-hint" style="margin-bottom: 10px;">Fallback when no CLI or local LLM is available.</div>
+              <div class="setting-row">
+                <label>Provider</label>
                 <select class="modal-select">
                   <option value="openai" selected>OpenAI</option>
                   <option value="anthropic">Anthropic</option>
-                  <option value="ollama">Ollama (Local)</option>
                 </select>
               </div>
               <div class="setting-row" style="margin-top: 8px;">
@@ -1132,28 +1241,26 @@ function getSettingsModalHTML() {
                   <option value="o1-mini">o1-mini</option>
                 </select>
               </div>
-            </div>
-            <div class="settings-section">
-              <h3>API Key</h3>
-              <div class="settings-input-row">
+              <div class="settings-input-row" style="margin-top: 8px;">
                 <input type="password" class="settings-input" value="sk-••••••••••••••••••••••" placeholder="Enter API key">
                 <button class="btn btn-secondary btn-sm" onclick="showToast('info', 'API key visibility toggled')">Show</button>
               </div>
-              <div class="settings-hint">Your API key is stored locally and never sent to our servers.</div>
+              <div class="settings-hint">API key is stored locally and never sent to our servers.</div>
             </div>
             <div class="settings-section">
-              <h3>Features</h3>
-              <div class="settings-toggle-row">
-                <label>Auto-generate Commit Messages</label>
-                <div class="settings-toggle active" onclick="toggleSettingSwitch(this)"><div class="settings-toggle-knob"></div></div>
+              <h3>Local LLM</h3>
+              <div class="setting-row">
+                <label>Ollama Endpoint</label>
+                <input type="text" class="settings-input" value="http://localhost:11434" placeholder="Ollama API endpoint">
               </div>
-              <div class="settings-toggle-row">
-                <label>AI Code Review</label>
-                <div class="settings-toggle active" onclick="toggleSettingSwitch(this)"><div class="settings-toggle-knob"></div></div>
-              </div>
-              <div class="settings-toggle-row">
-                <label>Smart Conflict Resolution</label>
-                <div class="settings-toggle" onclick="toggleSettingSwitch(this)"><div class="settings-toggle-knob"></div></div>
+              <div class="setting-row" style="margin-top: 8px;">
+                <label>Model</label>
+                <select class="modal-select">
+                  <option value="llama3.1" selected>llama3.1</option>
+                  <option value="codellama">codellama</option>
+                  <option value="deepseek-coder">deepseek-coder</option>
+                  <option value="mistral">mistral</option>
+                </select>
               </div>
             </div>
             <div class="settings-section">
@@ -1173,6 +1280,33 @@ function getSettingsModalHTML() {
                   <option value="ja">Japanese</option>
                 </select>
               </div>
+            </div>
+            <div class="settings-section">
+              <h3>Features</h3>
+              <div class="settings-toggle-row">
+                <label>Auto-generate Commit Messages</label>
+                <div class="settings-toggle active" onclick="toggleSettingSwitch(this)"><div class="settings-toggle-knob"></div></div>
+              </div>
+              <div class="settings-toggle-row">
+                <label>AI Code Review</label>
+                <div class="settings-toggle active" onclick="toggleSettingSwitch(this)"><div class="settings-toggle-knob"></div></div>
+              </div>
+              <div class="settings-toggle-row">
+                <label>Smart Conflict Resolution</label>
+                <div class="settings-toggle" onclick="toggleSettingSwitch(this)"><div class="settings-toggle-knob"></div></div>
+              </div>
+            </div>
+            <div class="settings-section">
+              <h3>Privacy</h3>
+              <div class="settings-toggle-row">
+                <label>Prefer Local LLM</label>
+                <div class="settings-toggle" onclick="toggleSettingSwitch(this)"><div class="settings-toggle-knob"></div></div>
+              </div>
+              <div class="setting-row" style="margin-top: 8px;">
+                <label>Exclude Patterns</label>
+                <input type="text" class="settings-input" value=".env, *.key, credentials.*" placeholder="Glob patterns to exclude">
+              </div>
+              <div class="settings-hint">Files matching these patterns will never be sent to external AI providers.</div>
             </div>
           </div>
 
@@ -1392,6 +1526,22 @@ function getSettingsModalHTML() {
       .settings-input { flex: 1; padding: 8px 12px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 6px; color: var(--text-primary); font-family: 'JetBrains Mono', monospace; font-size: 12px; }
       .settings-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
       .settings-hint { font-size: 11px; color: var(--text-muted); margin-top: 6px; }
+      .provider-priority-list { display: flex; flex-direction: column; gap: 4px; }
+      .provider-priority-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; }
+      .provider-priority-item.active { border-color: var(--accent); background: var(--accent-dim); }
+      .provider-priority-num { font-size: 11px; font-weight: 700; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: var(--bg-tertiary); color: var(--text-muted); flex-shrink: 0; }
+      .provider-priority-item.active .provider-priority-num { background: var(--accent); color: #fff; }
+      .provider-priority-name { font-size: 13px; font-weight: 600; color: var(--text-primary); min-width: 70px; }
+      .provider-priority-desc { font-size: 11px; color: var(--text-muted); flex: 1; }
+      .provider-priority-status { font-size: 11px; padding: 2px 6px; border-radius: 4px; background: var(--bg-tertiary); color: var(--text-muted); flex-shrink: 0; }
+      .provider-priority-status.available { background: rgba(63, 185, 80, 0.15); color: var(--success); }
+      .provider-priority-status.unavailable { background: var(--bg-tertiary); color: var(--text-muted); }
+      .cli-adapter-list { display: flex; flex-direction: column; gap: 0; }
+      .cli-adapter-item { display: flex; align-items: center; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid var(--border); }
+      .cli-adapter-item:last-child { border-bottom: none; }
+      .cli-adapter-info { display: flex; align-items: center; gap: 10px; }
+      .cli-adapter-name { font-size: 13px; color: var(--text-primary); min-width: 110px; }
+      .cli-adapter-cmd { font-size: 11px; padding: 2px 6px; background: var(--bg-tertiary); border-radius: 4px; color: var(--text-secondary); }
     </style>
   `;
 }
