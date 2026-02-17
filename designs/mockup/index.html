@@ -107,10 +107,36 @@
         </div>
         <div class="sidebar-section">
           <div class="section-label">高度な操作</div>
-          <div class="nav-item" data-view="advanced" onclick="switchView('advanced')">
-            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M6.5 6a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3z"/><path d="M5.5.5a.5.5 0 0 0-1 0V2A2.5 2.5 0 0 0 2 4.5H.5a.5.5 0 0 0 0 1H2v1H.5a.5.5 0 0 0 0 1H2v1H.5a.5.5 0 0 0 0 1H2A2.5 2.5 0 0 0 4.5 14v1.5a.5.5 0 0 0 1 0V14h1v1.5a.5.5 0 0 0 1 0V14h1v1.5a.5.5 0 0 0 1 0V14A2.5 2.5 0 0 0 14 11.5h1.5a.5.5 0 0 0 0-1H14v-1h1.5a.5.5 0 0 0 0-1H14v-1h1.5a.5.5 0 0 0 0-1H14A2.5 2.5 0 0 0 11.5 2V.5a.5.5 0 0 0-1 0V2h-1V.5a.5.5 0 0 0-1 0V2h-1V.5z"/></svg>
+          <div class="nav-item" data-view="cherry-pick" onclick="switchView('cherry-pick')">
+            <span class="nav-emoji">🍒</span>
             Cherry-pick
           </div>
+          <div class="nav-item" data-view="revert" onclick="switchView('revert')">
+            <span class="nav-emoji">↩️</span>
+            Revert
+          </div>
+          <div class="nav-item" data-view="reset" onclick="switchView('reset')">
+            <span class="nav-emoji">🔄</span>
+            Reset
+          </div>
+          <div class="nav-item" data-view="reflog" onclick="switchView('reflog')">
+            <span class="nav-emoji">📜</span>
+            Reflog
+          </div>
+        </div>
+        <div class="sidebar-section">
+          <div class="section-label">モジュール</div>
+          <div class="nav-item" data-view="submodules" onclick="switchView('submodules')">
+            <span class="nav-emoji">📦</span>
+            サブモジュール
+          </div>
+          <div class="nav-item" data-view="worktrees" onclick="switchView('worktrees')">
+            <span class="nav-emoji">🌲</span>
+            ワークツリー
+          </div>
+        </div>
+        <div class="sidebar-section">
+          <div class="section-label">ツール</div>
           <div class="nav-item" onclick="openModal('search')">
             <svg viewBox="0 0 16 16" fill="currentColor"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg>
             検索
@@ -275,11 +301,6 @@
 
         <!-- Remotes View -->
         <div class="view" id="view-remotes">
-          <!-- Will be loaded dynamically -->
-        </div>
-
-        <!-- Advanced View -->
-        <div class="view" id="view-advanced">
           <!-- Will be loaded dynamically -->
         </div>
 

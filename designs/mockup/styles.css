@@ -261,6 +261,7 @@ body {
 .nav-item:hover { background: var(--bg-tertiary); color: var(--text-primary); }
 .nav-item.active { background: var(--accent-dim); color: var(--accent); border-left: 2px solid var(--accent); }
 .nav-item svg { width: 16px; height: 16px; }
+.nav-emoji { font-size: 14px; width: 16px; text-align: center; }
 
 .nav-badge {
   margin-left: auto;

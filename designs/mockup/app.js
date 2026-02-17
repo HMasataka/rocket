@@ -105,9 +105,6 @@ function loadViewContent(viewName) {
     case 'remotes':
       view.innerHTML = getRemotesViewHTML();
       break;
-    case 'advanced':
-      view.innerHTML = getAdvancedViewHTML();
-      break;
     case 'cherry-pick':
       view.innerHTML = getCherryPickViewHTML();
       break;
@@ -1207,77 +1204,6 @@ function getRemotesViewHTML() {
   `;
 }
 
-function getAdvancedViewHTML() {
-  return `
-    <div class="advanced-layout">
-      <div class="panel-header">
-        <span class="panel-title">高度なGit操作</span>
-      </div>
-      <div class="advanced-content">
-        <div class="advanced-grid">
-          <div class="advanced-card" onclick="switchView('cherry-pick')">
-            <div class="advanced-icon" style="background: linear-gradient(135deg, #f472b6, #ec4899);">🍒</div>
-            <div class="advanced-info">
-              <div class="advanced-title">Cherry-pick</div>
-              <div class="advanced-desc">特定のコミットを現在のブランチに適用</div>
-            </div>
-          </div>
-          <div class="advanced-card" onclick="switchView('revert')">
-            <div class="advanced-icon" style="background: linear-gradient(135deg, #fbbf24, #f59e0b);">↩️</div>
-            <div class="advanced-info">
-              <div class="advanced-title">Revert</div>
-              <div class="advanced-desc">コミットの変更を打ち消す</div>
-            </div>
-          </div>
-          <div class="advanced-card" onclick="switchView('reset')">
-            <div class="advanced-icon" style="background: linear-gradient(135deg, #f87171, #ef4444);">🔄</div>
-            <div class="advanced-info">
-              <div class="advanced-title">Reset</div>
-              <div class="advanced-desc">HEADを指定コミットに移動</div>
-            </div>
-          </div>
-          <div class="advanced-card" onclick="switchView('reflog')">
-            <div class="advanced-icon" style="background: linear-gradient(135deg, #a78bfa, #8b5cf6);">📜</div>
-            <div class="advanced-info">
-              <div class="advanced-title">Reflog</div>
-              <div class="advanced-desc">HEADの移動履歴を確認・復元</div>
-            </div>
-          </div>
-        </div>
-        <h3 class="section-title">モジュール管理</h3>
-        <div class="advanced-grid">
-          <div class="advanced-card" onclick="switchView('submodules')">
-            <div class="advanced-icon" style="background: var(--accent-dim);">📦</div>
-            <div class="advanced-info">
-              <div class="advanced-title">サブモジュール</div>
-              <div class="advanced-desc">サブモジュールの追加・更新・削除</div>
-            </div>
-          </div>
-          <div class="advanced-card" onclick="switchView('worktrees')">
-            <div class="advanced-icon" style="background: var(--success-dim);">🌲</div>
-            <div class="advanced-info">
-              <div class="advanced-title">ワークツリー</div>
-              <div class="advanced-desc">複数ワークツリーの管理</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <style>
-      .advanced-layout { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
-      .advanced-content { flex: 1; overflow-y: auto; padding: 24px; }
-      .section-title { font-size: 14px; font-weight: 600; margin: 24px 0 16px; color: var(--text-secondary); }
-      .advanced-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-      .advanced-card { display: flex; align-items: center; gap: 16px; padding: 20px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 10px; cursor: pointer; transition: all 0.15s; }
-      .advanced-card:hover { border-color: var(--accent); background: var(--accent-dim); }
-      .advanced-icon { width: 48px; height: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
-      .advanced-info { flex: 1; }
-      .advanced-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
-      .advanced-desc { font-size: 12px; color: var(--text-muted); }
-    </style>
-  `;
-}
-
 // ===== Helper Functions =====
 function switchBranch(branchName) {
   state.currentBranch = branchName;
@@ -1425,14 +1351,11 @@ function getCherryPickViewHTML() {
   return `
     <div class="operation-layout">
       <div class="operation-header">
-        <button class="back-btn" onclick="switchView('advanced')">
-          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/></svg>
-          戻る
-        </button>
         <div class="operation-title">
           <span class="operation-icon" style="background: linear-gradient(135deg, #f472b6, #ec4899);">🍒</span>
           <h2>Cherry-pick</h2>
         </div>
+        <span class="operation-desc">特定のコミットを現在のブランチに適用</span>
       </div>
       <div class="operation-content">
         <div class="operation-main">
@@ -1469,7 +1392,6 @@ function getCherryPickViewHTML() {
             </div>
           </div>
           <div class="operation-actions">
-            <button class="btn btn-secondary" onclick="switchView('advanced')">キャンセル</button>
             <button class="btn btn-primary" onclick="executeCherryPick()">
               <svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/></svg>
               Cherry-pick実行
@@ -1481,12 +1403,10 @@ function getCherryPickViewHTML() {
     <style>
       .operation-layout { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
       .operation-header { display: flex; align-items: center; gap: 16px; padding: 16px 24px; border-bottom: 1px solid var(--border); }
-      .back-btn { display: flex; align-items: center; gap: 6px; padding: 8px 12px; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 6px; color: var(--text-secondary); font-size: 13px; cursor: pointer; }
-      .back-btn:hover { background: var(--bg-secondary); color: var(--text-primary); }
-      .back-btn svg { width: 14px; height: 14px; }
       .operation-title { display: flex; align-items: center; gap: 12px; }
       .operation-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
       .operation-title h2 { font-size: 18px; font-weight: 600; margin: 0; }
+      .operation-desc { font-size: 13px; color: var(--text-muted); margin-left: auto; }
       .operation-content { display: flex; flex: 1; overflow: hidden; }
       .operation-main { flex: 1; overflow-y: auto; padding: 20px; }
       .operation-panel { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
@@ -1541,14 +1461,11 @@ function getRevertViewHTML() {
   return `
     <div class="operation-layout">
       <div class="operation-header">
-        <button class="back-btn" onclick="switchView('advanced')">
-          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/></svg>
-          戻る
-        </button>
         <div class="operation-title">
           <span class="operation-icon" style="background: linear-gradient(135deg, #fbbf24, #f59e0b);">↩️</span>
           <h2>Revert</h2>
         </div>
+        <span class="operation-desc">コミットの変更を打ち消す新しいコミットを作成</span>
       </div>
       <div class="operation-content">
         <div class="operation-main">
@@ -1583,7 +1500,6 @@ function getRevertViewHTML() {
             <textarea class="revert-message-input" placeholder="Revert &quot;feat: ユーザー認証機能を追加&quot;&#10;&#10;This reverts commit a1b2c3d."></textarea>
           </div>
           <div class="operation-actions">
-            <button class="btn btn-secondary" onclick="switchView('advanced')">キャンセル</button>
             <button class="btn btn-warning" onclick="executeRevert()">
               <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L7.5 2.707V14.5a.5.5 0 0 0 .5.5z"/></svg>
               Revert実行
@@ -1638,14 +1554,11 @@ function getResetViewHTML() {
   return `
     <div class="operation-layout">
       <div class="operation-header">
-        <button class="back-btn" onclick="switchView('advanced')">
-          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/></svg>
-          戻る
-        </button>
         <div class="operation-title">
           <span class="operation-icon" style="background: linear-gradient(135deg, #f87171, #ef4444);">🔄</span>
           <h2>Reset</h2>
         </div>
+        <span class="operation-desc">HEADを指定コミットに移動</span>
       </div>
       <div class="operation-content">
         <div class="operation-main">
@@ -1691,7 +1604,6 @@ function getResetViewHTML() {
             <span>この操作は取り消せません。慎重に実行してください。</span>
           </div>
           <div class="operation-actions">
-            <button class="btn btn-secondary" onclick="switchView('advanced')">キャンセル</button>
             <button class="btn btn-danger" onclick="executeReset()">
               <svg viewBox="0 0 16 16" fill="currentColor"><path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/><path d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z"/></svg>
               Reset実行
@@ -1771,15 +1683,11 @@ function getReflogViewHTML() {
   return `
     <div class="operation-layout">
       <div class="operation-header">
-        <button class="back-btn" onclick="switchView('advanced')">
-          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/></svg>
-          戻る
-        </button>
         <div class="operation-title">
           <span class="operation-icon" style="background: linear-gradient(135deg, #a78bfa, #8b5cf6);">📜</span>
           <h2>Reflog</h2>
         </div>
-        <div class="operation-hint">HEADの移動履歴。失われたコミットを復元できます</div>
+        <span class="operation-desc">HEADの移動履歴 - 失われたコミットを復元</span>
       </div>
       <div class="reflog-content">
         <div class="reflog-table">
@@ -1852,15 +1760,12 @@ function getSubmodulesViewHTML() {
   return `
     <div class="operation-layout">
       <div class="operation-header">
-        <button class="back-btn" onclick="switchView('advanced')">
-          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/></svg>
-          戻る
-        </button>
         <div class="operation-title">
           <span class="operation-icon" style="background: var(--accent-dim);">📦</span>
           <h2>サブモジュール</h2>
         </div>
-        <button class="btn btn-primary btn-sm" onclick="addSubmodule()">+ サブモジュール追加</button>
+        <span class="operation-desc">サブモジュールの追加・更新・削除</span>
+        <button class="btn btn-primary btn-sm" onclick="addSubmodule()">+ 追加</button>
       </div>
       <div class="submodules-content">
         <div class="submodules-toolbar">
@@ -1944,15 +1849,12 @@ function getWorktreesViewHTML() {
   return `
     <div class="operation-layout">
       <div class="operation-header">
-        <button class="back-btn" onclick="switchView('advanced')">
-          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/></svg>
-          戻る
-        </button>
         <div class="operation-title">
           <span class="operation-icon" style="background: var(--success-dim);">🌲</span>
           <h2>ワークツリー</h2>
         </div>
-        <button class="btn btn-primary btn-sm" onclick="addWorktree()">+ ワークツリー追加</button>
+        <span class="operation-desc">複数ワークツリーの管理</span>
+        <button class="btn btn-primary btn-sm" onclick="addWorktree()">+ 追加</button>
       </div>
       <div class="worktrees-content">
         <div class="worktrees-hint">
@@ -2020,7 +1922,6 @@ function executeCherryPick() {
     return;
   }
   showToast('success', `${selected.length}件のコミットをcherry-pickしました`);
-  switchView('advanced');
 }
 
 function selectRevertCommit(element, hash) {
@@ -2031,7 +1932,6 @@ function selectRevertCommit(element, hash) {
 
 function executeRevert() {
   showToast('success', 'コミットをリバートしました');
-  switchView('advanced');
 }
 
 function selectResetCommit(element, hash) {
@@ -2042,7 +1942,6 @@ function selectResetCommit(element, hash) {
 
 function executeReset() {
   showToast('warning', 'リポジトリをリセットしました');
-  switchView('advanced');
 }
 
 function selectReflogEntry(element, index) {
