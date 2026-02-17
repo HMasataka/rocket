@@ -176,7 +176,8 @@ const sampleData = {
     { name: 'v0.9.0', commit: 'q3r4s5t', message: 'Beta release', date: '2 weeks ago' }
   ],
   remotes: [
-    { name: 'origin', url: 'git@github.com:HMasataka/rocket.git', fetch: true, push: true }
+    { name: 'origin', url: 'git@github.com:HMasataka/rocket.git', fetch: true, push: true, active: true },
+    { name: 'upstream', url: 'git@github.com:original/rocket.git', fetch: true, push: false, active: false }
   ]
 };
 
@@ -608,6 +609,7 @@ function getModalWidth(type) {
     'branch': '500px',
     'stash': '500px',
     'tag': '500px',
+    'remote': '480px',
     'settings': '700px',
     'ai-assist': '600px',
     'ai-commit': '550px',
@@ -627,6 +629,8 @@ function getModalContent(type) {
       return getStashModalHTML();
     case 'tag':
       return getTagModalHTML();
+    case 'remote':
+      return getRemoteModalHTML();
     case 'settings':
       return getSettingsModalHTML();
     case 'ai-assist':
@@ -794,6 +798,177 @@ function getTagModalHTML() {
       .tag-actions { display: flex; gap: 4px; }
     </style>
   `;
+}
+
+function getRemoteModalHTML() {
+  const remotes = sampleData.remotes;
+  const activeRemote = remotes.find(r => r.active) || remotes[0];
+
+  const remoteList = remotes.map(r => `
+    <div class="remote-item ${r.active ? 'active' : ''}" onclick="selectRemote('${r.name}')">
+      <div class="remote-radio">
+        <input type="radio" name="remote-select" ${r.active ? 'checked' : ''}>
+      </div>
+      <div class="remote-info">
+        <div class="remote-name">${r.name}</div>
+        <div class="remote-url">${r.url}</div>
+      </div>
+      <div class="remote-actions">
+        <button class="icon-btn" onclick="event.stopPropagation(); editRemote('${r.name}')" title="Edit">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/></svg>
+        </button>
+        ${!r.active ? `
+          <button class="icon-btn danger" onclick="event.stopPropagation(); removeRemote('${r.name}')" title="Remove">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/><path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/></svg>
+          </button>
+        ` : ''}
+      </div>
+    </div>
+  `).join('');
+
+  return `
+    <div class="modal-header">
+      <span class="modal-title">Remote</span>
+      <button class="modal-close" onclick="closeModal()">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="remote-section-label">Active Remote</div>
+      <div class="remote-list" id="remote-list">
+        ${remoteList}
+      </div>
+      <div class="add-remote-form" id="add-remote-form" style="display: none;">
+        <div class="form-divider"></div>
+        <div class="form-group">
+          <label>Name</label>
+          <input type="text" id="new-remote-name" class="form-input" placeholder="upstream">
+        </div>
+        <div class="form-group">
+          <label>URL</label>
+          <input type="text" id="new-remote-url" class="form-input" placeholder="git@github.com:user/repo.git">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+      <button class="btn btn-primary" id="add-remote-btn" onclick="toggleAddRemoteForm()">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/></svg>
+        Add Remote
+      </button>
+    </div>
+    <style>
+      .remote-section-label { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+      .remote-list { display: flex; flex-direction: column; gap: 6px; }
+      .remote-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: var(--bg-tertiary); border-radius: 8px; cursor: pointer; transition: all 0.15s; border: 2px solid transparent; }
+      .remote-item:hover { background: var(--bg-secondary); }
+      .remote-item.active { border-color: var(--accent); background: var(--accent-dim); }
+      .remote-radio { flex-shrink: 0; }
+      .remote-radio input { width: 1.15em; height: 1.15em; appearance: none; -webkit-appearance: none; border-radius: 50%; border: 0.1em solid #6b6b76; background: transparent; cursor: pointer; display: grid; place-content: center; }
+      .remote-radio input::before { content: ""; width: 0.65em; height: 0.65em; border-radius: 50%; transform: scale(0); transition: 120ms transform ease-in-out; background-color: var(--accent); }
+      .remote-radio input:checked { border-color: var(--accent); }
+      .remote-radio input:checked::before { transform: scale(1); }
+      .remote-info { flex: 1; min-width: 0; }
+      .remote-name { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+      .remote-url { font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .remote-actions { display: flex; gap: 4px; opacity: 0; transition: opacity 0.15s; }
+      .remote-item:hover .remote-actions { opacity: 1; }
+      .remote-item.active .remote-actions { opacity: 1; }
+      .icon-btn.danger { color: var(--danger); }
+      .icon-btn.danger:hover { background: rgba(239, 68, 68, 0.1); }
+      .add-remote-form { margin-top: 16px; }
+      .form-divider { height: 1px; background: var(--border); margin-bottom: 16px; }
+      .form-group { margin-bottom: 12px; }
+      .form-group label { display: block; font-size: 12px; font-weight: 500; margin-bottom: 6px; color: var(--text-secondary); }
+      .form-input { width: 100%; padding: 10px 12px; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 6px; color: var(--text-primary); font-size: 13px; font-family: 'JetBrains Mono', monospace; }
+      .form-input:focus { outline: none; border-color: var(--accent); }
+    </style>
+  `;
+}
+
+function selectRemote(name) {
+  sampleData.remotes.forEach(r => r.active = (r.name === name));
+  document.getElementById('active-remote-name').textContent = name;
+
+  // Update UI
+  document.querySelectorAll('.remote-item').forEach(item => {
+    const remoteName = item.querySelector('.remote-name').textContent;
+    const radio = item.querySelector('input[type="radio"]');
+    if (remoteName === name) {
+      item.classList.add('active');
+      radio.checked = true;
+    } else {
+      item.classList.remove('active');
+      radio.checked = false;
+    }
+  });
+
+  showToast('success', `Switched to ${name}`);
+}
+
+function toggleAddRemoteForm() {
+  const form = document.getElementById('add-remote-form');
+  const btn = document.getElementById('add-remote-btn');
+
+  if (form.style.display === 'none') {
+    form.style.display = 'block';
+    btn.innerHTML = `
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/></svg>
+      Save Remote
+    `;
+    btn.onclick = saveNewRemote;
+    document.getElementById('new-remote-name').focus();
+  } else {
+    form.style.display = 'none';
+    btn.innerHTML = `
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/></svg>
+      Add Remote
+    `;
+    btn.onclick = toggleAddRemoteForm;
+  }
+}
+
+function saveNewRemote() {
+  const name = document.getElementById('new-remote-name').value.trim();
+  const url = document.getElementById('new-remote-url').value.trim();
+
+  if (!name || !url) {
+    showToast('error', 'Please fill in all fields');
+    return;
+  }
+
+  if (sampleData.remotes.some(r => r.name === name)) {
+    showToast('error', 'Remote already exists');
+    return;
+  }
+
+  sampleData.remotes.push({ name, url, fetch: true, push: true, active: false });
+  showToast('success', `Added remote: ${name}`);
+  closeModal();
+  openModal('remote');
+}
+
+function editRemote(name) {
+  const remote = sampleData.remotes.find(r => r.name === name);
+  if (!remote) return;
+
+  const newUrl = prompt('Edit remote URL:', remote.url);
+  if (newUrl && newUrl !== remote.url) {
+    remote.url = newUrl;
+    showToast('success', `Updated ${name}`);
+    closeModal();
+    openModal('remote');
+  }
+}
+
+function removeRemote(name) {
+  const index = sampleData.remotes.findIndex(r => r.name === name);
+  if (index > -1) {
+    sampleData.remotes.splice(index, 1);
+    showToast('warning', `Removed ${name}`);
+    closeModal();
+    openModal('remote');
+  }
 }
 
 function getSettingsModalHTML() {

@@ -213,6 +213,17 @@ body {
   color: #fff;
 }
 
+.toolbar-btn.remote-btn {
+  gap: 8px;
+}
+
+.toolbar-btn.remote-btn .dropdown-arrow {
+  width: 12px;
+  height: 12px;
+  color: var(--text-muted);
+  margin-left: 2px;
+}
+
 /* ===== Main Layout ===== */
 .main-layout {
   flex: 1 1 auto;
