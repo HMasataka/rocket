@@ -2269,10 +2269,10 @@ function getChangesPreviewHTML(commit, type) {
 function getOperationStyles() {
   return `
     <style>
-      .operation-two-column { display: grid; grid-template-columns: 1fr 1fr; flex: 1; overflow: hidden; }
-      .operation-left-panel { display: flex; flex-direction: column; border-right: 1px solid var(--border); overflow: hidden; padding: 20px; gap: 16px; }
-      .operation-right-panel { display: flex; flex-direction: column; overflow-y: auto; padding: 20px; background: var(--bg-secondary); }
-      .operation-panel { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; flex: 1; display: flex; flex-direction: column; }
+      .operation-two-column { display: grid; grid-template-columns: 1fr 1fr; flex: 1; min-height: 0; overflow: hidden; }
+      .operation-left-panel { display: flex; flex-direction: column; border-right: 1px solid var(--border); overflow: hidden; padding: 20px; gap: 16px; min-height: 0; }
+      .operation-right-panel { display: flex; flex-direction: column; overflow-y: auto; padding: 20px; background: var(--bg-secondary); min-height: 0; }
+      .operation-panel { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; flex: 1; display: flex; flex-direction: column; min-height: 0; }
 
       .cherry-commit-list, .revert-commit-list, .reset-commit-list { flex: 1; overflow-y: auto; }
       .cherry-commit-row, .revert-commit-row, .reset-commit-row { display: flex; align-items: flex-start; padding: 14px 16px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.15s; }
@@ -2359,7 +2359,7 @@ function getOperationStyles() {
       .stats-numbers .additions { color: var(--success); }
       .stats-numbers .deletions { color: var(--danger); }
 
-      .operation-footer { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-top: 1px solid var(--border); background: var(--bg-secondary); }
+      .operation-footer { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-top: 1px solid var(--border); background: var(--bg-secondary); flex-shrink: 0; }
       .operation-summary { display: flex; align-items: center; gap: 12px; font-size: 13px; }
       .summary-stat { color: var(--text-secondary); }
       .summary-stat strong { color: var(--text-primary); }
