@@ -12,10 +12,40 @@ const state = {
 // ===== Sample Data =====
 const sampleData = {
   branches: [
-    { name: 'main', current: true, remote: 'origin/main', ahead: 0, behind: 0 },
-    { name: 'feature/auth', current: false, remote: 'origin/feature/auth', ahead: 2, behind: 0 },
-    { name: 'feature/ui-redesign', current: false, remote: null, ahead: 5, behind: 0 },
-    { name: 'hotfix/login-bug', current: false, remote: 'origin/hotfix/login-bug', ahead: 0, behind: 1 }
+    {
+      name: 'main', current: true, remote: 'origin/main', ahead: 0, behind: 0,
+      lastCommit: { hash: 'a1b2c3d', message: 'Merge branch feature/auth into main', author: 'tanaka', email: 'tanaka@example.com', date: '2 hours ago', dateAbsolute: 'Feb 17, 2026 14:32' },
+      recentCommits: [
+        { hash: 'a1b2c3d', message: 'Merge branch feature/auth into main', author: 'tanaka', date: '2 hours ago' },
+        { hash: 'g6h7i8j', message: 'docs: Update API documentation', author: 'tanaka', date: '1 day ago' },
+        { hash: 'j9k0l1m', message: 'fix: Fix login redirect bug', author: 'tanaka', date: '3 days ago' },
+        { hash: 'm2n3o4p', message: 'chore: Update dependencies', author: 'tanaka', date: '5 days ago' }
+      ]
+    },
+    {
+      name: 'feature/auth', current: false, remote: 'origin/feature/auth', ahead: 2, behind: 0,
+      lastCommit: { hash: 'e4f5g6h', message: 'feat: Add login form validation', author: 'yamada', email: 'yamada@example.com', date: '8 hours ago', dateAbsolute: 'Feb 17, 2026 08:15' },
+      recentCommits: [
+        { hash: 'e4f5g6h', message: 'feat: Add login form validation', author: 'yamada', date: '8 hours ago' },
+        { hash: 'c3d4e5f', message: 'feat: Add token refresh logic', author: 'yamada', date: '5 hours ago' },
+        { hash: 'b2c3d4e', message: 'feat: Complete OAuth integration', author: 'yamada', date: '3 hours ago' }
+      ]
+    },
+    {
+      name: 'feature/ui-redesign', current: false, remote: null, ahead: 5, behind: 0,
+      lastCommit: { hash: 'd4e5f6g', message: 'fix: Fix CSS layout issue', author: 'suzuki', email: 'suzuki@example.com', date: '6 hours ago', dateAbsolute: 'Feb 17, 2026 10:45' },
+      recentCommits: [
+        { hash: 'd4e5f6g', message: 'fix: Fix CSS layout issue', author: 'suzuki', date: '6 hours ago' },
+        { hash: 'f5g6h7i', message: 'refactor: Improve component structure', author: 'suzuki', date: '1 day ago' }
+      ]
+    },
+    {
+      name: 'hotfix/login-bug', current: false, remote: 'origin/hotfix/login-bug', ahead: 0, behind: 1,
+      lastCommit: { hash: 'l1m2n3o', message: 'fix: Critical login hotfix', author: 'yamada', email: 'yamada@example.com', date: '4 days ago', dateAbsolute: 'Feb 13, 2026 09:22' },
+      recentCommits: [
+        { hash: 'l1m2n3o', message: 'fix: Critical login hotfix', author: 'yamada', date: '4 days ago' }
+      ]
+    }
   ],
   commits: [
     // Graph structure: column (0=main, 1=feature/auth, 2=feature/ui), type (commit/merge/branch)
@@ -1510,20 +1540,33 @@ function getHistoryViewHTML() {
 }
 
 function getBranchesViewHTML() {
-  const branchList = sampleData.branches.map(b => `
-    <div class="branch-row ${b.current ? 'current' : ''}" onclick="switchBranch('${b.name}')">
+  const defaultBranch = sampleData.branches.find(b => b.current) || sampleData.branches[0];
+
+  const branchList = sampleData.branches.map((b, index) => `
+    <div class="branch-row ${b.current ? 'current' : ''} ${index === 0 ? 'selected' : ''}" onclick="selectBranch(this, '${b.name}')" data-branch="${b.name}">
       <div class="branch-icon">
         <svg viewBox="0 0 16 16" fill="currentColor"><path d="M9.5 3.25a2.25 2.25 0 1 1 3 2.122V6A2.5 2.5 0 0 1 10 8.5H6a1 1 0 0 0-1 1v1.128a2.251 2.251 0 1 1-1.5 0V5.372a2.25 2.25 0 1 1 1.5 0v1.836A2.492 2.492 0 0 1 6 7h4a1 1 0 0 0 1-1v-.628A2.25 2.25 0 0 1 9.5 3.25z"/></svg>
       </div>
       <div class="branch-details">
         <div class="branch-name">${b.name}</div>
-        ${b.remote ? `<div class="branch-tracking">${b.remote}</div>` : ''}
+        ${b.remote ? `<div class="branch-tracking">${b.remote}</div>` : '<div class="branch-tracking local-only">Local only</div>'}
       </div>
       <div class="branch-status">
         ${b.ahead > 0 ? `<span class="ahead">↑${b.ahead}</span>` : ''}
         ${b.behind > 0 ? `<span class="behind">↓${b.behind}</span>` : ''}
       </div>
       ${b.current ? '<span class="current-badge">HEAD</span>' : ''}
+    </div>
+  `).join('');
+
+  const recentCommitsHTML = defaultBranch.recentCommits.map(c => `
+    <div class="branch-commit-row">
+      <div class="branch-commit-hash">${c.hash}</div>
+      <div class="branch-commit-message">${c.message}</div>
+      <div class="branch-commit-meta">
+        <span class="branch-commit-author">${c.author}</span>
+        <span class="branch-commit-date">${c.date}</span>
+      </div>
     </div>
   `).join('');
 
@@ -1538,24 +1581,265 @@ function getBranchesViewHTML() {
           <button class="btn btn-primary btn-sm" onclick="createBranch()">+ New Branch</button>
         </div>
       </div>
-      <div class="branch-list">${branchList}</div>
+      <div class="branches-content">
+        <div class="branches-list-panel">
+          <div class="panel-header">
+            <span class="panel-title">All Branches</span>
+            <span class="branch-count">${sampleData.branches.length}</span>
+          </div>
+          <div class="branch-list">${branchList}</div>
+        </div>
+        <div class="branch-detail-panel" id="branch-detail-panel">
+          <div class="panel-header">
+            <span class="panel-title">Branch Details</span>
+            <div class="panel-actions">
+              <button class="btn btn-secondary btn-sm" onclick="checkoutBranch('${defaultBranch.name}')">Checkout</button>
+              <button class="btn btn-secondary btn-sm" onclick="mergeBranch('${defaultBranch.name}')">Merge</button>
+            </div>
+          </div>
+          <div class="branch-detail-content" id="branch-detail-content">
+            <div class="branch-detail-header">
+              <div class="branch-detail-icon ${defaultBranch.current ? 'current' : ''}">
+                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M9.5 3.25a2.25 2.25 0 1 1 3 2.122V6A2.5 2.5 0 0 1 10 8.5H6a1 1 0 0 0-1 1v1.128a2.251 2.251 0 1 1-1.5 0V5.372a2.25 2.25 0 1 1 1.5 0v1.836A2.492 2.492 0 0 1 6 7h4a1 1 0 0 0 1-1v-.628A2.25 2.25 0 0 1 9.5 3.25z"/></svg>
+              </div>
+              <div class="branch-detail-info">
+                <div class="branch-detail-name">${defaultBranch.name}</div>
+                <div class="branch-detail-tracking">${defaultBranch.remote || 'Local only'}</div>
+              </div>
+              ${defaultBranch.current ? '<span class="current-badge">HEAD</span>' : ''}
+            </div>
+
+            <div class="branch-sync-status">
+              <div class="sync-item ${defaultBranch.ahead > 0 ? 'active' : ''}">
+                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 12a.5.5 0 0 0 .5-.5V5.707l2.146 2.147a.5.5 0 0 0 .708-.708l-3-3a.5.5 0 0 0-.708 0l-3 3a.5.5 0 1 0 .708.708L7.5 5.707V11.5a.5.5 0 0 0 .5.5z"/></svg>
+                <span>${defaultBranch.ahead} ahead</span>
+              </div>
+              <div class="sync-item ${defaultBranch.behind > 0 ? 'active' : ''}">
+                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 4a.5.5 0 0 1 .5.5v5.793l2.146-2.147a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 .708-.708L7.5 10.293V4.5A.5.5 0 0 1 8 4z"/></svg>
+                <span>${defaultBranch.behind} behind</span>
+              </div>
+            </div>
+
+            <div class="branch-last-commit">
+              <div class="section-label">Last Commit</div>
+              <div class="last-commit-card">
+                <div class="last-commit-header">
+                  <div class="last-commit-avatar">
+                    <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0Zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4Zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10Z"/></svg>
+                  </div>
+                  <div class="last-commit-author-info">
+                    <div class="last-commit-author">${defaultBranch.lastCommit.author}</div>
+                    <div class="last-commit-email">${defaultBranch.lastCommit.email}</div>
+                  </div>
+                  <div class="last-commit-date">
+                    <div class="last-commit-relative">${defaultBranch.lastCommit.date}</div>
+                    <div class="last-commit-absolute">${defaultBranch.lastCommit.dateAbsolute}</div>
+                  </div>
+                </div>
+                <div class="last-commit-body">
+                  <div class="last-commit-hash">${defaultBranch.lastCommit.hash}</div>
+                  <div class="last-commit-message">${defaultBranch.lastCommit.message}</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="branch-recent-commits">
+              <div class="section-label">Recent Commits</div>
+              <div class="branch-commits-list">
+                ${recentCommitsHTML}
+              </div>
+            </div>
+
+            <div class="branch-actions-footer">
+              <button class="btn btn-secondary">
+                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/><path d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z"/></svg>
+                Rebase
+              </button>
+              <button class="btn btn-secondary">
+                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M5 3.5h6A1.5 1.5 0 0 1 12.5 5v6a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 11V5A1.5 1.5 0 0 1 5 3.5z"/></svg>
+                Rename
+              </button>
+              <button class="btn btn-danger-outline">
+                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/><path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1z"/></svg>
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
     <style>
+      .branches-content { display: grid; grid-template-columns: 50% 50%; flex: 1; width: 100%; height: 100%; overflow: hidden; }
+      .branches-content > * { min-width: 0; height: 100%; }
+
+      .branches-list-panel { display: flex; flex-direction: column; border-right: 1px solid var(--border); overflow: hidden; }
       .branch-list { flex: 1; overflow-y: auto; }
-      .branch-row { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--border); cursor: pointer; }
+      .branch-count { background: var(--bg-tertiary); padding: 2px 8px; border-radius: 10px; font-size: 11px; color: var(--text-muted); }
+
+      .branch-row { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--border); cursor: pointer; transition: all 0.15s; }
       .branch-row:hover { background: var(--bg-tertiary); }
       .branch-row.current { background: var(--accent-dim); }
+      .branch-row.selected { background: var(--accent-dim); border-left: 3px solid var(--accent); }
       .branch-icon { color: var(--accent); }
       .branch-icon svg { width: 16px; height: 16px; }
-      .branch-details { flex: 1; }
-      .branch-name { font-size: 13px; font-weight: 500; }
+      .branch-details { flex: 1; min-width: 0; }
+      .branch-name { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
       .branch-tracking { font-size: 11px; color: var(--text-muted); }
+      .branch-tracking.local-only { color: var(--warning); font-style: italic; }
       .branch-status { display: flex; gap: 8px; font-size: 11px; }
       .ahead { color: var(--success); }
       .behind { color: var(--warning); }
-      .current-badge { padding: 3px 8px; background: var(--accent); color: #fff; border-radius: 4px; font-size: 10px; font-weight: 600; }
+      .current-badge { padding: 3px 8px; background: var(--accent); color: #fff; border-radius: 4px; font-size: 10px; font-weight: 600; flex-shrink: 0; }
+
+      .branch-detail-panel { display: flex; flex-direction: column; overflow: hidden; }
+      .branch-detail-content { flex: 1; padding: 20px; overflow-y: auto; }
+
+      .branch-detail-header { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+      .branch-detail-icon { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; background: var(--bg-tertiary); border-radius: 12px; color: var(--text-muted); }
+      .branch-detail-icon.current { background: var(--accent-dim); color: var(--accent); }
+      .branch-detail-icon svg { width: 24px; height: 24px; }
+      .branch-detail-info { flex: 1; }
+      .branch-detail-name { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+      .branch-detail-tracking { font-size: 12px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+
+      .branch-sync-status { display: flex; gap: 16px; margin-bottom: 24px; padding: 16px; background: var(--bg-secondary); border-radius: 10px; }
+      .sync-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-muted); }
+      .sync-item svg { width: 16px; height: 16px; }
+      .sync-item.active { color: var(--text-primary); }
+      .sync-item.active svg { color: var(--accent); }
+
+      .section-label { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+
+      .branch-last-commit { margin-bottom: 24px; }
+      .last-commit-card { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+      .last-commit-header { display: flex; align-items: center; gap: 12px; padding: 16px; border-bottom: 1px solid var(--border); }
+      .last-commit-avatar { width: 36px; height: 36px; background: var(--bg-tertiary); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+      .last-commit-avatar svg { width: 18px; height: 18px; color: var(--text-muted); }
+      .last-commit-author-info { flex: 1; }
+      .last-commit-author { font-size: 13px; font-weight: 600; }
+      .last-commit-email { font-size: 11px; color: var(--text-muted); }
+      .last-commit-date { text-align: right; }
+      .last-commit-relative { font-size: 12px; color: var(--text-secondary); }
+      .last-commit-absolute { font-size: 10px; color: var(--text-muted); }
+      .last-commit-body { padding: 16px; }
+      .last-commit-hash { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--accent); margin-bottom: 8px; }
+      .last-commit-message { font-size: 13px; color: var(--text-primary); line-height: 1.5; }
+
+      .branch-recent-commits { margin-bottom: 24px; }
+      .branch-commits-list { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+      .branch-commit-row { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+      .branch-commit-row:last-child { border-bottom: none; }
+      .branch-commit-hash { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--accent); flex-shrink: 0; }
+      .branch-commit-message { flex: 1; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .branch-commit-meta { display: flex; gap: 8px; font-size: 11px; color: var(--text-muted); flex-shrink: 0; }
+
+      .branch-actions-footer { display: flex; gap: 8px; padding-top: 16px; border-top: 1px solid var(--border); }
+      .btn-danger-outline { background: transparent; color: var(--danger); border: 1px solid var(--danger); }
+      .btn-danger-outline:hover { background: var(--danger); color: #fff; }
     </style>
   `;
+}
+
+function selectBranch(element, branchName) {
+  // Update selection
+  document.querySelectorAll('.branch-row').forEach(row => row.classList.remove('selected'));
+  element.classList.add('selected');
+
+  // Find branch data
+  const branch = sampleData.branches.find(b => b.name === branchName);
+  if (!branch) return;
+
+  // Update detail panel
+  const detailContent = document.getElementById('branch-detail-content');
+  if (detailContent) {
+    const recentCommitsHTML = branch.recentCommits.map(c => `
+      <div class="branch-commit-row">
+        <div class="branch-commit-hash">${c.hash}</div>
+        <div class="branch-commit-message">${c.message}</div>
+        <div class="branch-commit-meta">
+          <span class="branch-commit-author">${c.author}</span>
+          <span class="branch-commit-date">${c.date}</span>
+        </div>
+      </div>
+    `).join('');
+
+    detailContent.innerHTML = `
+      <div class="branch-detail-header">
+        <div class="branch-detail-icon ${branch.current ? 'current' : ''}">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M9.5 3.25a2.25 2.25 0 1 1 3 2.122V6A2.5 2.5 0 0 1 10 8.5H6a1 1 0 0 0-1 1v1.128a2.251 2.251 0 1 1-1.5 0V5.372a2.25 2.25 0 1 1 1.5 0v1.836A2.492 2.492 0 0 1 6 7h4a1 1 0 0 0 1-1v-.628A2.25 2.25 0 0 1 9.5 3.25z"/></svg>
+        </div>
+        <div class="branch-detail-info">
+          <div class="branch-detail-name">${branch.name}</div>
+          <div class="branch-detail-tracking">${branch.remote || 'Local only'}</div>
+        </div>
+        ${branch.current ? '<span class="current-badge">HEAD</span>' : ''}
+      </div>
+
+      <div class="branch-sync-status">
+        <div class="sync-item ${branch.ahead > 0 ? 'active' : ''}">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 12a.5.5 0 0 0 .5-.5V5.707l2.146 2.147a.5.5 0 0 0 .708-.708l-3-3a.5.5 0 0 0-.708 0l-3 3a.5.5 0 1 0 .708.708L7.5 5.707V11.5a.5.5 0 0 0 .5.5z"/></svg>
+          <span>${branch.ahead} ahead</span>
+        </div>
+        <div class="sync-item ${branch.behind > 0 ? 'active' : ''}">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 4a.5.5 0 0 1 .5.5v5.793l2.146-2.147a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 .708-.708L7.5 10.293V4.5A.5.5 0 0 1 8 4z"/></svg>
+          <span>${branch.behind} behind</span>
+        </div>
+      </div>
+
+      <div class="branch-last-commit">
+        <div class="section-label">Last Commit</div>
+        <div class="last-commit-card">
+          <div class="last-commit-header">
+            <div class="last-commit-avatar">
+              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0Zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4Zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10Z"/></svg>
+            </div>
+            <div class="last-commit-author-info">
+              <div class="last-commit-author">${branch.lastCommit.author}</div>
+              <div class="last-commit-email">${branch.lastCommit.email}</div>
+            </div>
+            <div class="last-commit-date">
+              <div class="last-commit-relative">${branch.lastCommit.date}</div>
+              <div class="last-commit-absolute">${branch.lastCommit.dateAbsolute}</div>
+            </div>
+          </div>
+          <div class="last-commit-body">
+            <div class="last-commit-hash">${branch.lastCommit.hash}</div>
+            <div class="last-commit-message">${branch.lastCommit.message}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="branch-recent-commits">
+        <div class="section-label">Recent Commits</div>
+        <div class="branch-commits-list">
+          ${recentCommitsHTML}
+        </div>
+      </div>
+
+      <div class="branch-actions-footer">
+        <button class="btn btn-secondary">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/><path d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z"/></svg>
+          Rebase
+        </button>
+        <button class="btn btn-secondary">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M5 3.5h6A1.5 1.5 0 0 1 12.5 5v6a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 11V5A1.5 1.5 0 0 1 5 3.5z"/></svg>
+          Rename
+        </button>
+        <button class="btn btn-danger-outline">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/><path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1z"/></svg>
+          Delete
+        </button>
+      </div>
+    `;
+  }
+}
+
+function checkoutBranch(branchName) {
+  showToast('success', `Checked out branch: ${branchName}`);
+}
+
+function mergeBranch(branchName) {
+  showToast('info', `Merging ${branchName} into current branch...`);
 }
 
 function getRemotesViewHTML() {
