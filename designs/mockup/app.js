@@ -18,11 +18,22 @@ const sampleData = {
     { name: 'hotfix/login-bug', current: false, remote: 'origin/hotfix/login-bug', ahead: 0, behind: 1 }
   ],
   commits: [
-    { hash: 'a1b2c3d', message: 'feat: Add user authentication', author: 'tanaka', date: '2 days ago', branch: 'main' },
-    { hash: 'e4f5g6h', message: 'fix: Fix login bug', author: 'yamada', date: '3 days ago', branch: 'main' },
-    { hash: 'i7j8k9l', message: 'docs: Update README', author: 'tanaka', date: '4 days ago', branch: 'main' },
-    { hash: 'm0n1o2p', message: 'refactor: Code cleanup', author: 'suzuki', date: '5 days ago', branch: 'main' },
-    { hash: 'q3r4s5t', message: 'feat: Add settings screen', author: 'tanaka', date: '1 week ago', branch: 'main' }
+    // Graph structure: column (0=main, 1=feature/auth, 2=feature/ui), type (commit/merge/branch)
+    { hash: 'a1b2c3d', message: 'Merge branch feature/auth into main', author: 'tanaka', date: '2 hours ago', branch: 'main', col: 0, type: 'merge', mergeFrom: 1, refs: ['HEAD', 'main', 'origin/main'] },
+    { hash: 'b2c3d4e', message: 'feat: Complete OAuth integration', author: 'yamada', date: '3 hours ago', branch: 'feature/auth', col: 1, type: 'commit', refs: [] },
+    { hash: 'c3d4e5f', message: 'feat: Add token refresh logic', author: 'yamada', date: '5 hours ago', branch: 'feature/auth', col: 1, type: 'commit', refs: [] },
+    { hash: 'd4e5f6g', message: 'fix: Fix CSS layout issue', author: 'suzuki', date: '6 hours ago', branch: 'feature/ui', col: 2, type: 'commit', refs: ['feature/ui-redesign'] },
+    { hash: 'e4f5g6h', message: 'feat: Add login form validation', author: 'yamada', date: '8 hours ago', branch: 'feature/auth', col: 1, type: 'commit', refs: ['feature/auth'] },
+    { hash: 'f5g6h7i', message: 'refactor: Improve component structure', author: 'suzuki', date: '1 day ago', branch: 'feature/ui', col: 2, type: 'commit', refs: [] },
+    { hash: 'g6h7i8j', message: 'docs: Update API documentation', author: 'tanaka', date: '1 day ago', branch: 'main', col: 0, type: 'commit', refs: [] },
+    { hash: 'h7i8j9k', message: 'feat: Start auth feature branch', author: 'yamada', date: '2 days ago', branch: 'feature/auth', col: 1, type: 'branch', branchFrom: 0, refs: [] },
+    { hash: 'i8j9k0l', message: 'feat: Start UI redesign', author: 'suzuki', date: '2 days ago', branch: 'feature/ui', col: 2, type: 'branch', branchFrom: 0, refs: [] },
+    { hash: 'j9k0l1m', message: 'fix: Fix login redirect bug', author: 'tanaka', date: '3 days ago', branch: 'main', col: 0, type: 'commit', refs: [] },
+    { hash: 'k0l1m2n', message: 'Merge branch hotfix/login into main', author: 'tanaka', date: '4 days ago', branch: 'main', col: 0, type: 'merge', mergeFrom: 3, refs: [] },
+    { hash: 'l1m2n3o', message: 'fix: Critical login hotfix', author: 'yamada', date: '4 days ago', branch: 'hotfix/login', col: 3, type: 'commit', refs: [] },
+    { hash: 'm2n3o4p', message: 'chore: Update dependencies', author: 'tanaka', date: '5 days ago', branch: 'main', col: 0, type: 'commit', refs: [] },
+    { hash: 'n3o4p5q', message: 'feat: Add settings screen', author: 'suzuki', date: '1 week ago', branch: 'main', col: 0, type: 'commit', refs: ['v1.0.0'] },
+    { hash: 'o4p5q6r', message: 'Initial commit', author: 'tanaka', date: '2 weeks ago', branch: 'main', col: 0, type: 'commit', refs: [] }
   ],
   stashes: [
     { index: 0, message: 'WIP: Auth feature in progress', branch: 'feature/auth', date: '1 hour ago' },
@@ -42,7 +53,21 @@ document.addEventListener('DOMContentLoaded', () => {
   initDiffView();
   initKeyboardShortcuts();
   initResponsive();
+  initHistoryGraphSync();
 });
+
+// ===== History Graph Sync =====
+function initHistoryGraphSync() {
+  // Setup synchronized scrolling between graph and commit list
+  const commitList = document.querySelector('.commit-list');
+  const graphColumn = document.querySelector('.graph-column');
+
+  if (commitList && graphColumn) {
+    commitList.addEventListener('scroll', () => {
+      graphColumn.scrollTop = commitList.scrollTop;
+    });
+  }
+}
 
 // ===== Responsive Handling =====
 function initResponsive() {
@@ -98,6 +123,8 @@ function loadViewContent(viewName) {
   switch (viewName) {
     case 'history':
       view.innerHTML = getHistoryViewHTML();
+      // Re-init graph sync after loading
+      setTimeout(initHistoryGraphSync, 0);
       break;
     case 'branches':
       view.innerHTML = getBranchesViewHTML();
@@ -1080,14 +1107,100 @@ function getMergeViewerModalHTML() {
 
 // ===== View HTML Templates =====
 function getHistoryViewHTML() {
-  const commitList = sampleData.commits.map(c => `
-    <div class="commit-row" onclick="selectCommit('${c.hash}')">
-      <div class="commit-graph">
-        <div class="graph-node"></div>
-        <div class="graph-line"></div>
-      </div>
+  // Branch colors for graph
+  const branchColors = ['#58a6ff', '#f78166', '#a371f7', '#7ee787', '#ffa657'];
+  const ROW_HEIGHT = 52;
+  const COL_WIDTH = 20;
+  const NODE_RADIUS = 5;
+  const GRAPH_PADDING = 16;
+
+  // Calculate active columns at each row
+  const commits = sampleData.commits;
+  const maxCol = Math.max(...commits.map(c => c.col));
+
+  // Build graph SVG paths
+  function buildGraphSVG() {
+    const height = commits.length * ROW_HEIGHT;
+    const width = (maxCol + 1) * COL_WIDTH + GRAPH_PADDING * 2;
+
+    let paths = '';
+    let nodes = '';
+
+    // Track active lanes per column
+    const activeLanes = new Array(maxCol + 1).fill(false);
+
+    commits.forEach((commit, index) => {
+      const y = index * ROW_HEIGHT + ROW_HEIGHT / 2;
+      const x = GRAPH_PADDING + commit.col * COL_WIDTH;
+      const color = branchColors[commit.col % branchColors.length];
+
+      // Draw vertical lines for active lanes
+      for (let col = 0; col <= maxCol; col++) {
+        if (activeLanes[col] && col !== commit.col) {
+          const laneX = GRAPH_PADDING + col * COL_WIDTH;
+          const laneColor = branchColors[col % branchColors.length];
+          paths += `<line x1="${laneX}" y1="${y - ROW_HEIGHT/2}" x2="${laneX}" y2="${y + ROW_HEIGHT/2}" stroke="${laneColor}" stroke-width="2" class="graph-lane"/>`;
+        }
+      }
+
+      // Handle different commit types
+      if (commit.type === 'branch') {
+        // Branch point: draw curve from parent column
+        const parentX = GRAPH_PADDING + commit.branchFrom * COL_WIDTH;
+        paths += `<path d="M ${parentX} ${y - ROW_HEIGHT/2} L ${parentX} ${y - 10} Q ${parentX} ${y} ${x} ${y}" stroke="${color}" stroke-width="2" fill="none" class="graph-branch"/>`;
+        paths += `<line x1="${parentX}" y1="${y}" x2="${parentX}" y2="${y + ROW_HEIGHT/2}" stroke="${branchColors[commit.branchFrom % branchColors.length]}" stroke-width="2" class="graph-lane"/>`;
+        activeLanes[commit.col] = true;
+      } else if (commit.type === 'merge') {
+        // Merge: draw curve from merged branch
+        const mergeX = GRAPH_PADDING + commit.mergeFrom * COL_WIDTH;
+        paths += `<path d="M ${mergeX} ${y - ROW_HEIGHT/2} L ${mergeX} ${y - 10} Q ${mergeX} ${y} ${x} ${y}" stroke="${branchColors[commit.mergeFrom % branchColors.length]}" stroke-width="2" fill="none" class="graph-merge"/>`;
+        // Continue main line
+        if (index < commits.length - 1) {
+          paths += `<line x1="${x}" y1="${y}" x2="${x}" y2="${y + ROW_HEIGHT/2}" stroke="${color}" stroke-width="2" class="graph-lane"/>`;
+        }
+        activeLanes[commit.mergeFrom] = false;
+      } else {
+        // Regular commit: continue line
+        if (index < commits.length - 1) {
+          paths += `<line x1="${x}" y1="${y}" x2="${x}" y2="${y + ROW_HEIGHT/2}" stroke="${color}" stroke-width="2" class="graph-lane"/>`;
+        }
+        if (index > 0) {
+          paths += `<line x1="${x}" y1="${y - ROW_HEIGHT/2}" x2="${x}" y2="${y}" stroke="${color}" stroke-width="2" class="graph-lane"/>`;
+        }
+      }
+
+      // Draw node
+      const nodeClass = commit.type === 'merge' ? 'merge-node' : (commit.type === 'branch' ? 'branch-node' : '');
+      if (commit.type === 'merge') {
+        nodes += `<circle cx="${x}" cy="${y}" r="${NODE_RADIUS + 2}" fill="var(--bg)" stroke="${color}" stroke-width="2" class="graph-node ${nodeClass}"/>`;
+        nodes += `<circle cx="${x}" cy="${y}" r="${NODE_RADIUS - 1}" fill="${color}" class="graph-node-inner"/>`;
+      } else {
+        nodes += `<circle cx="${x}" cy="${y}" r="${NODE_RADIUS}" fill="${color}" class="graph-node ${nodeClass}"/>`;
+      }
+    });
+
+    return `<svg class="commit-graph-svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">${paths}${nodes}</svg>`;
+  }
+
+  const graphSVG = buildGraphSVG();
+
+  const commitList = sampleData.commits.map((c, index) => {
+    const refsHtml = c.refs.map(ref => {
+      let refClass = 'ref-tag';
+      if (ref === 'HEAD') refClass = 'ref-head';
+      else if (ref.startsWith('origin/')) refClass = 'ref-remote';
+      else if (ref.startsWith('v')) refClass = 'ref-version';
+      else refClass = 'ref-branch';
+      return `<span class="commit-ref ${refClass}">${ref}</span>`;
+    }).join('');
+
+    return `
+    <div class="commit-row" onclick="selectCommit('${c.hash}')" data-index="${index}">
       <div class="commit-info">
-        <div class="commit-message">${c.message}</div>
+        <div class="commit-message-row">
+          <span class="commit-message">${c.message}</span>
+          ${refsHtml}
+        </div>
         <div class="commit-meta">
           <span class="commit-hash">${c.hash}</span>
           <span class="commit-author">${c.author}</span>
@@ -1095,7 +1208,7 @@ function getHistoryViewHTML() {
         </div>
       </div>
     </div>
-  `).join('');
+  `}).join('');
 
   return `
     <div class="page-layout">
@@ -1109,11 +1222,20 @@ function getHistoryViewHTML() {
         <div class="history-panel">
           <div class="panel-header">
             <span class="panel-title">Commit History</span>
+            <div class="branch-legend">
+              <span class="legend-item"><span class="legend-dot" style="background: #58a6ff;"></span>main</span>
+              <span class="legend-item"><span class="legend-dot" style="background: #f78166;"></span>feature/auth</span>
+              <span class="legend-item"><span class="legend-dot" style="background: #a371f7;"></span>feature/ui</span>
+              <span class="legend-item"><span class="legend-dot" style="background: #7ee787;"></span>hotfix</span>
+            </div>
           <div class="panel-actions">
             <input type="text" class="search-input" placeholder="Search...">
           </div>
         </div>
-        <div class="commit-list">${commitList}</div>
+        <div class="commit-list-wrapper">
+          <div class="graph-column">${graphSVG}</div>
+          <div class="commit-list">${commitList}</div>
+        </div>
       </div>
       <div class="commit-detail-panel">
         <div class="panel-header">
@@ -1278,17 +1400,36 @@ function getHistoryViewHTML() {
     <style>
       .history-content { display: grid; grid-template-columns: 1fr 400px; flex: 1; overflow: hidden; }
       .history-panel { display: flex; flex-direction: column; overflow: hidden; border-right: 1px solid var(--border); }
+
+      /* Branch legend */
+      .branch-legend { display: flex; gap: 12px; margin-left: auto; margin-right: 16px; }
+      .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-muted); }
+      .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+      /* Graph column with synchronized scrolling */
+      .commit-list-wrapper { display: flex; flex: 1; overflow: hidden; }
+      .graph-column { flex-shrink: 0; overflow: hidden; background: var(--bg); border-right: 1px solid var(--border); }
+      .commit-graph-svg { display: block; }
+      .graph-lane { opacity: 0.8; }
+      .graph-branch, .graph-merge { opacity: 0.9; }
+      .graph-node { transition: r 0.15s ease; }
+
       .commit-list { flex: 1; overflow-y: auto; }
-      .commit-row { display: flex; padding: 12px 16px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.15s; }
+      .commit-row { display: flex; height: 52px; padding: 0 16px; align-items: center; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.15s; box-sizing: border-box; }
       .commit-row:hover { background: var(--bg-tertiary); }
       .commit-row.selected { background: var(--accent-dim); border-left: 3px solid var(--accent); }
-      .commit-graph { width: 30px; display: flex; flex-direction: column; align-items: center; }
-      .graph-node { width: 10px; height: 10px; background: var(--accent); border-radius: 50%; }
-      .graph-line { flex: 1; width: 2px; background: var(--border); margin-top: 4px; }
-      .commit-info { flex: 1; }
-      .commit-message { font-size: 13px; font-weight: 500; margin-bottom: 6px; }
+      .commit-info { flex: 1; min-width: 0; }
+      .commit-message-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; flex-wrap: wrap; }
+      .commit-message { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
       .commit-meta { display: flex; gap: 12px; font-size: 11px; color: var(--text-muted); }
       .commit-hash { font-family: 'JetBrains Mono', monospace; color: var(--accent); }
+
+      /* Ref badges */
+      .commit-ref { padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 600; font-family: 'JetBrains Mono', monospace; white-space: nowrap; }
+      .ref-head { background: var(--success); color: #fff; }
+      .ref-branch { background: var(--accent-dim); color: var(--accent); border: 1px solid var(--accent); }
+      .ref-remote { background: var(--purple-dim); color: var(--purple); }
+      .ref-version { background: var(--warning-dim); color: var(--warning); }
 
       .commit-detail-panel { display: flex; flex-direction: column; overflow: hidden; }
       .commit-detail { flex: 1; padding: 20px; overflow-y: auto; }
