@@ -331,7 +331,6 @@ body {
 
 /* ===== File Panel ===== */
 .file-panel {
-  background: var(--bg-secondary);
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
@@ -888,7 +887,6 @@ body {
 
 /* ===== Commit Panel ===== */
 .commit-panel {
-  background: var(--bg-secondary);
   border-left: 1px solid var(--border);
   display: flex;
   flex-direction: column;
