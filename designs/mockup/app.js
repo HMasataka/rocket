@@ -18,19 +18,19 @@ const sampleData = {
     { name: 'hotfix/login-bug', current: false, remote: 'origin/hotfix/login-bug', ahead: 0, behind: 1 }
   ],
   commits: [
-    { hash: 'a1b2c3d', message: 'feat: ユーザー認証機能を追加', author: 'tanaka', date: '2日前', branch: 'main' },
-    { hash: 'e4f5g6h', message: 'fix: ログインバグを修正', author: 'yamada', date: '3日前', branch: 'main' },
-    { hash: 'i7j8k9l', message: 'docs: READMEを更新', author: 'tanaka', date: '4日前', branch: 'main' },
-    { hash: 'm0n1o2p', message: 'refactor: コード整理', author: 'suzuki', date: '5日前', branch: 'main' },
-    { hash: 'q3r4s5t', message: 'feat: 設定画面を追加', author: 'tanaka', date: '1週間前', branch: 'main' }
+    { hash: 'a1b2c3d', message: 'feat: Add user authentication', author: 'tanaka', date: '2 days ago', branch: 'main' },
+    { hash: 'e4f5g6h', message: 'fix: Fix login bug', author: 'yamada', date: '3 days ago', branch: 'main' },
+    { hash: 'i7j8k9l', message: 'docs: Update README', author: 'tanaka', date: '4 days ago', branch: 'main' },
+    { hash: 'm0n1o2p', message: 'refactor: Code cleanup', author: 'suzuki', date: '5 days ago', branch: 'main' },
+    { hash: 'q3r4s5t', message: 'feat: Add settings screen', author: 'tanaka', date: '1 week ago', branch: 'main' }
   ],
   stashes: [
-    { index: 0, message: 'WIP: 認証機能の途中', branch: 'feature/auth', date: '1時間前' },
-    { index: 1, message: 'WIP: UI調整', branch: 'main', date: '昨日' }
+    { index: 0, message: 'WIP: Auth feature in progress', branch: 'feature/auth', date: '1 hour ago' },
+    { index: 1, message: 'WIP: UI adjustments', branch: 'main', date: 'yesterday' }
   ],
   tags: [
-    { name: 'v1.0.0', commit: 'a1b2c3d', message: 'Initial release', date: '1週間前' },
-    { name: 'v0.9.0', commit: 'q3r4s5t', message: 'Beta release', date: '2週間前' }
+    { name: 'v1.0.0', commit: 'a1b2c3d', message: 'Initial release', date: '1 week ago' },
+    { name: 'v0.9.0', commit: 'q3r4s5t', message: 'Beta release', date: '2 weeks ago' }
   ],
   remotes: [
     { name: 'origin', url: 'git@github.com:HMasataka/rocket.git', fetch: true, push: true }
@@ -346,7 +346,7 @@ function setDiffView(mode) {
 
 function toggleHunkMode() {
   state.hunkMode = !state.hunkMode;
-  showToast('info', state.hunkMode ? 'ハンクモードを有効化' : 'ハンクモードを無効化');
+  showToast('info', state.hunkMode ? 'Hunk mode enabled' : 'Hunk mode disabled');
 }
 
 // ===== File Operations =====
@@ -360,24 +360,24 @@ function selectFile(element, type) {
 
 function stageFile(event) {
   event.stopPropagation();
-  showToast('success', 'ファイルをステージしました');
+  showToast('success', 'File staged');
 }
 
 function unstageFile(event) {
   event.stopPropagation();
-  showToast('success', 'ファイルをアンステージしました');
+  showToast('success', 'File unstaged');
 }
 
 function stageAll() {
-  showToast('success', 'すべてのファイルをステージしました');
+  showToast('success', 'All files staged');
 }
 
 function stageHunk(index) {
-  showToast('success', `ハンク ${index + 1} をステージしました`);
+  showToast('success', `Hunk ${index + 1} staged`);
 }
 
 function discardHunk(index) {
-  showToast('warning', `ハンク ${index + 1} を破棄しました`);
+  showToast('warning', `Hunk ${index + 1} discarded`);
 }
 
 function toggleSection(header) {
@@ -392,10 +392,10 @@ function toggleSection(header) {
 function performCommit() {
   const subject = document.getElementById('commit-subject').value;
   if (!subject.trim()) {
-    showToast('error', 'コミットメッセージを入力してください');
+    showToast('error', 'Please enter a commit message');
     return;
   }
-  showToast('success', 'コミットを作成しました');
+  showToast('success', 'Commit created');
   document.getElementById('commit-subject').value = '';
   document.getElementById('commit-body').value = '';
 }
@@ -409,15 +409,15 @@ function performAction(action) {
   switch (action) {
     case 'fetch':
       showToast('info', 'Fetching from origin...');
-      setTimeout(() => showToast('success', 'Fetch完了'), 1000);
+      setTimeout(() => showToast('success', 'Fetch complete'), 1000);
       break;
     case 'pull':
       showToast('info', 'Pulling from origin/main...');
-      setTimeout(() => showToast('success', 'Pull完了 - Already up to date'), 1000);
+      setTimeout(() => showToast('success', 'Pull complete - Already up to date'), 1000);
       break;
     case 'push':
       showToast('info', 'Pushing to origin/main...');
-      setTimeout(() => showToast('success', 'Push完了'), 1000);
+      setTimeout(() => showToast('success', 'Push complete'), 1000);
       break;
   }
 }
@@ -493,29 +493,29 @@ function getBranchModalHTML() {
       <div class="branch-status">
         ${b.ahead > 0 ? `<span class="ahead">↑${b.ahead}</span>` : ''}
         ${b.behind > 0 ? `<span class="behind">↓${b.behind}</span>` : ''}
-        ${b.current ? '<span class="current-badge">現在</span>' : ''}
+        ${b.current ? '<span class="current-badge">Current</span>' : ''}
       </div>
     </div>
   `).join('');
 
   return `
     <div class="modal-header">
-      <span class="modal-title">ブランチ</span>
+      <span class="modal-title">Branches</span>
       <button class="modal-close" onclick="closeModal()">
         <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg>
       </button>
     </div>
     <div class="modal-body">
       <div class="modal-search">
-        <input type="text" placeholder="ブランチを検索..." class="modal-input">
+        <input type="text" placeholder="Search branches..." class="modal-input">
       </div>
       <div class="branch-list">${branchList}</div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="closeModal()">キャンセル</button>
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
       <button class="btn btn-primary" onclick="createBranch()">
         <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/></svg>
-        新規ブランチ
+        New Branch
       </button>
     </div>
     <style>
@@ -569,10 +569,10 @@ function getStashModalHTML() {
       <div class="stash-list">${stashList}</div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="closeModal()">閉じる</button>
+      <button class="btn btn-secondary" onclick="closeModal()">Close</button>
       <button class="btn btn-primary" onclick="createStash()">
         <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/></svg>
-        Stash作成
+        Create Stash
       </button>
     </div>
     <style>
@@ -606,7 +606,7 @@ function getTagModalHTML() {
 
   return `
     <div class="modal-header">
-      <span class="modal-title">タグ</span>
+      <span class="modal-title">Tags</span>
       <button class="modal-close" onclick="closeModal()">
         <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg>
       </button>
@@ -615,10 +615,10 @@ function getTagModalHTML() {
       <div class="tag-list">${tagList}</div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="closeModal()">閉じる</button>
+      <button class="btn btn-secondary" onclick="closeModal()">Close</button>
       <button class="btn btn-primary" onclick="createTag()">
         <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/></svg>
-        新規タグ
+        New Tag
       </button>
     </div>
     <style>
@@ -635,7 +635,7 @@ function getTagModalHTML() {
 function getSettingsModalHTML() {
   return `
     <div class="modal-header">
-      <span class="modal-title">設定</span>
+      <span class="modal-title">Settings</span>
       <button class="modal-close" onclick="closeModal()">
         <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg>
       </button>
@@ -643,15 +643,15 @@ function getSettingsModalHTML() {
     <div class="modal-body">
       <div class="settings-layout">
         <nav class="settings-nav">
-          <div class="settings-nav-item active" onclick="switchSettingsTab(this, 'appearance')">外観</div>
-          <div class="settings-nav-item" onclick="switchSettingsTab(this, 'editor')">エディタ</div>
-          <div class="settings-nav-item" onclick="switchSettingsTab(this, 'ai')">AI設定</div>
-          <div class="settings-nav-item" onclick="switchSettingsTab(this, 'keybindings')">キーバインド</div>
-          <div class="settings-nav-item" onclick="switchSettingsTab(this, 'tools')">外部ツール</div>
+          <div class="settings-nav-item active" onclick="switchSettingsTab(this, 'appearance')">Appearance</div>
+          <div class="settings-nav-item" onclick="switchSettingsTab(this, 'editor')">Editor</div>
+          <div class="settings-nav-item" onclick="switchSettingsTab(this, 'ai')">AI Settings</div>
+          <div class="settings-nav-item" onclick="switchSettingsTab(this, 'keybindings')">Keybindings</div>
+          <div class="settings-nav-item" onclick="switchSettingsTab(this, 'tools')">External Tools</div>
         </nav>
         <div class="settings-content">
           <div class="settings-section">
-            <h3>テーマ</h3>
+            <h3>Theme</h3>
             <div class="theme-selector">
               <label class="theme-option selected">
                 <input type="radio" name="theme" value="dark" checked>
@@ -666,7 +666,7 @@ function getSettingsModalHTML() {
             </div>
           </div>
           <div class="settings-section">
-            <h3>カラーテーマ</h3>
+            <h3>Color Theme</h3>
             <div class="color-picker">
               <div class="color-option selected" style="--color: #58a6ff" data-theme="cobalt"></div>
               <div class="color-option" style="--color: #34d399" data-theme="emerald"></div>
@@ -677,9 +677,9 @@ function getSettingsModalHTML() {
             </div>
           </div>
           <div class="settings-section">
-            <h3>フォントサイズ</h3>
+            <h3>Font Size</h3>
             <div class="setting-row">
-              <label>エディタ</label>
+              <label>Editor</label>
               <input type="range" min="10" max="20" value="13">
               <span>13px</span>
             </div>
@@ -717,7 +717,7 @@ function getSettingsModalHTML() {
 function getAIAssistModalHTML() {
   return `
     <div class="modal-header">
-      <span class="modal-title">🤖 AI アシスト</span>
+      <span class="modal-title">AI Assist</span>
       <button class="modal-close" onclick="closeModal()">
         <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg>
       </button>
@@ -727,34 +727,34 @@ function getAIAssistModalHTML() {
         <div class="ai-option" onclick="openModal('ai-commit')">
           <div class="ai-option-icon">✍️</div>
           <div class="ai-option-info">
-            <div class="ai-option-title">コミットメッセージ生成</div>
-            <div class="ai-option-desc">ステージ済みの差分から自動生成</div>
+            <div class="ai-option-title">Generate Commit Message</div>
+            <div class="ai-option-desc">Auto-generate from staged changes</div>
           </div>
         </div>
         <div class="ai-option" onclick="openModal('ai-review')">
           <div class="ai-option-icon">🔍</div>
           <div class="ai-option-info">
-            <div class="ai-option-title">コードレビュー</div>
-            <div class="ai-option-desc">差分を分析してレビューコメントを提案</div>
+            <div class="ai-option-title">Code Review</div>
+            <div class="ai-option-desc">Analyze diff and suggest review comments</div>
           </div>
         </div>
-        <div class="ai-option" onclick="showToast('info', 'パッチ生成を開始します')">
+        <div class="ai-option" onclick="showToast('info', 'Starting patch generation')">
           <div class="ai-option-icon">🔧</div>
           <div class="ai-option-info">
-            <div class="ai-option-title">パッチ生成</div>
-            <div class="ai-option-desc">レビューコメントから修正パッチを生成</div>
+            <div class="ai-option-title">Generate Patch</div>
+            <div class="ai-option-desc">Generate fix patches from review comments</div>
           </div>
         </div>
-        <div class="ai-option" onclick="showToast('info', 'PR説明文を生成します')">
+        <div class="ai-option" onclick="showToast('info', 'Generating PR description')">
           <div class="ai-option-icon">📝</div>
           <div class="ai-option-info">
-            <div class="ai-option-title">PR説明文生成</div>
-            <div class="ai-option-desc">ブランチの変更からPR説明文を生成</div>
+            <div class="ai-option-title">Generate PR Description</div>
+            <div class="ai-option-desc">Generate PR description from branch changes</div>
           </div>
         </div>
       </div>
       <div class="ai-cli-selector">
-        <label>使用するAI CLI:</label>
+        <label>AI CLI to use:</label>
         <select class="modal-select">
           <option value="claude">Claude CLI</option>
           <option value="codex">Codex CLI</option>
@@ -780,46 +780,46 @@ function getAIAssistModalHTML() {
 function getAICommitModalHTML() {
   return `
     <div class="modal-header">
-      <span class="modal-title">✍️ AIコミットメッセージ生成</span>
+      <span class="modal-title">AI Commit Message Generator</span>
       <button class="modal-close" onclick="closeModal()">
         <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg>
       </button>
     </div>
     <div class="modal-body">
       <div class="ai-settings-row">
-        <label>形式:</label>
+        <label>Format:</label>
         <select class="modal-select">
           <option value="conventional">Conventional Commits</option>
-          <option value="simple">シンプル</option>
-          <option value="detailed">詳細</option>
+          <option value="simple">Simple</option>
+          <option value="detailed">Detailed</option>
         </select>
-        <label>言語:</label>
+        <label>Language:</label>
         <select class="modal-select">
-          <option value="ja">日本語</option>
           <option value="en">English</option>
+          <option value="ja">Japanese</option>
         </select>
       </div>
       <div class="ai-generating">
         <div class="ai-spinner"></div>
-        <span>生成中...</span>
+        <span>Generating...</span>
       </div>
       <div class="ai-result" style="display: none;">
         <div class="ai-suggestion">
-          <div class="suggestion-subject">feat(auth): ユーザー認証ハンドラーを追加</div>
-          <div class="suggestion-body">- 新しいAuthHandlerを実装
-- slogを使用したログ出力に変更
-- エラーハンドリングを追加</div>
+          <div class="suggestion-subject">feat(auth): Add user authentication handler</div>
+          <div class="suggestion-body">- Implement new AuthHandler
+- Switch to slog for logging
+- Add error handling</div>
         </div>
         <div class="ai-alternatives">
-          <span class="alternatives-label">他の候補:</span>
-          <button class="alt-btn">feat: 認証機能を追加</button>
+          <span class="alternatives-label">Alternatives:</span>
+          <button class="alt-btn">feat: Add authentication</button>
           <button class="alt-btn">add: auth handler with logging</button>
         </div>
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="closeModal()">キャンセル</button>
-      <button class="btn btn-primary" onclick="useGeneratedMessage()">採用</button>
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="useGeneratedMessage()">Use</button>
     </div>
     <style>
       .ai-settings-row { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
@@ -842,7 +842,7 @@ function getAICommitModalHTML() {
 function getAIReviewModalHTML() {
   return `
     <div class="modal-header">
-      <span class="modal-title">🔍 AIコードレビュー</span>
+      <span class="modal-title">AI Code Review</span>
       <button class="modal-close" onclick="closeModal()">
         <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg>
       </button>
@@ -851,38 +851,38 @@ function getAIReviewModalHTML() {
       <div class="review-summary">
         <div class="review-stat">
           <span class="stat-value">3</span>
-          <span class="stat-label">ファイル分析</span>
+          <span class="stat-label">Files Analyzed</span>
         </div>
         <div class="review-stat warning">
           <span class="stat-value">2</span>
-          <span class="stat-label">警告</span>
+          <span class="stat-label">Warnings</span>
         </div>
         <div class="review-stat danger">
           <span class="stat-value">1</span>
-          <span class="stat-label">セキュリティ</span>
+          <span class="stat-label">Security</span>
         </div>
       </div>
       <div class="review-items">
         <div class="review-item warning">
           <div class="review-header">
             <span class="review-file">src/auth/handler.go:15</span>
-            <span class="review-type">⚠️ 警告</span>
+            <span class="review-type">⚠️ Warning</span>
           </div>
-          <div class="review-message">エラーハンドリングが不足しています。contextがnilの場合の処理を追加してください。</div>
+          <div class="review-message">Missing error handling. Please add handling for when context is nil.</div>
           <div class="review-actions">
-            <button class="btn btn-secondary btn-sm">無視</button>
-            <button class="btn btn-primary btn-sm">パッチを生成</button>
+            <button class="btn btn-secondary btn-sm">Ignore</button>
+            <button class="btn btn-primary btn-sm">Generate Patch</button>
           </div>
         </div>
         <div class="review-item danger">
           <div class="review-header">
             <span class="review-file">src/auth/token.go:42</span>
-            <span class="review-type">🔴 セキュリティ</span>
+            <span class="review-type">🔴 Security</span>
           </div>
-          <div class="review-message">ハードコードされた秘密鍵が検出されました。環境変数から読み込むように修正してください。</div>
+          <div class="review-message">Hardcoded secret key detected. Please load from environment variables.</div>
           <div class="review-actions">
-            <button class="btn btn-secondary btn-sm">無視</button>
-            <button class="btn btn-primary btn-sm">パッチを生成</button>
+            <button class="btn btn-secondary btn-sm">Ignore</button>
+            <button class="btn btn-primary btn-sm">Generate Patch</button>
           </div>
         </div>
       </div>
@@ -911,19 +911,19 @@ function getAIReviewModalHTML() {
 function getSearchModalHTML() {
   return `
     <div class="modal-header">
-      <span class="modal-title">🔍 リポジトリ検索</span>
+      <span class="modal-title">Repository Search</span>
       <button class="modal-close" onclick="closeModal()">
         <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg>
       </button>
     </div>
     <div class="modal-body">
       <div class="search-input-group">
-        <input type="text" class="modal-input search-main" placeholder="検索キーワードを入力..." autofocus>
+        <input type="text" class="modal-input search-main" placeholder="Enter search keyword..." autofocus>
       </div>
       <div class="search-filters">
-        <button class="filter-btn active">コード</button>
-        <button class="filter-btn">コミット</button>
-        <button class="filter-btn">ファイル名</button>
+        <button class="filter-btn active">Code</button>
+        <button class="filter-btn">Commits</button>
+        <button class="filter-btn">Filenames</button>
       </div>
       <div class="search-results">
         <div class="search-result">
@@ -960,7 +960,7 @@ function getSearchModalHTML() {
 function getConflictModalHTML() {
   return `
     <div class="modal-header">
-      <span class="modal-title">⚠️ コンフリクト解決</span>
+      <span class="modal-title">Resolve Conflict</span>
       <button class="modal-close" onclick="closeModal()">
         <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg>
       </button>
@@ -981,10 +981,10 @@ function getConflictModalHTML() {
           <div class="conflict-header theirs">>>>>>>> feature/config</div>
         </div>
         <div class="conflict-actions">
-          <button class="btn btn-secondary" onclick="resolveConflict('ours')">Oursを採用</button>
-          <button class="btn btn-secondary" onclick="resolveConflict('theirs')">Theirsを採用</button>
-          <button class="btn btn-secondary" onclick="resolveConflict('both')">両方を採用</button>
-          <button class="btn btn-primary" onclick="openModal('merge')">3-wayマージビューア</button>
+          <button class="btn btn-secondary" onclick="resolveConflict('ours')">Accept Ours</button>
+          <button class="btn btn-secondary" onclick="resolveConflict('theirs')">Accept Theirs</button>
+          <button class="btn btn-secondary" onclick="resolveConflict('both')">Accept Both</button>
+          <button class="btn btn-primary" onclick="openModal('merge')">3-way Merge Viewer</button>
         </div>
       </div>
     </div>
@@ -1007,7 +1007,7 @@ function getConflictModalHTML() {
 function getMergeViewerModalHTML() {
   return `
     <div class="modal-header">
-      <span class="modal-title">3-way マージビューア</span>
+      <span class="modal-title">3-way Merge Viewer</span>
       <button class="modal-close" onclick="closeModal()">
         <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg>
       </button>
@@ -1041,8 +1041,8 @@ function getMergeViewerModalHTML() {
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="closeModal()">キャンセル</button>
-      <button class="btn btn-success" onclick="saveMergeResult()">解決済みとしてマーク</button>
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-success" onclick="saveMergeResult()">Mark as Resolved</button>
     </div>
     <style>
       .merge-body { padding: 0 !important; }
@@ -1084,19 +1084,19 @@ function getHistoryViewHTML() {
     <div class="history-layout">
       <div class="history-panel">
         <div class="panel-header">
-          <span class="panel-title">コミット履歴</span>
+          <span class="panel-title">Commit History</span>
           <div class="panel-actions">
-            <input type="text" class="search-input" placeholder="検索...">
+            <input type="text" class="search-input" placeholder="Search...">
           </div>
         </div>
         <div class="commit-list">${commitList}</div>
       </div>
       <div class="commit-detail-panel">
         <div class="panel-header">
-          <span class="panel-title">コミット詳細</span>
+          <span class="panel-title">Commit Details</span>
         </div>
         <div class="commit-detail">
-          <p class="empty-state">コミットを選択してください</p>
+          <p class="empty-state">Select a commit</p>
         </div>
       </div>
     </div>
@@ -1142,8 +1142,8 @@ function getBranchesViewHTML() {
   return `
     <div class="branches-layout">
       <div class="panel-header">
-        <span class="panel-title">ブランチ</span>
-        <button class="btn btn-primary btn-sm" onclick="createBranch()">+ 新規ブランチ</button>
+        <span class="panel-title">Branches</span>
+        <button class="btn btn-primary btn-sm" onclick="createBranch()">+ New Branch</button>
       </div>
       <div class="branch-list">${branchList}</div>
     </div>
@@ -1186,8 +1186,8 @@ function getRemotesViewHTML() {
   return `
     <div class="remotes-layout">
       <div class="panel-header">
-        <span class="panel-title">リモート</span>
-        <button class="btn btn-primary btn-sm" onclick="addRemote()">+ リモート追加</button>
+        <span class="panel-title">Remotes</span>
+        <button class="btn btn-primary btn-sm" onclick="addRemote()">+ Add Remote</button>
       </div>
       <div class="remote-list">${remoteList}</div>
     </div>
@@ -1209,47 +1209,47 @@ function switchBranch(branchName) {
   state.currentBranch = branchName;
   document.getElementById('current-branch').textContent = branchName;
   closeModal();
-  showToast('success', `ブランチを ${branchName} に切り替えました`);
+  showToast('success', `Switched to branch ${branchName}`);
 }
 
 function createBranch() {
-  const name = prompt('新しいブランチ名:');
+  const name = prompt('New branch name:');
   if (name) {
-    showToast('success', `ブランチ "${name}" を作成しました`);
+    showToast('success', `Branch "${name}" created`);
     closeModal();
   }
 }
 
-function applyStash(index) { showToast('success', `Stash @{${index}} を適用しました`); }
-function popStash(index) { showToast('success', `Stash @{${index}} をポップしました`); closeModal(); }
-function dropStash(index) { showToast('warning', `Stash @{${index}} を削除しました`); }
+function applyStash(index) { showToast('success', `Stash @{${index}} applied`); }
+function popStash(index) { showToast('success', `Stash @{${index}} popped`); closeModal(); }
+function dropStash(index) { showToast('warning', `Stash @{${index}} dropped`); }
 function createStash() {
-  const msg = prompt('Stashメッセージ:');
+  const msg = prompt('Stash message:');
   if (msg !== null) {
-    showToast('success', 'Stashを作成しました');
+    showToast('success', 'Stash created');
     closeModal();
   }
 }
 
-function checkoutTag(name) { showToast('info', `タグ ${name} にチェックアウトします`); closeModal(); }
-function deleteTag(name) { showToast('warning', `タグ ${name} を削除しました`); }
+function checkoutTag(name) { showToast('info', `Checking out tag ${name}`); closeModal(); }
+function deleteTag(name) { showToast('warning', `Tag ${name} deleted`); }
 function createTag() {
-  const name = prompt('タグ名:');
+  const name = prompt('Tag name:');
   if (name) {
-    showToast('success', `タグ "${name}" を作成しました`);
+    showToast('success', `Tag "${name}" created`);
     closeModal();
   }
 }
 
 function addRemote() {
-  const name = prompt('リモート名:');
+  const name = prompt('Remote name:');
   if (name) {
-    showToast('success', `リモート "${name}" を追加しました`);
+    showToast('success', `Remote "${name}" added`);
   }
 }
 
 function selectCommit(hash) {
-  showToast('info', `コミット ${hash} を選択`);
+  showToast('info', `Selected commit ${hash}`);
 }
 
 function switchSettingsTab(element, tab) {
@@ -1258,18 +1258,18 @@ function switchSettingsTab(element, tab) {
 }
 
 function useGeneratedMessage() {
-  document.getElementById('commit-subject').value = 'feat(auth): ユーザー認証ハンドラーを追加';
+  document.getElementById('commit-subject').value = 'feat(auth): Add user authentication handler';
   closeModal();
-  showToast('success', 'コミットメッセージを設定しました');
+  showToast('success', 'Commit message set');
 }
 
 function resolveConflict(type) {
-  showToast('success', `${type}を採用してコンフリクトを解決しました`);
+  showToast('success', `Conflict resolved by accepting ${type}`);
   closeModal();
 }
 
 function saveMergeResult() {
-  showToast('success', 'マージ結果を保存しました');
+  showToast('success', 'Merge result saved');
   closeModal();
 }
 
@@ -1352,15 +1352,15 @@ function getCherryPickViewHTML() {
     <div class="operation-layout">
       <div class="operation-header">
         <h2 class="operation-title">Cherry-pick</h2>
-        <span class="operation-desc">特定のコミットを現在のブランチに適用</span>
+        <span class="operation-desc">Apply specific commits to the current branch</span>
       </div>
       <div class="operation-content">
         <div class="operation-main">
           <div class="operation-panel">
             <div class="panel-header">
-              <span class="panel-title">適用するコミットを選択</span>
+              <span class="panel-title">Select commits to apply</span>
               <div class="panel-actions">
-                <input type="text" class="search-input" placeholder="コミットを検索...">
+                <input type="text" class="search-input" placeholder="Search commits...">
               </div>
             </div>
             <div class="cherry-commit-list">${commitRows}</div>
@@ -1368,30 +1368,30 @@ function getCherryPickViewHTML() {
         </div>
         <div class="operation-sidebar">
           <div class="operation-options">
-            <h3>オプション</h3>
+            <h3>Options</h3>
             <label class="option-item">
               <input type="checkbox" checked>
-              <span>コミットを作成 (-x)</span>
+              <span>Create commit (-x)</span>
             </label>
             <label class="option-item">
               <input type="checkbox">
-              <span>変更のみ適用 (--no-commit)</span>
+              <span>Apply changes only (--no-commit)</span>
             </label>
             <label class="option-item">
               <input type="checkbox">
-              <span>マージコミットを許可 (-m)</span>
+              <span>Allow merge commits (-m)</span>
             </label>
           </div>
           <div class="operation-preview">
-            <h3>選択中</h3>
+            <h3>Selected</h3>
             <div class="selected-commits" id="cherry-selected">
-              <p class="empty-hint">コミットを選択してください</p>
+              <p class="empty-hint">Select commits</p>
             </div>
           </div>
           <div class="operation-actions">
             <button class="btn btn-primary" onclick="executeCherryPick()">
               <svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/></svg>
-              Cherry-pick実行
+              Execute Cherry-pick
             </button>
           </div>
         </div>
@@ -1457,15 +1457,15 @@ function getRevertViewHTML() {
     <div class="operation-layout">
       <div class="operation-header">
         <h2 class="operation-title">Revert</h2>
-        <span class="operation-desc">コミットの変更を打ち消す新しいコミットを作成</span>
+        <span class="operation-desc">Create a new commit that undoes changes</span>
       </div>
       <div class="operation-content">
         <div class="operation-main">
           <div class="operation-panel">
             <div class="panel-header">
-              <span class="panel-title">取り消すコミットを選択</span>
+              <span class="panel-title">Select commit to revert</span>
               <div class="panel-actions">
-                <input type="text" class="search-input" placeholder="コミットを検索...">
+                <input type="text" class="search-input" placeholder="Search commits...">
               </div>
             </div>
             <div class="revert-commit-list">${commitRows}</div>
@@ -1473,28 +1473,28 @@ function getRevertViewHTML() {
         </div>
         <div class="operation-sidebar">
           <div class="operation-options">
-            <h3>オプション</h3>
+            <h3>Options</h3>
             <label class="option-item">
               <input type="checkbox" checked>
-              <span>リバートコミットを作成</span>
+              <span>Create revert commit</span>
             </label>
             <label class="option-item">
               <input type="checkbox">
-              <span>変更のみ適用 (--no-commit)</span>
+              <span>Apply changes only (--no-commit)</span>
             </label>
             <label class="option-item">
               <input type="checkbox">
-              <span>エディタを開く (--edit)</span>
+              <span>Open editor (--edit)</span>
             </label>
           </div>
           <div class="operation-preview">
-            <h3>リバート後のコミットメッセージ</h3>
-            <textarea class="revert-message-input" placeholder="Revert &quot;feat: ユーザー認証機能を追加&quot;&#10;&#10;This reverts commit a1b2c3d."></textarea>
+            <h3>Revert commit message</h3>
+            <textarea class="revert-message-input" placeholder="Revert &quot;feat: Add user authentication&quot;&#10;&#10;This reverts commit a1b2c3d."></textarea>
           </div>
           <div class="operation-actions">
             <button class="btn btn-warning" onclick="executeRevert()">
               <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L7.5 2.707V14.5a.5.5 0 0 0 .5.5z"/></svg>
-              Revert実行
+              Execute Revert
             </button>
           </div>
         </div>
@@ -1547,15 +1547,15 @@ function getResetViewHTML() {
     <div class="operation-layout">
       <div class="operation-header">
         <h2 class="operation-title">Reset</h2>
-        <span class="operation-desc">HEADを指定コミットに移動</span>
+        <span class="operation-desc">Move HEAD to specified commit</span>
       </div>
       <div class="operation-content">
         <div class="operation-main">
           <div class="operation-panel">
             <div class="panel-header">
-              <span class="panel-title">リセット先のコミットを選択</span>
+              <span class="panel-title">Select target commit for reset</span>
               <div class="panel-actions">
-                <input type="text" class="search-input" placeholder="コミットを検索...">
+                <input type="text" class="search-input" placeholder="Search commits...">
               </div>
             </div>
             <div class="reset-commit-list">${commitRows}</div>
@@ -1563,39 +1563,39 @@ function getResetViewHTML() {
         </div>
         <div class="operation-sidebar">
           <div class="operation-options">
-            <h3>リセットモード</h3>
+            <h3>Reset Mode</h3>
             <div class="reset-mode-selector">
               <label class="reset-mode soft">
                 <input type="radio" name="reset-mode" value="soft">
                 <div class="mode-content">
                   <div class="mode-title">--soft</div>
-                  <div class="mode-desc">HEADのみ移動。変更はステージ済みに残る</div>
+                  <div class="mode-desc">Only move HEAD. Changes remain staged</div>
                 </div>
               </label>
               <label class="reset-mode mixed selected">
                 <input type="radio" name="reset-mode" value="mixed" checked>
                 <div class="mode-content">
-                  <div class="mode-title">--mixed (デフォルト)</div>
-                  <div class="mode-desc">HEAD+インデックスをリセット。変更は作業ツリーに残る</div>
+                  <div class="mode-title">--mixed (default)</div>
+                  <div class="mode-desc">Reset HEAD and index. Changes remain in working tree</div>
                 </div>
               </label>
               <label class="reset-mode hard">
                 <input type="radio" name="reset-mode" value="hard">
                 <div class="mode-content">
                   <div class="mode-title">--hard</div>
-                  <div class="mode-desc danger">すべてリセット。変更は完全に失われる</div>
+                  <div class="mode-desc danger">Reset everything. Changes will be lost</div>
                 </div>
               </label>
             </div>
           </div>
           <div class="reset-warning">
             <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/></svg>
-            <span>この操作は取り消せません。慎重に実行してください。</span>
+            <span>This operation cannot be undone. Proceed with caution.</span>
           </div>
           <div class="operation-actions">
             <button class="btn btn-danger" onclick="executeReset()">
               <svg viewBox="0 0 16 16" fill="currentColor"><path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/><path d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z"/></svg>
-              Reset実行
+              Execute Reset
             </button>
           </div>
         </div>
@@ -1633,13 +1633,13 @@ function getResetViewHTML() {
 
 function getReflogViewHTML() {
   const reflogEntries = [
-    { index: 0, hash: 'a1b2c3d', action: 'commit', message: 'feat: ユーザー認証機能を追加', date: '2分前' },
-    { index: 1, hash: 'e4f5g6h', action: 'checkout', message: 'moving from feature/auth to main', date: '10分前' },
-    { index: 2, hash: 'i7j8k9l', action: 'commit', message: 'fix: ログインバグを修正', date: '1時間前' },
-    { index: 3, hash: 'm0n1o2p', action: 'rebase', message: 'rebase finished', date: '2時間前' },
-    { index: 4, hash: 'q3r4s5t', action: 'reset', message: 'moving to HEAD~1', date: '3時間前' },
-    { index: 5, hash: 'u6v7w8x', action: 'pull', message: 'merge origin/main', date: '昨日' },
-    { index: 6, hash: 'y9z0a1b', action: 'cherry-pick', message: 'cherry-picked abc123', date: '昨日' },
+    { index: 0, hash: 'a1b2c3d', action: 'commit', message: 'feat: Add user authentication', date: '2 min ago' },
+    { index: 1, hash: 'e4f5g6h', action: 'checkout', message: 'moving from feature/auth to main', date: '10 min ago' },
+    { index: 2, hash: 'i7j8k9l', action: 'commit', message: 'fix: Fix login bug', date: '1 hour ago' },
+    { index: 3, hash: 'm0n1o2p', action: 'rebase', message: 'rebase finished', date: '2 hours ago' },
+    { index: 4, hash: 'q3r4s5t', action: 'reset', message: 'moving to HEAD~1', date: '3 hours ago' },
+    { index: 5, hash: 'u6v7w8x', action: 'pull', message: 'merge origin/main', date: 'yesterday' },
+    { index: 6, hash: 'y9z0a1b', action: 'cherry-pick', message: 'cherry-picked abc123', date: 'yesterday' },
   ];
 
   const actionColors = {
@@ -1673,17 +1673,17 @@ function getReflogViewHTML() {
     <div class="operation-layout">
       <div class="operation-header">
         <h2 class="operation-title">Reflog</h2>
-        <span class="operation-desc">HEADの移動履歴 - 失われたコミットを復元</span>
+        <span class="operation-desc">HEAD history - Recover lost commits</span>
       </div>
       <div class="reflog-content">
         <div class="reflog-table">
           <div class="reflog-header">
-            <div class="reflog-index">参照</div>
-            <div class="reflog-hash">ハッシュ</div>
-            <div class="reflog-action">アクション</div>
-            <div class="reflog-message">メッセージ</div>
-            <div class="reflog-date">日時</div>
-            <div class="reflog-actions">操作</div>
+            <div class="reflog-index">Ref</div>
+            <div class="reflog-hash">Hash</div>
+            <div class="reflog-action">Action</div>
+            <div class="reflog-message">Message</div>
+            <div class="reflog-date">Date</div>
+            <div class="reflog-actions">Actions</div>
           </div>
           ${rows}
         </div>
@@ -1722,23 +1722,23 @@ function getSubmodulesViewHTML() {
           <div class="submodule-url">${s.url}</div>
         </div>
         <div class="submodule-status ${s.status}">
-          ${s.status === 'up-to-date' ? '✓ 最新' : '⚠ 更新あり'}
+          ${s.status === 'up-to-date' ? '✓ Up to date' : '⚠ Updates available'}
         </div>
       </div>
       <div class="submodule-details">
         <div class="submodule-detail">
-          <span class="detail-label">ブランチ:</span>
+          <span class="detail-label">Branch:</span>
           <span class="detail-value">${s.branch}</span>
         </div>
         <div class="submodule-detail">
-          <span class="detail-label">コミット:</span>
+          <span class="detail-label">Commit:</span>
           <span class="detail-value hash">${s.commit}</span>
         </div>
       </div>
       <div class="submodule-actions">
-        <button class="btn btn-secondary btn-sm" onclick="updateSubmodule('${s.path}')">更新</button>
-        <button class="btn btn-secondary btn-sm" onclick="openSubmodule('${s.path}')">開く</button>
-        <button class="btn btn-secondary btn-sm" onclick="removeSubmodule('${s.path}')">削除</button>
+        <button class="btn btn-secondary btn-sm" onclick="updateSubmodule('${s.path}')">Update</button>
+        <button class="btn btn-secondary btn-sm" onclick="openSubmodule('${s.path}')">Open</button>
+        <button class="btn btn-secondary btn-sm" onclick="removeSubmodule('${s.path}')">Remove</button>
       </div>
     </div>
   `).join('');
@@ -1746,15 +1746,15 @@ function getSubmodulesViewHTML() {
   return `
     <div class="operation-layout">
       <div class="operation-header">
-        <h2 class="operation-title">サブモジュール</h2>
-        <span class="operation-desc">サブモジュールの追加・更新・削除</span>
-        <button class="btn btn-primary btn-sm" onclick="addSubmodule()">+ 追加</button>
+        <h2 class="operation-title">Submodules</h2>
+        <span class="operation-desc">Add, update, and remove submodules</span>
+        <button class="btn btn-primary btn-sm" onclick="addSubmodule()">+ Add</button>
       </div>
       <div class="submodules-content">
         <div class="submodules-toolbar">
           <button class="btn btn-secondary" onclick="updateAllSubmodules()">
             <svg viewBox="0 0 16 16" fill="currentColor"><path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/><path d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z"/></svg>
-            すべて更新
+            Update All
           </button>
           <button class="btn btn-secondary" onclick="initSubmodules()">
             <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L7.5 13.293V1.5A.5.5 0 0 1 8 1z"/></svg>
@@ -1762,7 +1762,7 @@ function getSubmodulesViewHTML() {
           </button>
         </div>
         <div class="submodules-list">
-          ${rows || '<p class="empty-state">サブモジュールがありません</p>'}
+          ${rows || '<p class="empty-state">No submodules</p>'}
         </div>
       </div>
     </div>
@@ -1810,20 +1810,20 @@ function getWorktreesViewHTML() {
           </div>
         </div>
         <div class="worktree-badges">
-          ${w.isMain ? '<span class="worktree-badge main">メイン</span>' : ''}
+          ${w.isMain ? '<span class="worktree-badge main">Main</span>' : ''}
           <span class="worktree-badge ${w.status}">${w.status === 'clean' ? '✓ Clean' : '● Modified'}</span>
         </div>
       </div>
       <div class="worktree-details">
         <div class="worktree-detail">
-          <span class="detail-label">コミット:</span>
+          <span class="detail-label">Commit:</span>
           <span class="detail-value hash">${w.commit}</span>
         </div>
       </div>
       ${!w.isMain ? `
         <div class="worktree-actions">
-          <button class="btn btn-secondary btn-sm" onclick="openWorktree('${w.path}')">開く</button>
-          <button class="btn btn-secondary btn-sm" onclick="removeWorktree('${w.path}')">削除</button>
+          <button class="btn btn-secondary btn-sm" onclick="openWorktree('${w.path}')">Open</button>
+          <button class="btn btn-secondary btn-sm" onclick="removeWorktree('${w.path}')">Remove</button>
         </div>
       ` : ''}
     </div>
@@ -1832,14 +1832,14 @@ function getWorktreesViewHTML() {
   return `
     <div class="operation-layout">
       <div class="operation-header">
-        <h2 class="operation-title">ワークツリー</h2>
-        <span class="operation-desc">複数ワークツリーの管理</span>
-        <button class="btn btn-primary btn-sm" onclick="addWorktree()">+ 追加</button>
+        <h2 class="operation-title">Worktrees</h2>
+        <span class="operation-desc">Manage multiple worktrees</span>
+        <button class="btn btn-primary btn-sm" onclick="addWorktree()">+ Add</button>
       </div>
       <div class="worktrees-content">
         <div class="worktrees-hint">
           <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>
-          <span>ワークツリーを使うと、同じリポジトリの異なるブランチを同時に作業できます</span>
+          <span>Worktrees allow you to work on different branches of the same repository simultaneously</span>
         </div>
         <div class="worktrees-list">
           ${rows}
@@ -1884,7 +1884,7 @@ function updateCherryPickSelection() {
   const selected = document.querySelectorAll('.cherry-commit-row.selected');
   const container = document.getElementById('cherry-selected');
   if (selected.length === 0) {
-    container.innerHTML = '<p class="empty-hint">コミットを選択してください</p>';
+    container.innerHTML = '<p class="empty-hint">Select commits</p>';
   } else {
     const items = Array.from(selected).map(row => {
       const hash = row.querySelector('input').dataset.hash;
@@ -1898,10 +1898,10 @@ function updateCherryPickSelection() {
 function executeCherryPick() {
   const selected = document.querySelectorAll('.cherry-commit-row.selected');
   if (selected.length === 0) {
-    showToast('error', 'コミットを選択してください');
+    showToast('error', 'Please select commits');
     return;
   }
-  showToast('success', `${selected.length}件のコミットをcherry-pickしました`);
+  showToast('success', `Cherry-picked ${selected.length} commit(s)`);
 }
 
 function selectRevertCommit(element, hash) {
@@ -1911,7 +1911,7 @@ function selectRevertCommit(element, hash) {
 }
 
 function executeRevert() {
-  showToast('success', 'コミットをリバートしました');
+  showToast('success', 'Commit reverted');
 }
 
 function selectResetCommit(element, hash) {
@@ -1921,7 +1921,7 @@ function selectResetCommit(element, hash) {
 }
 
 function executeReset() {
-  showToast('warning', 'リポジトリをリセットしました');
+  showToast('warning', 'Repository reset');
 }
 
 function selectReflogEntry(element, index) {
@@ -1931,62 +1931,62 @@ function selectReflogEntry(element, index) {
 
 function checkoutReflog(index, event) {
   event.stopPropagation();
-  showToast('success', `HEAD@{${index}} にチェックアウトしました`);
+  showToast('success', `Checked out to HEAD@{${index}}`);
 }
 
 function resetToReflog(index, event) {
   event.stopPropagation();
-  showToast('warning', `HEAD@{${index}} にリセットしました`);
+  showToast('warning', `Reset to HEAD@{${index}}`);
 }
 
 function addSubmodule() {
-  const url = prompt('サブモジュールのURL:');
+  const url = prompt('Submodule URL:');
   if (url) {
-    showToast('success', 'サブモジュールを追加しました');
+    showToast('success', 'Submodule added');
   }
 }
 
 function updateSubmodule(path) {
-  showToast('info', `${path} を更新中...`);
-  setTimeout(() => showToast('success', 'サブモジュールを更新しました'), 1000);
+  showToast('info', `Updating ${path}...`);
+  setTimeout(() => showToast('success', 'Submodule updated'), 1000);
 }
 
 function openSubmodule(path) {
-  showToast('info', `${path} を開きます`);
+  showToast('info', `Opening ${path}`);
 }
 
 function removeSubmodule(path) {
-  if (confirm(`${path} を削除しますか？`)) {
-    showToast('warning', 'サブモジュールを削除しました');
+  if (confirm(`Remove ${path}?`)) {
+    showToast('warning', 'Submodule removed');
   }
 }
 
 function updateAllSubmodules() {
-  showToast('info', 'すべてのサブモジュールを更新中...');
-  setTimeout(() => showToast('success', 'すべてのサブモジュールを更新しました'), 1500);
+  showToast('info', 'Updating all submodules...');
+  setTimeout(() => showToast('success', 'All submodules updated'), 1500);
 }
 
 function initSubmodules() {
-  showToast('info', 'サブモジュールを初期化中...');
-  setTimeout(() => showToast('success', 'サブモジュールを初期化しました'), 1000);
+  showToast('info', 'Initializing submodules...');
+  setTimeout(() => showToast('success', 'Submodules initialized'), 1000);
 }
 
 function addWorktree() {
-  const branch = prompt('ブランチ名:');
+  const branch = prompt('Branch name:');
   if (branch) {
-    const path = prompt('ワークツリーのパス:');
+    const path = prompt('Worktree path:');
     if (path) {
-      showToast('success', `ワークツリーを作成しました: ${path}`);
+      showToast('success', `Worktree created: ${path}`);
     }
   }
 }
 
 function openWorktree(path) {
-  showToast('info', `${path} を開きます`);
+  showToast('info', `Opening ${path}`);
 }
 
 function removeWorktree(path) {
-  if (confirm(`${path} を削除しますか？`)) {
-    showToast('warning', 'ワークツリーを削除しました');
+  if (confirm(`Remove ${path}?`)) {
+    showToast('warning', 'Worktree removed');
   }
 }
