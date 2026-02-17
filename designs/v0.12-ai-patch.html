@@ -1,0 +1,746 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rocket v0.12 - AI連携（パッチ生成）</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg-primary: #0f1419;
+        --bg-secondary: #151b22;
+        --bg-tertiary: #1c242d;
+        --text-primary: #e6edf3;
+        --text-secondary: #8b949e;
+        --text-muted: #565d64;
+        --border: #2d3640;
+        --accent: #58a6ff;
+        --ai: #f472b6;
+        --ai-bg: rgba(244, 114, 182, 0.15);
+        --ai-border: rgba(244, 114, 182, 0.4);
+        --added: #3fb950;
+        --added-bg: rgba(63, 185, 80, 0.15);
+        --removed: #f85149;
+        --removed-bg: rgba(248, 81, 73, 0.15);
+      }
+
+      .light {
+        --bg-primary: #ffffff;
+        --bg-secondary: #f6f8fa;
+        --bg-tertiary: #ebeef1;
+        --text-primary: #1f2328;
+        --text-secondary: #656d76;
+        --text-muted: #8c959f;
+        --border: #d1d9e0;
+        --accent: #0969da;
+        --ai: #db2777;
+        --ai-bg: rgba(219, 39, 119, 0.1);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "IBM Plex Sans", sans-serif;
+        background: #0a0c0f;
+        min-height: 100vh;
+        padding: 40px;
+      }
+
+      .header {
+        max-width: 1200px;
+        margin: 0 auto 32px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .title-group {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+      .version-badge {
+        padding: 6px 14px;
+        background: linear-gradient(135deg, #f472b6, #a78bfa);
+        color: #fff;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 600;
+      }
+      .title {
+        font-size: 24px;
+        font-weight: 600;
+        color: #e6edf3;
+      }
+      .subtitle {
+        font-size: 14px;
+        color: #8b949e;
+        margin-top: 4px;
+      }
+
+      .theme-toggle {
+        display: flex;
+        gap: 8px;
+        background: #151b22;
+        padding: 6px;
+        border-radius: 10px;
+        border: 1px solid #2d3640;
+      }
+      .theme-btn {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 6px;
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        background: transparent;
+        color: #8b949e;
+      }
+      .theme-btn.active {
+        background: #58a6ff;
+        color: #fff;
+      }
+
+      .app-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
+        border: 1px solid var(--border);
+      }
+      .app {
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        height: 800px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .titlebar {
+        height: 38px;
+        background: var(--bg-secondary);
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        padding: 0 16px;
+      }
+      .window-controls {
+        display: flex;
+        gap: 8px;
+      }
+      .window-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+      }
+      .window-dot.close {
+        background: #ff5f57;
+      }
+      .window-dot.minimize {
+        background: #febc2e;
+      }
+      .window-dot.maximize {
+        background: #28c840;
+      }
+      .titlebar-text {
+        flex: 1;
+        text-align: center;
+        font-size: 13px;
+        color: var(--text-muted);
+      }
+
+      .main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      /* Workflow Steps */
+      .workflow-steps {
+        padding: 16px 24px;
+        background: var(--bg-secondary);
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .step {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        background: var(--bg-tertiary);
+        border-radius: 20px;
+        font-size: 12px;
+        color: var(--text-muted);
+      }
+
+      .step.active {
+        background: var(--ai-bg);
+        color: var(--ai);
+      }
+      .step.done {
+        background: var(--added-bg);
+        color: var(--added);
+      }
+
+      .step-num {
+        width: 20px;
+        height: 20px;
+        background: var(--bg-primary);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        font-weight: 600;
+      }
+
+      .step.active .step-num {
+        background: var(--ai);
+        color: #fff;
+      }
+      .step.done .step-num {
+        background: var(--added);
+        color: #fff;
+      }
+
+      .step-arrow {
+        color: var(--text-muted);
+      }
+
+      /* Content Area */
+      .content-area {
+        flex: 1;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        overflow: hidden;
+      }
+
+      /* Original Code Panel */
+      .original-panel {
+        border-right: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      .panel-header {
+        padding: 12px 20px;
+        background: var(--bg-secondary);
+        border-bottom: 1px solid var(--border);
+        font-size: 13px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .panel-header svg {
+        width: 16px;
+        height: 16px;
+        color: var(--text-muted);
+      }
+
+      .panel-content {
+        flex: 1;
+        overflow-y: auto;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 12px;
+      }
+
+      .code-line {
+        display: flex;
+        line-height: 1.7;
+      }
+      .code-line.removed {
+        background: var(--removed-bg);
+      }
+
+      .line-num {
+        width: 40px;
+        color: var(--text-muted);
+        text-align: right;
+        padding-right: 12px;
+        border-right: 1px solid var(--border);
+        user-select: none;
+      }
+      .line-sign {
+        width: 20px;
+        text-align: center;
+        font-weight: 600;
+      }
+      .line-sign.removed {
+        color: var(--removed);
+      }
+      .line-content {
+        flex: 1;
+        padding: 0 12px;
+        white-space: pre;
+      }
+
+      /* AI Patch Panel */
+      .patch-panel {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      .patch-header {
+        padding: 12px 20px;
+        background: var(--ai-bg);
+        border-bottom: 1px solid var(--ai-border);
+        font-size: 13px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--ai);
+      }
+
+      .patch-header svg {
+        width: 16px;
+        height: 16px;
+      }
+
+      .patch-content {
+        flex: 1;
+        overflow-y: auto;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 12px;
+      }
+
+      .code-line.added {
+        background: var(--added-bg);
+      }
+      .line-sign.added {
+        color: var(--added);
+      }
+
+      /* Explanation */
+      .explanation {
+        padding: 16px 20px;
+        background: var(--bg-secondary);
+        border-top: 1px solid var(--border);
+      }
+
+      .explanation-title {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--ai);
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .explanation-title svg {
+        width: 14px;
+        height: 14px;
+      }
+
+      .explanation-text {
+        font-size: 13px;
+        color: var(--text-secondary);
+        line-height: 1.6;
+      }
+
+      /* Footer Actions */
+      .footer-actions {
+        padding: 16px 24px;
+        background: var(--bg-secondary);
+        border-top: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .human-loop-badge {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 14px;
+        background: var(--ai-bg);
+        border: 1px solid var(--ai-border);
+        border-radius: 8px;
+        font-size: 12px;
+        color: var(--ai);
+      }
+
+      .human-loop-badge svg {
+        width: 16px;
+        height: 16px;
+      }
+
+      .action-buttons {
+        margin-left: auto;
+        display: flex;
+        gap: 8px;
+      }
+
+      .action-btn {
+        padding: 12px 20px;
+        border: 1px solid var(--border);
+        background: var(--bg-tertiary);
+        border-radius: 8px;
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text-primary);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .action-btn:hover {
+        border-color: var(--accent);
+      }
+      .action-btn svg {
+        width: 16px;
+        height: 16px;
+      }
+
+      .action-btn.reject {
+        color: var(--removed);
+        border-color: var(--removed);
+      }
+      .action-btn.partial {
+        border-color: var(--accent);
+      }
+      .action-btn.apply {
+        background: var(--added);
+        border-color: var(--added);
+        color: #fff;
+      }
+
+      .features {
+        max-width: 1200px;
+        margin: 32px auto 0;
+        padding: 20px;
+        background: #151b22;
+        border-radius: 12px;
+        border: 1px solid #2d3640;
+      }
+      .features-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: #e6edf3;
+        margin-bottom: 12px;
+      }
+      .features-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .feature-tag {
+        padding: 6px 12px;
+        background: rgba(244, 114, 182, 0.15);
+        color: #f472b6;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 500;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <div class="title-group">
+        <span class="version-badge">v0.12</span>
+        <div>
+          <h1 class="title">AI連携（パッチ生成・Human-in-the-loop）</h1>
+          <p class="subtitle">AIが生成した修正を人が確認して適用できる</p>
+        </div>
+      </div>
+      <div class="theme-toggle">
+        <button class="theme-btn active" data-theme="dark">Dark</button>
+        <button class="theme-btn" data-theme="light">Light</button>
+      </div>
+    </div>
+
+    <div class="app-container">
+      <div class="app" id="app">
+        <div class="titlebar">
+          <div class="window-controls">
+            <div class="window-dot close"></div>
+            <div class="window-dot minimize"></div>
+            <div class="window-dot maximize"></div>
+          </div>
+          <span class="titlebar-text">Rocket - AI Patch Review</span>
+        </div>
+
+        <div class="main">
+          <div class="workflow-steps">
+            <div class="step done">
+              <span class="step-num">1</span>
+              問題検出
+            </div>
+            <span class="step-arrow">→</span>
+            <div class="step done">
+              <span class="step-num">2</span>
+              パッチ生成
+            </div>
+            <span class="step-arrow">→</span>
+            <div class="step active">
+              <span class="step-num">3</span>
+              レビュー
+            </div>
+            <span class="step-arrow">→</span>
+            <div class="step">
+              <span class="step-num">4</span>
+              適用
+            </div>
+          </div>
+
+          <div class="content-area">
+            <div class="original-panel">
+              <div class="panel-header">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"
+                  />
+                </svg>
+                元のコード
+              </div>
+              <div class="panel-content">
+                <div class="code-line">
+                  <span class="line-num">43</span><span class="line-sign"></span
+                  ><span class="line-content"></span>
+                </div>
+                <div class="code-line">
+                  <span class="line-num">44</span><span class="line-sign"></span
+                  ><span class="line-content"
+                    >// ValidateToken checks if the token is valid</span
+                  >
+                </div>
+                <div class="code-line removed">
+                  <span class="line-num">45</span
+                  ><span class="line-sign removed">-</span
+                  ><span class="line-content"
+                    >func (c *Client) ValidateToken(token string) bool {</span
+                  >
+                </div>
+                <div class="code-line removed">
+                  <span class="line-num">46</span
+                  ><span class="line-sign removed">-</span
+                  ><span class="line-content">
+                    return token == c.expectedToken</span
+                  >
+                </div>
+                <div class="code-line removed">
+                  <span class="line-num">47</span
+                  ><span class="line-sign removed">-</span
+                  ><span class="line-content">}</span>
+                </div>
+                <div class="code-line">
+                  <span class="line-num">48</span><span class="line-sign"></span
+                  ><span class="line-content"></span>
+                </div>
+                <div class="code-line">
+                  <span class="line-num">49</span><span class="line-sign"></span
+                  ><span class="line-content"
+                    >// Refresh refreshes the OAuth token</span
+                  >
+                </div>
+              </div>
+            </div>
+
+            <div class="patch-panel">
+              <div class="patch-header">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M12 2a10 10 0 1010 10A10 10 0 0012 2z" />
+                  <path d="M12 6v6l4 2" />
+                </svg>
+                AI 生成パッチ
+              </div>
+              <div class="panel-content">
+                <div class="code-line">
+                  <span class="line-num">43</span><span class="line-sign"></span
+                  ><span class="line-content"></span>
+                </div>
+                <div class="code-line">
+                  <span class="line-num">44</span><span class="line-sign"></span
+                  ><span class="line-content"
+                    >// ValidateToken checks if the token is valid</span
+                  >
+                </div>
+                <div class="code-line added">
+                  <span class="line-num">45</span
+                  ><span class="line-sign added">+</span
+                  ><span class="line-content"
+                    >// Uses constant-time comparison to prevent timing
+                    attacks</span
+                  >
+                </div>
+                <div class="code-line added">
+                  <span class="line-num">46</span
+                  ><span class="line-sign added">+</span
+                  ><span class="line-content"
+                    >func (c *Client) ValidateToken(token string) bool {</span
+                  >
+                </div>
+                <div class="code-line added">
+                  <span class="line-num">47</span
+                  ><span class="line-sign added">+</span
+                  ><span class="line-content">
+                    return subtle.ConstantTimeCompare(</span
+                  >
+                </div>
+                <div class="code-line added">
+                  <span class="line-num">48</span
+                  ><span class="line-sign added">+</span
+                  ><span class="line-content"> []byte(token),</span>
+                </div>
+                <div class="code-line added">
+                  <span class="line-num">49</span
+                  ><span class="line-sign added">+</span
+                  ><span class="line-content"> []byte(c.expectedToken),</span>
+                </div>
+                <div class="code-line added">
+                  <span class="line-num">50</span
+                  ><span class="line-sign added">+</span
+                  ><span class="line-content"> ) == 1</span>
+                </div>
+                <div class="code-line added">
+                  <span class="line-num">51</span
+                  ><span class="line-sign added">+</span
+                  ><span class="line-content">}</span>
+                </div>
+                <div class="code-line">
+                  <span class="line-num">52</span><span class="line-sign"></span
+                  ><span class="line-content"></span>
+                </div>
+                <div class="code-line">
+                  <span class="line-num">53</span><span class="line-sign"></span
+                  ><span class="line-content"
+                    >// Refresh refreshes the OAuth token</span
+                  >
+                </div>
+              </div>
+              <div class="explanation">
+                <div class="explanation-title">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M12 16v-4M12 8h.01" />
+                  </svg>
+                  変更の説明
+                </div>
+                <div class="explanation-text">
+                  文字列の直接比較（==）を
+                  <code>subtle.ConstantTimeCompare()</code> に置き換えました。
+                  これにより、比較処理が常に一定時間で完了するため、タイミング攻撃を防止できます。
+                  また、関数のドキュメントにセキュリティに関するコメントを追加しました。
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="footer-actions">
+            <div class="human-loop-badge">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+              Human-in-the-loop: 最終判断は人が行います
+            </div>
+            <div class="action-buttons">
+              <button class="action-btn reject">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+                却下
+              </button>
+              <button class="action-btn partial">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"
+                  />
+                </svg>
+                編集して適用
+              </button>
+              <button class="action-btn apply">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M5 12l5 5L20 7" />
+                </svg>
+                そのまま適用
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="features">
+      <h3 class="features-title">v0.12 機能（v0.11 に追加）</h3>
+      <div class="features-list">
+        <span class="feature-tag">修正パッチ自動生成</span>
+        <span class="feature-tag">提案プレビュー</span>
+        <span class="feature-tag">承認→適用ワークフロー</span>
+        <span class="feature-tag">部分採用</span>
+        <span class="feature-tag">差分確認</span>
+        <span class="feature-tag">Issue連携</span>
+        <span class="feature-tag">テストコード生成</span>
+        <span class="feature-tag">生成履歴</span>
+        <span class="feature-tag">Human-in-the-loop</span>
+      </div>
+    </div>
+
+    <script>
+      document.querySelectorAll(".theme-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          document
+            .querySelectorAll(".theme-btn")
+            .forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          const app = document.getElementById("app");
+          if (btn.dataset.theme === "light") app.classList.add("light");
+          else app.classList.remove("light");
+        });
+      });
+    </script>
+  </body>
+</html>

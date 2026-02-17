@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rocket v0.10 - AI連携（基本）</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0f1419;
+      --bg-secondary: #151b22;
+      --bg-tertiary: #1c242d;
+      --text-primary: #e6edf3;
+      --text-secondary: #8b949e;
+      --text-muted: #565d64;
+      --border: #2d3640;
+      --accent: #58a6ff;
+      --ai: #f472b6;
+      --ai-bg: rgba(244, 114, 182, 0.15);
+      --ai-border: rgba(244, 114, 182, 0.4);
+      --added: #3fb950;
+      --added-bg: rgba(63, 185, 80, 0.15);
+    }
+
+    .light {
+      --bg-primary: #ffffff;
+      --bg-secondary: #f6f8fa;
+      --bg-tertiary: #ebeef1;
+      --text-primary: #1f2328;
+      --text-secondary: #656d76;
+      --text-muted: #8c959f;
+      --border: #d1d9e0;
+      --accent: #0969da;
+      --ai: #db2777;
+      --ai-bg: rgba(219, 39, 119, 0.1);
+      --ai-border: rgba(219, 39, 119, 0.3);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'IBM Plex Sans', sans-serif; background: #0a0c0f; min-height: 100vh; padding: 40px; }
+
+    .header { max-width: 1200px; margin: 0 auto 32px; display: flex; align-items: center; justify-content: space-between; }
+    .title-group { display: flex; align-items: center; gap: 16px; }
+    .version-badge { padding: 6px 14px; background: linear-gradient(135deg, #f472b6, #a78bfa); color: #fff; border-radius: 6px; font-size: 14px; font-weight: 600; }
+    .title { font-size: 24px; font-weight: 600; color: #e6edf3; }
+    .subtitle { font-size: 14px; color: #8b949e; margin-top: 4px; }
+
+    .theme-toggle { display: flex; gap: 8px; background: #151b22; padding: 6px; border-radius: 10px; border: 1px solid #2d3640; }
+    .theme-btn { padding: 8px 16px; border: none; border-radius: 6px; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; background: transparent; color: #8b949e; }
+    .theme-btn.active { background: #58a6ff; color: #fff; }
+
+    .app-container { max-width: 1200px; margin: 0 auto; border-radius: 12px; overflow: hidden; box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4); border: 1px solid var(--border); }
+    .app { background: var(--bg-primary); color: var(--text-primary); height: 750px; display: flex; flex-direction: column; }
+
+    .titlebar { height: 38px; background: var(--bg-secondary); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 16px; }
+    .window-controls { display: flex; gap: 8px; }
+    .window-dot { width: 12px; height: 12px; border-radius: 50%; }
+    .window-dot.close { background: #ff5f57; }
+    .window-dot.minimize { background: #febc2e; }
+    .window-dot.maximize { background: #28c840; }
+    .titlebar-text { flex: 1; text-align: center; font-size: 13px; color: var(--text-muted); }
+
+    .main { flex: 1; display: grid; grid-template-columns: 1fr 380px; overflow: hidden; }
+
+    /* Diff Panel */
+    .diff-panel { display: flex; flex-direction: column; overflow: hidden; border-right: 1px solid var(--border); }
+
+    .diff-header {
+      padding: 12px 20px;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .diff-file { font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+    .diff-stats { margin-left: auto; font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+    .diff-stats .added { color: var(--added); }
+
+    .diff-content { flex: 1; overflow-y: auto; font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+
+    .diff-line { display: flex; line-height: 1.7; }
+    .diff-line.added { background: var(--added-bg); }
+
+    .line-num { width: 40px; padding: 0 8px; text-align: right; color: var(--text-muted); border-right: 1px solid var(--border); }
+    .line-sign { width: 20px; text-align: center; font-weight: 600; color: var(--added); }
+    .line-content { flex: 1; padding: 0 12px; white-space: pre; }
+
+    /* AI Commit Panel */
+    .ai-panel { background: var(--bg-secondary); display: flex; flex-direction: column; }
+
+    .ai-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .ai-icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, #f472b6, #a78bfa);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .ai-icon svg { width: 18px; height: 18px; color: #fff; }
+
+    .ai-header-text h3 { font-size: 14px; font-weight: 600; }
+    .ai-header-text p { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+    .cli-selector {
+      margin-left: auto;
+      padding: 6px 12px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 11px;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .cli-selector svg { width: 14px; height: 14px; color: var(--ai); }
+
+    .ai-content { flex: 1; padding: 20px; overflow-y: auto; }
+
+    /* AI Generated Message */
+    .ai-suggestion {
+      background: var(--ai-bg);
+      border: 1px solid var(--ai-border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .suggestion-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--ai);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .suggestion-header svg { width: 14px; height: 14px; }
+
+    .suggestion-type {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: var(--bg-tertiary);
+      border-radius: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ai);
+      margin-bottom: 12px;
+    }
+
+    .suggestion-subject {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+
+    .suggestion-body {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .suggestion-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .suggestion-btn {
+      padding: 10px 16px;
+      border: 1px solid var(--border);
+      background: var(--bg-tertiary);
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-primary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .suggestion-btn:hover { border-color: var(--accent); }
+    .suggestion-btn svg { width: 14px; height: 14px; }
+    .suggestion-btn.primary { background: var(--ai); border-color: var(--ai); color: #fff; }
+
+    /* Format Options */
+    .format-options {
+      margin-bottom: 16px;
+    }
+
+    .format-title { font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 10px; }
+
+    .format-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+
+    .format-chip {
+      padding: 6px 12px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+    }
+    .format-chip:hover { border-color: var(--accent); color: var(--text-primary); }
+    .format-chip.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+    /* Summary */
+    .ai-summary {
+      background: var(--bg-primary);
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .summary-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .summary-title svg { width: 14px; height: 14px; color: var(--ai); }
+
+    .summary-text {
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--text-secondary);
+    }
+
+    /* AI Footer */
+    .ai-footer {
+      padding: 16px 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    .commit-btn {
+      width: 100%;
+      padding: 14px;
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .commit-btn:hover { background: var(--accent-hover); }
+    .commit-btn svg { width: 18px; height: 18px; }
+
+    .features { max-width: 1200px; margin: 32px auto 0; padding: 20px; background: #151b22; border-radius: 12px; border: 1px solid #2d3640; }
+    .features-title { font-size: 14px; font-weight: 600; color: #e6edf3; margin-bottom: 12px; }
+    .features-list { display: flex; flex-wrap: wrap; gap: 8px; }
+    .feature-tag { padding: 6px 12px; background: rgba(244, 114, 182, 0.15); color: #f472b6; border-radius: 6px; font-size: 12px; font-weight: 500; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="title-group">
+      <span class="version-badge">v0.10</span>
+      <div>
+        <h1 class="title">AI連携（基本）</h1>
+        <p class="subtitle">AIによるコミット支援ができる</p>
+      </div>
+    </div>
+    <div class="theme-toggle">
+      <button class="theme-btn active" data-theme="dark">Dark</button>
+      <button class="theme-btn" data-theme="light">Light</button>
+    </div>
+  </div>
+
+  <div class="app-container">
+    <div class="app" id="app">
+      <div class="titlebar">
+        <div class="window-controls">
+          <div class="window-dot close"></div>
+          <div class="window-dot minimize"></div>
+          <div class="window-dot maximize"></div>
+        </div>
+        <span class="titlebar-text">Rocket - rocket</span>
+      </div>
+
+      <div class="main">
+        <div class="diff-panel">
+          <div class="diff-header">
+            <span class="diff-file">ステージ済みの変更</span>
+            <span class="diff-stats"><span class="added">+89</span> -12 • 3ファイル</span>
+          </div>
+          <div class="diff-content">
+            <div class="diff-line added"><span class="line-num">1</span><span class="line-sign">+</span><span class="line-content">package ui</span></div>
+            <div class="diff-line added"><span class="line-num">2</span><span class="line-sign">+</span><span class="line-content"></span></div>
+            <div class="diff-line added"><span class="line-num">3</span><span class="line-sign">+</span><span class="line-content">import (</span></div>
+            <div class="diff-line added"><span class="line-num">4</span><span class="line-sign">+</span><span class="line-content">    "strings"</span></div>
+            <div class="diff-line added"><span class="line-num">5</span><span class="line-sign">+</span><span class="line-content">)</span></div>
+            <div class="diff-line added"><span class="line-num">6</span><span class="line-sign">+</span><span class="line-content"></span></div>
+            <div class="diff-line added"><span class="line-num">7</span><span class="line-sign">+</span><span class="line-content">// DiffOptions configures how diffs are rendered</span></div>
+            <div class="diff-line added"><span class="line-num">8</span><span class="line-sign">+</span><span class="line-content">type DiffOptions struct {</span></div>
+            <div class="diff-line added"><span class="line-num">9</span><span class="line-sign">+</span><span class="line-content">    WordDiff bool</span></div>
+            <div class="diff-line added"><span class="line-num">10</span><span class="line-sign">+</span><span class="line-content">    Context  int</span></div>
+            <div class="diff-line added"><span class="line-num">11</span><span class="line-sign">+</span><span class="line-content">    SideBySide bool</span></div>
+            <div class="diff-line added"><span class="line-num">12</span><span class="line-sign">+</span><span class="line-content">}</span></div>
+            <div class="diff-line added"><span class="line-num">13</span><span class="line-sign">+</span><span class="line-content"></span></div>
+            <div class="diff-line added"><span class="line-num">14</span><span class="line-sign">+</span><span class="line-content">// RenderDiff renders a diff with the given options</span></div>
+            <div class="diff-line added"><span class="line-num">15</span><span class="line-sign">+</span><span class="line-content">func RenderDiff(old, new string, opts DiffOptions) string {</span></div>
+            <div class="diff-line added"><span class="line-num">16</span><span class="line-sign">+</span><span class="line-content">    diffs := diff.Do(old, new)</span></div>
+            <div class="diff-line added"><span class="line-num">17</span><span class="line-sign">+</span><span class="line-content">    </span></div>
+            <div class="diff-line added"><span class="line-num">18</span><span class="line-sign">+</span><span class="line-content">    if opts.WordDiff {</span></div>
+            <div class="diff-line added"><span class="line-num">19</span><span class="line-sign">+</span><span class="line-content">        diffs = highlightWords(diffs)</span></div>
+            <div class="diff-line added"><span class="line-num">20</span><span class="line-sign">+</span><span class="line-content">    }</span></div>
+            <div class="diff-line added"><span class="line-num">21</span><span class="line-sign">+</span><span class="line-content">    </span></div>
+            <div class="diff-line added"><span class="line-num">22</span><span class="line-sign">+</span><span class="line-content">    var result strings.Builder</span></div>
+            <div class="diff-line added"><span class="line-num">23</span><span class="line-sign">+</span><span class="line-content">    for i, d := range diffs {</span></div>
+          </div>
+        </div>
+
+        <div class="ai-panel">
+          <div class="ai-header">
+            <div class="ai-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2a10 10 0 1010 10A10 10 0 0012 2zm0 18a8 8 0 118-8 8 8 0 01-8 8z"/>
+                <path d="M12 6v6l4 2"/>
+              </svg>
+            </div>
+            <div class="ai-header-text">
+              <h3>AI コミットメッセージ</h3>
+              <p>差分から自動生成</p>
+            </div>
+            <div class="cli-selector">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2a10 10 0 1010 10A10 10 0 0012 2z"/>
+              </svg>
+              Claude Code
+            </div>
+          </div>
+
+          <div class="ai-content">
+            <div class="format-options">
+              <div class="format-title">フォーマット</div>
+              <div class="format-chips">
+                <span class="format-chip active">Conventional</span>
+                <span class="format-chip">シンプル</span>
+                <span class="format-chip">詳細</span>
+              </div>
+            </div>
+
+            <div class="format-options">
+              <div class="format-title">言語</div>
+              <div class="format-chips">
+                <span class="format-chip">English</span>
+                <span class="format-chip active">日本語</span>
+              </div>
+            </div>
+
+            <div class="ai-suggestion">
+              <div class="suggestion-header">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 2a10 10 0 1010 10A10 10 0 0012 2z"/>
+                  <path d="M12 6v6l4 2"/>
+                </svg>
+                AI生成
+              </div>
+
+              <div class="suggestion-type">
+                <span>feat:</span>
+                新機能
+              </div>
+
+              <div class="suggestion-subject">
+                差分ビューアにオプション機能を追加
+              </div>
+
+              <div class="suggestion-body">
+                DiffOptions構造体を導入し、差分表示をカスタマイズ可能に。
+                単語単位ハイライト、コンテキスト行数指定、サイドバイサイド
+                表示に対応。RenderDiff関数のシグネチャを更新。
+              </div>
+
+              <div class="suggestion-actions">
+                <button class="suggestion-btn primary">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12l5 5L20 7"/></svg>
+                  採用
+                </button>
+                <button class="suggestion-btn">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6"/></svg>
+                  再生成
+                </button>
+                <button class="suggestion-btn">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/></svg>
+                  編集
+                </button>
+              </div>
+            </div>
+
+            <div class="ai-summary">
+              <div class="summary-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                </svg>
+                変更サマリー
+              </div>
+              <div class="summary-text">
+                この変更は差分表示機能を拡張し、ユーザーが表示方法をカスタマイズ
+                できるようにします。主な変更点は、DiffOptions構造体の追加、
+                RenderDiff関数へのオプション引数追加、highlightWords関数の
+                新規実装です。
+              </div>
+            </div>
+          </div>
+
+          <div class="ai-footer">
+            <button class="commit-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="4"/>
+                <path d="M12 2v6M12 16v6"/>
+              </svg>
+              コミット
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="features">
+    <h3 class="features-title">v0.10 機能（v0.9 に追加）</h3>
+    <div class="features-list">
+      <span class="feature-tag">LLM CLI自動検出</span>
+      <span class="feature-tag">Claude Code連携</span>
+      <span class="feature-tag">コミットメッセージ生成</span>
+      <span class="feature-tag">Conventional Commits</span>
+      <span class="feature-tag">日本語/英語切り替え</span>
+      <span class="feature-tag">生成結果の編集</span>
+      <span class="feature-tag">差分サマリー</span>
+      <span class="feature-tag">プライバシー設定</span>
+      <span class="feature-tag">機密ファイル除外</span>
+    </div>
+  </div>
+
+  <script>
+    document.querySelectorAll('.theme-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const app = document.getElementById('app');
+        if (btn.dataset.theme === 'light') app.classList.add('light');
+        else app.classList.remove('light');
+      });
+    });
+  </script>
+</body>
+</html>

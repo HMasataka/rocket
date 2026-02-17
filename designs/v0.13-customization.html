@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rocket v0.13 - UI/UX・外部ツール連携</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0f1419;
+      --bg-secondary: #151b22;
+      --bg-tertiary: #1c242d;
+      --text-primary: #e6edf3;
+      --text-secondary: #8b949e;
+      --text-muted: #565d64;
+      --border: #2d3640;
+      --accent: #58a6ff;
+      --accent-dim: rgba(88, 166, 255, 0.15);
+    }
+
+    .light {
+      --bg-primary: #ffffff;
+      --bg-secondary: #f6f8fa;
+      --bg-tertiary: #ebeef1;
+      --text-primary: #1f2328;
+      --text-secondary: #656d76;
+      --text-muted: #8c959f;
+      --border: #d1d9e0;
+      --accent: #0969da;
+      --accent-dim: rgba(9, 105, 218, 0.1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'IBM Plex Sans', sans-serif; background: #0a0c0f; min-height: 100vh; padding: 40px; }
+
+    .header { max-width: 1200px; margin: 0 auto 32px; display: flex; align-items: center; justify-content: space-between; }
+    .title-group { display: flex; align-items: center; gap: 16px; }
+    .version-badge { padding: 6px 14px; background: var(--accent); color: #fff; border-radius: 6px; font-size: 14px; font-weight: 600; }
+    .title { font-size: 24px; font-weight: 600; color: #e6edf3; }
+    .subtitle { font-size: 14px; color: #8b949e; margin-top: 4px; }
+
+    .theme-toggle { display: flex; gap: 8px; background: #151b22; padding: 6px; border-radius: 10px; border: 1px solid #2d3640; }
+    .theme-btn { padding: 8px 16px; border: none; border-radius: 6px; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; background: transparent; color: #8b949e; }
+    .theme-btn.active { background: #58a6ff; color: #fff; }
+
+    .app-container { max-width: 1200px; margin: 0 auto; border-radius: 12px; overflow: hidden; box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4); border: 1px solid var(--border); }
+    .app { background: var(--bg-primary); color: var(--text-primary); height: 750px; display: flex; flex-direction: column; }
+
+    .titlebar { height: 38px; background: var(--bg-secondary); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 16px; }
+    .window-controls { display: flex; gap: 8px; }
+    .window-dot { width: 12px; height: 12px; border-radius: 50%; }
+    .window-dot.close { background: #ff5f57; }
+    .window-dot.minimize { background: #febc2e; }
+    .window-dot.maximize { background: #28c840; }
+    .titlebar-text { flex: 1; text-align: center; font-size: 13px; color: var(--text-muted); }
+
+    .main { flex: 1; display: grid; grid-template-columns: 260px 1fr; overflow: hidden; }
+
+    /* Settings Sidebar */
+    .settings-sidebar { background: var(--bg-secondary); border-right: 1px solid var(--border); overflow-y: auto; }
+
+    .sidebar-section { padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .sidebar-section:last-child { border-bottom: none; }
+
+    .section-title {
+      padding: 8px 20px;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+    }
+
+    .nav-item {
+      padding: 10px 20px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.15s;
+    }
+    .nav-item:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+    .nav-item.active { background: var(--accent-dim); color: var(--accent); border-left: 2px solid var(--accent); }
+    .nav-item svg { width: 16px; height: 16px; }
+
+    /* Settings Content */
+    .settings-content { overflow-y: auto; padding: 32px; }
+
+    .settings-header { margin-bottom: 32px; }
+    .settings-title { font-size: 24px; font-weight: 600; margin-bottom: 8px; }
+    .settings-desc { font-size: 14px; color: var(--text-secondary); }
+
+    .settings-group { margin-bottom: 32px; }
+    .group-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+
+    .setting-item {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .setting-item:last-child { border-bottom: none; }
+
+    .setting-info { flex: 1; margin-right: 24px; }
+    .setting-label { font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+    .setting-desc { font-size: 12px; color: var(--text-muted); }
+
+    /* Toggle */
+    .toggle {
+      width: 44px;
+      height: 24px;
+      background: var(--bg-tertiary);
+      border-radius: 12px;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .toggle.active { background: var(--accent); }
+    .toggle::after {
+      content: '';
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      background: #fff;
+      border-radius: 50%;
+      top: 3px;
+      left: 3px;
+      transition: transform 0.2s;
+    }
+    .toggle.active::after { transform: translateX(20px); }
+
+    /* Select */
+    .select-wrapper {
+      position: relative;
+      width: 200px;
+    }
+    .select {
+      width: 100%;
+      padding: 10px 14px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 13px;
+      color: var(--text-primary);
+      cursor: pointer;
+      appearance: none;
+    }
+    .select:focus { outline: none; border-color: var(--accent); }
+
+    /* Color Theme Picker */
+    .theme-picker { display: flex; gap: 8px; }
+    .theme-option {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: all 0.15s;
+    }
+    .theme-option:hover { transform: scale(1.1); }
+    .theme-option.selected { border-color: var(--text-primary); }
+    .theme-option.cobalt { background: #58a6ff; }
+    .theme-option.emerald { background: #34d399; }
+    .theme-option.rose { background: #f472b6; }
+    .theme-option.amber { background: #f59e0b; }
+    .theme-option.slate { background: #a5a5b4; }
+    .theme-option.violet { background: #a78bfa; }
+
+    /* Keybind */
+    .keybind-input {
+      display: flex;
+      gap: 4px;
+    }
+    .key {
+      padding: 6px 10px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    /* External Tools */
+    .tool-list { display: flex; flex-direction: column; gap: 8px; }
+    .tool-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: var(--bg-tertiary);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    .tool-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--bg-secondary);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .tool-icon svg { width: 20px; height: 20px; color: var(--accent); }
+    .tool-info { flex: 1; }
+    .tool-name { font-size: 14px; font-weight: 500; }
+    .tool-path { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted); }
+    .tool-btn {
+      padding: 8px 14px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 12px;
+      color: var(--text-primary);
+      cursor: pointer;
+    }
+    .tool-btn:hover { border-color: var(--accent); }
+
+    .features { max-width: 1200px; margin: 32px auto 0; padding: 20px; background: #151b22; border-radius: 12px; border: 1px solid #2d3640; }
+    .features-title { font-size: 14px; font-weight: 600; color: #e6edf3; margin-bottom: 12px; }
+    .features-list { display: flex; flex-wrap: wrap; gap: 8px; }
+    .feature-tag { padding: 6px 12px; background: rgba(88, 166, 255, 0.15); color: #58a6ff; border-radius: 6px; font-size: 12px; font-weight: 500; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="title-group">
+      <span class="version-badge">v0.13</span>
+      <div>
+        <h1 class="title">UI/UX・外部ツール連携</h1>
+        <p class="subtitle">カスタマイズ性と外部ツールとの連携を強化</p>
+      </div>
+    </div>
+    <div class="theme-toggle">
+      <button class="theme-btn active" data-theme="dark">Dark</button>
+      <button class="theme-btn" data-theme="light">Light</button>
+    </div>
+  </div>
+
+  <div class="app-container">
+    <div class="app" id="app">
+      <div class="titlebar">
+        <div class="window-controls">
+          <div class="window-dot close"></div>
+          <div class="window-dot minimize"></div>
+          <div class="window-dot maximize"></div>
+        </div>
+        <span class="titlebar-text">Rocket - 設定</span>
+      </div>
+
+      <div class="main">
+        <div class="settings-sidebar">
+          <div class="sidebar-section">
+            <div class="section-title">外観</div>
+            <div class="nav-item active">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+              テーマ
+            </div>
+            <div class="nav-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg>
+              フォント
+            </div>
+            <div class="nav-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+              レイアウト
+            </div>
+          </div>
+          <div class="sidebar-section">
+            <div class="section-title">操作</div>
+            <div class="nav-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01M10 8h.01M14 8h.01"/></svg>
+              キーバインド
+            </div>
+          </div>
+          <div class="sidebar-section">
+            <div class="section-title">外部ツール</div>
+            <div class="nav-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
+              エディタ
+            </div>
+            <div class="nav-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+              ターミナル
+            </div>
+            <div class="nav-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0020 4.77 5.07 5.07 0 0019.91 1S18.73.65 16 2.48a13.38 13.38 0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 005 4.77a5.44 5.44 0 00-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 009 18.13V22"/></svg>
+              GitHub連携
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-content">
+          <div class="settings-header">
+            <h2 class="settings-title">テーマ</h2>
+            <p class="settings-desc">アプリケーションの外観をカスタマイズします</p>
+          </div>
+
+          <div class="settings-group">
+            <h3 class="group-title">モード</h3>
+            <div class="setting-item">
+              <div class="setting-info">
+                <div class="setting-label">ダークモード</div>
+                <div class="setting-desc">暗い背景色を使用します</div>
+              </div>
+              <div class="toggle active"></div>
+            </div>
+            <div class="setting-item">
+              <div class="setting-info">
+                <div class="setting-label">システム設定に従う</div>
+                <div class="setting-desc">OSの設定に合わせて自動切り替え</div>
+              </div>
+              <div class="toggle"></div>
+            </div>
+          </div>
+
+          <div class="settings-group">
+            <h3 class="group-title">カラーテーマ</h3>
+            <div class="setting-item">
+              <div class="setting-info">
+                <div class="setting-label">アクセントカラー</div>
+                <div class="setting-desc">UIのハイライト色を選択</div>
+              </div>
+              <div class="theme-picker">
+                <div class="theme-option cobalt selected" title="Cobalt"></div>
+                <div class="theme-option emerald" title="Emerald"></div>
+                <div class="theme-option rose" title="Rose"></div>
+                <div class="theme-option amber" title="Amber"></div>
+                <div class="theme-option slate" title="Slate"></div>
+                <div class="theme-option violet" title="Violet"></div>
+              </div>
+            </div>
+            <div class="setting-item">
+              <div class="setting-info">
+                <div class="setting-label">カスタムテーマ</div>
+                <div class="setting-desc">~/.config/rocket/themes/ からテーマを読み込み</div>
+              </div>
+              <div class="select-wrapper">
+                <select class="select">
+                  <option>なし</option>
+                  <option>my-custom-theme</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-group">
+            <h3 class="group-title">外部ツール</h3>
+            <div class="tool-list">
+              <div class="tool-item">
+                <div class="tool-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/></svg>
+                </div>
+                <div class="tool-info">
+                  <div class="tool-name">差分ツール</div>
+                  <div class="tool-path">/usr/local/bin/code --diff</div>
+                </div>
+                <button class="tool-btn">変更</button>
+              </div>
+              <div class="tool-item">
+                <div class="tool-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3v12M18 9a3 3 0 100-6 3 3 0 000 6z"/></svg>
+                </div>
+                <div class="tool-info">
+                  <div class="tool-name">マージツール</div>
+                  <div class="tool-path">/usr/local/bin/code --merge</div>
+                </div>
+                <button class="tool-btn">変更</button>
+              </div>
+              <div class="tool-item">
+                <div class="tool-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+                </div>
+                <div class="tool-info">
+                  <div class="tool-name">ターミナル</div>
+                  <div class="tool-path">/Applications/iTerm.app</div>
+                </div>
+                <button class="tool-btn">変更</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="features">
+    <h3 class="features-title">v0.13 機能（v0.12 に追加）</h3>
+    <div class="features-list">
+      <span class="feature-tag">ライト/ダークモード</span>
+      <span class="feature-tag">カラーテーマ選択</span>
+      <span class="feature-tag">カスタムテーマ</span>
+      <span class="feature-tag">フォント設定</span>
+      <span class="feature-tag">キーバインド</span>
+      <span class="feature-tag">レイアウト</span>
+      <span class="feature-tag">外部差分ツール</span>
+      <span class="feature-tag">外部マージツール</span>
+      <span class="feature-tag">エディタ連携</span>
+      <span class="feature-tag">ターミナル統合</span>
+      <span class="feature-tag">GitHub/GitLab連携</span>
+    </div>
+  </div>
+
+  <script>
+    document.querySelectorAll('.theme-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const app = document.getElementById('app');
+        if (btn.dataset.theme === 'light') app.classList.add('light');
+        else app.classList.remove('light');
+      });
+    });
+
+    document.querySelectorAll('.toggle').forEach(toggle => {
+      toggle.addEventListener('click', () => toggle.classList.toggle('active'));
+    });
+
+    document.querySelectorAll('.theme-option').forEach(opt => {
+      opt.addEventListener('click', () => {
+        document.querySelectorAll('.theme-option').forEach(o => o.classList.remove('selected'));
+        opt.classList.add('selected');
+      });
+    });
+  </script>
+</body>
+</html>

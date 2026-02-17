@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rocket v0.5 - ハンク単位ステージング</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0f1419;
+      --bg-secondary: #151b22;
+      --bg-tertiary: #1c242d;
+      --text-primary: #e6edf3;
+      --text-secondary: #8b949e;
+      --text-muted: #565d64;
+      --border: #2d3640;
+      --accent: #58a6ff;
+      --accent-hover: #79b8ff;
+      --accent-dim: rgba(88, 166, 255, 0.15);
+      --added: #3fb950;
+      --added-bg: rgba(63, 185, 80, 0.15);
+      --added-border: rgba(63, 185, 80, 0.4);
+      --removed: #f85149;
+      --removed-bg: rgba(248, 81, 73, 0.15);
+      --removed-border: rgba(248, 81, 73, 0.4);
+      --staged: #a371f7;
+      --staged-bg: rgba(163, 113, 247, 0.15);
+    }
+
+    .light {
+      --bg-primary: #ffffff;
+      --bg-secondary: #f6f8fa;
+      --bg-tertiary: #ebeef1;
+      --text-primary: #1f2328;
+      --text-secondary: #656d76;
+      --text-muted: #8c959f;
+      --border: #d1d9e0;
+      --accent: #0969da;
+      --accent-hover: #0860ca;
+      --accent-dim: rgba(9, 105, 218, 0.1);
+      --added: #1a7f37;
+      --added-bg: rgba(26, 127, 55, 0.1);
+      --added-border: rgba(26, 127, 55, 0.3);
+      --removed: #cf222e;
+      --removed-bg: rgba(207, 34, 46, 0.1);
+      --removed-border: rgba(207, 34, 46, 0.3);
+      --staged: #8250df;
+      --staged-bg: rgba(130, 80, 223, 0.1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'IBM Plex Sans', sans-serif;
+      background: #0a0c0f;
+      min-height: 100vh;
+      padding: 40px;
+    }
+
+    .header { max-width: 1200px; margin: 0 auto 32px; display: flex; align-items: center; justify-content: space-between; }
+    .title-group { display: flex; align-items: center; gap: 16px; }
+    .version-badge { padding: 6px 14px; background: var(--accent); color: #fff; border-radius: 6px; font-size: 14px; font-weight: 600; }
+    .title { font-size: 24px; font-weight: 600; color: #e6edf3; }
+    .subtitle { font-size: 14px; color: #8b949e; margin-top: 4px; }
+
+    .theme-toggle { display: flex; gap: 8px; background: #151b22; padding: 6px; border-radius: 10px; border: 1px solid #2d3640; }
+    .theme-btn { padding: 8px 16px; border: none; border-radius: 6px; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; background: transparent; color: #8b949e; transition: all 0.2s; }
+    .theme-btn.active { background: #58a6ff; color: #fff; }
+
+    .app-container { max-width: 1200px; margin: 0 auto; border-radius: 12px; overflow: hidden; box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4); border: 1px solid var(--border); }
+    .app { background: var(--bg-primary); color: var(--text-primary); height: 750px; display: flex; flex-direction: column; }
+
+    .titlebar { height: 38px; background: var(--bg-secondary); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 16px; gap: 12px; }
+    .window-controls { display: flex; gap: 8px; }
+    .window-dot { width: 12px; height: 12px; border-radius: 50%; }
+    .window-dot.close { background: #ff5f57; }
+    .window-dot.minimize { background: #febc2e; }
+    .window-dot.maximize { background: #28c840; }
+    .titlebar-text { flex: 1; text-align: center; font-size: 13px; color: var(--text-muted); font-weight: 500; }
+
+    .main { flex: 1; display: grid; grid-template-columns: 280px 1fr; overflow: hidden; }
+
+    /* Sidebar */
+    .sidebar {
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar-header {
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sidebar-header svg { width: 18px; height: 18px; color: var(--accent); }
+    .sidebar-header span { font-size: 14px; font-weight: 600; }
+
+    .sidebar-content { flex: 1; overflow-y: auto; padding: 8px 0; }
+
+    .file-item {
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .file-item:hover { background: var(--bg-tertiary); }
+    .file-item.selected { background: var(--accent-dim); border-left: 2px solid var(--accent); }
+
+    .file-icon { width: 16px; height: 16px; color: var(--text-secondary); }
+    .file-name { font-family: 'JetBrains Mono', monospace; font-size: 12px; flex: 1; }
+
+    .file-hunk-count {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: var(--staged-bg);
+      color: var(--staged);
+    }
+
+    /* Diff Panel */
+    .diff-panel {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .diff-toolbar {
+      padding: 12px 20px;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .diff-file-info {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .diff-file-path {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .diff-stats {
+      display: flex;
+      gap: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+    }
+
+    .diff-stats .added { color: var(--added); }
+    .diff-stats .removed { color: var(--removed); }
+
+    .view-toggle {
+      display: flex;
+      background: var(--bg-tertiary);
+      border-radius: 6px;
+      padding: 2px;
+    }
+
+    .view-btn {
+      padding: 6px 12px;
+      background: none;
+      border: none;
+      font-family: inherit;
+      font-size: 12px;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all 0.15s;
+    }
+
+    .view-btn.active { background: var(--accent); color: #fff; }
+    .view-btn:hover:not(.active) { color: var(--text-primary); }
+
+    .diff-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+    }
+
+    /* Hunk */
+    .hunk {
+      margin-bottom: 24px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .hunk.staged { border-color: var(--staged); }
+
+    .hunk-header {
+      padding: 10px 16px;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .hunk.staged .hunk-header { background: var(--staged-bg); }
+
+    .hunk-range {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--accent);
+    }
+
+    .hunk-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      flex: 1;
+    }
+
+    .hunk-actions { display: flex; gap: 8px; }
+
+    .hunk-btn {
+      padding: 6px 12px;
+      border: 1px solid var(--border);
+      background: var(--bg-tertiary);
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-primary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s;
+    }
+
+    .hunk-btn:hover { border-color: var(--accent); background: var(--accent-dim); }
+    .hunk-btn svg { width: 12px; height: 12px; }
+
+    .hunk-btn.stage { background: var(--added); border-color: var(--added); color: #fff; }
+    .hunk-btn.stage:hover { background: #4cc764; }
+
+    .hunk-btn.unstage { background: var(--staged); border-color: var(--staged); color: #fff; }
+    .hunk-btn.unstage:hover { opacity: 0.9; }
+
+    .hunk-btn.discard { color: var(--removed); border-color: var(--removed); background: transparent; }
+    .hunk-btn.discard:hover { background: var(--removed-bg); }
+
+    .hunk-lines { font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+
+    .diff-line {
+      display: flex;
+      line-height: 1.7;
+    }
+
+    .diff-line.added { background: var(--added-bg); }
+    .diff-line.removed { background: var(--removed-bg); }
+
+    .line-gutter {
+      width: 80px;
+      display: flex;
+      flex-shrink: 0;
+      border-right: 1px solid var(--border);
+    }
+
+    .line-num {
+      width: 40px;
+      padding: 0 8px;
+      text-align: right;
+      color: var(--text-muted);
+      user-select: none;
+    }
+
+    .line-sign {
+      width: 24px;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .diff-line.added .line-sign { color: var(--added); }
+    .diff-line.removed .line-sign { color: var(--removed); }
+
+    .line-content {
+      flex: 1;
+      padding: 0 16px;
+      white-space: pre;
+    }
+
+    /* Word diff highlight */
+    .word-added {
+      background: var(--added-border);
+      border-radius: 2px;
+      padding: 0 2px;
+    }
+
+    .word-removed {
+      background: var(--removed-border);
+      border-radius: 2px;
+      padding: 0 2px;
+    }
+
+    /* Side by Side */
+    .side-by-side {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .side-panel {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .side-header {
+      padding: 10px 16px;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .side-header.old { color: var(--removed); }
+    .side-header.new { color: var(--added); }
+
+    .staging-summary {
+      padding: 16px;
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .staging-info { font-size: 13px; color: var(--text-secondary); }
+    .staging-info strong { color: var(--text-primary); }
+
+    .commit-staged-btn {
+      padding: 10px 20px;
+      background: var(--accent);
+      border: none;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.15s;
+    }
+
+    .commit-staged-btn:hover { background: var(--accent-hover); }
+    .commit-staged-btn svg { width: 16px; height: 16px; }
+
+    .features { max-width: 1200px; margin: 32px auto 0; padding: 20px; background: #151b22; border-radius: 12px; border: 1px solid #2d3640; }
+    .features-title { font-size: 14px; font-weight: 600; color: #e6edf3; margin-bottom: 12px; }
+    .features-list { display: flex; flex-wrap: wrap; gap: 8px; }
+    .feature-tag { padding: 6px 12px; background: rgba(88, 166, 255, 0.15); color: #58a6ff; border-radius: 6px; font-size: 12px; font-weight: 500; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="title-group">
+      <span class="version-badge">v0.5</span>
+      <div>
+        <h1 class="title">ハンク単位ステージング</h1>
+        <p class="subtitle">変更をハンク（変更ブロック）単位で選択してコミットできる</p>
+      </div>
+    </div>
+    <div class="theme-toggle">
+      <button class="theme-btn active" data-theme="dark">Dark</button>
+      <button class="theme-btn" data-theme="light">Light</button>
+    </div>
+  </div>
+
+  <div class="app-container">
+    <div class="app" id="app">
+      <div class="titlebar">
+        <div class="window-controls">
+          <div class="window-dot close"></div>
+          <div class="window-dot minimize"></div>
+          <div class="window-dot maximize"></div>
+        </div>
+        <span class="titlebar-text">Rocket - rocket</span>
+      </div>
+
+      <div class="main">
+        <div class="sidebar">
+          <div class="sidebar-header">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+              <path d="M14 2v6h6"/>
+            </svg>
+            <span>変更ファイル</span>
+          </div>
+          <div class="sidebar-content">
+            <div class="file-item selected">
+              <svg class="file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                <path d="M14 2v6h6"/>
+              </svg>
+              <span class="file-name">internal/ui/diff.go</span>
+              <span class="file-hunk-count">1/3</span>
+            </div>
+            <div class="file-item">
+              <svg class="file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                <path d="M14 2v6h6"/>
+              </svg>
+              <span class="file-name">internal/ui/stage.go</span>
+              <span class="file-hunk-count">0/2</span>
+            </div>
+            <div class="file-item">
+              <svg class="file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                <path d="M14 2v6h6"/>
+              </svg>
+              <span class="file-name">go.mod</span>
+              <span class="file-hunk-count">0/1</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="diff-panel">
+          <div class="diff-toolbar">
+            <div class="diff-file-info">
+              <span class="diff-file-path">internal/ui/diff.go</span>
+              <span class="diff-stats">
+                <span class="added">+45</span>
+                <span class="removed">-12</span>
+              </span>
+            </div>
+            <div class="view-toggle">
+              <button class="view-btn active">インライン</button>
+              <button class="view-btn">サイドバイサイド</button>
+            </div>
+          </div>
+
+          <div class="diff-content">
+            <!-- Hunk 1 - Staged -->
+            <div class="hunk staged">
+              <div class="hunk-header">
+                <span class="hunk-range">@@ -45,8 +45,12 @@</span>
+                <span class="hunk-desc">func RenderDiff</span>
+                <div class="hunk-actions">
+                  <button class="hunk-btn unstage">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M5 12h14"/>
+                    </svg>
+                    Unstage
+                  </button>
+                </div>
+              </div>
+              <div class="hunk-lines">
+                <div class="diff-line">
+                  <div class="line-gutter">
+                    <span class="line-num">45</span>
+                    <span class="line-num">45</span>
+                  </div>
+                  <span class="line-sign"></span>
+                  <span class="line-content">package ui</span>
+                </div>
+                <div class="diff-line">
+                  <div class="line-gutter">
+                    <span class="line-num">46</span>
+                    <span class="line-num">46</span>
+                  </div>
+                  <span class="line-sign"></span>
+                  <span class="line-content"></span>
+                </div>
+                <div class="diff-line removed">
+                  <div class="line-gutter">
+                    <span class="line-num">47</span>
+                    <span class="line-num"></span>
+                  </div>
+                  <span class="line-sign">-</span>
+                  <span class="line-content">func RenderDiff(<span class="word-removed">old, new string</span>) string {</span>
+                </div>
+                <div class="diff-line added">
+                  <div class="line-gutter">
+                    <span class="line-num"></span>
+                    <span class="line-num">47</span>
+                  </div>
+                  <span class="line-sign">+</span>
+                  <span class="line-content">func RenderDiff(<span class="word-added">old, new string, opts DiffOptions</span>) string {</span>
+                </div>
+                <div class="diff-line">
+                  <div class="line-gutter">
+                    <span class="line-num">48</span>
+                    <span class="line-num">48</span>
+                  </div>
+                  <span class="line-sign"></span>
+                  <span class="line-content">    diffs := diff.Do(old, new)</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Hunk 2 - Not staged -->
+            <div class="hunk">
+              <div class="hunk-header">
+                <span class="hunk-range">@@ -55,4 +59,8 @@</span>
+                <span class="hunk-desc">for loop</span>
+                <div class="hunk-actions">
+                  <button class="hunk-btn stage">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M12 5v14M5 12h14"/>
+                    </svg>
+                    Stage
+                  </button>
+                  <button class="hunk-btn discard">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"/>
+                    </svg>
+                    破棄
+                  </button>
+                </div>
+              </div>
+              <div class="hunk-lines">
+                <div class="diff-line">
+                  <div class="line-gutter">
+                    <span class="line-num">55</span>
+                    <span class="line-num">59</span>
+                  </div>
+                  <span class="line-sign"></span>
+                  <span class="line-content">    var result strings.Builder</span>
+                </div>
+                <div class="diff-line removed">
+                  <div class="line-gutter">
+                    <span class="line-num">56</span>
+                    <span class="line-num"></span>
+                  </div>
+                  <span class="line-sign">-</span>
+                  <span class="line-content">    for <span class="word-removed">_</span>, d := range diffs {</span>
+                </div>
+                <div class="diff-line added">
+                  <div class="line-gutter">
+                    <span class="line-num"></span>
+                    <span class="line-num">60</span>
+                  </div>
+                  <span class="line-sign">+</span>
+                  <span class="line-content">    for <span class="word-added">i</span>, d := range diffs {</span>
+                </div>
+                <div class="diff-line added">
+                  <div class="line-gutter">
+                    <span class="line-num"></span>
+                    <span class="line-num">61</span>
+                  </div>
+                  <span class="line-sign">+</span>
+                  <span class="line-content">        if opts.Context > 0 && shouldSkip(i, diffs, opts.Context) {</span>
+                </div>
+                <div class="diff-line added">
+                  <div class="line-gutter">
+                    <span class="line-num"></span>
+                    <span class="line-num">62</span>
+                  </div>
+                  <span class="line-sign">+</span>
+                  <span class="line-content">            continue</span>
+                </div>
+                <div class="diff-line added">
+                  <div class="line-gutter">
+                    <span class="line-num"></span>
+                    <span class="line-num">63</span>
+                  </div>
+                  <span class="line-sign">+</span>
+                  <span class="line-content">        }</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Hunk 3 - Not staged -->
+            <div class="hunk">
+              <div class="hunk-header">
+                <span class="hunk-range">@@ -72,3 +80,6 @@</span>
+                <span class="hunk-desc">formatAdd function</span>
+                <div class="hunk-actions">
+                  <button class="hunk-btn stage">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M12 5v14M5 12h14"/>
+                    </svg>
+                    Stage
+                  </button>
+                  <button class="hunk-btn discard">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"/>
+                    </svg>
+                    破棄
+                  </button>
+                </div>
+              </div>
+              <div class="hunk-lines">
+                <div class="diff-line removed">
+                  <div class="line-gutter">
+                    <span class="line-num">72</span>
+                    <span class="line-num"></span>
+                  </div>
+                  <span class="line-sign">-</span>
+                  <span class="line-content">            result.WriteString("+" + d.Text)</span>
+                </div>
+                <div class="diff-line added">
+                  <div class="line-gutter">
+                    <span class="line-num"></span>
+                    <span class="line-num">80</span>
+                  </div>
+                  <span class="line-sign">+</span>
+                  <span class="line-content">            result.WriteString(formatAdd(d.Text, opts))</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="staging-summary">
+            <div class="staging-info">
+              <strong>1</strong> / 3 ハンクをステージ済み
+            </div>
+            <button class="commit-staged-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="4"/>
+                <path d="M12 2v6M12 16v6"/>
+              </svg>
+              ステージ済みをコミット
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="features">
+    <h3 class="features-title">v0.5 機能（v0.4 に追加）</h3>
+    <div class="features-list">
+      <span class="feature-tag">ハンク単位ステージング</span>
+      <span class="feature-tag">ハンク単位アンステージ</span>
+      <span class="feature-tag">ハンク単位で変更破棄</span>
+      <span class="feature-tag">サイドバイサイド表示</span>
+      <span class="feature-tag">インライン表示切り替え</span>
+      <span class="feature-tag">単語単位の差分ハイライト</span>
+    </div>
+  </div>
+
+  <script>
+    const themeBtns = document.querySelectorAll('.theme-btn');
+    const app = document.getElementById('app');
+    themeBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        themeBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        if (btn.dataset.theme === 'light') app.classList.add('light');
+        else app.classList.remove('light');
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rocket v0.9 - 3ウェイマージビューア・リベース</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0f1419;
+      --bg-secondary: #151b22;
+      --bg-tertiary: #1c242d;
+      --text-primary: #e6edf3;
+      --text-secondary: #8b949e;
+      --text-muted: #565d64;
+      --border: #2d3640;
+      --accent: #58a6ff;
+      --base: #d29922;
+      --base-bg: rgba(210, 153, 34, 0.15);
+      --ours: #58a6ff;
+      --ours-bg: rgba(88, 166, 255, 0.15);
+      --theirs: #a371f7;
+      --theirs-bg: rgba(163, 113, 247, 0.15);
+      --result: #3fb950;
+      --result-bg: rgba(63, 185, 80, 0.15);
+    }
+
+    .light {
+      --bg-primary: #ffffff;
+      --bg-secondary: #f6f8fa;
+      --bg-tertiary: #ebeef1;
+      --text-primary: #1f2328;
+      --text-secondary: #656d76;
+      --text-muted: #8c959f;
+      --border: #d1d9e0;
+      --base: #9a6700;
+      --base-bg: rgba(154, 103, 0, 0.1);
+      --ours: #0969da;
+      --ours-bg: rgba(9, 105, 218, 0.1);
+      --theirs: #8250df;
+      --theirs-bg: rgba(130, 80, 223, 0.1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'IBM Plex Sans', sans-serif; background: #0a0c0f; min-height: 100vh; padding: 40px; }
+
+    .header { max-width: 1400px; margin: 0 auto 32px; display: flex; align-items: center; justify-content: space-between; }
+    .title-group { display: flex; align-items: center; gap: 16px; }
+    .version-badge { padding: 6px 14px; background: var(--accent); color: #fff; border-radius: 6px; font-size: 14px; font-weight: 600; }
+    .title { font-size: 24px; font-weight: 600; color: #e6edf3; }
+    .subtitle { font-size: 14px; color: #8b949e; margin-top: 4px; }
+
+    .theme-toggle { display: flex; gap: 8px; background: #151b22; padding: 6px; border-radius: 10px; border: 1px solid #2d3640; }
+    .theme-btn { padding: 8px 16px; border: none; border-radius: 6px; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; background: transparent; color: #8b949e; }
+    .theme-btn.active { background: #58a6ff; color: #fff; }
+
+    .app-container { max-width: 1400px; margin: 0 auto; border-radius: 12px; overflow: hidden; box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4); border: 1px solid var(--border); }
+    .app { background: var(--bg-primary); color: var(--text-primary); height: 750px; display: flex; flex-direction: column; }
+
+    .titlebar { height: 38px; background: var(--bg-secondary); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 16px; }
+    .window-controls { display: flex; gap: 8px; }
+    .window-dot { width: 12px; height: 12px; border-radius: 50%; }
+    .window-dot.close { background: #ff5f57; }
+    .window-dot.minimize { background: #febc2e; }
+    .window-dot.maximize { background: #28c840; }
+    .titlebar-text { flex: 1; text-align: center; font-size: 13px; color: var(--text-muted); }
+
+    .toolbar {
+      padding: 12px 20px;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .file-path { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 500; }
+    .conflict-nav { margin-left: auto; display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-secondary); }
+
+    .nav-btn {
+      width: 28px;
+      height: 28px;
+      border: 1px solid var(--border);
+      background: var(--bg-tertiary);
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-secondary);
+    }
+    .nav-btn:hover { border-color: var(--accent); color: var(--text-primary); }
+    .nav-btn svg { width: 14px; height: 14px; }
+
+    /* 3-Way Merge View */
+    .merge-view {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      overflow: hidden;
+    }
+
+    .merge-panel {
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .merge-panel:last-child { border-right: none; }
+
+    .panel-header {
+      padding: 10px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .panel-header.base { background: var(--base-bg); color: var(--base); }
+    .panel-header.ours { background: var(--ours-bg); color: var(--ours); }
+    .panel-header.theirs { background: var(--theirs-bg); color: var(--theirs); }
+    .panel-header.result { background: var(--result-bg); color: var(--result); }
+
+    .panel-header svg { width: 14px; height: 14px; }
+
+    .panel-content {
+      flex: 1;
+      overflow-y: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .code-line { padding: 2px 12px; white-space: pre; }
+    .code-line.highlight-ours { background: var(--ours-bg); }
+    .code-line.highlight-theirs { background: var(--theirs-bg); }
+    .code-line.highlight-result { background: var(--result-bg); }
+    .code-line.conflict { background: rgba(248, 81, 73, 0.15); }
+
+    .result-actions {
+      padding: 8px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 4px;
+    }
+
+    .result-btn {
+      flex: 1;
+      padding: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg-tertiary);
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--text-primary);
+      cursor: pointer;
+    }
+    .result-btn:hover { border-color: var(--accent); }
+    .result-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+    /* Footer */
+    .merge-footer {
+      padding: 12px 20px;
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .footer-info { font-size: 13px; color: var(--text-secondary); }
+
+    .footer-actions { display: flex; gap: 8px; }
+
+    .footer-btn {
+      padding: 10px 16px;
+      border: 1px solid var(--border);
+      background: var(--bg-tertiary);
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-primary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .footer-btn:hover { border-color: var(--accent); }
+    .footer-btn svg { width: 16px; height: 16px; }
+    .footer-btn.primary { background: var(--result); border-color: var(--result); color: #fff; }
+
+    .features { max-width: 1400px; margin: 32px auto 0; padding: 20px; background: #151b22; border-radius: 12px; border: 1px solid #2d3640; }
+    .features-title { font-size: 14px; font-weight: 600; color: #e6edf3; margin-bottom: 12px; }
+    .features-list { display: flex; flex-wrap: wrap; gap: 8px; }
+    .feature-tag { padding: 6px 12px; background: rgba(88, 166, 255, 0.15); color: #58a6ff; border-radius: 6px; font-size: 12px; font-weight: 500; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="title-group">
+      <span class="version-badge">v0.9</span>
+      <div>
+        <h1 class="title">3ウェイマージビューア・リベース</h1>
+        <p class="subtitle">高度なコンフリクト解決とリベースができる</p>
+      </div>
+    </div>
+    <div class="theme-toggle">
+      <button class="theme-btn active" data-theme="dark">Dark</button>
+      <button class="theme-btn" data-theme="light">Light</button>
+    </div>
+  </div>
+
+  <div class="app-container">
+    <div class="app" id="app">
+      <div class="titlebar">
+        <div class="window-controls">
+          <div class="window-dot close"></div>
+          <div class="window-dot minimize"></div>
+          <div class="window-dot maximize"></div>
+        </div>
+        <span class="titlebar-text">Rocket - 3-Way Merge</span>
+      </div>
+
+      <div class="toolbar">
+        <span class="file-path">internal/auth/oauth.go</span>
+        <div class="conflict-nav">
+          <button class="nav-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+          </button>
+          <span>競合 1 / 2</span>
+          <button class="nav-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="merge-view">
+        <!-- Base -->
+        <div class="merge-panel">
+          <div class="panel-header base">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+            </svg>
+            Base（共通祖先）
+          </div>
+          <div class="panel-content">
+            <div class="code-line">package auth</div>
+            <div class="code-line"></div>
+            <div class="code-line">import (</div>
+            <div class="code-line">    "context"</div>
+            <div class="code-line">)</div>
+            <div class="code-line"></div>
+            <div class="code-line highlight-ours">func NewOAuthClient(config *Config) *Client {</div>
+            <div class="code-line highlight-ours">    return &Client{</div>
+            <div class="code-line highlight-ours">        clientID: config.ClientID,</div>
+            <div class="code-line highlight-ours">    }</div>
+            <div class="code-line highlight-ours">}</div>
+            <div class="code-line"></div>
+            <div class="code-line">func (c *Client) Authenticate(ctx context.Context) error {</div>
+            <div class="code-line">    return nil</div>
+            <div class="code-line">}</div>
+          </div>
+        </div>
+
+        <!-- Ours -->
+        <div class="merge-panel">
+          <div class="panel-header ours">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+            </svg>
+            Ours（main）
+          </div>
+          <div class="panel-content">
+            <div class="code-line">package auth</div>
+            <div class="code-line"></div>
+            <div class="code-line">import (</div>
+            <div class="code-line">    "context"</div>
+            <div class="code-line">)</div>
+            <div class="code-line"></div>
+            <div class="code-line highlight-ours">func NewOAuthClient(config *Config) *Client {</div>
+            <div class="code-line highlight-ours">    return &Client{</div>
+            <div class="code-line highlight-ours">        clientID:     config.ClientID,</div>
+            <div class="code-line highlight-ours">        clientSecret: config.ClientSecret,</div>
+            <div class="code-line highlight-ours">        redirectURL:  config.RedirectURL,</div>
+            <div class="code-line highlight-ours">    }</div>
+            <div class="code-line highlight-ours">}</div>
+            <div class="code-line"></div>
+            <div class="code-line">func (c *Client) Authenticate(ctx context.Context) error {</div>
+            <div class="code-line">    return nil</div>
+            <div class="code-line">}</div>
+          </div>
+        </div>
+
+        <!-- Theirs -->
+        <div class="merge-panel">
+          <div class="panel-header theirs">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+            </svg>
+            Theirs（feature/auth）
+          </div>
+          <div class="panel-content">
+            <div class="code-line">package auth</div>
+            <div class="code-line"></div>
+            <div class="code-line">import (</div>
+            <div class="code-line">    "context"</div>
+            <div class="code-line">    "time"</div>
+            <div class="code-line">)</div>
+            <div class="code-line"></div>
+            <div class="code-line highlight-theirs">func NewOAuthClient(cfg *Config, opts ...Option) *Client {</div>
+            <div class="code-line highlight-theirs">    client := &Client{</div>
+            <div class="code-line highlight-theirs">        clientID: cfg.ClientID,</div>
+            <div class="code-line highlight-theirs">        timeout:  30 * time.Second,</div>
+            <div class="code-line highlight-theirs">    }</div>
+            <div class="code-line highlight-theirs">    for _, opt := range opts {</div>
+            <div class="code-line highlight-theirs">        opt(client)</div>
+            <div class="code-line highlight-theirs">    }</div>
+            <div class="code-line highlight-theirs">    return client</div>
+            <div class="code-line highlight-theirs">}</div>
+            <div class="code-line"></div>
+            <div class="code-line">func (c *Client) Authenticate(ctx context.Context) error {</div>
+            <div class="code-line">    return nil</div>
+            <div class="code-line">}</div>
+          </div>
+        </div>
+
+        <!-- Result -->
+        <div class="merge-panel">
+          <div class="panel-header result">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M5 12l5 5L20 7"/>
+            </svg>
+            Result（マージ結果）
+          </div>
+          <div class="panel-content">
+            <div class="code-line">package auth</div>
+            <div class="code-line"></div>
+            <div class="code-line">import (</div>
+            <div class="code-line">    "context"</div>
+            <div class="code-line">    "time"</div>
+            <div class="code-line">)</div>
+            <div class="code-line"></div>
+            <div class="code-line highlight-result">func NewOAuthClient(cfg *Config, opts ...Option) *Client {</div>
+            <div class="code-line highlight-result">    client := &Client{</div>
+            <div class="code-line highlight-result">        clientID:     cfg.ClientID,</div>
+            <div class="code-line highlight-result">        clientSecret: cfg.ClientSecret,</div>
+            <div class="code-line highlight-result">        redirectURL:  cfg.RedirectURL,</div>
+            <div class="code-line highlight-result">        timeout:      30 * time.Second,</div>
+            <div class="code-line highlight-result">    }</div>
+            <div class="code-line highlight-result">    for _, opt := range opts {</div>
+            <div class="code-line highlight-result">        opt(client)</div>
+            <div class="code-line highlight-result">    }</div>
+            <div class="code-line highlight-result">    return client</div>
+            <div class="code-line highlight-result">}</div>
+            <div class="code-line"></div>
+            <div class="code-line">func (c *Client) Authenticate(ctx context.Context) error {</div>
+            <div class="code-line">    return nil</div>
+            <div class="code-line">}</div>
+          </div>
+          <div class="result-actions">
+            <button class="result-btn">Base</button>
+            <button class="result-btn">Ours</button>
+            <button class="result-btn">Theirs</button>
+            <button class="result-btn active">手動編集</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="merge-footer">
+        <div class="footer-info">3-Way マージビューア • 変更箇所をハイライト表示</div>
+        <div class="footer-actions">
+          <button class="footer-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            キャンセル
+          </button>
+          <button class="footer-btn primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12l5 5L20 7"/></svg>
+            この解決を保存
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="features">
+    <h3 class="features-title">v0.9 機能（v0.8 に追加）</h3>
+    <div class="features-list">
+      <span class="feature-tag">3ウェイマージビューア</span>
+      <span class="feature-tag">Base表示</span>
+      <span class="feature-tag">Ours/Theirs比較</span>
+      <span class="feature-tag">結果プレビュー</span>
+      <span class="feature-tag">パネル間差分ハイライト</span>
+      <span class="feature-tag">基本リベース</span>
+      <span class="feature-tag">リベース中の競合解決</span>
+      <span class="feature-tag">リベース中止/継続</span>
+      <span class="feature-tag">インタラクティブリベース</span>
+      <span class="feature-tag">Squash/Fixup</span>
+    </div>
+  </div>
+
+  <script>
+    document.querySelectorAll('.theme-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const app = document.getElementById('app');
+        if (btn.dataset.theme === 'light') app.classList.add('light');
+        else app.classList.remove('light');
+      });
+    });
+  </script>
+</body>
+</html>

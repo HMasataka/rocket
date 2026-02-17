@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rocket v0.11 - AI連携（レビュー・分析）</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0f1419;
+      --bg-secondary: #151b22;
+      --bg-tertiary: #1c242d;
+      --text-primary: #e6edf3;
+      --text-secondary: #8b949e;
+      --text-muted: #565d64;
+      --border: #2d3640;
+      --accent: #58a6ff;
+      --ai: #f472b6;
+      --ai-bg: rgba(244, 114, 182, 0.15);
+      --warning: #d29922;
+      --warning-bg: rgba(210, 153, 34, 0.15);
+      --danger: #f85149;
+      --danger-bg: rgba(248, 81, 73, 0.15);
+      --info: #58a6ff;
+      --info-bg: rgba(88, 166, 255, 0.15);
+      --added: #3fb950;
+      --added-bg: rgba(63, 185, 80, 0.15);
+    }
+
+    .light {
+      --bg-primary: #ffffff;
+      --bg-secondary: #f6f8fa;
+      --bg-tertiary: #ebeef1;
+      --text-primary: #1f2328;
+      --text-secondary: #656d76;
+      --text-muted: #8c959f;
+      --border: #d1d9e0;
+      --accent: #0969da;
+      --ai: #db2777;
+      --ai-bg: rgba(219, 39, 119, 0.1);
+      --warning: #9a6700;
+      --warning-bg: rgba(154, 103, 0, 0.1);
+      --danger: #cf222e;
+      --danger-bg: rgba(207, 34, 46, 0.1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'IBM Plex Sans', sans-serif; background: #0a0c0f; min-height: 100vh; padding: 40px; }
+
+    .header { max-width: 1200px; margin: 0 auto 32px; display: flex; align-items: center; justify-content: space-between; }
+    .title-group { display: flex; align-items: center; gap: 16px; }
+    .version-badge { padding: 6px 14px; background: linear-gradient(135deg, #f472b6, #a78bfa); color: #fff; border-radius: 6px; font-size: 14px; font-weight: 600; }
+    .title { font-size: 24px; font-weight: 600; color: #e6edf3; }
+    .subtitle { font-size: 14px; color: #8b949e; margin-top: 4px; }
+
+    .theme-toggle { display: flex; gap: 8px; background: #151b22; padding: 6px; border-radius: 10px; border: 1px solid #2d3640; }
+    .theme-btn { padding: 8px 16px; border: none; border-radius: 6px; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; background: transparent; color: #8b949e; }
+    .theme-btn.active { background: #58a6ff; color: #fff; }
+
+    .app-container { max-width: 1200px; margin: 0 auto; border-radius: 12px; overflow: hidden; box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4); border: 1px solid var(--border); }
+    .app { background: var(--bg-primary); color: var(--text-primary); height: 800px; display: flex; flex-direction: column; }
+
+    .titlebar { height: 38px; background: var(--bg-secondary); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 16px; }
+    .window-controls { display: flex; gap: 8px; }
+    .window-dot { width: 12px; height: 12px; border-radius: 50%; }
+    .window-dot.close { background: #ff5f57; }
+    .window-dot.minimize { background: #febc2e; }
+    .window-dot.maximize { background: #28c840; }
+    .titlebar-text { flex: 1; text-align: center; font-size: 13px; color: var(--text-muted); }
+
+    /* Review Header */
+    .review-header {
+      padding: 16px 24px;
+      background: var(--ai-bg);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .review-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #f472b6, #a78bfa);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .review-icon svg { width: 22px; height: 22px; color: #fff; }
+
+    .review-info h2 { font-size: 16px; font-weight: 600; }
+    .review-info p { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+    .review-stats { margin-left: auto; display: flex; gap: 16px; }
+
+    .stat-item {
+      text-align: center;
+      padding: 8px 16px;
+      background: var(--bg-secondary);
+      border-radius: 8px;
+    }
+    .stat-value { font-size: 20px; font-weight: 700; }
+    .stat-value.danger { color: var(--danger); }
+    .stat-value.warning { color: var(--warning); }
+    .stat-value.info { color: var(--info); }
+    .stat-label { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+
+    .main { flex: 1; display: grid; grid-template-columns: 300px 1fr; overflow: hidden; }
+
+    /* File Risk List */
+    .risk-sidebar { background: var(--bg-secondary); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+
+    .sidebar-header { padding: 14px 16px; border-bottom: 1px solid var(--border); font-size: 13px; font-weight: 600; }
+
+    .file-list { flex: 1; overflow-y: auto; }
+
+    .file-item {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .file-item:hover { background: var(--bg-tertiary); }
+    .file-item.selected { background: var(--ai-bg); border-left: 3px solid var(--ai); }
+
+    .file-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+
+    .risk-badge {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+    .risk-badge.high { background: var(--danger); }
+    .risk-badge.medium { background: var(--warning); }
+    .risk-badge.low { background: var(--info); }
+
+    .file-name { font-family: 'JetBrains Mono', monospace; font-size: 12px; flex: 1; }
+
+    .file-score {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .file-score.high { background: var(--danger-bg); color: var(--danger); }
+    .file-score.medium { background: var(--warning-bg); color: var(--warning); }
+    .file-score.low { background: var(--info-bg); color: var(--info); }
+
+    .file-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+
+    .file-tag {
+      font-size: 9px;
+      padding: 2px 6px;
+      background: var(--bg-tertiary);
+      border-radius: 4px;
+      color: var(--text-muted);
+    }
+
+    /* Review Content */
+    .review-content { display: flex; flex-direction: column; overflow: hidden; }
+
+    .content-header {
+      padding: 16px 24px;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .content-file { font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 500; }
+
+    .content-actions { margin-left: auto; display: flex; gap: 8px; }
+
+    .content-btn {
+      padding: 8px 14px;
+      border: 1px solid var(--border);
+      background: var(--bg-tertiary);
+      border-radius: 6px;
+      font-size: 12px;
+      color: var(--text-primary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .content-btn:hover { border-color: var(--accent); }
+    .content-btn svg { width: 14px; height: 14px; }
+
+    .content-body { flex: 1; overflow-y: auto; padding: 20px 24px; }
+
+    /* Review Comments */
+    .review-comment {
+      background: var(--bg-secondary);
+      border-radius: 12px;
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+
+    .comment-header {
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .comment-type {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 4px;
+    }
+    .comment-type.security { background: var(--danger-bg); color: var(--danger); }
+    .comment-type.bug { background: var(--warning-bg); color: var(--warning); }
+    .comment-type.suggestion { background: var(--info-bg); color: var(--info); }
+    .comment-type svg { width: 12px; height: 12px; }
+
+    .comment-location { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted); margin-left: auto; }
+
+    .comment-code {
+      padding: 12px 16px;
+      background: var(--bg-primary);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;
+    }
+
+    .code-line { display: flex; line-height: 1.6; }
+    .code-line.highlight { background: var(--danger-bg); }
+
+    .line-num { width: 40px; color: var(--text-muted); text-align: right; padding-right: 12px; user-select: none; }
+    .line-content { white-space: pre; }
+
+    .comment-body { padding: 16px; }
+
+    .comment-title { font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+    .comment-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+
+    .comment-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .action-btn {
+      padding: 8px 14px;
+      border: 1px solid var(--border);
+      background: var(--bg-tertiary);
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-primary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .action-btn:hover { border-color: var(--accent); }
+    .action-btn svg { width: 12px; height: 12px; }
+    .action-btn.primary { background: var(--ai); border-color: var(--ai); color: #fff; }
+
+    .features { max-width: 1200px; margin: 32px auto 0; padding: 20px; background: #151b22; border-radius: 12px; border: 1px solid #2d3640; }
+    .features-title { font-size: 14px; font-weight: 600; color: #e6edf3; margin-bottom: 12px; }
+    .features-list { display: flex; flex-wrap: wrap; gap: 8px; }
+    .feature-tag { padding: 6px 12px; background: rgba(244, 114, 182, 0.15); color: #f472b6; border-radius: 6px; font-size: 12px; font-weight: 500; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="title-group">
+      <span class="version-badge">v0.11</span>
+      <div>
+        <h1 class="title">AI連携（レビュー・分析）</h1>
+        <p class="subtitle">AIによる差分の分析とレビュー支援ができる</p>
+      </div>
+    </div>
+    <div class="theme-toggle">
+      <button class="theme-btn active" data-theme="dark">Dark</button>
+      <button class="theme-btn" data-theme="light">Light</button>
+    </div>
+  </div>
+
+  <div class="app-container">
+    <div class="app" id="app">
+      <div class="titlebar">
+        <div class="window-controls">
+          <div class="window-dot close"></div>
+          <div class="window-dot minimize"></div>
+          <div class="window-dot maximize"></div>
+        </div>
+        <span class="titlebar-text">Rocket - AI Code Review</span>
+      </div>
+
+      <div class="review-header">
+        <div class="review-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+            <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/>
+          </svg>
+        </div>
+        <div class="review-info">
+          <h2>PR レビュー分析</h2>
+          <p>feature/oauth → main • 12 files changed</p>
+        </div>
+        <div class="review-stats">
+          <div class="stat-item">
+            <div class="stat-value danger">2</div>
+            <div class="stat-label">Critical</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value warning">5</div>
+            <div class="stat-label">Warning</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value info">8</div>
+            <div class="stat-label">Info</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="main">
+        <div class="risk-sidebar">
+          <div class="sidebar-header">ファイル別リスク</div>
+          <div class="file-list">
+            <div class="file-item selected">
+              <div class="file-header">
+                <span class="risk-badge high"></span>
+                <span class="file-name">internal/auth/oauth.go</span>
+                <span class="file-score high">High</span>
+              </div>
+              <div class="file-tags">
+                <span class="file-tag">セキュリティ</span>
+                <span class="file-tag">API変更</span>
+              </div>
+            </div>
+            <div class="file-item">
+              <div class="file-header">
+                <span class="risk-badge high"></span>
+                <span class="file-name">internal/auth/token.go</span>
+                <span class="file-score high">High</span>
+              </div>
+              <div class="file-tags">
+                <span class="file-tag">セキュリティ</span>
+              </div>
+            </div>
+            <div class="file-item">
+              <div class="file-header">
+                <span class="risk-badge medium"></span>
+                <span class="file-name">internal/config/config.go</span>
+                <span class="file-score medium">Med</span>
+              </div>
+              <div class="file-tags">
+                <span class="file-tag">設定変更</span>
+              </div>
+            </div>
+            <div class="file-item">
+              <div class="file-header">
+                <span class="risk-badge low"></span>
+                <span class="file-name">go.mod</span>
+                <span class="file-score low">Low</span>
+              </div>
+              <div class="file-tags">
+                <span class="file-tag">依存更新</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="review-content">
+          <div class="content-header">
+            <span class="content-file">internal/auth/oauth.go</span>
+            <div class="content-actions">
+              <button class="content-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                差分を表示
+              </button>
+            </div>
+          </div>
+
+          <div class="content-body">
+            <div class="review-comment">
+              <div class="comment-header">
+                <span class="comment-type security">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                  セキュリティ
+                </span>
+                <span class="comment-location">Line 45-48</span>
+              </div>
+              <div class="comment-code">
+                <div class="code-line highlight"><span class="line-num">45</span><span class="line-content">func (c *Client) ValidateToken(token string) bool {</span></div>
+                <div class="code-line highlight"><span class="line-num">46</span><span class="line-content">    return token == c.expectedToken</span></div>
+                <div class="code-line highlight"><span class="line-num">47</span><span class="line-content">}</span></div>
+              </div>
+              <div class="comment-body">
+                <div class="comment-title">タイミング攻撃に脆弱</div>
+                <div class="comment-desc">
+                  文字列の直接比較はタイミング攻撃に対して脆弱です。
+                  <code>subtle.ConstantTimeCompare()</code> を使用して、
+                  一定時間での比較を行うことを推奨します。
+                </div>
+                <div class="comment-actions">
+                  <button class="action-btn primary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                    修正パッチを生成
+                  </button>
+                  <button class="action-btn">解決済みにする</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="review-comment">
+              <div class="comment-header">
+                <span class="comment-type bug">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+                  潜在的バグ
+                </span>
+                <span class="comment-location">Line 72</span>
+              </div>
+              <div class="comment-code">
+                <div class="code-line"><span class="line-num">71</span><span class="line-content">func (c *Client) Refresh() error {</span></div>
+                <div class="code-line highlight"><span class="line-num">72</span><span class="line-content">    resp, _ := http.Get(c.refreshURL)</span></div>
+                <div class="code-line"><span class="line-num">73</span><span class="line-content">    defer resp.Body.Close()</span></div>
+              </div>
+              <div class="comment-body">
+                <div class="comment-title">エラーハンドリングの欠落</div>
+                <div class="comment-desc">
+                  http.Get のエラーが無視されています。resp が nil の場合、
+                  次の行で panic が発生します。エラーチェックを追加してください。
+                </div>
+                <div class="comment-actions">
+                  <button class="action-btn primary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                    修正パッチを生成
+                  </button>
+                  <button class="action-btn">解決済みにする</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="review-comment">
+              <div class="comment-header">
+                <span class="comment-type suggestion">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3M12 17h.01"/></svg>
+                  提案
+                </span>
+                <span class="comment-location">Line 15</span>
+              </div>
+              <div class="comment-body">
+                <div class="comment-title">定数の外部化を検討</div>
+                <div class="comment-desc">
+                  タイムアウト値 (30 * time.Second) がハードコードされています。
+                  設定ファイルまたは環境変数から読み込むことを検討してください。
+                </div>
+                <div class="comment-actions">
+                  <button class="action-btn">解決済みにする</button>
+                  <button class="action-btn">無視する</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="features">
+    <h3 class="features-title">v0.11 機能（v0.10 に追加）</h3>
+    <div class="features-list">
+      <span class="feature-tag">コードレビュー支援</span>
+      <span class="feature-tag">バグ・問題点指摘</span>
+      <span class="feature-tag">セキュリティリスク検出</span>
+      <span class="feature-tag">リスクハイライト</span>
+      <span class="feature-tag">依存パッケージ更新検出</span>
+      <span class="feature-tag">公開API変更検出</span>
+      <span class="feature-tag">複雑度スコア</span>
+      <span class="feature-tag">コンフリクト解決支援</span>
+      <span class="feature-tag">PR説明文生成</span>
+    </div>
+  </div>
+
+  <script>
+    document.querySelectorAll('.theme-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const app = document.getElementById('app');
+        if (btn.dataset.theme === 'light') app.classList.add('light');
+        else app.classList.remove('light');
+      });
+    });
+  </script>
+</body>
+</html>

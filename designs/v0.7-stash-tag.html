@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rocket v0.7 - スタッシュ・タグ</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0f1419;
+      --bg-secondary: #151b22;
+      --bg-tertiary: #1c242d;
+      --text-primary: #e6edf3;
+      --text-secondary: #8b949e;
+      --text-muted: #565d64;
+      --border: #2d3640;
+      --accent: #58a6ff;
+      --accent-dim: rgba(88, 166, 255, 0.15);
+      --stash: #a371f7;
+      --stash-bg: rgba(163, 113, 247, 0.15);
+      --tag: #d29922;
+      --tag-bg: rgba(210, 153, 34, 0.15);
+      --added: #3fb950;
+      --removed: #f85149;
+    }
+
+    .light {
+      --bg-primary: #ffffff;
+      --bg-secondary: #f6f8fa;
+      --bg-tertiary: #ebeef1;
+      --text-primary: #1f2328;
+      --text-secondary: #656d76;
+      --text-muted: #8c959f;
+      --border: #d1d9e0;
+      --accent: #0969da;
+      --accent-dim: rgba(9, 105, 218, 0.1);
+      --stash: #8250df;
+      --stash-bg: rgba(130, 80, 223, 0.1);
+      --tag: #9a6700;
+      --tag-bg: rgba(154, 103, 0, 0.1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'IBM Plex Sans', sans-serif; background: #0a0c0f; min-height: 100vh; padding: 40px; }
+
+    .header { max-width: 1200px; margin: 0 auto 32px; display: flex; align-items: center; justify-content: space-between; }
+    .title-group { display: flex; align-items: center; gap: 16px; }
+    .version-badge { padding: 6px 14px; background: var(--accent); color: #fff; border-radius: 6px; font-size: 14px; font-weight: 600; }
+    .title { font-size: 24px; font-weight: 600; color: #e6edf3; }
+    .subtitle { font-size: 14px; color: #8b949e; margin-top: 4px; }
+
+    .theme-toggle { display: flex; gap: 8px; background: #151b22; padding: 6px; border-radius: 10px; border: 1px solid #2d3640; }
+    .theme-btn { padding: 8px 16px; border: none; border-radius: 6px; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; background: transparent; color: #8b949e; }
+    .theme-btn.active { background: #58a6ff; color: #fff; }
+
+    .app-container { max-width: 1200px; margin: 0 auto; border-radius: 12px; overflow: hidden; box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4); border: 1px solid var(--border); }
+    .app { background: var(--bg-primary); color: var(--text-primary); height: 700px; display: flex; flex-direction: column; }
+
+    .titlebar { height: 38px; background: var(--bg-secondary); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 16px; }
+    .window-controls { display: flex; gap: 8px; }
+    .window-dot { width: 12px; height: 12px; border-radius: 50%; }
+    .window-dot.close { background: #ff5f57; }
+    .window-dot.minimize { background: #febc2e; }
+    .window-dot.maximize { background: #28c840; }
+    .titlebar-text { flex: 1; text-align: center; font-size: 13px; color: var(--text-muted); }
+
+    .main { flex: 1; display: grid; grid-template-columns: 300px 1fr; overflow: hidden; }
+
+    /* Sidebar with Tabs */
+    .sidebar { background: var(--bg-secondary); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+
+    .sidebar-tabs { display: flex; border-bottom: 1px solid var(--border); }
+    .sidebar-tab {
+      flex: 1;
+      padding: 14px;
+      background: none;
+      border: none;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .sidebar-tab:hover { color: var(--text-primary); }
+    .sidebar-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .sidebar-tab svg { width: 16px; height: 16px; }
+
+    .sidebar-content { flex: 1; overflow-y: auto; }
+
+    /* Stash List */
+    .stash-header {
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .stash-title { font-size: 12px; font-weight: 600; color: var(--text-secondary); }
+
+    .new-stash-btn {
+      padding: 6px 12px;
+      background: var(--stash);
+      border: none;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 500;
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .new-stash-btn svg { width: 12px; height: 12px; }
+
+    .stash-list { padding: 8px 0; }
+
+    .stash-item {
+      padding: 12px 16px;
+      cursor: pointer;
+      transition: background 0.15s;
+      border-left: 3px solid transparent;
+    }
+    .stash-item:hover { background: var(--bg-tertiary); }
+    .stash-item.selected { background: var(--stash-bg); border-left-color: var(--stash); }
+
+    .stash-name { font-size: 13px; font-weight: 500; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+    .stash-index { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--stash); background: var(--stash-bg); padding: 2px 6px; border-radius: 4px; }
+    .stash-message { font-size: 12px; color: var(--text-muted); }
+    .stash-meta { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+    /* Tag List */
+    .tag-header {
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .new-tag-btn {
+      padding: 6px 12px;
+      background: var(--tag);
+      border: none;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 500;
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .tag-list { padding: 8px 0; }
+
+    .tag-item {
+      padding: 12px 16px;
+      cursor: pointer;
+      transition: background 0.15s;
+      border-left: 3px solid transparent;
+    }
+    .tag-item:hover { background: var(--bg-tertiary); }
+    .tag-item.selected { background: var(--tag-bg); border-left-color: var(--tag); }
+
+    .tag-name-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+    .tag-icon { width: 16px; height: 16px; color: var(--tag); }
+    .tag-name { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; }
+    .tag-type { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: var(--bg-tertiary); color: var(--text-muted); }
+    .tag-commit { font-size: 12px; color: var(--text-muted); }
+
+    /* Detail Panel */
+    .detail-panel { display: flex; flex-direction: column; overflow: hidden; }
+
+    .detail-header {
+      padding: 20px 24px;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .detail-type { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+    .detail-type.stash { color: var(--stash); }
+    .detail-type.tag { color: var(--tag); }
+    .detail-type svg { width: 14px; height: 14px; }
+
+    .detail-title { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+    .detail-meta { font-size: 13px; color: var(--text-secondary); }
+
+    .detail-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .action-btn {
+      padding: 10px 16px;
+      border: 1px solid var(--border);
+      background: var(--bg-tertiary);
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-primary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .action-btn:hover { border-color: var(--accent); }
+    .action-btn svg { width: 16px; height: 16px; }
+    .action-btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .action-btn.danger { color: var(--removed); border-color: var(--removed); }
+
+    .detail-content { flex: 1; overflow-y: auto; padding: 20px 24px; }
+
+    .file-list { margin-top: 16px; }
+    .file-list-title { font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 12px; }
+
+    .file-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: var(--bg-secondary);
+      border-radius: 6px;
+      margin-bottom: 6px;
+    }
+
+    .file-icon { width: 16px; height: 16px; }
+    .file-icon.added { color: var(--added); }
+    .file-icon.modified { color: var(--tag); }
+
+    .file-name { font-family: 'JetBrains Mono', monospace; font-size: 12px; flex: 1; }
+
+    .features { max-width: 1200px; margin: 32px auto 0; padding: 20px; background: #151b22; border-radius: 12px; border: 1px solid #2d3640; }
+    .features-title { font-size: 14px; font-weight: 600; color: #e6edf3; margin-bottom: 12px; }
+    .features-list { display: flex; flex-wrap: wrap; gap: 8px; }
+    .feature-tag { padding: 6px 12px; background: rgba(88, 166, 255, 0.15); color: #58a6ff; border-radius: 6px; font-size: 12px; font-weight: 500; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="title-group">
+      <span class="version-badge">v0.7</span>
+      <div>
+        <h1 class="title">スタッシュ・タグ</h1>
+        <p class="subtitle">作業の一時退避とリリース管理ができる</p>
+      </div>
+    </div>
+    <div class="theme-toggle">
+      <button class="theme-btn active" data-theme="dark">Dark</button>
+      <button class="theme-btn" data-theme="light">Light</button>
+    </div>
+  </div>
+
+  <div class="app-container">
+    <div class="app" id="app">
+      <div class="titlebar">
+        <div class="window-controls">
+          <div class="window-dot close"></div>
+          <div class="window-dot minimize"></div>
+          <div class="window-dot maximize"></div>
+        </div>
+        <span class="titlebar-text">Rocket - rocket</span>
+      </div>
+
+      <div class="main">
+        <div class="sidebar">
+          <div class="sidebar-tabs">
+            <button class="sidebar-tab active">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
+              </svg>
+              スタッシュ
+            </button>
+            <button class="sidebar-tab">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/>
+                <line x1="7" y1="7" x2="7.01" y2="7"/>
+              </svg>
+              タグ
+            </button>
+          </div>
+
+          <div class="sidebar-content">
+            <div class="stash-header">
+              <span class="stash-title">保存済みスタッシュ</span>
+              <button class="new-stash-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                新規
+              </button>
+            </div>
+
+            <div class="stash-list">
+              <div class="stash-item selected">
+                <div class="stash-name">
+                  <span class="stash-index">stash@{0}</span>
+                  WIP: UIの調整中
+                </div>
+                <div class="stash-message">On main: 差分ビューアのスタイル調整</div>
+                <div class="stash-meta">3時間前 • 5ファイル変更</div>
+              </div>
+
+              <div class="stash-item">
+                <div class="stash-name">
+                  <span class="stash-index">stash@{1}</span>
+                  認証機能のテスト
+                </div>
+                <div class="stash-message">On feature/auth: OAuth実装中</div>
+                <div class="stash-meta">1日前 • 3ファイル変更</div>
+              </div>
+
+              <div class="stash-item">
+                <div class="stash-name">
+                  <span class="stash-index">stash@{2}</span>
+                  バグ修正途中
+                </div>
+                <div class="stash-message">On main: スクロール問題の調査</div>
+                <div class="stash-meta">3日前 • 2ファイル変更</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-panel">
+          <div class="detail-header">
+            <div class="detail-type stash">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
+              </svg>
+              stash@{0}
+            </div>
+            <h2 class="detail-title">WIP: UIの調整中</h2>
+            <p class="detail-meta">On main: 差分ビューアのスタイル調整 • 3時間前</p>
+            <div class="detail-actions">
+              <button class="action-btn primary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 5v14M19 12l-7 7-7-7"/>
+                </svg>
+                Apply
+              </button>
+              <button class="action-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 5v14M19 12l-7 7-7-7"/>
+                </svg>
+                Pop
+              </button>
+              <button class="action-btn danger">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"/>
+                </svg>
+                削除
+              </button>
+            </div>
+          </div>
+
+          <div class="detail-content">
+            <div class="file-list">
+              <div class="file-list-title">変更ファイル (5)</div>
+              <div class="file-item">
+                <svg class="file-icon modified" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                </svg>
+                <span class="file-name">internal/ui/diff.go</span>
+              </div>
+              <div class="file-item">
+                <svg class="file-icon modified" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                </svg>
+                <span class="file-name">internal/ui/styles.go</span>
+              </div>
+              <div class="file-item">
+                <svg class="file-icon added" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                </svg>
+                <span class="file-name">internal/ui/themes/dark.go</span>
+              </div>
+              <div class="file-item">
+                <svg class="file-icon modified" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                </svg>
+                <span class="file-name">internal/ui/components/sidebar.go</span>
+              </div>
+              <div class="file-item">
+                <svg class="file-icon modified" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                </svg>
+                <span class="file-name">go.mod</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="features">
+    <h3 class="features-title">v0.7 機能（v0.6 に追加）</h3>
+    <div class="features-list">
+      <span class="feature-tag">スタッシュ作成</span>
+      <span class="feature-tag">スタッシュ一覧</span>
+      <span class="feature-tag">スタッシュ差分プレビュー</span>
+      <span class="feature-tag">Apply / Pop</span>
+      <span class="feature-tag">スタッシュ削除</span>
+      <span class="feature-tag">タグ一覧</span>
+      <span class="feature-tag">軽量タグ作成</span>
+      <span class="feature-tag">注釈付きタグ</span>
+      <span class="feature-tag">タグ削除</span>
+      <span class="feature-tag">Co-Author追加</span>
+    </div>
+  </div>
+
+  <script>
+    document.querySelectorAll('.theme-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const app = document.getElementById('app');
+        if (btn.dataset.theme === 'light') app.classList.add('light');
+        else app.classList.remove('light');
+      });
+    });
+  </script>
+</body>
+</html>

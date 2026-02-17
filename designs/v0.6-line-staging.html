@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rocket v0.6 - 行単位ステージング・Amend</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0f1419;
+      --bg-secondary: #151b22;
+      --bg-tertiary: #1c242d;
+      --text-primary: #e6edf3;
+      --text-secondary: #8b949e;
+      --text-muted: #565d64;
+      --border: #2d3640;
+      --accent: #58a6ff;
+      --accent-hover: #79b8ff;
+      --accent-dim: rgba(88, 166, 255, 0.15);
+      --added: #3fb950;
+      --added-bg: rgba(63, 185, 80, 0.15);
+      --removed: #f85149;
+      --removed-bg: rgba(248, 81, 73, 0.15);
+      --selected: #58a6ff;
+      --selected-bg: rgba(88, 166, 255, 0.25);
+    }
+
+    .light {
+      --bg-primary: #ffffff;
+      --bg-secondary: #f6f8fa;
+      --bg-tertiary: #ebeef1;
+      --text-primary: #1f2328;
+      --text-secondary: #656d76;
+      --text-muted: #8c959f;
+      --border: #d1d9e0;
+      --accent: #0969da;
+      --accent-hover: #0860ca;
+      --accent-dim: rgba(9, 105, 218, 0.1);
+      --added: #1a7f37;
+      --added-bg: rgba(26, 127, 55, 0.1);
+      --removed: #cf222e;
+      --removed-bg: rgba(207, 34, 46, 0.1);
+      --selected: #0969da;
+      --selected-bg: rgba(9, 105, 218, 0.15);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'IBM Plex Sans', sans-serif; background: #0a0c0f; min-height: 100vh; padding: 40px; }
+
+    .header { max-width: 1200px; margin: 0 auto 32px; display: flex; align-items: center; justify-content: space-between; }
+    .title-group { display: flex; align-items: center; gap: 16px; }
+    .version-badge { padding: 6px 14px; background: var(--accent); color: #fff; border-radius: 6px; font-size: 14px; font-weight: 600; }
+    .title { font-size: 24px; font-weight: 600; color: #e6edf3; }
+    .subtitle { font-size: 14px; color: #8b949e; margin-top: 4px; }
+
+    .theme-toggle { display: flex; gap: 8px; background: #151b22; padding: 6px; border-radius: 10px; border: 1px solid #2d3640; }
+    .theme-btn { padding: 8px 16px; border: none; border-radius: 6px; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; background: transparent; color: #8b949e; }
+    .theme-btn.active { background: #58a6ff; color: #fff; }
+
+    .app-container { max-width: 1200px; margin: 0 auto; border-radius: 12px; overflow: hidden; box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4); border: 1px solid var(--border); }
+    .app { background: var(--bg-primary); color: var(--text-primary); height: 700px; display: flex; flex-direction: column; }
+
+    .titlebar { height: 38px; background: var(--bg-secondary); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 16px; gap: 12px; }
+    .window-controls { display: flex; gap: 8px; }
+    .window-dot { width: 12px; height: 12px; border-radius: 50%; }
+    .window-dot.close { background: #ff5f57; }
+    .window-dot.minimize { background: #febc2e; }
+    .window-dot.maximize { background: #28c840; }
+    .titlebar-text { flex: 1; text-align: center; font-size: 13px; color: var(--text-muted); }
+
+    .main { flex: 1; display: grid; grid-template-columns: 1fr 340px; overflow: hidden; }
+
+    /* Diff with line selection */
+    .diff-panel { display: flex; flex-direction: column; overflow: hidden; }
+
+    .diff-toolbar {
+      padding: 12px 20px;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .diff-file-path { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 500; }
+
+    .selection-info {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .selection-count {
+      padding: 4px 10px;
+      background: var(--selected-bg);
+      color: var(--selected);
+      border-radius: 4px;
+      font-weight: 600;
+    }
+
+    .selection-actions { display: flex; gap: 8px; }
+
+    .sel-btn {
+      padding: 6px 12px;
+      border: 1px solid var(--border);
+      background: var(--bg-tertiary);
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-primary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s;
+    }
+
+    .sel-btn:hover { border-color: var(--accent); }
+    .sel-btn svg { width: 12px; height: 12px; }
+    .sel-btn.stage { background: var(--added); border-color: var(--added); color: #fff; }
+
+    .diff-content { flex: 1; overflow-y: auto; }
+
+    .diff-line {
+      display: flex;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      line-height: 1.7;
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+
+    .diff-line:hover { background: var(--bg-tertiary); }
+    .diff-line.added { background: var(--added-bg); }
+    .diff-line.removed { background: var(--removed-bg); }
+    .diff-line.selected { background: var(--selected-bg) !important; outline: 1px solid var(--selected); outline-offset: -1px; }
+
+    .line-checkbox {
+      width: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      border-right: 1px solid var(--border);
+    }
+
+    .line-checkbox input {
+      width: 14px;
+      height: 14px;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    .line-num {
+      width: 40px;
+      padding: 0 8px;
+      text-align: right;
+      color: var(--text-muted);
+      user-select: none;
+    }
+
+    .line-sign { width: 20px; text-align: center; font-weight: 600; }
+    .diff-line.added .line-sign { color: var(--added); }
+    .diff-line.removed .line-sign { color: var(--removed); }
+
+    .line-content { flex: 1; padding: 0 12px; white-space: pre; }
+
+    /* Commit Panel with Amend */
+    .commit-panel {
+      background: var(--bg-secondary);
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .commit-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .commit-title { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+    .commit-title svg { width: 18px; height: 18px; color: var(--accent); }
+
+    .amend-toggle {
+      margin-top: 12px;
+      padding: 12px;
+      background: var(--bg-tertiary);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    .amend-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+    }
+
+    .amend-checkbox input { width: 16px; height: 16px; accent-color: var(--accent); }
+    .amend-checkbox span { font-size: 13px; font-weight: 500; }
+
+    .amend-info {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .amend-hash {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--accent);
+    }
+
+    .commit-form { flex: 1; display: flex; flex-direction: column; padding: 20px; gap: 16px; }
+
+    .input-group { display: flex; flex-direction: column; gap: 8px; }
+    .input-label { font-size: 12px; font-weight: 500; color: var(--text-secondary); }
+
+    .input-field {
+      padding: 12px 14px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: var(--text-primary);
+      outline: none;
+    }
+
+    .input-field:focus { border-color: var(--accent); }
+
+    .textarea-field {
+      flex: 1;
+      min-height: 100px;
+      padding: 12px 14px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: var(--text-primary);
+      resize: none;
+      outline: none;
+    }
+
+    .textarea-field:focus { border-color: var(--accent); }
+
+    .commit-actions { padding: 16px 20px; border-top: 1px solid var(--border); }
+
+    .commit-btn {
+      width: 100%;
+      padding: 14px;
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .commit-btn:hover { background: var(--accent-hover); }
+    .commit-btn svg { width: 18px; height: 18px; }
+
+    .commit-btn.amend { background: #d29922; }
+    .commit-btn.amend:hover { background: #e0a830; }
+
+    .features { max-width: 1200px; margin: 32px auto 0; padding: 20px; background: #151b22; border-radius: 12px; border: 1px solid #2d3640; }
+    .features-title { font-size: 14px; font-weight: 600; color: #e6edf3; margin-bottom: 12px; }
+    .features-list { display: flex; flex-wrap: wrap; gap: 8px; }
+    .feature-tag { padding: 6px 12px; background: rgba(88, 166, 255, 0.15); color: #58a6ff; border-radius: 6px; font-size: 12px; font-weight: 500; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="title-group">
+      <span class="version-badge">v0.6</span>
+      <div>
+        <h1 class="title">行単位ステージング・Amend</h1>
+        <p class="subtitle">行単位の細かい操作と直前コミットの修正ができる</p>
+      </div>
+    </div>
+    <div class="theme-toggle">
+      <button class="theme-btn active" data-theme="dark">Dark</button>
+      <button class="theme-btn" data-theme="light">Light</button>
+    </div>
+  </div>
+
+  <div class="app-container">
+    <div class="app" id="app">
+      <div class="titlebar">
+        <div class="window-controls">
+          <div class="window-dot close"></div>
+          <div class="window-dot minimize"></div>
+          <div class="window-dot maximize"></div>
+        </div>
+        <span class="titlebar-text">Rocket - rocket</span>
+      </div>
+
+      <div class="main">
+        <div class="diff-panel">
+          <div class="diff-toolbar">
+            <span class="diff-file-path">internal/ui/diff.go</span>
+            <div class="selection-info">
+              <span class="selection-count">3 行選択中</span>
+              <div class="selection-actions">
+                <button class="sel-btn stage">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                  選択をステージ
+                </button>
+                <button class="sel-btn">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"/></svg>
+                  破棄
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="diff-content">
+            <div class="diff-line">
+              <div class="line-checkbox"><input type="checkbox"></div>
+              <span class="line-num">45</span>
+              <span class="line-sign"></span>
+              <span class="line-content">package ui</span>
+            </div>
+            <div class="diff-line">
+              <div class="line-checkbox"><input type="checkbox"></div>
+              <span class="line-num">46</span>
+              <span class="line-sign"></span>
+              <span class="line-content"></span>
+            </div>
+            <div class="diff-line removed">
+              <div class="line-checkbox"><input type="checkbox"></div>
+              <span class="line-num">47</span>
+              <span class="line-sign">-</span>
+              <span class="line-content">func RenderDiff(old, new string) string {</span>
+            </div>
+            <div class="diff-line added selected">
+              <div class="line-checkbox"><input type="checkbox" checked></div>
+              <span class="line-num">47</span>
+              <span class="line-sign">+</span>
+              <span class="line-content">func RenderDiff(old, new string, opts DiffOptions) string {</span>
+            </div>
+            <div class="diff-line">
+              <div class="line-checkbox"><input type="checkbox"></div>
+              <span class="line-num">48</span>
+              <span class="line-sign"></span>
+              <span class="line-content">    diffs := diff.Do(old, new)</span>
+            </div>
+            <div class="diff-line added selected">
+              <div class="line-checkbox"><input type="checkbox" checked></div>
+              <span class="line-num">49</span>
+              <span class="line-sign">+</span>
+              <span class="line-content">    if opts.WordDiff {</span>
+            </div>
+            <div class="diff-line added selected">
+              <div class="line-checkbox"><input type="checkbox" checked></div>
+              <span class="line-num">50</span>
+              <span class="line-sign">+</span>
+              <span class="line-content">        diffs = highlightWords(diffs)</span>
+            </div>
+            <div class="diff-line added">
+              <div class="line-checkbox"><input type="checkbox"></div>
+              <span class="line-num">51</span>
+              <span class="line-sign">+</span>
+              <span class="line-content">    }</span>
+            </div>
+            <div class="diff-line">
+              <div class="line-checkbox"><input type="checkbox"></div>
+              <span class="line-num">52</span>
+              <span class="line-sign"></span>
+              <span class="line-content">    </span>
+            </div>
+            <div class="diff-line">
+              <div class="line-checkbox"><input type="checkbox"></div>
+              <span class="line-num">53</span>
+              <span class="line-sign"></span>
+              <span class="line-content">    var result strings.Builder</span>
+            </div>
+            <div class="diff-line removed">
+              <div class="line-checkbox"><input type="checkbox"></div>
+              <span class="line-num">54</span>
+              <span class="line-sign">-</span>
+              <span class="line-content">    for _, d := range diffs {</span>
+            </div>
+            <div class="diff-line added">
+              <div class="line-checkbox"><input type="checkbox"></div>
+              <span class="line-num">54</span>
+              <span class="line-sign">+</span>
+              <span class="line-content">    for i, d := range diffs {</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="commit-panel">
+          <div class="commit-header">
+            <h3 class="commit-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="4"/>
+                <path d="M12 2v6M12 16v6"/>
+              </svg>
+              コミット
+            </h3>
+            <div class="amend-toggle">
+              <label class="amend-checkbox">
+                <input type="checkbox" id="amend-check">
+                <span>直前のコミットを修正 (Amend)</span>
+              </label>
+              <div class="amend-info">
+                直前: <span class="amend-hash">a3f8c2d</span> - feat: 差分ビューアのUIを刷新
+              </div>
+            </div>
+          </div>
+
+          <div class="commit-form">
+            <div class="input-group">
+              <label class="input-label">件名</label>
+              <input type="text" class="input-field" id="commit-subject" placeholder="変更の要約を入力...">
+            </div>
+            <div class="input-group" style="flex: 1;">
+              <label class="input-label">本文（オプション）</label>
+              <textarea class="textarea-field" id="commit-body" placeholder="詳細な説明を入力..."></textarea>
+            </div>
+          </div>
+
+          <div class="commit-actions">
+            <button class="commit-btn" id="commit-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M5 12l5 5L20 7"/>
+              </svg>
+              <span id="btn-text">Commit</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="features">
+    <h3 class="features-title">v0.6 機能（v0.5 に追加）</h3>
+    <div class="features-list">
+      <span class="feature-tag">行単位ステージング</span>
+      <span class="feature-tag">行範囲選択</span>
+      <span class="feature-tag">行単位で破棄</span>
+      <span class="feature-tag">Amend（直前コミット修正）</span>
+      <span class="feature-tag">メッセージのみAmend</span>
+      <span class="feature-tag">変更追加してAmend</span>
+    </div>
+  </div>
+
+  <script>
+    document.querySelectorAll('.theme-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const app = document.getElementById('app');
+        if (btn.dataset.theme === 'light') app.classList.add('light');
+        else app.classList.remove('light');
+      });
+    });
+
+    document.getElementById('amend-check').addEventListener('change', (e) => {
+      const btn = document.getElementById('commit-btn');
+      const btnText = document.getElementById('btn-text');
+      if (e.target.checked) {
+        btn.classList.add('amend');
+        btnText.textContent = 'Amend Commit';
+      } else {
+        btn.classList.remove('amend');
+        btnText.textContent = 'Commit';
+      }
+    });
+  </script>
+</body>
+</html>

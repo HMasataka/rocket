@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rocket v1.x - 拡張機能</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0f1419;
+      --bg-secondary: #151b22;
+      --bg-tertiary: #1c242d;
+      --text-primary: #e6edf3;
+      --text-secondary: #8b949e;
+      --text-muted: #565d64;
+      --border: #2d3640;
+      --accent: #58a6ff;
+      --accent-dim: rgba(88, 166, 255, 0.15);
+      --success: #3fb950;
+      --warning: #d29922;
+      --danger: #f85149;
+      --purple: #a855f7;
+      --pink: #ec4899;
+    }
+
+    .light {
+      --bg-primary: #ffffff;
+      --bg-secondary: #f6f8fa;
+      --bg-tertiary: #ebeef1;
+      --text-primary: #1f2328;
+      --text-secondary: #656d76;
+      --text-muted: #8c959f;
+      --border: #d1d9e0;
+      --accent: #0969da;
+      --accent-dim: rgba(9, 105, 218, 0.1);
+      --success: #1a7f37;
+      --warning: #9a6700;
+      --danger: #cf222e;
+      --purple: #8250df;
+      --pink: #bf3989;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'IBM Plex Sans', sans-serif; background: #0a0c0f; min-height: 100vh; padding: 40px; }
+
+    .header { max-width: 1200px; margin: 0 auto 32px; display: flex; align-items: center; justify-content: space-between; }
+    .title-group { display: flex; align-items: center; gap: 16px; }
+    .version-badge { padding: 6px 14px; background: linear-gradient(135deg, #a855f7, #ec4899); color: #fff; border-radius: 6px; font-size: 14px; font-weight: 600; }
+    .title { font-size: 24px; font-weight: 600; color: #e6edf3; }
+    .subtitle { font-size: 14px; color: #8b949e; margin-top: 4px; }
+
+    .theme-toggle { display: flex; gap: 8px; background: #151b22; padding: 6px; border-radius: 10px; border: 1px solid #2d3640; }
+    .theme-btn { padding: 8px 16px; border: none; border-radius: 6px; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; background: transparent; color: #8b949e; transition: all 0.2s; }
+    .theme-btn.active { background: #58a6ff; color: #fff; }
+
+    .app-container { max-width: 1200px; margin: 0 auto; border-radius: 12px; overflow: hidden; box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4); border: 1px solid var(--border); }
+    .app { background: var(--bg-primary); color: var(--text-primary); height: 850px; display: flex; flex-direction: column; }
+
+    .titlebar { height: 38px; background: var(--bg-secondary); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 16px; }
+    .window-controls { display: flex; gap: 8px; }
+    .window-dot { width: 12px; height: 12px; border-radius: 50%; }
+    .window-dot.close { background: #ff5f57; }
+    .window-dot.minimize { background: #febc2e; }
+    .window-dot.maximize { background: #28c840; }
+    .titlebar-center { flex: 1; display: flex; align-items: center; justify-content: center; gap: 4px; }
+    .tab { padding: 6px 16px; font-size: 12px; color: var(--text-muted); background: transparent; border: none; cursor: pointer; border-radius: 6px; font-family: inherit; }
+    .tab.active { background: var(--bg-tertiary); color: var(--text-primary); }
+    .tab:hover:not(.active) { color: var(--text-secondary); }
+
+    .main { flex: 1; display: grid; grid-template-columns: 240px 1fr 300px; overflow: hidden; }
+
+    /* Sidebar */
+    .sidebar { background: var(--bg-secondary); border-right: 1px solid var(--border); overflow-y: auto; }
+    .sidebar-section { padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .sidebar-section:last-child { border-bottom: none; }
+    .section-label { padding: 8px 16px; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); }
+    .nav-item { padding: 10px 16px; font-size: 13px; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; gap: 10px; }
+    .nav-item:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+    .nav-item.active { background: var(--accent-dim); color: var(--accent); border-left: 2px solid var(--accent); }
+    .nav-item svg { width: 16px; height: 16px; }
+    .nav-badge { margin-left: auto; padding: 2px 6px; font-size: 10px; border-radius: 4px; font-weight: 600; }
+    .nav-badge.new { background: rgba(168, 85, 247, 0.2); color: var(--purple); }
+
+    /* Content */
+    .content { overflow-y: auto; padding: 24px; }
+    .content-header { margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; }
+    .content-title { font-size: 20px; font-weight: 600; }
+    .content-actions { display: flex; gap: 8px; }
+
+    .btn { padding: 8px 14px; border: none; border-radius: 6px; font-family: inherit; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { filter: brightness(1.1); }
+    .btn-secondary { background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border); }
+    .btn-secondary:hover { background: var(--border); }
+    .btn-danger { background: rgba(248, 81, 73, 0.15); color: var(--danger); border: 1px solid rgba(248, 81, 73, 0.3); }
+    .btn-danger:hover { background: rgba(248, 81, 73, 0.25); }
+    .btn svg { width: 14px; height: 14px; }
+
+    /* Git Operations Panel */
+    .operations-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 24px; }
+    .op-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .op-card:hover { border-color: var(--accent); background: var(--accent-dim); }
+    .op-card.active { border-color: var(--accent); background: var(--accent-dim); }
+    .op-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+    .op-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+    .op-icon.cherry { background: linear-gradient(135deg, #f472b6, #ec4899); }
+    .op-icon.revert { background: linear-gradient(135deg, #fbbf24, #f59e0b); }
+    .op-icon.reset { background: linear-gradient(135deg, #f87171, #ef4444); }
+    .op-icon.reflog { background: linear-gradient(135deg, #a78bfa, #8b5cf6); }
+    .op-title { font-size: 14px; font-weight: 600; }
+    .op-desc { font-size: 12px; color: var(--text-muted); }
+
+    /* Cherry-pick Panel */
+    .cherry-panel {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin-bottom: 24px;
+    }
+    .panel-header {
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .panel-title { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+    .panel-title svg { width: 16px; height: 16px; color: var(--accent); }
+
+    .commit-select {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .commit-input {
+      width: 100%;
+      padding: 10px 14px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--text-primary);
+    }
+    .commit-input:focus { outline: none; border-color: var(--accent); }
+    .commit-input::placeholder { color: var(--text-muted); }
+
+    .commit-preview { padding: 16px; }
+    .preview-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px;
+      background: var(--bg-tertiary);
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+    .preview-item:last-child { margin-bottom: 0; }
+    .preview-hash {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--accent);
+      background: var(--accent-dim);
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+    .preview-info { flex: 1; }
+    .preview-msg { font-size: 13px; margin-bottom: 4px; }
+    .preview-meta { font-size: 11px; color: var(--text-muted); }
+    .preview-check { color: var(--success); }
+
+    /* Submodules Section */
+    .submodule-section { margin-bottom: 24px; }
+    .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .section-title { font-size: 14px; font-weight: 600; }
+
+    .submodule-list {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .submodule-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .submodule-item:last-child { border-bottom: none; }
+    .submodule-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--bg-tertiary);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent);
+    }
+    .submodule-icon svg { width: 16px; height: 16px; }
+    .submodule-info { flex: 1; }
+    .submodule-name { font-size: 13px; font-weight: 500; margin-bottom: 2px; }
+    .submodule-path { font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+    .submodule-status { display: flex; align-items: center; gap: 6px; font-size: 11px; }
+    .status-badge { padding: 3px 8px; border-radius: 4px; font-weight: 500; }
+    .status-badge.synced { background: rgba(63, 185, 80, 0.15); color: var(--success); }
+    .status-badge.behind { background: rgba(210, 153, 34, 0.15); color: var(--warning); }
+    .submodule-actions { display: flex; gap: 4px; }
+    .icon-btn {
+      width: 28px;
+      height: 28px;
+      border: none;
+      border-radius: 6px;
+      background: var(--bg-tertiary);
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .icon-btn:hover { color: var(--accent); background: var(--accent-dim); }
+    .icon-btn svg { width: 14px; height: 14px; }
+
+    /* Right Panel - Search & Tools */
+    .right-panel { background: var(--bg-secondary); border-left: 1px solid var(--border); overflow-y: auto; display: flex; flex-direction: column; }
+
+    .search-section { padding: 16px; border-bottom: 1px solid var(--border); }
+    .search-title { font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .search-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+    .search-box:focus-within { border-color: var(--accent); }
+    .search-box svg { width: 16px; height: 16px; color: var(--text-muted); }
+    .search-input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      font-family: inherit;
+      font-size: 13px;
+      color: var(--text-primary);
+      outline: none;
+    }
+    .search-input::placeholder { color: var(--text-muted); }
+
+    .search-filters { display: flex; gap: 6px; flex-wrap: wrap; }
+    .filter-chip {
+      padding: 5px 10px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 11px;
+      color: var(--text-secondary);
+      cursor: pointer;
+    }
+    .filter-chip:hover { border-color: var(--accent); color: var(--accent); }
+    .filter-chip.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+
+    .search-results { padding: 12px 16px; flex: 1; overflow-y: auto; }
+    .result-item {
+      padding: 10px 12px;
+      background: var(--bg-tertiary);
+      border-radius: 6px;
+      margin-bottom: 8px;
+      cursor: pointer;
+    }
+    .result-item:hover { background: var(--accent-dim); }
+    .result-file { font-size: 12px; font-weight: 500; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+    .result-file svg { width: 12px; height: 12px; color: var(--accent); }
+    .result-match { font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+    .result-highlight { color: var(--warning); background: rgba(210, 153, 34, 0.2); padding: 0 2px; border-radius: 2px; }
+
+    /* Signature Section */
+    .signature-section { padding: 16px; border-bottom: 1px solid var(--border); }
+    .signature-option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      background: var(--bg-tertiary);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      cursor: pointer;
+    }
+    .signature-option:last-child { margin-bottom: 0; }
+    .signature-option:hover { background: var(--accent-dim); }
+    .signature-icon { font-size: 20px; }
+    .signature-info { flex: 1; }
+    .signature-name { font-size: 13px; font-weight: 500; }
+    .signature-desc { font-size: 11px; color: var(--text-muted); }
+    .signature-status { width: 8px; height: 8px; border-radius: 50%; }
+    .signature-status.active { background: var(--success); }
+    .signature-status.inactive { background: var(--text-muted); }
+
+    /* Worktree Section */
+    .worktree-section { padding: 16px; border-bottom: 1px solid var(--border); }
+    .worktree-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: var(--bg-tertiary);
+      border-radius: 6px;
+      margin-bottom: 6px;
+    }
+    .worktree-item:last-child { margin-bottom: 0; }
+    .worktree-item.current { border: 1px solid var(--accent); }
+    .worktree-branch { font-size: 12px; font-weight: 500; flex: 1; }
+    .worktree-path { font-size: 10px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+    .worktree-badge { font-size: 9px; padding: 2px 6px; background: var(--accent-dim); color: var(--accent); border-radius: 3px; }
+
+    /* Gitignore Section */
+    .gitignore-section { padding: 16px; flex: 1; }
+    .template-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+    .template-item {
+      padding: 10px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 11px;
+      text-align: center;
+      cursor: pointer;
+    }
+    .template-item:hover { border-color: var(--accent); }
+    .template-item.selected { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+    .template-icon { font-size: 18px; margin-bottom: 4px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="title-group">
+      <span class="version-badge">v1.x</span>
+      <div>
+        <div class="title">拡張機能</div>
+        <div class="subtitle">パワーユーザー向け機能の追加</div>
+      </div>
+    </div>
+    <div class="theme-toggle">
+      <button class="theme-btn active" onclick="setTheme('dark')">Dark</button>
+      <button class="theme-btn" onclick="setTheme('light')">Light</button>
+    </div>
+  </div>
+
+  <div class="app-container">
+    <div class="app" id="app">
+      <div class="titlebar">
+        <div class="window-controls">
+          <div class="window-dot close"></div>
+          <div class="window-dot minimize"></div>
+          <div class="window-dot maximize"></div>
+        </div>
+        <div class="titlebar-center">
+          <button class="tab active">rocket-app</button>
+          <button class="tab">rocket-core</button>
+          <button class="tab">rocket-cli</button>
+          <button class="tab">+</button>
+        </div>
+      </div>
+
+      <div class="main">
+        <!-- Left Sidebar -->
+        <nav class="sidebar">
+          <div class="sidebar-section">
+            <div class="section-label">高度なGit操作</div>
+            <div class="nav-item active">
+              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M6.5 6a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3z"/><path d="M5.5.5a.5.5 0 0 0-1 0V2A2.5 2.5 0 0 0 2 4.5H.5a.5.5 0 0 0 0 1H2v1H.5a.5.5 0 0 0 0 1H2v1H.5a.5.5 0 0 0 0 1H2v1H.5a.5.5 0 0 0 0 1H2A2.5 2.5 0 0 0 4.5 14v1.5a.5.5 0 0 0 1 0V14h1v1.5a.5.5 0 0 0 1 0V14h1v1.5a.5.5 0 0 0 1 0V14h1v1.5a.5.5 0 0 0 1 0V14a2.5 2.5 0 0 0 2.5-2.5h1.5a.5.5 0 0 0 0-1H14v-1h1.5a.5.5 0 0 0 0-1H14v-1h1.5a.5.5 0 0 0 0-1H14v-1h1.5a.5.5 0 0 0 0-1H14A2.5 2.5 0 0 0 11.5 2V.5a.5.5 0 0 0-1 0V2h-1V.5a.5.5 0 0 0-1 0V2h-1V.5a.5.5 0 0 0-1 0V2h-1V.5zm1 4.5h3A1.5 1.5 0 0 1 11 6.5v3A1.5 1.5 0 0 1 9.5 11h-3A1.5 1.5 0 0 1 5 9.5v-3A1.5 1.5 0 0 1 6.5 5z"/></svg>
+              Cherry-pick
+              <span class="nav-badge new">NEW</span>
+            </div>
+            <div class="nav-item">
+              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 3a5 5 0 1 1-4.546 2.914.5.5 0 0 0-.908-.417A6 6 0 1 0 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 0-.41-.192L5.23 2.308a.25.25 0 0 0 0 .384l2.36 1.966A.25.25 0 0 0 8 4.466z"/></svg>
+              Revert
+            </div>
+            <div class="nav-item">
+              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M12.643 15C13.979 15 15 13.845 15 12.5V5H1v7.5C1 13.845 2.021 15 3.357 15h9.286zM5.5 7h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1 0-1zM.8 1a.8.8 0 0 0-.8.8V3a.8.8 0 0 0 .8.8h14.4A.8.8 0 0 0 16 3V1.8a.8.8 0 0 0-.8-.8H.8z"/></svg>
+              Reset
+            </div>
+            <div class="nav-item">
+              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/><path d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z"/></svg>
+              Reflog
+            </div>
+          </div>
+          <div class="sidebar-section">
+            <div class="section-label">モジュール管理</div>
+            <div class="nav-item">
+              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M14.5 3a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h13zm-13-1A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-13z"/><path d="M3 5.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zM3 8a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9A.5.5 0 0 1 3 8zm0 2.5a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6a.5.5 0 0 1-.5-.5z"/></svg>
+              サブモジュール
+            </div>
+            <div class="nav-item">
+              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.825a2 2 0 0 1-1.991-1.819l-.637-7a1.99 1.99 0 0 1 .342-1.31L.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3zm-8.322.12C1.72 3.042 1.95 3 2.19 3h5.396l-.707-.707A1 1 0 0 0 6.172 2H2.5a1 1 0 0 0-1 .981l.006.139z"/></svg>
+              ワークツリー
+            </div>
+          </div>
+          <div class="sidebar-section">
+            <div class="section-label">ユーティリティ</div>
+            <div class="nav-item">
+              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg>
+              検索
+            </div>
+            <div class="nav-item">
+              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M7.307 5.138a.5.5 0 0 1 .386 0l4.5 1.9a.5.5 0 0 1 0 .924l-4.5 1.9a.5.5 0 0 1-.386 0l-4.5-1.9a.5.5 0 0 1 0-.924l4.5-1.9z"/><path d="M7.307 9.138a.5.5 0 0 1 .386 0l4.5 1.9a.5.5 0 0 1 0 .924l-4.5 1.9a.5.5 0 0 1-.386 0l-4.5-1.9a.5.5 0 0 1 0-.924l4.5-1.9z"/></svg>
+              .gitignore
+            </div>
+            <div class="nav-item">
+              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M5.338 1.59a61.44 61.44 0 0 0-2.837.856.481.481 0 0 0-.328.39c-.554 4.157.726 7.19 2.253 9.188a10.725 10.725 0 0 0 2.287 2.233c.346.244.652.42.893.533.12.057.218.095.293.118a.55.55 0 0 0 .101.025.615.615 0 0 0 .1-.025c.076-.023.174-.061.294-.118.24-.113.547-.29.893-.533a10.726 10.726 0 0 0 2.287-2.233c1.527-1.997 2.807-5.031 2.253-9.188a.48.48 0 0 0-.328-.39c-.651-.213-1.75-.56-2.837-.855C9.552 1.29 8.531 1.067 8 1.067c-.53 0-1.552.223-2.662.524z"/></svg>
+              署名設定
+            </div>
+          </div>
+          <div class="sidebar-section">
+            <div class="section-label">設定</div>
+            <div class="nav-item">
+              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34z"/></svg>
+              Gitconfig
+            </div>
+            <div class="nav-item">
+              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2zM8 1.918l-.797.161A4.002 4.002 0 0 0 4 6c0 .628-.134 2.197-.459 3.742-.16.767-.376 1.566-.663 2.258h10.244c-.287-.692-.502-1.49-.663-2.258C12.134 8.197 12 6.628 12 6a4.002 4.002 0 0 0-3.203-3.92L8 1.917zM14.22 12c.223.447.481.801.78 1H1c.299-.199.557-.553.78-1C2.68 10.2 3 6.88 3 6c0-2.42 1.72-4.44 4.005-4.901a1 1 0 1 1 1.99 0A5.002 5.002 0 0 1 13 6c0 .88.32 4.2 1.22 6z"/></svg>
+              通知
+            </div>
+            <div class="nav-item">
+              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/><path d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3z"/></svg>
+              自動fetch
+            </div>
+          </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="content">
+          <div class="content-header">
+            <div class="content-title">Cherry-pick</div>
+            <div class="content-actions">
+              <button class="btn btn-secondary">
+                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286z"/></svg>
+                ヘルプ
+              </button>
+              <button class="btn btn-primary">
+                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/></svg>
+                Cherry-pick 実行
+              </button>
+            </div>
+          </div>
+
+          <!-- Operations Grid -->
+          <div class="operations-grid">
+            <div class="op-card active">
+              <div class="op-header">
+                <div class="op-icon cherry">🍒</div>
+                <div class="op-title">Cherry-pick</div>
+              </div>
+              <div class="op-desc">特定のコミットを現在のブランチに適用</div>
+            </div>
+            <div class="op-card">
+              <div class="op-header">
+                <div class="op-icon revert">↩️</div>
+                <div class="op-title">Revert</div>
+              </div>
+              <div class="op-desc">コミットの変更を打ち消す新しいコミットを作成</div>
+            </div>
+            <div class="op-card">
+              <div class="op-header">
+                <div class="op-icon reset">🔄</div>
+                <div class="op-title">Reset</div>
+              </div>
+              <div class="op-desc">HEADを指定コミットに移動（Soft/Mixed/Hard）</div>
+            </div>
+            <div class="op-card">
+              <div class="op-header">
+                <div class="op-icon reflog">📜</div>
+                <div class="op-title">Reflog</div>
+              </div>
+              <div class="op-desc">HEADの移動履歴を確認・復元</div>
+            </div>
+          </div>
+
+          <!-- Cherry-pick Panel -->
+          <div class="cherry-panel">
+            <div class="panel-header">
+              <div class="panel-title">
+                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M6.5 6a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3z"/></svg>
+                コミット選択
+              </div>
+              <span style="font-size: 12px; color: var(--text-muted);">feature/auth ブランチから</span>
+            </div>
+            <div class="commit-select">
+              <input type="text" class="commit-input" placeholder="コミットハッシュを入力、または下から選択...">
+            </div>
+            <div class="commit-preview">
+              <div class="preview-item">
+                <input type="checkbox" checked style="accent-color: var(--accent);">
+                <span class="preview-hash">a1b2c3d</span>
+                <div class="preview-info">
+                  <div class="preview-msg">feat: ユーザー認証機能を追加</div>
+                  <div class="preview-meta">tanaka • 2日前</div>
+                </div>
+              </div>
+              <div class="preview-item">
+                <input type="checkbox" style="accent-color: var(--accent);">
+                <span class="preview-hash">e4f5g6h</span>
+                <div class="preview-info">
+                  <div class="preview-msg">fix: トークン検証のバグを修正</div>
+                  <div class="preview-meta">tanaka • 3日前</div>
+                </div>
+              </div>
+              <div class="preview-item">
+                <input type="checkbox" style="accent-color: var(--accent);">
+                <span class="preview-hash">i7j8k9l</span>
+                <div class="preview-info">
+                  <div class="preview-msg">test: 認証テストを追加</div>
+                  <div class="preview-meta">tanaka • 3日前</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Submodule Section -->
+          <div class="submodule-section">
+            <div class="section-header">
+              <div class="section-title">サブモジュール</div>
+              <button class="btn btn-secondary">
+                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/></svg>
+                追加
+              </button>
+            </div>
+            <div class="submodule-list">
+              <div class="submodule-item">
+                <div class="submodule-icon">
+                  <svg viewBox="0 0 16 16" fill="currentColor"><path d="M14.5 3a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h13z"/></svg>
+                </div>
+                <div class="submodule-info">
+                  <div class="submodule-name">rocket-core</div>
+                  <div class="submodule-path">libs/core @ a1b2c3d</div>
+                </div>
+                <span class="status-badge synced">同期済み</span>
+                <div class="submodule-actions">
+                  <button class="icon-btn" title="更新">
+                    <svg viewBox="0 0 16 16" fill="currentColor"><path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41z"/></svg>
+                  </button>
+                  <button class="icon-btn" title="削除">
+                    <svg viewBox="0 0 16 16" fill="currentColor"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/></svg>
+                  </button>
+                </div>
+              </div>
+              <div class="submodule-item">
+                <div class="submodule-icon">
+                  <svg viewBox="0 0 16 16" fill="currentColor"><path d="M14.5 3a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h13z"/></svg>
+                </div>
+                <div class="submodule-info">
+                  <div class="submodule-name">rocket-ui</div>
+                  <div class="submodule-path">libs/ui @ e4f5g6h</div>
+                </div>
+                <span class="status-badge behind">3 behind</span>
+                <div class="submodule-actions">
+                  <button class="icon-btn" title="更新">
+                    <svg viewBox="0 0 16 16" fill="currentColor"><path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41z"/></svg>
+                  </button>
+                  <button class="icon-btn" title="削除">
+                    <svg viewBox="0 0 16 16" fill="currentColor"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+
+        <!-- Right Panel -->
+        <aside class="right-panel">
+          <!-- Search -->
+          <div class="search-section">
+            <div class="search-title">リポジトリ検索</div>
+            <div class="search-box">
+              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg>
+              <input type="text" class="search-input" placeholder="検索キーワード...">
+            </div>
+            <div class="search-filters">
+              <span class="filter-chip active">コード</span>
+              <span class="filter-chip">コミット</span>
+              <span class="filter-chip">ファイル名</span>
+            </div>
+          </div>
+
+          <div class="search-results">
+            <div class="result-item">
+              <div class="result-file">
+                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M5.526 10.273c-.542 0-.832.563-.832 1.612 0 .088.003.173.006.252l1.559-1.143c-.126-.474-.375-.72-.733-.72zm-.732 2.508c.126.472.372.718.732.718.54 0 .83-.563.83-1.614 0-.085-.003-.17-.006-.25l-1.556 1.146z"/></svg>
+                cmd/main.go
+              </div>
+              <div class="result-match">func <span class="result-highlight">handleAuth</span>(ctx *Context) {</div>
+            </div>
+            <div class="result-item">
+              <div class="result-file">
+                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M5.526 10.273c-.542 0-.832.563-.832 1.612 0 .088.003.173.006.252l1.559-1.143c-.126-.474-.375-.72-.733-.72zm-.732 2.508c.126.472.372.718.732.718.54 0 .83-.563.83-1.614 0-.085-.003-.17-.006-.25l-1.556 1.146z"/></svg>
+                internal/auth/handler.go
+              </div>
+              <div class="result-match">type <span class="result-highlight">Auth</span>Handler struct {</div>
+            </div>
+            <div class="result-item">
+              <div class="result-file">
+                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M5.526 10.273c-.542 0-.832.563-.832 1.612 0 .088.003.173.006.252l1.559-1.143c-.126-.474-.375-.72-.733-.72zm-.732 2.508c.126.472.372.718.732.718.54 0 .83-.563.83-1.614 0-.085-.003-.17-.006-.25l-1.556 1.146z"/></svg>
+                internal/auth/token.go
+              </div>
+              <div class="result-match">func validate<span class="result-highlight">Auth</span>Token(t string)</div>
+            </div>
+          </div>
+
+          <!-- Signature -->
+          <div class="signature-section">
+            <div class="search-title">コミット署名</div>
+            <div class="signature-option">
+              <span class="signature-icon">🔑</span>
+              <div class="signature-info">
+                <div class="signature-name">GPG署名</div>
+                <div class="signature-desc">gpg-agent で署名</div>
+              </div>
+              <span class="signature-status active"></span>
+            </div>
+            <div class="signature-option">
+              <span class="signature-icon">🔐</span>
+              <div class="signature-info">
+                <div class="signature-name">SSH署名</div>
+                <div class="signature-desc">ssh-agent で署名</div>
+              </div>
+              <span class="signature-status inactive"></span>
+            </div>
+          </div>
+
+          <!-- Worktree -->
+          <div class="worktree-section">
+            <div class="search-title">ワークツリー</div>
+            <div class="worktree-item current">
+              <div>
+                <div class="worktree-branch">main</div>
+                <div class="worktree-path">~/projects/rocket</div>
+              </div>
+              <span class="worktree-badge">現在</span>
+            </div>
+            <div class="worktree-item">
+              <div>
+                <div class="worktree-branch">feature/ai</div>
+                <div class="worktree-path">~/projects/rocket-ai</div>
+              </div>
+            </div>
+            <div class="worktree-item">
+              <div>
+                <div class="worktree-branch">hotfix/auth</div>
+                <div class="worktree-path">~/projects/rocket-hotfix</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Gitignore Templates -->
+          <div class="gitignore-section">
+            <div class="search-title">.gitignore テンプレート</div>
+            <div class="template-grid">
+              <div class="template-item selected">
+                <div class="template-icon">🐹</div>
+                <div>Go</div>
+              </div>
+              <div class="template-item">
+                <div class="template-icon">🟨</div>
+                <div>JavaScript</div>
+              </div>
+              <div class="template-item">
+                <div class="template-icon">🐍</div>
+                <div>Python</div>
+              </div>
+              <div class="template-item">
+                <div class="template-icon">🦀</div>
+                <div>Rust</div>
+              </div>
+              <div class="template-item selected">
+                <div class="template-icon">🍎</div>
+                <div>macOS</div>
+              </div>
+              <div class="template-item">
+                <div class="template-icon">🪟</div>
+                <div>Windows</div>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function setTheme(theme) {
+      const app = document.getElementById('app');
+      const buttons = document.querySelectorAll('.theme-btn');
+
+      if (theme === 'light') {
+        app.classList.add('light');
+      } else {
+        app.classList.remove('light');
+      }
+
+      buttons.forEach(btn => {
+        btn.classList.toggle('active', btn.textContent.toLowerCase() === theme);
+      });
+    }
+
+    // Operation card selection
+    document.querySelectorAll('.op-card').forEach(card => {
+      card.addEventListener('click', function() {
+        document.querySelectorAll('.op-card').forEach(c => c.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+
+    // Filter chip selection
+    document.querySelectorAll('.filter-chip').forEach(chip => {
+      chip.addEventListener('click', function() {
+        document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+
+    // Template selection
+    document.querySelectorAll('.template-item').forEach(item => {
+      item.addEventListener('click', function() {
+        this.classList.toggle('selected');
+      });
+    });
+
+    // Tab switching
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', function() {
+        if (this.textContent !== '+') {
+          document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+          this.classList.add('active');
+        }
+      });
+    });
+  </script>
+</body>
+</html>
