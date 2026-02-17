@@ -279,6 +279,28 @@ adapters:
 ### カスタマイズ
 
 - **テーマ**: ライト/ダークモード切り替え
+- **カラーテーマ**: アクセントカラーの選択（Cobalt / Emerald / Rose / Amber / Slate / Violet）
+- **カスタムカラーテーマ**: 設定ファイルで独自テーマを追加可能
+
+```yaml
+# ~/.config/rocket/themes/my-theme.yaml
+name: "My Theme"
+dark:
+  bg-primary: "#0f1419"
+  bg-secondary: "#151b22"
+  text-primary: "#e6edf3"
+  accent: "#58a6ff"
+  added: "#3fb950"
+  removed: "#f85149"
+light:
+  bg-primary: "#ffffff"
+  bg-secondary: "#f6f8fa"
+  text-primary: "#1f2328"
+  accent: "#0969da"
+  added: "#1a7f37"
+  removed: "#cf222e"
+```
+
 - **フォント設定**: フォントファミリー/サイズの変更
 - **キーバインド**: ショートカットのカスタマイズ
 - **レイアウト**: パネル配置のカスタマイズ
