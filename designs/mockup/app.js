@@ -1090,10 +1090,15 @@ function getHistoryViewHTML() {
   `).join('');
 
   return `
-    <div class="history-layout">
-      <div class="history-panel">
-        <div class="panel-header">
-          <span class="panel-title">Commit History</span>
+    <div class="page-layout">
+      <div class="page-header">
+        <h2 class="page-title">History</h2>
+        <span class="page-desc">Browse commit history and view changes</span>
+      </div>
+      <div class="history-content">
+        <div class="history-panel">
+          <div class="panel-header">
+            <span class="panel-title">Commit History</span>
           <div class="panel-actions">
             <input type="text" class="search-input" placeholder="Search...">
           </div>
@@ -1206,9 +1211,14 @@ function getHistoryViewHTML() {
           </div>
         </div>
       </div>
+      </div>
     </div>
     <style>
-      .history-layout { display: grid; grid-template-columns: 1fr 400px; height: 100%; overflow: hidden; }
+      .page-layout { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
+      .page-header { display: flex; align-items: center; gap: 16px; padding: 16px 24px; border-bottom: 1px solid var(--border); }
+      .page-title { font-size: 14px; font-weight: 600; margin: 0; }
+      .page-desc { font-size: 13px; color: var(--text-muted); }
+      .history-content { display: grid; grid-template-columns: 1fr 400px; flex: 1; overflow: hidden; }
       .history-panel { display: flex; flex-direction: column; overflow: hidden; border-right: 1px solid var(--border); }
       .commit-list { flex: 1; overflow-y: auto; }
       .commit-row { display: flex; padding: 12px 16px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.15s; }
@@ -1292,15 +1302,22 @@ function getBranchesViewHTML() {
   `).join('');
 
   return `
-    <div class="branches-layout">
-      <div class="panel-header">
-        <span class="panel-title">Branches</span>
-        <button class="btn btn-primary btn-sm" onclick="createBranch()">+ New Branch</button>
+    <div class="page-layout">
+      <div class="page-header">
+        <h2 class="page-title">Branches</h2>
+        <span class="page-desc">Manage local and remote branches</span>
+        <div class="page-actions">
+          <button class="btn btn-primary btn-sm" onclick="createBranch()">+ New Branch</button>
+        </div>
       </div>
       <div class="branch-list">${branchList}</div>
     </div>
     <style>
-      .branches-layout { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
+      .page-layout { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
+      .page-header { display: flex; align-items: center; gap: 16px; padding: 16px 24px; border-bottom: 1px solid var(--border); }
+      .page-title { font-size: 14px; font-weight: 600; margin: 0; }
+      .page-desc { font-size: 13px; color: var(--text-muted); }
+      .page-actions { margin-left: auto; }
       .branch-list { flex: 1; overflow-y: auto; }
       .branch-row { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--border); cursor: pointer; }
       .branch-row:hover { background: var(--bg-tertiary); }
@@ -1336,15 +1353,22 @@ function getRemotesViewHTML() {
   `).join('');
 
   return `
-    <div class="remotes-layout">
-      <div class="panel-header">
-        <span class="panel-title">Remotes</span>
-        <button class="btn btn-primary btn-sm" onclick="addRemote()">+ Add Remote</button>
+    <div class="page-layout">
+      <div class="page-header">
+        <h2 class="page-title">Remotes</h2>
+        <span class="page-desc">Configure remote repositories</span>
+        <div class="page-actions">
+          <button class="btn btn-primary btn-sm" onclick="addRemote()">+ Add Remote</button>
+        </div>
       </div>
       <div class="remote-list">${remoteList}</div>
     </div>
     <style>
-      .remotes-layout { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
+      .page-layout { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
+      .page-header { display: flex; align-items: center; gap: 16px; padding: 16px 24px; border-bottom: 1px solid var(--border); }
+      .page-title { font-size: 14px; font-weight: 600; margin: 0; }
+      .page-desc { font-size: 13px; color: var(--text-muted); }
+      .page-actions { margin-left: auto; }
       .remote-list { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
       .remote-item { display: flex; align-items: center; gap: 12px; padding: 16px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px; }
       .remote-icon { color: var(--accent); }
@@ -1563,7 +1587,7 @@ function getCherryPickViewHTML() {
     <style>
       .operation-layout { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
       .operation-header { display: flex; align-items: center; gap: 16px; padding: 16px 24px; border-bottom: 1px solid var(--border); }
-      .operation-title { font-size: 18px; font-weight: 600; margin: 0; }
+      .operation-title { font-size: 14px; font-weight: 600; margin: 0; }
       .operation-desc { font-size: 13px; color: var(--text-muted); margin-left: auto; }
       .operation-content { display: flex; flex: 1; overflow: hidden; }
       .operation-main { flex: 1; overflow-y: auto; padding: 20px; }
