@@ -912,7 +912,6 @@ function getAIReviewModalHTML() {
       .review-type { font-size: 11px; }
       .review-message { font-size: 13px; color: var(--text-secondary); margin-bottom: 12px; }
       .review-actions { display: flex; gap: 8px; }
-      .btn-sm { padding: 6px 12px; font-size: 11px; }
     </style>
   `;
 }
@@ -1326,7 +1325,6 @@ function getBranchesViewHTML() {
       .ahead { color: var(--success); }
       .behind { color: var(--warning); }
       .current-badge { padding: 3px 8px; background: var(--accent); color: #fff; border-radius: 4px; font-size: 10px; font-weight: 600; }
-      .btn-sm { padding: 6px 12px; font-size: 12px; }
     </style>
   `;
 }
@@ -2016,7 +2014,6 @@ function getSubmodulesViewHTML() {
       .detail-value { color: var(--text-primary); }
       .detail-value.hash { font-family: 'JetBrains Mono', monospace; color: var(--accent); }
       .submodule-actions { display: flex; gap: 8px; }
-      .btn-sm { padding: 6px 12px; font-size: 12px; }
     </style>
   `;
 }

@@ -336,7 +336,8 @@ body {
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 14px 20px;
+  padding: 0 20px;
+  height: 48px;
   border-bottom: 1px solid var(--border);
 }
 
@@ -957,6 +958,11 @@ body {
 }
 
 .btn svg { width: 16px; height: 16px; }
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 12px;
+}
 
 .btn-primary { background: var(--accent); color: #fff; }
 .btn-primary:hover { filter: brightness(1.1); }
