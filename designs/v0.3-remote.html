@@ -1,601 +1,502 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rocket v0.3 - リモート操作</title>
+  <title>Rocket v0.3 - Remote</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --bg-primary: #0f1419;
-      --bg-secondary: #151b22;
-      --bg-tertiary: #1c242d;
-      --text-primary: #e6edf3;
-      --text-secondary: #8b949e;
-      --text-muted: #565d64;
-      --border: #2d3640;
-      --accent: #58a6ff;
-      --accent-hover: #79b8ff;
-      --accent-dim: rgba(88, 166, 255, 0.15);
-      --added: #3fb950;
-      --added-bg: rgba(63, 185, 80, 0.15);
-      --removed: #f85149;
-      --warning: #d29922;
-      --warning-bg: rgba(210, 153, 34, 0.15);
-    }
+:root {
+  --bg-primary: #0f1419;
+  --bg-secondary: #151b22;
+  --bg-tertiary: #1c242d;
+  --bg-hover: #252d38;
+  --text-primary: #e6edf3;
+  --text-secondary: #8b949e;
+  --text-muted: #565d64;
+  --border: #2d3640;
+  --accent: #58a6ff;
+  --accent-dim: rgba(88, 166, 255, 0.15);
+  --success: #3fb950;
+  --success-dim: rgba(63, 185, 80, 0.15);
+  --warning: #d29922;
+  --warning-dim: rgba(210, 153, 34, 0.15);
+  --danger: #f85149;
+  --danger-dim: rgba(248, 81, 73, 0.15);
+  --diff-add-bg: rgba(63, 185, 80, 0.15);
+  --diff-del-bg: rgba(248, 81, 73, 0.15);
+}
+.light {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f6f8fa;
+  --bg-tertiary: #ebeef1;
+  --bg-hover: #e1e4e8;
+  --text-primary: #1f2328;
+  --text-secondary: #656d76;
+  --text-muted: #8c959f;
+  --border: #d1d9e0;
+  --accent: #0969da;
+  --accent-dim: rgba(9, 105, 218, 0.1);
+  --success: #1a7f37;
+  --success-dim: rgba(26, 127, 55, 0.1);
+  --warning: #9a6700;
+  --warning-dim: rgba(154, 103, 0, 0.1);
+  --danger: #cf222e;
+  --danger-dim: rgba(207, 34, 46, 0.1);
+  --diff-add-bg: rgba(26, 127, 55, 0.1);
+  --diff-del-bg: rgba(207, 34, 46, 0.1);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif; background: #0a0c0f; color: var(--text-primary); overflow: hidden; }
+.app { height: 100vh; display: flex; flex-direction: column; background: var(--bg-primary); }
 
-    .light {
-      --bg-primary: #ffffff;
-      --bg-secondary: #f6f8fa;
-      --bg-tertiary: #ebeef1;
-      --text-primary: #1f2328;
-      --text-secondary: #656d76;
-      --text-muted: #8c959f;
-      --border: #d1d9e0;
-      --accent: #0969da;
-      --accent-hover: #0860ca;
-      --accent-dim: rgba(9, 105, 218, 0.1);
-      --added: #1a7f37;
-      --added-bg: rgba(26, 127, 55, 0.1);
-      --removed: #cf222e;
-      --warning: #9a6700;
-      --warning-bg: rgba(154, 103, 0, 0.1);
-    }
+/* Title Bar */
+.titlebar { height: 38px; flex-shrink: 0; background: var(--bg-secondary); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 12px; }
+.window-controls { display: flex; gap: 8px; margin-right: 16px; }
+.window-dot { width: 12px; height: 12px; border-radius: 50%; }
+.window-dot.close { background: #ff5f57; }
+.window-dot.minimize { background: #febc2e; }
+.window-dot.maximize { background: #28c840; }
+.titlebar-tabs { display: flex; gap: 4px; }
+.tab { padding: 6px 16px; font-size: 12px; color: var(--text-muted); background: transparent; border: none; cursor: pointer; border-radius: 6px; font-family: inherit; }
+.tab.active { background: var(--bg-tertiary); color: var(--text-primary); }
 
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+/* Toolbar */
+.toolbar { height: 48px; flex-shrink: 0; background: var(--bg-secondary); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 16px; gap: 8px; }
+.branch-selector { display: flex; align-items: center; gap: 8px; padding: 6px 12px; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 6px; font-size: 13px; cursor: pointer; transition: all 0.15s; }
+.branch-selector:hover { border-color: var(--accent); }
+.branch-selector svg { width: 16px; height: 16px; color: var(--accent); }
+.branch-selector .chevron { width: 12px; height: 12px; color: var(--text-muted); }
+.toolbar-group { display: flex; align-items: center; gap: 4px; }
+.toolbar-spacer { flex: 1; }
+.toolbar-btn { display: flex; align-items: center; gap: 6px; padding: 6px 12px; background: transparent; border: 1px solid var(--border); border-radius: 6px; color: var(--text-secondary); font-family: inherit; font-size: 12px; cursor: pointer; transition: all 0.15s; }
+.toolbar-btn:hover { background: var(--bg-tertiary); color: var(--text-primary); border-color: var(--accent); }
+.toolbar-btn svg { width: 14px; height: 14px; }
+.toolbar-btn.remote-btn { gap: 8px; }
+.toolbar-btn.remote-btn .dropdown-arrow { width: 12px; height: 12px; color: var(--text-muted); }
+.status-item.sync { color: var(--success); }
 
-    body {
-      font-family: 'IBM Plex Sans', sans-serif;
-      background: #0a0c0f;
-      min-height: 100vh;
-      padding: 40px;
-    }
+/* Modal */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); opacity: 0; visibility: hidden; transition: all 0.2s; z-index: 100; }
+.modal-overlay.active { opacity: 1; visibility: visible; }
+.modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%) scale(0.95); background: var(--bg-primary); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 24px 64px rgba(0,0,0,0.4); opacity: 0; visibility: hidden; transition: all 0.2s; z-index: 101; max-height: 80vh; overflow: hidden; display: flex; flex-direction: column; width: 500px; }
+.modal.active { opacity: 1; visibility: visible; transform: translate(-50%,-50%) scale(1); }
+.modal-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.modal-title { font-size: 16px; font-weight: 600; }
+.modal-close { width: 28px; height: 28px; border: none; border-radius: 6px; background: transparent; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.modal-close:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+.modal-close svg { width: 16px; height: 16px; }
+.modal-body { padding: 20px; overflow-y: auto; flex: 1; }
+.modal-footer { padding: 16px 20px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; }
+.modal-input { width: 100%; padding: 10px 14px; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 6px; color: var(--text-primary); font-family: inherit; font-size: 13px; }
+.modal-input:focus { outline: none; border-color: var(--accent); }
+.branch-list { display: flex; flex-direction: column; gap: 4px; max-height: 300px; overflow-y: auto; }
+.branch-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: var(--bg-tertiary); border-radius: 6px; cursor: pointer; }
+.branch-item:hover { background: var(--accent-dim); }
+.branch-item.current { border: 1px solid var(--accent); }
+.branch-info { display: flex; flex-direction: column; gap: 2px; }
+.branch-name { font-size: 13px; font-weight: 500; }
+.branch-remote { font-size: 11px; color: var(--text-muted); }
+.branch-status-info { display: flex; align-items: center; gap: 8px; font-size: 11px; }
+.ahead { color: var(--success); }
+.behind { color: var(--warning); }
+.current-badge { padding: 2px 8px; background: var(--accent); color: #fff; border-radius: 4px; font-size: 10px; }
 
-    .header {
-      max-width: 1200px;
-      margin: 0 auto 32px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
+/* Branches View */
+.branches-layout { display: flex; width: 100%; height: 100%; overflow: hidden; }
+.branches-list-panel { width: 300px; flex: 0 0 300px; border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+.branches-detail-panel { flex: 1; display: flex; flex-direction: column; overflow-y: auto; padding: 20px; }
+.branch-list-item { padding: 12px 16px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.15s; }
+.branch-list-item:hover { background: var(--bg-tertiary); }
+.branch-list-item.active { background: var(--accent-dim); border-left: 3px solid var(--accent); }
+.branch-list-item .branch-item-name { font-size: 13px; font-weight: 500; }
+.branch-list-item .branch-item-meta { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
 
-    .title-group { display: flex; align-items: center; gap: 16px; }
-    .version-badge { padding: 6px 14px; background: var(--accent); color: #fff; border-radius: 6px; font-size: 14px; font-weight: 600; }
-    .title { font-size: 24px; font-weight: 600; color: #e6edf3; }
-    .subtitle { font-size: 14px; color: #8b949e; margin-top: 4px; }
+/* Main Layout */
+.main-layout { flex: 1 1 auto; display: flex; width: 100%; min-height: 0; overflow: hidden; }
 
-    .theme-toggle { display: flex; gap: 8px; background: #151b22; padding: 6px; border-radius: 10px; border: 1px solid #2d3640; }
-    .theme-btn { padding: 8px 16px; border: none; border-radius: 6px; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; background: transparent; color: #8b949e; transition: all 0.2s; }
-    .theme-btn.active { background: #58a6ff; color: #fff; }
+/* Sidebar */
+.sidebar { width: 200px; min-width: 180px; background: var(--bg-secondary); border-right: 1px solid var(--border); overflow-y: auto; flex-shrink: 0; }
+.sidebar-section { padding: 8px 0; border-bottom: 1px solid var(--border); }
+.sidebar-section:last-child { border-bottom: none; }
+.section-label { padding: 8px 16px; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); }
+.nav-item { padding: 8px 16px; font-size: 13px; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; gap: 10px; transition: all 0.15s; }
+.nav-item:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+.nav-item.active { background: var(--accent-dim); color: var(--accent); border-left: 2px solid var(--accent); }
+.nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+.nav-badge { margin-left: auto; padding: 2px 8px; background: var(--accent); color: #fff; border-radius: 10px; font-size: 10px; font-weight: 600; }
 
-    .app-container { max-width: 1200px; margin: 0 auto; border-radius: 12px; overflow: hidden; box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4); border: 1px solid var(--border); }
-    .app { background: var(--bg-primary); color: var(--text-primary); height: 700px; display: flex; flex-direction: column; }
+/* Content Area */
+.content { flex: 1 1 auto; min-width: 0; min-height: 0; overflow: hidden; display: flex; flex-direction: column; }
+.view { display: none; flex: 1; width: 100%; height: 100%; min-height: 0; overflow: hidden; }
+.view.active { display: flex; flex-direction: column; width: 100%; height: 100%; min-height: 0; }
 
-    .titlebar { height: 38px; background: var(--bg-secondary); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 16px; gap: 12px; }
-    .window-controls { display: flex; gap: 8px; }
-    .window-dot { width: 12px; height: 12px; border-radius: 50%; }
-    .window-dot.close { background: #ff5f57; }
-    .window-dot.minimize { background: #febc2e; }
-    .window-dot.maximize { background: #28c840; }
-    .titlebar-text { flex: 1; text-align: center; font-size: 13px; color: var(--text-muted); font-weight: 500; }
+/* Changes Layout */
+.changes-layout { display: flex; width: 100%; height: 100%; overflow: hidden; }
+.changes-layout .file-panel { width: 250px; flex: 0 0 250px; }
+.changes-layout .diff-panel { flex: 1 1 auto; min-width: 0; }
+.changes-layout .commit-panel { width: 300px; flex: 0 0 300px; }
 
-    .toolbar {
-      padding: 12px 20px;
-      background: var(--bg-secondary);
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
+/* File Panel */
+.file-panel { border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+.panel-header { padding: 14px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.panel-title { font-size: 13px; font-weight: 600; white-space: nowrap; }
+.panel-actions { display: flex; gap: 8px; align-items: center; }
+.file-section { border-bottom: 1px solid var(--border); }
+.file-section:last-child { border-bottom: none; }
+.file-section-header { padding: 8px 12px; font-size: 11px; font-weight: 600; color: var(--text-muted); display: flex; align-items: center; gap: 6px; cursor: pointer; user-select: none; }
+.file-section-header:hover { background: var(--bg-tertiary); }
+.file-section-header .chevron { width: 12px; height: 12px; transition: transform 0.15s; }
+.file-section-header.collapsed .chevron { transform: rotate(-90deg); }
+.file-section-header .count { margin-left: auto; color: var(--accent); }
+.file-list { overflow-y: auto; }
+.file-item { padding: 6px 12px 6px 24px; font-size: 12px; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: all 0.1s; }
+.file-item:hover { background: var(--bg-tertiary); }
+.file-item.selected { background: var(--accent-dim); }
+.file-status { width: 16px; height: 16px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; }
+.file-status.add { background: var(--success-dim); color: var(--success); }
+.file-status.modify { background: var(--warning-dim); color: var(--warning); }
+.file-status.untracked { background: var(--bg-tertiary); color: var(--text-muted); }
+.file-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-secondary); }
+.file-item.selected .file-name { color: var(--text-primary); }
+.file-action { width: 20px; height: 20px; border: none; border-radius: 4px; background: transparent; color: var(--text-muted); cursor: pointer; display: none; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; }
+.file-item:hover .file-action { display: flex; }
+.file-action:hover { background: var(--accent); color: #fff; }
 
-    .toolbar-group { display: flex; gap: 8px; }
-    .toolbar-divider { width: 1px; height: 24px; background: var(--border); margin: 0 8px; }
+/* Diff Panel */
+.diff-panel { display: flex; flex-direction: column; overflow: hidden; }
+.diff-content { flex: 1; overflow: auto; font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1.6; padding: 0; display: block; }
+.diff-hunk { border-bottom: 1px solid var(--border); }
+.diff-hunk-header { padding: 8px 16px; background: var(--bg-tertiary); color: var(--text-muted); font-size: 11px; font-family: 'JetBrains Mono', monospace; }
+.diff-line { display: flex; padding: 0 16px; min-height: 22px; }
+.diff-line:hover { background: var(--bg-hover); }
+.line-num { width: 40px; text-align: right; padding-right: 12px; color: var(--text-muted); user-select: none; }
+.line-content { flex: 1; white-space: pre; }
+.diff-line.add { background: var(--diff-add-bg); }
+.diff-line.add .line-content { color: var(--success); }
+.diff-line.del { background: var(--diff-del-bg); }
+.diff-line.del .line-content { color: var(--danger); }
 
-    .toolbar-btn {
-      padding: 8px 14px;
-      border: 1px solid var(--border);
-      background: var(--bg-tertiary);
-      border-radius: 6px;
-      font-family: inherit;
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--text-primary);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      transition: all 0.15s;
-    }
+/* Commit Panel */
+.commit-panel { border-left: 1px solid var(--border); display: flex; flex-direction: column; }
+.commit-form { flex: 1; display: flex; flex-direction: column; padding: 16px; gap: 12px; }
+.commit-subject { flex: 0; padding: 10px 14px; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 6px; color: var(--text-primary); font-family: inherit; font-size: 13px; }
+.commit-subject:focus { outline: none; border-color: var(--accent); }
+.commit-subject::placeholder { color: var(--text-muted); }
+.commit-body { flex: 1; min-height: 100px; padding: 10px 14px; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 6px; color: var(--text-primary); font-family: inherit; font-size: 13px; resize: none; }
+.commit-body:focus { outline: none; border-color: var(--accent); }
+.commit-body::placeholder { color: var(--text-muted); }
+.commit-actions { display: flex; justify-content: flex-end; }
 
-    .toolbar-btn:hover { border-color: var(--accent); background: var(--accent-dim); }
-    .toolbar-btn svg { width: 16px; height: 16px; }
+/* Buttons */
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; border: none; border-radius: 6px; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; }
+.btn svg { width: 16px; height: 16px; }
+.btn-xs { padding: 3px 8px; font-size: 11px; }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { filter: brightness(1.1); }
+.btn-secondary { background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border); }
+.btn-secondary:hover { background: var(--bg-hover); }
 
-    .toolbar-btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
-    .toolbar-btn.primary:hover { background: var(--accent-hover); }
+/* Status Bar */
+.statusbar { height: 24px; flex-shrink: 0; background: var(--bg-secondary); border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 12px; font-size: 11px; }
+.status-left, .status-right { display: flex; align-items: center; gap: 16px; }
+.status-item { display: flex; align-items: center; gap: 6px; color: var(--text-muted); }
+.status-item svg { width: 12px; height: 12px; }
 
-    .sync-status {
-      margin-left: auto;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 13px;
-      color: var(--text-secondary);
-    }
+/* Toast */
+.toast-container { position: fixed; bottom: 40px; right: 20px; display: flex; flex-direction: column; gap: 8px; z-index: 200; }
+.toast { padding: 12px 20px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3); display: flex; align-items: center; gap: 10px; font-size: 13px; animation: slideIn 0.3s ease; }
+.toast.success { border-color: var(--success); }
+.toast.success::before { content: '\2713'; color: var(--success); font-weight: 600; }
+.toast.error { border-color: var(--danger); }
+.toast.error::before { content: '\2717'; color: var(--danger); font-weight: 600; }
+@keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
-    .sync-indicator {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--added);
-    }
-
-    .sync-indicator.warning { background: var(--warning); }
-
-    .main { flex: 1; display: grid; grid-template-columns: 300px 1fr; overflow: hidden; }
-
-    /* Remote Sidebar */
-    .remote-sidebar {
-      background: var(--bg-secondary);
-      border-right: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-    }
-
-    .sidebar-header {
-      padding: 16px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .sidebar-title { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
-    .sidebar-title svg { width: 18px; height: 18px; color: var(--accent); }
-
-    .add-remote-btn {
-      padding: 6px 10px;
-      background: transparent;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      font-size: 12px;
-      color: var(--text-secondary);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      transition: all 0.15s;
-    }
-
-    .add-remote-btn:hover { border-color: var(--accent); color: var(--accent); }
-    .add-remote-btn svg { width: 14px; height: 14px; }
-
-    .remote-list { flex: 1; overflow-y: auto; padding: 8px 0; }
-
-    .remote-item {
-      padding: 12px 16px;
-      cursor: pointer;
-      transition: background 0.15s;
-      border-left: 2px solid transparent;
-    }
-
-    .remote-item:hover { background: var(--bg-tertiary); }
-    .remote-item.selected { background: var(--accent-dim); border-left-color: var(--accent); }
-
-    .remote-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-    .remote-icon { width: 20px; height: 20px; color: var(--text-secondary); }
-    .remote-item.selected .remote-icon { color: var(--accent); }
-    .remote-name { font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 600; }
-
-    .remote-url {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
-      color: var(--text-muted);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .remote-branches {
-      margin-top: 12px;
-      padding-top: 12px;
-      border-top: 1px solid var(--border);
-    }
-
-    .remote-branch {
-      padding: 6px 0;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-      color: var(--text-secondary);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .remote-branch svg { width: 14px; height: 14px; }
-
-    /* Main Content */
-    .main-content { background: var(--bg-primary); display: flex; flex-direction: column; overflow: hidden; }
-
-    .content-header {
-      padding: 20px 24px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      gap: 20px;
-    }
-
-    .branch-sync-info { flex: 1; }
-    .branch-sync-info h2 { font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 600; margin-bottom: 8px; }
-
-    .sync-badges { display: flex; gap: 12px; }
-
-    .sync-badge {
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-size: 12px;
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .sync-badge.ahead { background: var(--added-bg); color: var(--added); }
-    .sync-badge.behind { background: var(--warning-bg); color: var(--warning); }
-    .sync-badge svg { width: 14px; height: 14px; }
-
-    .sync-actions { display: flex; gap: 8px; }
-
-    .sync-btn {
-      padding: 12px 20px;
-      border: none;
-      border-radius: 8px;
-      font-family: inherit;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      transition: all 0.15s;
-    }
-
-    .sync-btn svg { width: 18px; height: 18px; }
-    .sync-btn.pull { background: var(--accent); color: #fff; }
-    .sync-btn.pull:hover { background: var(--accent-hover); }
-    .sync-btn.push { background: var(--bg-tertiary); border: 1px solid var(--border); color: var(--text-primary); }
-    .sync-btn.push:hover { border-color: var(--accent); background: var(--accent-dim); }
-
-    /* Sync Details */
-    .sync-details { flex: 1; padding: 24px; overflow-y: auto; }
-
-    .sync-section { margin-bottom: 32px; }
-    .sync-section-title { font-size: 14px; font-weight: 600; color: var(--text-secondary); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
-    .sync-section-title svg { width: 16px; height: 16px; }
-
-    .commit-list { display: flex; flex-direction: column; gap: 8px; }
-
-    .commit-card {
-      padding: 16px;
-      background: var(--bg-secondary);
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-    }
-
-    .commit-card.incoming { border-left: 3px solid var(--warning); }
-    .commit-card.outgoing { border-left: 3px solid var(--added); }
-
-    .commit-hash {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-      padding: 4px 8px;
-      border-radius: 4px;
-    }
-
-    .commit-card.incoming .commit-hash { background: var(--warning-bg); color: var(--warning); }
-    .commit-card.outgoing .commit-hash { background: var(--added-bg); color: var(--added); }
-
-    .commit-info { flex: 1; }
-    .commit-message { font-size: 14px; font-weight: 500; }
-    .commit-meta { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
-
-    /* Pull Options */
-    .pull-options {
-      background: var(--bg-secondary);
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      padding: 20px;
-    }
-
-    .pull-options-title { font-size: 14px; font-weight: 600; margin-bottom: 16px; }
-
-    .option-group { display: flex; gap: 12px; }
-
-    .option-item {
-      flex: 1;
-      padding: 16px;
-      background: var(--bg-primary);
-      border: 2px solid var(--border);
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-
-    .option-item:hover { border-color: var(--text-muted); }
-    .option-item.selected { border-color: var(--accent); background: var(--accent-dim); }
-    .option-item-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
-    .option-item-desc { font-size: 12px; color: var(--text-muted); }
-
-    .features { max-width: 1200px; margin: 32px auto 0; padding: 20px; background: #151b22; border-radius: 12px; border: 1px solid #2d3640; }
-    .features-title { font-size: 14px; font-weight: 600; color: #e6edf3; margin-bottom: 12px; }
-    .features-list { display: flex; flex-wrap: wrap; gap: 8px; }
-    .feature-tag { padding: 6px 12px; background: rgba(88, 166, 255, 0.15); color: #58a6ff; border-radius: 6px; font-size: 12px; font-weight: 500; }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
   </style>
 </head>
 <body>
-  <div class="header">
-    <div class="title-group">
-      <span class="version-badge">v0.3</span>
-      <div>
-        <h1 class="title">リモート操作</h1>
-        <p class="subtitle">チームでの共同開発ができる</p>
+  <div class="app" id="app">
+    <!-- Title Bar -->
+    <div class="titlebar">
+      <div class="window-controls">
+        <div class="window-dot close"></div>
+        <div class="window-dot minimize"></div>
+        <div class="window-dot maximize"></div>
+      </div>
+      <div class="titlebar-tabs">
+        <button class="tab active">rocket-app</button>
       </div>
     </div>
-    <div class="theme-toggle">
-      <button class="theme-btn active" data-theme="dark">Dark</button>
-      <button class="theme-btn" data-theme="light">Light</button>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="branch-selector" onclick="openModal()">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M9.5 3.25a2.25 2.25 0 1 1 3 2.122V6A2.5 2.5 0 0 1 10 8.5H6a1 1 0 0 0-1 1v1.128a2.251 2.251 0 1 1-1.5 0V5.372a2.25 2.25 0 1 1 1.5 0v1.836A2.492 2.492 0 0 1 6 7h4a1 1 0 0 0 1-1v-.628A2.25 2.25 0 0 1 9.5 3.25z"/></svg>
+        <span id="current-branch">main</span>
+        <svg viewBox="0 0 16 16" fill="currentColor" class="chevron"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708z"/></svg>
+      </div>
+      <div class="toolbar-group">
+        <button class="toolbar-btn" onclick="performAction('fetch')" title="Fetch"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L7.5 13.293V1.5A.5.5 0 0 1 8 1z"/></svg><span>Fetch</span></button>
+        <button class="toolbar-btn" onclick="performAction('pull')" title="Pull"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L7.5 13.293V1.5A.5.5 0 0 1 8 1z"/></svg><span>Pull</span></button>
+        <button class="toolbar-btn" onclick="performAction('push')" title="Push"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L7.5 2.707V14.5a.5.5 0 0 0 .5.5z"/></svg><span>Push</span></button>
+      </div>
+      <div class="toolbar-group">
+        <button class="toolbar-btn remote-btn" onclick="openRemoteModal()" title="Remote"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1.002 1.002 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4.018 4.018 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243L6.586 4.672z"/></svg><span id="active-remote-name">origin</span><svg class="dropdown-arrow" viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 6.646a.5.5 0 0 1 .708 0L8 9.293l2.646-2.647a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708z"/></svg></button>
+      </div>
     </div>
-  </div>
 
-  <div class="app-container">
-    <div class="app" id="app">
-      <div class="titlebar">
-        <div class="window-controls">
-          <div class="window-dot close"></div>
-          <div class="window-dot minimize"></div>
-          <div class="window-dot maximize"></div>
+    <!-- Main Layout -->
+    <div class="main-layout">
+      <nav class="sidebar">
+        <div class="sidebar-section">
+          <div class="section-label">Workspace</div>
+          <div class="nav-item active" data-view="changes" onclick="switchView('changes')">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/></svg>
+            Changes
+            <span class="nav-badge">5</span>
+          </div>
         </div>
-        <span class="titlebar-text">Rocket - rocket</span>
+        <div class="sidebar-section">
+          <div class="section-label">Branches</div>
+          <div class="nav-item" data-view="branches" onclick="switchView('branches')">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M9.5 3.25a2.25 2.25 0 1 1 3 2.122V6A2.5 2.5 0 0 1 10 8.5H6a1 1 0 0 0-1 1v1.128a2.251 2.251 0 1 1-1.5 0V5.372a2.25 2.25 0 1 1 1.5 0v1.836A2.492 2.492 0 0 1 6 7h4a1 1 0 0 0 1-1v-.628A2.25 2.25 0 0 1 9.5 3.25z"/></svg>
+            Branches
+          </div>
+        </div>
+      </nav>
+
+      <main class="content">
+        <div class="view active" id="view-changes">
+          <div class="changes-layout">
+            <!-- File List -->
+            <div class="file-panel">
+              <div class="panel-header">
+                <span class="panel-title">Changed Files</span>
+                <div class="panel-actions">
+                  <button class="btn btn-secondary btn-xs" onclick="showToast('success','All files unstaged')" title="Unstage All">Unstage All</button>
+                  <button class="btn btn-secondary btn-xs" onclick="showToast('success','All files staged')" title="Stage All">Stage All</button>
+                </div>
+              </div>
+              <div class="file-section">
+                <div class="file-section-header" onclick="toggleSection(this)">
+                  <svg viewBox="0 0 16 16" fill="currentColor" class="chevron"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708z"/></svg>
+                  <span>Staged</span>
+                  <span class="count">2</span>
+                </div>
+                <div class="file-list">
+                  <div class="file-item staged selected" onclick="selectFile(this)">
+                    <span class="file-status add">A</span>
+                    <span class="file-name">src/auth/handler.go</span>
+                    <button class="file-action" onclick="event.stopPropagation();showToast('success','File unstaged')" title="Unstage">&minus;</button>
+                  </div>
+                  <div class="file-item staged" onclick="selectFile(this)">
+                    <span class="file-status modify">M</span>
+                    <span class="file-name">src/main.go</span>
+                    <button class="file-action" onclick="event.stopPropagation();showToast('success','File unstaged')" title="Unstage">&minus;</button>
+                  </div>
+                </div>
+              </div>
+              <div class="file-section">
+                <div class="file-section-header" onclick="toggleSection(this)">
+                  <svg viewBox="0 0 16 16" fill="currentColor" class="chevron"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708z"/></svg>
+                  <span>Modified</span>
+                  <span class="count">2</span>
+                </div>
+                <div class="file-list">
+                  <div class="file-item" onclick="selectFile(this)">
+                    <span class="file-status modify">M</span>
+                    <span class="file-name">src/config/settings.go</span>
+                    <button class="file-action" onclick="event.stopPropagation();showToast('success','File staged')" title="Stage">+</button>
+                  </div>
+                  <div class="file-item" onclick="selectFile(this)">
+                    <span class="file-status modify">M</span>
+                    <span class="file-name">go.mod</span>
+                    <button class="file-action" onclick="event.stopPropagation();showToast('success','File staged')" title="Stage">+</button>
+                  </div>
+                </div>
+              </div>
+              <div class="file-section">
+                <div class="file-section-header" onclick="toggleSection(this)">
+                  <svg viewBox="0 0 16 16" fill="currentColor" class="chevron"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708z"/></svg>
+                  <span>Untracked</span>
+                  <span class="count">1</span>
+                </div>
+                <div class="file-list">
+                  <div class="file-item" onclick="selectFile(this)">
+                    <span class="file-status untracked">?</span>
+                    <span class="file-name">src/auth/token.go</span>
+                    <button class="file-action" onclick="event.stopPropagation();showToast('success','File staged')" title="Stage">+</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Diff Panel -->
+            <div class="diff-panel" id="diff-panel">
+              <div class="panel-header">
+                <span class="panel-title" id="diff-filename">src/auth/handler.go</span>
+              </div>
+              <div class="diff-content" id="diff-inline"></div>
+            </div>
+
+            <!-- Commit Panel -->
+            <div class="commit-panel">
+              <div class="panel-header">
+                <span class="panel-title">Commit</span>
+              </div>
+              <div class="commit-form">
+                <input type="text" class="commit-subject" placeholder="Commit message (subject)" id="commit-subject">
+                <textarea class="commit-body" placeholder="Description (optional)" id="commit-body"></textarea>
+                <div class="commit-actions">
+                  <button class="btn btn-primary" onclick="performCommit()">
+                    <svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/></svg>
+                    Commit
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Branches View -->
+        <div class="view" id="view-branches">
+          <div class="branches-layout">
+            <div class="branches-list-panel">
+              <div class="panel-header"><span class="panel-title">Local Branches</span></div>
+              <div class="branch-list-item active" onclick="selectBranch(this,'main')">
+                <div class="branch-item-name">main</div>
+                <div class="branch-item-meta">a1b2c3d - 2 hours ago</div>
+              </div>
+              <div class="branch-list-item" onclick="selectBranch(this,'feature/auth')">
+                <div class="branch-item-name">feature/auth</div>
+                <div class="branch-item-meta">e4f5g6h - 8 hours ago</div>
+              </div>
+              <div class="branch-list-item" onclick="selectBranch(this,'feature/ui-redesign')">
+                <div class="branch-item-name">feature/ui-redesign</div>
+                <div class="branch-item-meta">d4e5f6g - 6 hours ago</div>
+              </div>
+              <div class="branch-list-item" onclick="selectBranch(this,'hotfix/login-bug')">
+                <div class="branch-item-name">hotfix/login-bug</div>
+                <div class="branch-item-meta">l1m2n3o - 4 days ago</div>
+              </div>
+            </div>
+            <div class="branches-detail-panel" id="branch-detail">
+              <h3 style="font-size:16px;font-weight:600;margin-bottom:16px;">main</h3>
+              <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">Last commit: a1b2c3d - Merge branch feature/auth into main</div>
+              <div style="font-size:12px;color:var(--text-muted);">Author: tanaka - 2 hours ago</div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modal-overlay" onclick="closeModal()"></div>
+    <div class="modal" id="modal-container"></div>
+
+    <!-- Status Bar -->
+    <div class="statusbar">
+      <div class="status-left">
+        <span class="status-item">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M9.5 3.25a2.25 2.25 0 1 1 3 2.122V6A2.5 2.5 0 0 1 10 8.5H6a1 1 0 0 0-1 1v1.128a2.251 2.251 0 1 1-1.5 0V5.372a2.25 2.25 0 1 1 1.5 0v1.836A2.492 2.492 0 0 1 6 7h4a1 1 0 0 0 1-1v-.628A2.25 2.25 0 0 1 9.5 3.25z"/></svg>
+          main
+        </span>
+        <span class="status-item sync">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/></svg>
+          Synced with origin/main
+        </span>
       </div>
-
-      <div class="toolbar">
-        <div class="toolbar-group">
-          <button class="toolbar-btn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9"/>
-            </svg>
-            Fetch
-          </button>
-          <button class="toolbar-btn primary">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M12 5v14M19 12l-7 7-7-7"/>
-            </svg>
-            Pull
-          </button>
-          <button class="toolbar-btn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M12 19V5M5 12l7-7 7 7"/>
-            </svg>
-            Push
-          </button>
-        </div>
-        <div class="toolbar-divider"></div>
-        <div class="sync-status">
-          <span class="sync-indicator warning"></span>
-          <span>2 commits behind, 3 ahead</span>
-        </div>
-      </div>
-
-      <div class="main">
-        <div class="remote-sidebar">
-          <div class="sidebar-header">
-            <span class="sidebar-title">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9"/>
-              </svg>
-              リモート
-            </span>
-            <button class="add-remote-btn">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 5v14M5 12h14"/>
-              </svg>
-              追加
-            </button>
-          </div>
-
-          <div class="remote-list">
-            <div class="remote-item selected">
-              <div class="remote-header">
-                <svg class="remote-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0020 4.77 5.07 5.07 0 0019.91 1S18.73.65 16 2.48a13.38 13.38 0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 005 4.77a5.44 5.44 0 00-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 009 18.13V22"/>
-                </svg>
-                <span class="remote-name">origin</span>
-              </div>
-              <div class="remote-url">git@github.com:HMasataka/rocket.git</div>
-              <div class="remote-branches">
-                <div class="remote-branch">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M6 3v12M18 9a3 3 0 100-6 3 3 0 000 6z"/>
-                  </svg>
-                  origin/main
-                </div>
-                <div class="remote-branch">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M6 3v12M18 9a3 3 0 100-6 3 3 0 000 6z"/>
-                  </svg>
-                  origin/develop
-                </div>
-                <div class="remote-branch">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M6 3v12M18 9a3 3 0 100-6 3 3 0 000 6z"/>
-                  </svg>
-                  origin/feature/auth
-                </div>
-              </div>
-            </div>
-
-            <div class="remote-item">
-              <div class="remote-header">
-                <svg class="remote-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3"/>
-                </svg>
-                <span class="remote-name">upstream</span>
-              </div>
-              <div class="remote-url">git@github.com:original/rocket.git</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="main-content">
-          <div class="content-header">
-            <div class="branch-sync-info">
-              <h2>main ← origin/main</h2>
-              <div class="sync-badges">
-                <span class="sync-badge behind">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M12 5v14M19 12l-7 7-7-7"/>
-                  </svg>
-                  2 behind
-                </span>
-                <span class="sync-badge ahead">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M12 19V5M5 12l7-7 7 7"/>
-                  </svg>
-                  3 ahead
-                </span>
-              </div>
-            </div>
-            <div class="sync-actions">
-              <button class="sync-btn push">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M12 19V5M5 12l7-7 7 7"/>
-                </svg>
-                Push
-              </button>
-              <button class="sync-btn pull">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M12 5v14M19 12l-7 7-7-7"/>
-                </svg>
-                Pull
-              </button>
-            </div>
-          </div>
-
-          <div class="sync-details">
-            <div class="sync-section">
-              <h3 class="sync-section-title">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M12 5v14M19 12l-7 7-7-7"/>
-                </svg>
-                Pull する変更（2 commits）
-              </h3>
-              <div class="commit-list">
-                <div class="commit-card incoming">
-                  <span class="commit-hash">f8a2c1e</span>
-                  <div class="commit-info">
-                    <div class="commit-message">docs: READMEを更新</div>
-                    <div class="commit-meta">teammate • 3時間前</div>
-                  </div>
-                </div>
-                <div class="commit-card incoming">
-                  <span class="commit-hash">d4b7e9a</span>
-                  <div class="commit-info">
-                    <div class="commit-message">fix: 認証エラーのハンドリングを修正</div>
-                    <div class="commit-meta">teammate • 5時間前</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="sync-section">
-              <h3 class="sync-section-title">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M12 19V5M5 12l7-7 7 7"/>
-                </svg>
-                Push する変更（3 commits）
-              </h3>
-              <div class="commit-list">
-                <div class="commit-card outgoing">
-                  <span class="commit-hash">a3f8c2d</span>
-                  <div class="commit-info">
-                    <div class="commit-message">feat: 差分ビューアのUIを刷新</div>
-                    <div class="commit-meta">masataka • 2時間前</div>
-                  </div>
-                </div>
-                <div class="commit-card outgoing">
-                  <span class="commit-hash">b7e1d9f</span>
-                  <div class="commit-info">
-                    <div class="commit-message">refactor: コンポーネント構造を整理</div>
-                    <div class="commit-meta">masataka • 5時間前</div>
-                  </div>
-                </div>
-                <div class="commit-card outgoing">
-                  <span class="commit-hash">c4a2e8b</span>
-                  <div class="commit-info">
-                    <div class="commit-message">fix: サイドバーのスクロール問題を修正</div>
-                    <div class="commit-meta">masataka • 1日前</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="sync-section">
-              <div class="pull-options">
-                <h3 class="pull-options-title">Pull 方法</h3>
-                <div class="option-group">
-                  <div class="option-item selected">
-                    <div class="option-item-title">Merge</div>
-                    <div class="option-item-desc">マージコミットを作成して統合</div>
-                  </div>
-                  <div class="option-item">
-                    <div class="option-item-title">Rebase</div>
-                    <div class="option-item-desc">コミット履歴を一直線に保つ</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+      <div class="status-right">
+        <span class="status-item">rocket-app</span>
       </div>
     </div>
   </div>
 
-  <div class="features">
-    <h3 class="features-title">v0.3 機能（v0.2 に追加）</h3>
-    <div class="features-list">
-      <span class="feature-tag">認証（Credential Helper）</span>
-      <span class="feature-tag">SSH連携</span>
-      <span class="feature-tag">Fetch</span>
-      <span class="feature-tag">Pull（Merge/Rebase）</span>
-      <span class="feature-tag">Push</span>
-      <span class="feature-tag">リモート管理</span>
-      <span class="feature-tag">リモートブランチ表示</span>
-      <span class="feature-tag">アップストリーム設定</span>
-    </div>
-  </div>
+  <div class="toast-container" id="toast-container"></div>
 
   <script>
-    const themeBtns = document.querySelectorAll('.theme-btn');
-    const app = document.getElementById('app');
-    themeBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        themeBtns.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        if (btn.dataset.theme === 'light') app.classList.add('light');
-        else app.classList.remove('light');
-      });
-    });
-
-    document.querySelectorAll('.option-item').forEach(opt => {
-      opt.addEventListener('click', () => {
-        document.querySelectorAll('.option-item').forEach(o => o.classList.remove('selected'));
-        opt.classList.add('selected');
-      });
-    });
+function switchView(v) {
+  document.querySelectorAll('.nav-item').forEach(function(i){i.classList.toggle('active',i.dataset.view===v);});
+  document.querySelectorAll('.view').forEach(function(el){el.classList.remove('active');});
+  var t=document.getElementById('view-'+v); if(t) t.classList.add('active');
+}
+function selectFile(el) {
+  document.querySelectorAll('.file-item').forEach(function(i){i.classList.remove('selected');});
+  el.classList.add('selected');
+}
+function toggleSection(header) {
+  header.classList.toggle('collapsed');
+  var fl=header.nextElementSibling;
+  if(fl) fl.style.display=header.classList.contains('collapsed')?'none':'block';
+}
+function performCommit() {
+  var s=document.getElementById('commit-subject').value;
+  if(!s.trim()){showToast('error','Please enter a commit message');return;}
+  showToast('success','Commit created');
+  document.getElementById('commit-subject').value='';
+  document.getElementById('commit-body').value='';
+}
+function showToast(type,msg) {
+  var c=document.getElementById('toast-container');
+  var t=document.createElement('div'); t.className='toast '+type; t.textContent=msg;
+  c.appendChild(t); setTimeout(function(){t.remove();},3000);
+}
+function renderInlineDiff() {
+  document.getElementById('diff-inline').innerHTML=
+    '<div class="diff-hunk">'+
+      '<div class="diff-hunk-header">@@ -1,10 +1,15 @@ package auth</div>'+
+      '<div class="diff-line"><span class="line-num">1</span><span class="line-content">package auth</span></div>'+
+      '<div class="diff-line"><span class="line-num">2</span><span class="line-content"></span></div>'+
+      '<div class="diff-line"><span class="line-num">3</span><span class="line-content">import (</span></div>'+
+      '<div class="diff-line add"><span class="line-num">4</span><span class="line-content">+    "context"</span></div>'+
+      '<div class="diff-line add"><span class="line-num">5</span><span class="line-content">+    "errors"</span></div>'+
+      '<div class="diff-line"><span class="line-num">6</span><span class="line-content">    "fmt"</span></div>'+
+      '<div class="diff-line del"><span class="line-num">7</span><span class="line-content">-    "log"</span></div>'+
+      '<div class="diff-line add"><span class="line-num">8</span><span class="line-content">+    "log/slog"</span></div>'+
+      '<div class="diff-line"><span class="line-num">9</span><span class="line-content">)</span></div>'+
+    '</div>'+
+    '<div class="diff-hunk">'+
+      '<div class="diff-hunk-header">@@ -25,6 +30,20 @@ func NewHandler() *Handler {</div>'+
+      '<div class="diff-line"><span class="line-num">25</span><span class="line-content">func NewHandler() *Handler {</span></div>'+
+      '<div class="diff-line add"><span class="line-num">26</span><span class="line-content">+    return &amp;Handler{</span></div>'+
+      '<div class="diff-line add"><span class="line-num">27</span><span class="line-content">+        logger: slog.Default(),</span></div>'+
+      '<div class="diff-line add"><span class="line-num">28</span><span class="line-content">+    }</span></div>'+
+      '<div class="diff-line del"><span class="line-num">29</span><span class="line-content">-    return &amp;Handler{}</span></div>'+
+      '<div class="diff-line"><span class="line-num">30</span><span class="line-content">}</span></div>'+
+    '</div>';
+}
+function openModal() {
+  var o=document.getElementById('modal-overlay'),m=document.getElementById('modal-container');
+  m.innerHTML='<div class="modal-header"><span class="modal-title">Branches</span><button class="modal-close" onclick="closeModal()"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg></button></div><div class="modal-body"><div style="margin-bottom:16px"><input type="text" placeholder="Search branches..." class="modal-input"></div><div class="branch-list"><div class="branch-item current"><div class="branch-info"><span class="branch-name">main</span><span class="branch-remote">origin/main</span></div><div class="branch-status-info"><span class="current-badge">Current</span></div></div><div class="branch-item" onclick="switchBranch(\'feature/auth\')"><div class="branch-info"><span class="branch-name">feature/auth</span><span class="branch-remote">origin/feature/auth</span></div><div class="branch-status-info"><span class="ahead">&uarr;2</span></div></div><div class="branch-item" onclick="switchBranch(\'feature/ui-redesign\')"><div class="branch-info"><span class="branch-name">feature/ui-redesign</span></div><div class="branch-status-info"><span class="ahead">&uarr;5</span></div></div><div class="branch-item" onclick="switchBranch(\'hotfix/login-bug\')"><div class="branch-info"><span class="branch-name">hotfix/login-bug</span><span class="branch-remote">origin/hotfix/login-bug</span></div><div class="branch-status-info"><span class="behind">&darr;1</span></div></div></div></div><div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="showToast(\'success\',\'New branch created\');closeModal()"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/></svg> New Branch</button></div>';
+  o.classList.add('active'); m.classList.add('active');
+}
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('active');
+  document.getElementById('modal-container').classList.remove('active');
+}
+function switchBranch(name) {
+  document.getElementById('current-branch').textContent=name;
+  showToast('success','Switched to '+name); closeModal();
+}
+function performAction(a) {
+  showToast('info',a.charAt(0).toUpperCase()+a.slice(1)+'ing from origin...');
+  setTimeout(function(){showToast('success',a.charAt(0).toUpperCase()+a.slice(1)+' complete');},1000);
+}
+function openRemoteModal() {
+  var o=document.getElementById('modal-overlay'),m=document.getElementById('modal-container');
+  m.innerHTML='<div class="modal-header"><span class="modal-title">Remote</span><button class="modal-close" onclick="closeModal()"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg></button></div><div class="modal-body"><div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px">Active Remote</div><div style="display:flex;flex-direction:column;gap:6px"><div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--accent-dim);border:2px solid var(--accent);border-radius:8px;cursor:pointer"><div style="flex:1"><div style="font-size:13px;font-weight:600;margin-bottom:4px">origin</div><div style="font-size:11px;color:var(--text-muted);font-family:JetBrains Mono,monospace">git@github.com:HMasataka/rocket.git</div></div></div><div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--bg-tertiary);border:2px solid transparent;border-radius:8px;cursor:pointer" onclick="showToast(\'success\',\'Switched to upstream\');closeModal()"><div style="flex:1"><div style="font-size:13px;font-weight:600;margin-bottom:4px">upstream</div><div style="font-size:11px;color:var(--text-muted);font-family:JetBrains Mono,monospace">git@github.com:original/rocket.git</div></div></div></div></div><div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal()">Close</button><button class="btn btn-primary" onclick="showToast(\'info\',\'Add remote form\');closeModal()"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/></svg> Add Remote</button></div>';
+  o.classList.add('active'); m.classList.add('active');
+}
+function selectBranch(el,name) {
+  document.querySelectorAll('.branch-list-item').forEach(function(i){i.classList.remove('active');});
+  el.classList.add('active');
+}
+document.addEventListener('DOMContentLoaded', renderInlineDiff);
   </script>
 </body>
 </html>

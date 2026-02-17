@@ -1,1549 +1,433 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rocket v0.1 - Classic Color Variants</title>
+  <title>Rocket v0.1 - Color Variants</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --showcase-bg: #08080a;
-      --showcase-card-bg: #111113;
-      --showcase-text: #e8e8ec;
-      --showcase-muted: #7a7a85;
-      --showcase-border: #2a2a2f;
-    }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'Outfit', sans-serif;
-      background: var(--showcase-bg);
-      color: var(--showcase-text);
-      line-height: 1.6;
-      min-height: 100vh;
-    }
-
-    /* Showcase Header */
-    .showcase-header {
-      padding: 48px 40px 32px;
-      text-align: center;
-      border-bottom: 1px solid var(--showcase-border);
-      background: linear-gradient(180deg, #12121a 0%, var(--showcase-bg) 100%);
-    }
-
-    .showcase-title {
-      font-size: 36px;
-      font-weight: 700;
-      letter-spacing: -1px;
-      margin-bottom: 8px;
-    }
-
-    .showcase-subtitle {
-      font-size: 16px;
-      color: var(--showcase-muted);
-    }
-
-    /* Theme Toggle */
-    .theme-controls {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      z-index: 1000;
-      display: flex;
-      gap: 8px;
-      background: rgba(17, 17, 19, 0.95);
-      backdrop-filter: blur(10px);
-      padding: 8px;
-      border-radius: 12px;
-      border: 1px solid var(--showcase-border);
-    }
-
-    .theme-btn {
-      padding: 10px 20px;
-      border: none;
-      border-radius: 8px;
-      font-family: 'Outfit', sans-serif;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s;
-      background: transparent;
-      color: var(--showcase-muted);
-    }
-
-    .theme-btn.active {
-      background: #fff;
-      color: #000;
-    }
-
-    .theme-btn:hover:not(.active) {
-      background: rgba(255, 255, 255, 0.1);
-      color: var(--showcase-text);
-    }
-
-    /* Design Grid */
-    .design-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 32px;
-      padding: 40px;
-      max-width: 1800px;
-      margin: 0 auto;
-    }
-
-    @media (max-width: 1400px) {
-      .design-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .design-card {
-      background: var(--showcase-card-bg);
-      border-radius: 16px;
-      overflow: hidden;
-      border: 1px solid var(--showcase-border);
-    }
-
-    .card-header {
-      padding: 20px 24px;
-      border-bottom: 1px solid var(--showcase-border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .card-info {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .card-number {
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 14px;
-      font-weight: 700;
-      color: #fff;
-    }
-
-    .card-title {
-      font-size: 18px;
-      font-weight: 600;
-    }
-
-    .card-desc {
-      font-size: 13px;
-      color: var(--showcase-muted);
-      margin-top: 2px;
-    }
-
-    .color-chips {
-      display: flex;
-      gap: 6px;
-    }
-
-    .color-chip {
-      width: 20px;
-      height: 20px;
-      border-radius: 4px;
-      border: 2px solid rgba(255,255,255,0.1);
-    }
-
-    /* ========================================
-       BASE CLASSIC STYLES
-       ======================================== */
-
-    .classic-app {
-      font-family: 'IBM Plex Sans', sans-serif;
-      height: 520px;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .classic-titlebar {
-      height: 36px;
-      display: flex;
-      align-items: center;
-      padding: 0 14px;
-      gap: 12px;
-    }
-
-    .window-controls {
-      display: flex;
-      gap: 8px;
-    }
-
-    .window-dot {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-    }
-
-    .window-dot.close { background: #ff5f57; }
-    .window-dot.minimize { background: #febc2e; }
-    .window-dot.maximize { background: #28c840; }
-
-    .titlebar-text {
-      flex: 1;
-      text-align: center;
-      font-size: 12px;
-      font-weight: 500;
-    }
-
-    .classic-main {
-      flex: 1;
-      display: grid;
-      grid-template-columns: 240px 1fr 280px;
-      overflow: hidden;
-    }
-
-    /* Sidebar */
-    .classic-sidebar {
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-
-    .sidebar-header {
-      padding: 14px 16px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .branch-icon {
-      width: 16px;
-      height: 16px;
-    }
-
-    .branch-name {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-      font-weight: 600;
-    }
-
-    .sidebar-content {
-      flex: 1;
-      overflow-y: auto;
-      padding: 4px 0;
-    }
-
-    .file-group {
-      margin-bottom: 4px;
-    }
-
-    .file-group-header {
-      padding: 6px 16px;
-      font-size: 10px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .file-group-count {
-      padding: 2px 6px;
-      border-radius: 8px;
-      font-size: 9px;
-    }
-
-    .file-item {
-      padding: 6px 16px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      cursor: pointer;
-      transition: background 0.15s;
-    }
-
-    .file-icon {
-      width: 14px;
-      height: 14px;
-      flex-shrink: 0;
-    }
-
-    .file-name {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
-      flex: 1;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .file-status {
-      font-size: 9px;
-      font-weight: 600;
-      padding: 2px 5px;
-      border-radius: 3px;
-    }
-
-    .sidebar-actions {
-      padding: 10px 12px;
-      display: flex;
-      gap: 6px;
-    }
-
-    .sidebar-btn {
-      flex: 1;
-      padding: 7px 10px;
-      border-radius: 6px;
-      font-size: 11px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-
-    /* Diff View */
-    .classic-diff {
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-
-    .diff-header {
-      padding: 10px 16px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .diff-file-path {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-    }
-
-    .diff-stats {
-      margin-left: auto;
-      display: flex;
-      gap: 10px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
-    }
-
-    .diff-content {
-      flex: 1;
-      overflow-y: auto;
-      padding: 0;
-    }
-
-    .diff-line {
-      display: flex;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
-      line-height: 1.6;
-    }
-
-    .line-number {
-      width: 40px;
-      padding: 0 8px;
-      text-align: right;
-      user-select: none;
-      flex-shrink: 0;
-    }
-
-    .line-sign {
-      width: 20px;
-      text-align: center;
-      flex-shrink: 0;
-      font-weight: 600;
-    }
-
-    .line-content {
-      flex: 1;
-      padding: 0 12px;
-      white-space: pre;
-      overflow-x: auto;
-    }
-
-    /* Commit Panel */
-    .classic-commit {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .commit-header {
-      padding: 14px 16px;
-    }
-
-    .commit-title {
-      font-size: 13px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .commit-icon {
-      width: 16px;
-      height: 16px;
-    }
-
-    .commit-form {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      padding: 16px;
-      gap: 12px;
-    }
-
-    .commit-input-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .commit-label {
-      font-size: 11px;
-      font-weight: 500;
-    }
-
-    .commit-subject {
-      padding: 10px 12px;
-      border-radius: 6px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-      outline: none;
-      transition: all 0.15s;
-    }
-
-    .commit-body {
-      flex: 1;
-      min-height: 80px;
-      padding: 10px 12px;
-      border-radius: 6px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-      resize: none;
-      outline: none;
-      transition: all 0.15s;
-    }
-
-    .commit-actions {
-      padding: 12px 16px;
-    }
-
-    .commit-btn {
-      width: 100%;
-      padding: 12px;
-      border: none;
-      border-radius: 6px;
-      font-family: 'IBM Plex Sans', sans-serif;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.15s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-
-    .commit-btn:hover {
-      transform: translateY(-1px);
-    }
-
-    /* ========================================
-       VARIANT A: COBALT (青系)
-       ======================================== */
-
-    .cobalt {
-      --bg-primary: #0f1419;
-      --bg-secondary: #151b22;
-      --bg-tertiary: #1c242d;
-      --text-primary: #e6edf3;
-      --text-secondary: #8b949e;
-      --text-muted: #565d64;
-      --border: #2d3640;
-      --accent: #58a6ff;
-      --accent-hover: #79b8ff;
-      --accent-dim: rgba(88, 166, 255, 0.15);
-      --added: #3fb950;
-      --added-bg: rgba(63, 185, 80, 0.15);
-      --removed: #f85149;
-      --removed-bg: rgba(248, 81, 73, 0.15);
-      --modified: #d29922;
-      --untracked: #a371f7;
-    }
-
-    .cobalt.light {
-      --bg-primary: #ffffff;
-      --bg-secondary: #f6f8fa;
-      --bg-tertiary: #ebeef1;
-      --text-primary: #1f2328;
-      --text-secondary: #656d76;
-      --text-muted: #8c959f;
-      --border: #d1d9e0;
-      --accent: #0969da;
-      --accent-hover: #0860ca;
-      --accent-dim: rgba(9, 105, 218, 0.1);
-      --added: #1a7f37;
-      --added-bg: rgba(26, 127, 55, 0.1);
-      --removed: #cf222e;
-      --removed-bg: rgba(207, 34, 46, 0.1);
-      --modified: #9a6700;
-      --untracked: #8250df;
-    }
-
-    /* ========================================
-       VARIANT B: EMERALD (緑系)
-       ======================================== */
-
-    .emerald {
-      --bg-primary: #0d1512;
-      --bg-secondary: #121d18;
-      --bg-tertiary: #18261f;
-      --text-primary: #e8f0ec;
-      --text-secondary: #8fa69a;
-      --text-muted: #5a6e64;
-      --border: #2a3d34;
-      --accent: #34d399;
-      --accent-hover: #4ade9a;
-      --accent-dim: rgba(52, 211, 153, 0.15);
-      --added: #4ade80;
-      --added-bg: rgba(74, 222, 128, 0.15);
-      --removed: #f87171;
-      --removed-bg: rgba(248, 113, 113, 0.15);
-      --modified: #fbbf24;
-      --untracked: #60a5fa;
-    }
-
-    .emerald.light {
-      --bg-primary: #fafdfb;
-      --bg-secondary: #f0f7f4;
-      --bg-tertiary: #e4f0ea;
-      --text-primary: #14201a;
-      --text-secondary: #4a6358;
-      --text-muted: #7a9488;
-      --border: #c8ddd2;
-      --accent: #059669;
-      --accent-hover: #047857;
-      --accent-dim: rgba(5, 150, 105, 0.1);
-      --added: #16a34a;
-      --added-bg: rgba(22, 163, 74, 0.1);
-      --removed: #dc2626;
-      --removed-bg: rgba(220, 38, 38, 0.1);
-      --modified: #ca8a04;
-      --untracked: #2563eb;
-    }
-
-    /* ========================================
-       VARIANT C: ROSE (ピンク系)
-       ======================================== */
-
-    .rose {
-      --bg-primary: #12090d;
-      --bg-secondary: #1a0f14;
-      --bg-tertiary: #24151b;
-      --text-primary: #f5e8ed;
-      --text-secondary: #b8949e;
-      --text-muted: #7a5c66;
-      --border: #3d2830;
-      --accent: #f472b6;
-      --accent-hover: #f9a8d4;
-      --accent-dim: rgba(244, 114, 182, 0.15);
-      --added: #4ade80;
-      --added-bg: rgba(74, 222, 128, 0.15);
-      --removed: #fb7185;
-      --removed-bg: rgba(251, 113, 133, 0.15);
-      --modified: #fcd34d;
-      --untracked: #a78bfa;
-    }
-
-    .rose.light {
-      --bg-primary: #fffbfc;
-      --bg-secondary: #fdf2f5;
-      --bg-tertiary: #fce7ed;
-      --text-primary: #1f1214;
-      --text-secondary: #6b4550;
-      --text-muted: #9a7580;
-      --border: #f0c6d0;
-      --accent: #db2777;
-      --accent-hover: #be185d;
-      --accent-dim: rgba(219, 39, 119, 0.1);
-      --added: #16a34a;
-      --added-bg: rgba(22, 163, 74, 0.1);
-      --removed: #e11d48;
-      --removed-bg: rgba(225, 29, 72, 0.1);
-      --modified: #ca8a04;
-      --untracked: #7c3aed;
-    }
-
-    /* ========================================
-       VARIANT D: AMBER (オレンジ/琥珀系)
-       ======================================== */
-
-    .amber {
-      --bg-primary: #14110d;
-      --bg-secondary: #1c1812;
-      --bg-tertiary: #262018;
-      --text-primary: #f5f0e8;
-      --text-secondary: #b5a894;
-      --text-muted: #7a6e5a;
-      --border: #3d3428;
-      --accent: #f59e0b;
-      --accent-hover: #fbbf24;
-      --accent-dim: rgba(245, 158, 11, 0.15);
-      --added: #4ade80;
-      --added-bg: rgba(74, 222, 128, 0.15);
-      --removed: #f87171;
-      --removed-bg: rgba(248, 113, 113, 0.15);
-      --modified: #facc15;
-      --untracked: #38bdf8;
-    }
-
-    .amber.light {
-      --bg-primary: #fffcf5;
-      --bg-secondary: #fef7e8;
-      --bg-tertiary: #fef0d6;
-      --text-primary: #1c1810;
-      --text-secondary: #6b5d45;
-      --text-muted: #9a8a70;
-      --border: #e8d8b8;
-      --accent: #d97706;
-      --accent-hover: #b45309;
-      --accent-dim: rgba(217, 119, 6, 0.1);
-      --added: #16a34a;
-      --added-bg: rgba(22, 163, 74, 0.1);
-      --removed: #dc2626;
-      --removed-bg: rgba(220, 38, 38, 0.1);
-      --modified: #ca8a04;
-      --untracked: #0284c7;
-    }
-
-    /* ========================================
-       VARIANT E: SLATE (グレー/モノクロ系)
-       ======================================== */
-
-    .slate {
-      --bg-primary: #0f0f12;
-      --bg-secondary: #17171c;
-      --bg-tertiary: #1f1f26;
-      --text-primary: #ececf0;
-      --text-secondary: #9898a4;
-      --text-muted: #5c5c68;
-      --border: #2e2e38;
-      --accent: #a5a5b4;
-      --accent-hover: #c0c0cc;
-      --accent-dim: rgba(165, 165, 180, 0.15);
-      --added: #6ee7b7;
-      --added-bg: rgba(110, 231, 183, 0.12);
-      --removed: #fca5a5;
-      --removed-bg: rgba(252, 165, 165, 0.12);
-      --modified: #fde68a;
-      --untracked: #93c5fd;
-    }
-
-    .slate.light {
-      --bg-primary: #fafafa;
-      --bg-secondary: #f1f1f4;
-      --bg-tertiary: #e5e5ea;
-      --text-primary: #18181b;
-      --text-secondary: #52525b;
-      --text-muted: #a1a1aa;
-      --border: #d4d4d8;
-      --accent: #52525b;
-      --accent-hover: #3f3f46;
-      --accent-dim: rgba(82, 82, 91, 0.1);
-      --added: #15803d;
-      --added-bg: rgba(21, 128, 61, 0.1);
-      --removed: #b91c1c;
-      --removed-bg: rgba(185, 28, 28, 0.1);
-      --modified: #a16207;
-      --untracked: #1d4ed8;
-    }
-
-    /* ========================================
-       VARIANT F: VIOLET (紫系)
-       ======================================== */
-
-    .violet {
-      --bg-primary: #0e0c14;
-      --bg-secondary: #14121c;
-      --bg-tertiary: #1c1926;
-      --text-primary: #ede8f5;
-      --text-secondary: #9d94b8;
-      --text-muted: #635a7a;
-      --border: #332d44;
-      --accent: #a78bfa;
-      --accent-hover: #c4b5fd;
-      --accent-dim: rgba(167, 139, 250, 0.15);
-      --added: #4ade80;
-      --added-bg: rgba(74, 222, 128, 0.15);
-      --removed: #f87171;
-      --removed-bg: rgba(248, 113, 113, 0.15);
-      --modified: #fbbf24;
-      --untracked: #38bdf8;
-    }
-
-    .violet.light {
-      --bg-primary: #fcfaff;
-      --bg-secondary: #f5f3ff;
-      --bg-tertiary: #ede9fe;
-      --text-primary: #1e1b26;
-      --text-secondary: #5b5470;
-      --text-muted: #8b82a4;
-      --border: #ddd6fe;
-      --accent: #7c3aed;
-      --accent-hover: #6d28d9;
-      --accent-dim: rgba(124, 58, 237, 0.1);
-      --added: #16a34a;
-      --added-bg: rgba(22, 163, 74, 0.1);
-      --removed: #dc2626;
-      --removed-bg: rgba(220, 38, 38, 0.1);
-      --modified: #ca8a04;
-      --untracked: #0284c7;
-    }
-
-    /* Apply colors to elements */
-    .classic-app {
-      background: var(--bg-primary);
-      color: var(--text-primary);
-    }
-
-    .classic-titlebar {
-      background: var(--bg-secondary);
-      border-bottom: 1px solid var(--border);
-    }
-
-    .titlebar-text {
-      color: var(--text-muted);
-    }
-
-    .classic-sidebar {
-      background: var(--bg-secondary);
-      border-right: 1px solid var(--border);
-    }
-
-    .sidebar-header {
-      border-bottom: 1px solid var(--border);
-    }
-
-    .branch-icon {
-      color: var(--accent);
-    }
-
-    .branch-name {
-      color: var(--text-primary);
-    }
-
-    .file-group-header {
-      color: var(--text-muted);
-    }
-
-    .file-group-count {
-      background: var(--bg-tertiary);
-    }
-
-    .file-item:hover {
-      background: var(--bg-tertiary);
-    }
-
-    .file-item.selected {
-      background: var(--bg-tertiary);
-      border-left: 2px solid var(--accent);
-    }
-
-    .file-status.modified {
-      background: rgba(var(--modified), 0.2);
-      color: var(--modified);
-    }
-
-    .file-status.untracked {
-      background: rgba(var(--untracked), 0.2);
-      color: var(--untracked);
-    }
-
-    .file-status.staged {
-      background: var(--added-bg);
-      color: var(--added);
-    }
-
-    .sidebar-actions {
-      border-top: 1px solid var(--border);
-    }
-
-    .sidebar-btn {
-      border: 1px solid var(--border);
-      background: var(--bg-tertiary);
-      color: var(--text-primary);
-    }
-
-    .sidebar-btn:hover {
-      border-color: var(--accent);
-      background: var(--bg-primary);
-    }
-
-    .classic-diff {
-      background: var(--bg-primary);
-    }
-
-    .diff-header {
-      background: var(--bg-secondary);
-      border-bottom: 1px solid var(--border);
-    }
-
-    .diff-file-path {
-      color: var(--text-primary);
-    }
-
-    .diff-stats .added { color: var(--added); }
-    .diff-stats .removed { color: var(--removed); }
-
-    .diff-line.added {
-      background: var(--added-bg);
-    }
-
-    .diff-line.removed {
-      background: var(--removed-bg);
-    }
-
-    .line-number {
-      color: var(--text-muted);
-      border-right: 1px solid var(--border);
-    }
-
-    .diff-line.added .line-sign { color: var(--added); }
-    .diff-line.removed .line-sign { color: var(--removed); }
-
-    .classic-commit {
-      background: var(--bg-secondary);
-      border-left: 1px solid var(--border);
-    }
-
-    .commit-header {
-      border-bottom: 1px solid var(--border);
-    }
-
-    .commit-icon {
-      color: var(--accent);
-    }
-
-    .commit-label {
-      color: var(--text-secondary);
-    }
-
-    .commit-subject,
-    .commit-body {
-      background: var(--bg-primary);
-      border: 1px solid var(--border);
-      color: var(--text-primary);
-    }
-
-    .commit-subject:focus,
-    .commit-body:focus {
-      border-color: var(--accent);
-    }
-
-    .commit-actions {
-      border-top: 1px solid var(--border);
-    }
-
-    .commit-btn {
-      background: var(--accent);
-      color: var(--bg-primary);
-    }
-
-    .commit-btn:hover {
-      background: var(--accent-hover);
-    }
-
-    .slate .commit-btn,
-    .slate.light .commit-btn {
-      color: #fff;
-    }
+:root {
+  --bg-primary: #0f1419;
+  --bg-secondary: #151b22;
+  --bg-tertiary: #1c242d;
+  --bg-hover: #252d38;
+  --text-primary: #e6edf3;
+  --text-secondary: #8b949e;
+  --text-muted: #565d64;
+  --border: #2d3640;
+  --accent: #58a6ff;
+  --accent-dim: rgba(88, 166, 255, 0.15);
+  --success: #3fb950;
+  --success-dim: rgba(63, 185, 80, 0.15);
+  --warning: #d29922;
+  --warning-dim: rgba(210, 153, 34, 0.15);
+  --danger: #f85149;
+  --danger-dim: rgba(248, 81, 73, 0.15);
+  --diff-add-bg: rgba(63, 185, 80, 0.15);
+  --diff-del-bg: rgba(248, 81, 73, 0.15);
+}
+.light {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f6f8fa;
+  --bg-tertiary: #ebeef1;
+  --bg-hover: #e1e4e8;
+  --text-primary: #1f2328;
+  --text-secondary: #656d76;
+  --text-muted: #8c959f;
+  --border: #d1d9e0;
+  --accent: #0969da;
+  --accent-dim: rgba(9, 105, 218, 0.1);
+  --success: #1a7f37;
+  --success-dim: rgba(26, 127, 55, 0.1);
+  --warning: #9a6700;
+  --warning-dim: rgba(154, 103, 0, 0.1);
+  --danger: #cf222e;
+  --danger-dim: rgba(207, 34, 46, 0.1);
+  --diff-add-bg: rgba(26, 127, 55, 0.1);
+  --diff-del-bg: rgba(207, 34, 46, 0.1);
+}
+/* Emerald */
+.theme-emerald { --accent: #34d399; --accent-dim: rgba(52, 211, 153, 0.15); }
+.theme-emerald.light { --accent: #059669; --accent-dim: rgba(5, 150, 105, 0.1); }
+/* Rose */
+.theme-rose { --accent: #f472b6; --accent-dim: rgba(244, 114, 182, 0.15); }
+.theme-rose.light { --accent: #db2777; --accent-dim: rgba(219, 39, 119, 0.1); }
+/* Amber */
+.theme-amber { --accent: #f59e0b; --accent-dim: rgba(245, 158, 11, 0.15); }
+.theme-amber.light { --accent: #d97706; --accent-dim: rgba(217, 119, 6, 0.1); }
+/* Slate */
+.theme-slate { --accent: #a5a5b4; --accent-dim: rgba(165, 165, 180, 0.15); }
+.theme-slate.light { --accent: #64748b; --accent-dim: rgba(100, 116, 139, 0.1); }
+/* Violet */
+.theme-violet { --accent: #a78bfa; --accent-dim: rgba(167, 139, 250, 0.15); }
+.theme-violet.light { --accent: #7c3aed; --accent-dim: rgba(124, 58, 237, 0.1); }
+
+/* Theme Switcher Bar */
+.theme-bar { height: 40px; flex-shrink: 0; background: var(--bg-tertiary); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: center; gap: 12px; padding: 0 16px; }
+.theme-bar-label { font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-right: 8px; }
+.color-dot { width: 20px; height: 20px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: all 0.15s; }
+.color-dot:hover { transform: scale(1.2); }
+.color-dot.active { border-color: var(--text-primary); box-shadow: 0 0 0 2px var(--bg-primary); }
+.mode-toggle { display: flex; background: var(--bg-secondary); border-radius: 6px; padding: 2px; margin-left: 16px; border: 1px solid var(--border); }
+.mode-btn { padding: 4px 12px; border: none; border-radius: 4px; background: transparent; color: var(--text-muted); font-family: inherit; font-size: 11px; cursor: pointer; }
+.mode-btn.active { background: var(--accent); color: #fff; }
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif; background: #0a0c0f; color: var(--text-primary); overflow: hidden; }
+.app { height: 100vh; display: flex; flex-direction: column; background: var(--bg-primary); }
+
+/* Title Bar */
+.titlebar { height: 38px; flex-shrink: 0; background: var(--bg-secondary); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 12px; }
+.window-controls { display: flex; gap: 8px; margin-right: 16px; }
+.window-dot { width: 12px; height: 12px; border-radius: 50%; }
+.window-dot.close { background: #ff5f57; }
+.window-dot.minimize { background: #febc2e; }
+.window-dot.maximize { background: #28c840; }
+.titlebar-tabs { display: flex; gap: 4px; }
+.tab { padding: 6px 16px; font-size: 12px; color: var(--text-muted); background: transparent; border: none; cursor: pointer; border-radius: 6px; font-family: inherit; }
+.tab.active { background: var(--bg-tertiary); color: var(--text-primary); }
+
+/* Toolbar */
+.toolbar { height: 48px; flex-shrink: 0; background: var(--bg-secondary); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 16px; gap: 8px; }
+.branch-selector { display: flex; align-items: center; gap: 8px; padding: 6px 12px; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 6px; font-size: 13px; cursor: default; }
+.branch-selector svg { width: 16px; height: 16px; color: var(--accent); }
+
+/* Main Layout */
+.main-layout { flex: 1 1 auto; display: flex; width: 100%; min-height: 0; overflow: hidden; }
+
+/* Sidebar */
+.sidebar { width: 200px; min-width: 180px; background: var(--bg-secondary); border-right: 1px solid var(--border); overflow-y: auto; flex-shrink: 0; }
+.sidebar-section { padding: 8px 0; border-bottom: 1px solid var(--border); }
+.sidebar-section:last-child { border-bottom: none; }
+.section-label { padding: 8px 16px; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); }
+.nav-item { padding: 8px 16px; font-size: 13px; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; gap: 10px; transition: all 0.15s; }
+.nav-item:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+.nav-item.active { background: var(--accent-dim); color: var(--accent); border-left: 2px solid var(--accent); }
+.nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+.nav-badge { margin-left: auto; padding: 2px 8px; background: var(--accent); color: #fff; border-radius: 10px; font-size: 10px; font-weight: 600; }
+
+/* Content Area */
+.content { flex: 1 1 auto; min-width: 0; min-height: 0; overflow: hidden; display: flex; flex-direction: column; }
+.view { display: none; flex: 1; width: 100%; height: 100%; min-height: 0; overflow: hidden; }
+.view.active { display: flex; flex-direction: column; width: 100%; height: 100%; min-height: 0; }
+
+/* Changes Layout */
+.changes-layout { display: flex; width: 100%; height: 100%; overflow: hidden; }
+.changes-layout .file-panel { width: 250px; flex: 0 0 250px; }
+.changes-layout .diff-panel { flex: 1 1 auto; min-width: 0; }
+.changes-layout .commit-panel { width: 300px; flex: 0 0 300px; }
+
+/* File Panel */
+.file-panel { border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+.panel-header { padding: 14px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.panel-title { font-size: 13px; font-weight: 600; white-space: nowrap; }
+.panel-actions { display: flex; gap: 8px; align-items: center; }
+.file-section { border-bottom: 1px solid var(--border); }
+.file-section:last-child { border-bottom: none; }
+.file-section-header { padding: 8px 12px; font-size: 11px; font-weight: 600; color: var(--text-muted); display: flex; align-items: center; gap: 6px; cursor: pointer; user-select: none; }
+.file-section-header:hover { background: var(--bg-tertiary); }
+.file-section-header .chevron { width: 12px; height: 12px; transition: transform 0.15s; }
+.file-section-header.collapsed .chevron { transform: rotate(-90deg); }
+.file-section-header .count { margin-left: auto; color: var(--accent); }
+.file-list { overflow-y: auto; }
+.file-item { padding: 6px 12px 6px 24px; font-size: 12px; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: all 0.1s; }
+.file-item:hover { background: var(--bg-tertiary); }
+.file-item.selected { background: var(--accent-dim); }
+.file-status { width: 16px; height: 16px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; }
+.file-status.add { background: var(--success-dim); color: var(--success); }
+.file-status.modify { background: var(--warning-dim); color: var(--warning); }
+.file-status.untracked { background: var(--bg-tertiary); color: var(--text-muted); }
+.file-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-secondary); }
+.file-item.selected .file-name { color: var(--text-primary); }
+.file-action { width: 20px; height: 20px; border: none; border-radius: 4px; background: transparent; color: var(--text-muted); cursor: pointer; display: none; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; }
+.file-item:hover .file-action { display: flex; }
+.file-action:hover { background: var(--accent); color: #fff; }
+
+/* Diff Panel */
+.diff-panel { display: flex; flex-direction: column; overflow: hidden; }
+.diff-content { flex: 1; overflow: auto; font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1.6; padding: 0; display: block; }
+.diff-hunk { border-bottom: 1px solid var(--border); }
+.diff-hunk-header { padding: 8px 16px; background: var(--bg-tertiary); color: var(--text-muted); font-size: 11px; font-family: 'JetBrains Mono', monospace; }
+.diff-line { display: flex; padding: 0 16px; min-height: 22px; }
+.diff-line:hover { background: var(--bg-hover); }
+.line-num { width: 40px; text-align: right; padding-right: 12px; color: var(--text-muted); user-select: none; }
+.line-content { flex: 1; white-space: pre; }
+.diff-line.add { background: var(--diff-add-bg); }
+.diff-line.add .line-content { color: var(--success); }
+.diff-line.del { background: var(--diff-del-bg); }
+.diff-line.del .line-content { color: var(--danger); }
+
+/* Commit Panel */
+.commit-panel { border-left: 1px solid var(--border); display: flex; flex-direction: column; }
+.commit-form { flex: 1; display: flex; flex-direction: column; padding: 16px; gap: 12px; }
+.commit-subject { flex: 0; padding: 10px 14px; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 6px; color: var(--text-primary); font-family: inherit; font-size: 13px; }
+.commit-subject:focus { outline: none; border-color: var(--accent); }
+.commit-subject::placeholder { color: var(--text-muted); }
+.commit-body { flex: 1; min-height: 100px; padding: 10px 14px; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 6px; color: var(--text-primary); font-family: inherit; font-size: 13px; resize: none; }
+.commit-body:focus { outline: none; border-color: var(--accent); }
+.commit-body::placeholder { color: var(--text-muted); }
+.commit-actions { display: flex; justify-content: flex-end; }
+
+/* Buttons */
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; border: none; border-radius: 6px; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; }
+.btn svg { width: 16px; height: 16px; }
+.btn-xs { padding: 3px 8px; font-size: 11px; }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { filter: brightness(1.1); }
+.btn-secondary { background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border); }
+.btn-secondary:hover { background: var(--bg-hover); }
+
+/* Status Bar */
+.statusbar { height: 24px; flex-shrink: 0; background: var(--bg-secondary); border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 12px; font-size: 11px; }
+.status-left, .status-right { display: flex; align-items: center; gap: 16px; }
+.status-item { display: flex; align-items: center; gap: 6px; color: var(--text-muted); }
+.status-item svg { width: 12px; height: 12px; }
+
+/* Toast */
+.toast-container { position: fixed; bottom: 40px; right: 20px; display: flex; flex-direction: column; gap: 8px; z-index: 200; }
+.toast { padding: 12px 20px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3); display: flex; align-items: center; gap: 10px; font-size: 13px; animation: slideIn 0.3s ease; }
+.toast.success { border-color: var(--success); }
+.toast.success::before { content: '\2713'; color: var(--success); font-weight: 600; }
+.toast.error { border-color: var(--danger); }
+.toast.error::before { content: '\2717'; color: var(--danger); font-weight: 600; }
+@keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
   </style>
 </head>
 <body>
-  <!-- Theme Controls -->
-  <div class="theme-controls">
-    <button class="theme-btn active" data-theme="dark">Dark</button>
-    <button class="theme-btn" data-theme="light">Light</button>
-  </div>
-
-  <!-- Header -->
-  <header class="showcase-header">
-    <h1 class="showcase-title">Classic - Color Variants</h1>
-    <p class="showcase-subtitle">6種類のカラーバリエーション / ライト・ダークモード切り替え可</p>
-  </header>
-
-  <div class="design-grid">
-    <!-- Variant A: Cobalt -->
-    <div class="design-card">
-      <div class="card-header">
-        <div class="card-info">
-          <div class="card-number" style="background: #58a6ff;">A</div>
-          <div>
-            <div class="card-title">Cobalt</div>
-            <div class="card-desc">GitHubライクな落ち着いた青</div>
-          </div>
-        </div>
-        <div class="color-chips">
-          <div class="color-chip" style="background: #58a6ff;"></div>
-          <div class="color-chip" style="background: #151b22;"></div>
-          <div class="color-chip" style="background: #3fb950;"></div>
-        </div>
+  <div class="app" id="app">
+    <!-- Title Bar -->
+    <div class="titlebar">
+      <div class="window-controls">
+        <div class="window-dot close"></div>
+        <div class="window-dot minimize"></div>
+        <div class="window-dot maximize"></div>
       </div>
-      <div class="classic-app cobalt" id="cobalt-app">
-        <div class="classic-titlebar">
-          <div class="window-controls">
-            <div class="window-dot close"></div>
-            <div class="window-dot minimize"></div>
-            <div class="window-dot maximize"></div>
-          </div>
-          <span class="titlebar-text">Rocket - rocket</span>
-        </div>
-        <div class="classic-main">
-          <div class="classic-sidebar">
-            <div class="sidebar-header">
-              <svg class="branch-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M6 3v12M18 9a3 3 0 100-6 3 3 0 000 6zM6 21a3 3 0 100-6 3 3 0 000 6zM18 9a9 9 0 01-9 9"/>
-              </svg>
-              <span class="branch-name">main</span>
-            </div>
-            <div class="sidebar-content">
-              <div class="file-group">
-                <div class="file-group-header"><span>Staged</span><span class="file-group-count">2</span></div>
-                <div class="file-item">
-                  <svg class="file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
-                  <span class="file-name">cmd/main.go</span>
-                  <span class="file-status staged">A</span>
-                </div>
-                <div class="file-item">
-                  <svg class="file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
-                  <span class="file-name">internal/git/repo.go</span>
-                  <span class="file-status staged">M</span>
-                </div>
-              </div>
-              <div class="file-group">
-                <div class="file-group-header"><span>Modified</span><span class="file-group-count">2</span></div>
-                <div class="file-item selected">
-                  <svg class="file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
-                  <span class="file-name">internal/ui/diff.go</span>
-                  <span class="file-status modified">M</span>
-                </div>
-                <div class="file-item">
-                  <svg class="file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
-                  <span class="file-name">go.mod</span>
-                  <span class="file-status modified">M</span>
-                </div>
-              </div>
-            </div>
-            <div class="sidebar-actions">
-              <button class="sidebar-btn">Stage All</button>
-              <button class="sidebar-btn">Unstage All</button>
-            </div>
-          </div>
-          <div class="classic-diff">
-            <div class="diff-header">
-              <span class="diff-file-path">internal/ui/diff.go</span>
-              <div class="diff-stats"><span class="added">+24</span><span class="removed">-8</span></div>
-            </div>
-            <div class="diff-content">
-              <div class="diff-line"><span class="line-number">45</span><span class="line-sign"></span><span class="line-content">package ui</span></div>
-              <div class="diff-line"><span class="line-number">46</span><span class="line-sign"></span><span class="line-content"></span></div>
-              <div class="diff-line removed"><span class="line-number">47</span><span class="line-sign">-</span><span class="line-content">func RenderDiff(old, new string) string {</span></div>
-              <div class="diff-line added"><span class="line-number">47</span><span class="line-sign">+</span><span class="line-content">func RenderDiff(old, new string, opts DiffOptions) string {</span></div>
-              <div class="diff-line"><span class="line-number">48</span><span class="line-sign"></span><span class="line-content">    diffs := diff.Do(old, new)</span></div>
-              <div class="diff-line added"><span class="line-number">49</span><span class="line-sign">+</span><span class="line-content">    if opts.WordDiff {</span></div>
-              <div class="diff-line added"><span class="line-number">50</span><span class="line-sign">+</span><span class="line-content">        diffs = highlightWords(diffs)</span></div>
-              <div class="diff-line added"><span class="line-number">51</span><span class="line-sign">+</span><span class="line-content">    }</span></div>
-            </div>
-          </div>
-          <div class="classic-commit">
-            <div class="commit-header">
-              <h3 class="commit-title">
-                <svg class="commit-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v6M12 16v6"/></svg>
-                コミット
-              </h3>
-            </div>
-            <div class="commit-form">
-              <div class="commit-input-group">
-                <label class="commit-label">件名</label>
-                <input type="text" class="commit-subject" placeholder="変更の要約...">
-              </div>
-              <div class="commit-input-group" style="flex: 1;">
-                <label class="commit-label">本文</label>
-                <textarea class="commit-body" placeholder="詳細..."></textarea>
-              </div>
-            </div>
-            <div class="commit-actions">
-              <button class="commit-btn">Commit</button>
-            </div>
-          </div>
-        </div>
+      <div class="titlebar-tabs">
+        <button class="tab active">rocket-app</button>
       </div>
     </div>
 
-    <!-- Variant B: Emerald -->
-    <div class="design-card">
-      <div class="card-header">
-        <div class="card-info">
-          <div class="card-number" style="background: #34d399;">B</div>
-          <div>
-            <div class="card-title">Emerald</div>
-            <div class="card-desc">自然な緑、目に優しい</div>
-          </div>
-        </div>
-        <div class="color-chips">
-          <div class="color-chip" style="background: #34d399;"></div>
-          <div class="color-chip" style="background: #121d18;"></div>
-          <div class="color-chip" style="background: #4ade80;"></div>
-        </div>
-      </div>
-      <div class="classic-app emerald" id="emerald-app">
-        <div class="classic-titlebar">
-          <div class="window-controls">
-            <div class="window-dot close"></div>
-            <div class="window-dot minimize"></div>
-            <div class="window-dot maximize"></div>
-          </div>
-          <span class="titlebar-text">Rocket - rocket</span>
-        </div>
-        <div class="classic-main">
-          <div class="classic-sidebar">
-            <div class="sidebar-header">
-              <svg class="branch-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M6 3v12M18 9a3 3 0 100-6 3 3 0 000 6zM6 21a3 3 0 100-6 3 3 0 000 6zM18 9a9 9 0 01-9 9"/>
-              </svg>
-              <span class="branch-name">main</span>
-            </div>
-            <div class="sidebar-content">
-              <div class="file-group">
-                <div class="file-group-header"><span>Staged</span><span class="file-group-count">2</span></div>
-                <div class="file-item">
-                  <svg class="file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
-                  <span class="file-name">cmd/main.go</span>
-                  <span class="file-status staged">A</span>
-                </div>
-                <div class="file-item">
-                  <svg class="file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
-                  <span class="file-name">internal/git/repo.go</span>
-                  <span class="file-status staged">M</span>
-                </div>
-              </div>
-              <div class="file-group">
-                <div class="file-group-header"><span>Modified</span><span class="file-group-count">2</span></div>
-                <div class="file-item selected">
-                  <svg class="file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
-                  <span class="file-name">internal/ui/diff.go</span>
-                  <span class="file-status modified">M</span>
-                </div>
-                <div class="file-item">
-                  <svg class="file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
-                  <span class="file-name">go.mod</span>
-                  <span class="file-status modified">M</span>
-                </div>
-              </div>
-            </div>
-            <div class="sidebar-actions">
-              <button class="sidebar-btn">Stage All</button>
-              <button class="sidebar-btn">Unstage All</button>
-            </div>
-          </div>
-          <div class="classic-diff">
-            <div class="diff-header">
-              <span class="diff-file-path">internal/ui/diff.go</span>
-              <div class="diff-stats"><span class="added">+24</span><span class="removed">-8</span></div>
-            </div>
-            <div class="diff-content">
-              <div class="diff-line"><span class="line-number">45</span><span class="line-sign"></span><span class="line-content">package ui</span></div>
-              <div class="diff-line"><span class="line-number">46</span><span class="line-sign"></span><span class="line-content"></span></div>
-              <div class="diff-line removed"><span class="line-number">47</span><span class="line-sign">-</span><span class="line-content">func RenderDiff(old, new string) string {</span></div>
-              <div class="diff-line added"><span class="line-number">47</span><span class="line-sign">+</span><span class="line-content">func RenderDiff(old, new string, opts DiffOptions) string {</span></div>
-              <div class="diff-line"><span class="line-number">48</span><span class="line-sign"></span><span class="line-content">    diffs := diff.Do(old, new)</span></div>
-              <div class="diff-line added"><span class="line-number">49</span><span class="line-sign">+</span><span class="line-content">    if opts.WordDiff {</span></div>
-              <div class="diff-line added"><span class="line-number">50</span><span class="line-sign">+</span><span class="line-content">        diffs = highlightWords(diffs)</span></div>
-              <div class="diff-line added"><span class="line-number">51</span><span class="line-sign">+</span><span class="line-content">    }</span></div>
-            </div>
-          </div>
-          <div class="classic-commit">
-            <div class="commit-header">
-              <h3 class="commit-title">
-                <svg class="commit-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v6M12 16v6"/></svg>
-                コミット
-              </h3>
-            </div>
-            <div class="commit-form">
-              <div class="commit-input-group">
-                <label class="commit-label">件名</label>
-                <input type="text" class="commit-subject" placeholder="変更の要約...">
-              </div>
-              <div class="commit-input-group" style="flex: 1;">
-                <label class="commit-label">本文</label>
-                <textarea class="commit-body" placeholder="詳細..."></textarea>
-              </div>
-            </div>
-            <div class="commit-actions">
-              <button class="commit-btn">Commit</button>
-            </div>
-          </div>
-        </div>
+    <!-- Theme Switcher Bar -->
+    <div class="theme-bar">
+      <span class="theme-bar-label">Theme</span>
+      <div class="color-dot active" style="background:#58a6ff" data-theme="cobalt" onclick="setColorTheme(this)"></div>
+      <div class="color-dot" style="background:#34d399" data-theme="emerald" onclick="setColorTheme(this)"></div>
+      <div class="color-dot" style="background:#f472b6" data-theme="rose" onclick="setColorTheme(this)"></div>
+      <div class="color-dot" style="background:#f59e0b" data-theme="amber" onclick="setColorTheme(this)"></div>
+      <div class="color-dot" style="background:#a5a5b4" data-theme="slate" onclick="setColorTheme(this)"></div>
+      <div class="color-dot" style="background:#a78bfa" data-theme="violet" onclick="setColorTheme(this)"></div>
+      <div class="mode-toggle">
+        <button class="mode-btn active" onclick="setMode('dark',this)">Dark</button>
+        <button class="mode-btn" onclick="setMode('light',this)">Light</button>
       </div>
     </div>
 
-    <!-- Variant C: Rose -->
-    <div class="design-card">
-      <div class="card-header">
-        <div class="card-info">
-          <div class="card-number" style="background: #f472b6;">C</div>
-          <div>
-            <div class="card-title">Rose</div>
-            <div class="card-desc">モダンなピンク、個性的</div>
-          </div>
-        </div>
-        <div class="color-chips">
-          <div class="color-chip" style="background: #f472b6;"></div>
-          <div class="color-chip" style="background: #1a0f14;"></div>
-          <div class="color-chip" style="background: #4ade80;"></div>
-        </div>
-      </div>
-      <div class="classic-app rose" id="rose-app">
-        <div class="classic-titlebar">
-          <div class="window-controls">
-            <div class="window-dot close"></div>
-            <div class="window-dot minimize"></div>
-            <div class="window-dot maximize"></div>
-          </div>
-          <span class="titlebar-text">Rocket - rocket</span>
-        </div>
-        <div class="classic-main">
-          <div class="classic-sidebar">
-            <div class="sidebar-header">
-              <svg class="branch-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M6 3v12M18 9a3 3 0 100-6 3 3 0 000 6zM6 21a3 3 0 100-6 3 3 0 000 6zM18 9a9 9 0 01-9 9"/>
-              </svg>
-              <span class="branch-name">main</span>
-            </div>
-            <div class="sidebar-content">
-              <div class="file-group">
-                <div class="file-group-header"><span>Staged</span><span class="file-group-count">2</span></div>
-                <div class="file-item">
-                  <svg class="file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
-                  <span class="file-name">cmd/main.go</span>
-                  <span class="file-status staged">A</span>
-                </div>
-                <div class="file-item">
-                  <svg class="file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
-                  <span class="file-name">internal/git/repo.go</span>
-                  <span class="file-status staged">M</span>
-                </div>
-              </div>
-              <div class="file-group">
-                <div class="file-group-header"><span>Modified</span><span class="file-group-count">2</span></div>
-                <div class="file-item selected">
-                  <svg class="file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
-                  <span class="file-name">internal/ui/diff.go</span>
-                  <span class="file-status modified">M</span>
-                </div>
-                <div class="file-item">
-                  <svg class="file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
-                  <span class="file-name">go.mod</span>
-                  <span class="file-status modified">M</span>
-                </div>
-              </div>
-            </div>
-            <div class="sidebar-actions">
-              <button class="sidebar-btn">Stage All</button>
-              <button class="sidebar-btn">Unstage All</button>
-            </div>
-          </div>
-          <div class="classic-diff">
-            <div class="diff-header">
-              <span class="diff-file-path">internal/ui/diff.go</span>
-              <div class="diff-stats"><span class="added">+24</span><span class="removed">-8</span></div>
-            </div>
-            <div class="diff-content">
-              <div class="diff-line"><span class="line-number">45</span><span class="line-sign"></span><span class="line-content">package ui</span></div>
-              <div class="diff-line"><span class="line-number">46</span><span class="line-sign"></span><span class="line-content"></span></div>
-              <div class="diff-line removed"><span class="line-number">47</span><span class="line-sign">-</span><span class="line-content">func RenderDiff(old, new string) string {</span></div>
-              <div class="diff-line added"><span class="line-number">47</span><span class="line-sign">+</span><span class="line-content">func RenderDiff(old, new string, opts DiffOptions) string {</span></div>
-              <div class="diff-line"><span class="line-number">48</span><span class="line-sign"></span><span class="line-content">    diffs := diff.Do(old, new)</span></div>
-              <div class="diff-line added"><span class="line-number">49</span><span class="line-sign">+</span><span class="line-content">    if opts.WordDiff {</span></div>
-              <div class="diff-line added"><span class="line-number">50</span><span class="line-sign">+</span><span class="line-content">        diffs = highlightWords(diffs)</span></div>
-              <div class="diff-line added"><span class="line-number">51</span><span class="line-sign">+</span><span class="line-content">    }</span></div>
-            </div>
-          </div>
-          <div class="classic-commit">
-            <div class="commit-header">
-              <h3 class="commit-title">
-                <svg class="commit-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v6M12 16v6"/></svg>
-                コミット
-              </h3>
-            </div>
-            <div class="commit-form">
-              <div class="commit-input-group">
-                <label class="commit-label">件名</label>
-                <input type="text" class="commit-subject" placeholder="変更の要約...">
-              </div>
-              <div class="commit-input-group" style="flex: 1;">
-                <label class="commit-label">本文</label>
-                <textarea class="commit-body" placeholder="詳細..."></textarea>
-              </div>
-            </div>
-            <div class="commit-actions">
-              <button class="commit-btn">Commit</button>
-            </div>
-          </div>
-        </div>
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="branch-selector">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M9.5 3.25a2.25 2.25 0 1 1 3 2.122V6A2.5 2.5 0 0 1 10 8.5H6a1 1 0 0 0-1 1v1.128a2.251 2.251 0 1 1-1.5 0V5.372a2.25 2.25 0 1 1 1.5 0v1.836A2.492 2.492 0 0 1 6 7h4a1 1 0 0 0 1-1v-.628A2.25 2.25 0 0 1 9.5 3.25z"/></svg>
+        <span>main</span>
       </div>
     </div>
 
-    <!-- Variant D: Amber -->
-    <div class="design-card">
-      <div class="card-header">
-        <div class="card-info">
-          <div class="card-number" style="background: #f59e0b;">D</div>
-          <div>
-            <div class="card-title">Amber</div>
-            <div class="card-desc">温かみのある琥珀色</div>
+    <!-- Main Layout -->
+    <div class="main-layout">
+      <nav class="sidebar">
+        <div class="sidebar-section">
+          <div class="section-label">Workspace</div>
+          <div class="nav-item active" data-view="changes" onclick="switchView('changes')">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/></svg>
+            Changes
+            <span class="nav-badge">5</span>
           </div>
         </div>
-        <div class="color-chips">
-          <div class="color-chip" style="background: #f59e0b;"></div>
-          <div class="color-chip" style="background: #1c1812;"></div>
-          <div class="color-chip" style="background: #4ade80;"></div>
+      </nav>
+
+      <main class="content">
+        <div class="view active" id="view-changes">
+          <div class="changes-layout">
+            <!-- File List -->
+            <div class="file-panel">
+              <div class="panel-header">
+                <span class="panel-title">Changed Files</span>
+                <div class="panel-actions">
+                  <button class="btn btn-secondary btn-xs" onclick="showToast('success','All files unstaged')" title="Unstage All">Unstage All</button>
+                  <button class="btn btn-secondary btn-xs" onclick="showToast('success','All files staged')" title="Stage All">Stage All</button>
+                </div>
+              </div>
+              <div class="file-section">
+                <div class="file-section-header" onclick="toggleSection(this)">
+                  <svg viewBox="0 0 16 16" fill="currentColor" class="chevron"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708z"/></svg>
+                  <span>Staged</span>
+                  <span class="count">2</span>
+                </div>
+                <div class="file-list">
+                  <div class="file-item staged selected" onclick="selectFile(this)">
+                    <span class="file-status add">A</span>
+                    <span class="file-name">src/auth/handler.go</span>
+                    <button class="file-action" onclick="event.stopPropagation();showToast('success','File unstaged')" title="Unstage">&minus;</button>
+                  </div>
+                  <div class="file-item staged" onclick="selectFile(this)">
+                    <span class="file-status modify">M</span>
+                    <span class="file-name">src/main.go</span>
+                    <button class="file-action" onclick="event.stopPropagation();showToast('success','File unstaged')" title="Unstage">&minus;</button>
+                  </div>
+                </div>
+              </div>
+              <div class="file-section">
+                <div class="file-section-header" onclick="toggleSection(this)">
+                  <svg viewBox="0 0 16 16" fill="currentColor" class="chevron"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708z"/></svg>
+                  <span>Modified</span>
+                  <span class="count">2</span>
+                </div>
+                <div class="file-list">
+                  <div class="file-item" onclick="selectFile(this)">
+                    <span class="file-status modify">M</span>
+                    <span class="file-name">src/config/settings.go</span>
+                    <button class="file-action" onclick="event.stopPropagation();showToast('success','File staged')" title="Stage">+</button>
+                  </div>
+                  <div class="file-item" onclick="selectFile(this)">
+                    <span class="file-status modify">M</span>
+                    <span class="file-name">go.mod</span>
+                    <button class="file-action" onclick="event.stopPropagation();showToast('success','File staged')" title="Stage">+</button>
+                  </div>
+                </div>
+              </div>
+              <div class="file-section">
+                <div class="file-section-header" onclick="toggleSection(this)">
+                  <svg viewBox="0 0 16 16" fill="currentColor" class="chevron"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708z"/></svg>
+                  <span>Untracked</span>
+                  <span class="count">1</span>
+                </div>
+                <div class="file-list">
+                  <div class="file-item" onclick="selectFile(this)">
+                    <span class="file-status untracked">?</span>
+                    <span class="file-name">src/auth/token.go</span>
+                    <button class="file-action" onclick="event.stopPropagation();showToast('success','File staged')" title="Stage">+</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Diff Panel -->
+            <div class="diff-panel" id="diff-panel">
+              <div class="panel-header">
+                <span class="panel-title" id="diff-filename">src/auth/handler.go</span>
+              </div>
+              <div class="diff-content" id="diff-inline"></div>
+            </div>
+
+            <!-- Commit Panel -->
+            <div class="commit-panel">
+              <div class="panel-header">
+                <span class="panel-title">Commit</span>
+              </div>
+              <div class="commit-form">
+                <input type="text" class="commit-subject" placeholder="Commit message (subject)" id="commit-subject">
+                <textarea class="commit-body" placeholder="Description (optional)" id="commit-body"></textarea>
+                <div class="commit-actions">
+                  <button class="btn btn-primary" onclick="performCommit()">
+                    <svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/></svg>
+                    Commit
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-      <div class="classic-app amber" id="amber-app">
-        <div class="classic-titlebar">
-          <div class="window-controls">
-            <div class="window-dot close"></div>
-            <div class="window-dot minimize"></div>
-            <div class="window-dot maximize"></div>
-          </div>
-          <span class="titlebar-text">Rocket - rocket</span>
-        </div>
-        <div class="classic-main">
-          <div class="classic-sidebar">
-            <div class="sidebar-header">
-              <svg class="branch-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M6 3v12M18 9a3 3 0 100-6 3 3 0 000 6zM6 21a3 3 0 100-6 3 3 0 000 6zM18 9a9 9 0 01-9 9"/>
-              </svg>
-              <span class="branch-name">main</span>
-            </div>
-            <div class="sidebar-content">
-              <div class="file-group">
-                <div class="file-group-header"><span>Staged</span><span class="file-group-count">2</span></div>
-                <div class="file-item">
-                  <svg class="file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
-                  <span class="file-name">cmd/main.go</span>
-                  <span class="file-status staged">A</span>
-                </div>
-                <div class="file-item">
-                  <svg class="file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
-                  <span class="file-name">internal/git/repo.go</span>
-                  <span class="file-status staged">M</span>
-                </div>
-              </div>
-              <div class="file-group">
-                <div class="file-group-header"><span>Modified</span><span class="file-group-count">2</span></div>
-                <div class="file-item selected">
-                  <svg class="file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
-                  <span class="file-name">internal/ui/diff.go</span>
-                  <span class="file-status modified">M</span>
-                </div>
-                <div class="file-item">
-                  <svg class="file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
-                  <span class="file-name">go.mod</span>
-                  <span class="file-status modified">M</span>
-                </div>
-              </div>
-            </div>
-            <div class="sidebar-actions">
-              <button class="sidebar-btn">Stage All</button>
-              <button class="sidebar-btn">Unstage All</button>
-            </div>
-          </div>
-          <div class="classic-diff">
-            <div class="diff-header">
-              <span class="diff-file-path">internal/ui/diff.go</span>
-              <div class="diff-stats"><span class="added">+24</span><span class="removed">-8</span></div>
-            </div>
-            <div class="diff-content">
-              <div class="diff-line"><span class="line-number">45</span><span class="line-sign"></span><span class="line-content">package ui</span></div>
-              <div class="diff-line"><span class="line-number">46</span><span class="line-sign"></span><span class="line-content"></span></div>
-              <div class="diff-line removed"><span class="line-number">47</span><span class="line-sign">-</span><span class="line-content">func RenderDiff(old, new string) string {</span></div>
-              <div class="diff-line added"><span class="line-number">47</span><span class="line-sign">+</span><span class="line-content">func RenderDiff(old, new string, opts DiffOptions) string {</span></div>
-              <div class="diff-line"><span class="line-number">48</span><span class="line-sign"></span><span class="line-content">    diffs := diff.Do(old, new)</span></div>
-              <div class="diff-line added"><span class="line-number">49</span><span class="line-sign">+</span><span class="line-content">    if opts.WordDiff {</span></div>
-              <div class="diff-line added"><span class="line-number">50</span><span class="line-sign">+</span><span class="line-content">        diffs = highlightWords(diffs)</span></div>
-              <div class="diff-line added"><span class="line-number">51</span><span class="line-sign">+</span><span class="line-content">    }</span></div>
-            </div>
-          </div>
-          <div class="classic-commit">
-            <div class="commit-header">
-              <h3 class="commit-title">
-                <svg class="commit-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v6M12 16v6"/></svg>
-                コミット
-              </h3>
-            </div>
-            <div class="commit-form">
-              <div class="commit-input-group">
-                <label class="commit-label">件名</label>
-                <input type="text" class="commit-subject" placeholder="変更の要約...">
-              </div>
-              <div class="commit-input-group" style="flex: 1;">
-                <label class="commit-label">本文</label>
-                <textarea class="commit-body" placeholder="詳細..."></textarea>
-              </div>
-            </div>
-            <div class="commit-actions">
-              <button class="commit-btn">Commit</button>
-            </div>
-          </div>
-        </div>
-      </div>
+      </main>
     </div>
 
-    <!-- Variant E: Slate -->
-    <div class="design-card">
-      <div class="card-header">
-        <div class="card-info">
-          <div class="card-number" style="background: #a5a5b4;">E</div>
-          <div>
-            <div class="card-title">Slate</div>
-            <div class="card-desc">ニュートラルなグレー、クリーン</div>
-          </div>
-        </div>
-        <div class="color-chips">
-          <div class="color-chip" style="background: #a5a5b4;"></div>
-          <div class="color-chip" style="background: #17171c;"></div>
-          <div class="color-chip" style="background: #6ee7b7;"></div>
-        </div>
+    <!-- Status Bar -->
+    <div class="statusbar">
+      <div class="status-left">
+        <span class="status-item">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M9.5 3.25a2.25 2.25 0 1 1 3 2.122V6A2.5 2.5 0 0 1 10 8.5H6a1 1 0 0 0-1 1v1.128a2.251 2.251 0 1 1-1.5 0V5.372a2.25 2.25 0 1 1 1.5 0v1.836A2.492 2.492 0 0 1 6 7h4a1 1 0 0 0 1-1v-.628A2.25 2.25 0 0 1 9.5 3.25z"/></svg>
+          main
+        </span>
       </div>
-      <div class="classic-app slate" id="slate-app">
-        <div class="classic-titlebar">
-          <div class="window-controls">
-            <div class="window-dot close"></div>
-            <div class="window-dot minimize"></div>
-            <div class="window-dot maximize"></div>
-          </div>
-          <span class="titlebar-text">Rocket - rocket</span>
-        </div>
-        <div class="classic-main">
-          <div class="classic-sidebar">
-            <div class="sidebar-header">
-              <svg class="branch-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M6 3v12M18 9a3 3 0 100-6 3 3 0 000 6zM6 21a3 3 0 100-6 3 3 0 000 6zM18 9a9 9 0 01-9 9"/>
-              </svg>
-              <span class="branch-name">main</span>
-            </div>
-            <div class="sidebar-content">
-              <div class="file-group">
-                <div class="file-group-header"><span>Staged</span><span class="file-group-count">2</span></div>
-                <div class="file-item">
-                  <svg class="file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
-                  <span class="file-name">cmd/main.go</span>
-                  <span class="file-status staged">A</span>
-                </div>
-                <div class="file-item">
-                  <svg class="file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
-                  <span class="file-name">internal/git/repo.go</span>
-                  <span class="file-status staged">M</span>
-                </div>
-              </div>
-              <div class="file-group">
-                <div class="file-group-header"><span>Modified</span><span class="file-group-count">2</span></div>
-                <div class="file-item selected">
-                  <svg class="file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
-                  <span class="file-name">internal/ui/diff.go</span>
-                  <span class="file-status modified">M</span>
-                </div>
-                <div class="file-item">
-                  <svg class="file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
-                  <span class="file-name">go.mod</span>
-                  <span class="file-status modified">M</span>
-                </div>
-              </div>
-            </div>
-            <div class="sidebar-actions">
-              <button class="sidebar-btn">Stage All</button>
-              <button class="sidebar-btn">Unstage All</button>
-            </div>
-          </div>
-          <div class="classic-diff">
-            <div class="diff-header">
-              <span class="diff-file-path">internal/ui/diff.go</span>
-              <div class="diff-stats"><span class="added">+24</span><span class="removed">-8</span></div>
-            </div>
-            <div class="diff-content">
-              <div class="diff-line"><span class="line-number">45</span><span class="line-sign"></span><span class="line-content">package ui</span></div>
-              <div class="diff-line"><span class="line-number">46</span><span class="line-sign"></span><span class="line-content"></span></div>
-              <div class="diff-line removed"><span class="line-number">47</span><span class="line-sign">-</span><span class="line-content">func RenderDiff(old, new string) string {</span></div>
-              <div class="diff-line added"><span class="line-number">47</span><span class="line-sign">+</span><span class="line-content">func RenderDiff(old, new string, opts DiffOptions) string {</span></div>
-              <div class="diff-line"><span class="line-number">48</span><span class="line-sign"></span><span class="line-content">    diffs := diff.Do(old, new)</span></div>
-              <div class="diff-line added"><span class="line-number">49</span><span class="line-sign">+</span><span class="line-content">    if opts.WordDiff {</span></div>
-              <div class="diff-line added"><span class="line-number">50</span><span class="line-sign">+</span><span class="line-content">        diffs = highlightWords(diffs)</span></div>
-              <div class="diff-line added"><span class="line-number">51</span><span class="line-sign">+</span><span class="line-content">    }</span></div>
-            </div>
-          </div>
-          <div class="classic-commit">
-            <div class="commit-header">
-              <h3 class="commit-title">
-                <svg class="commit-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v6M12 16v6"/></svg>
-                コミット
-              </h3>
-            </div>
-            <div class="commit-form">
-              <div class="commit-input-group">
-                <label class="commit-label">件名</label>
-                <input type="text" class="commit-subject" placeholder="変更の要約...">
-              </div>
-              <div class="commit-input-group" style="flex: 1;">
-                <label class="commit-label">本文</label>
-                <textarea class="commit-body" placeholder="詳細..."></textarea>
-              </div>
-            </div>
-            <div class="commit-actions">
-              <button class="commit-btn">Commit</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Variant F: Violet -->
-    <div class="design-card">
-      <div class="card-header">
-        <div class="card-info">
-          <div class="card-number" style="background: #a78bfa;">F</div>
-          <div>
-            <div class="card-title">Violet</div>
-            <div class="card-desc">上品な紫、クリエイティブ</div>
-          </div>
-        </div>
-        <div class="color-chips">
-          <div class="color-chip" style="background: #a78bfa;"></div>
-          <div class="color-chip" style="background: #14121c;"></div>
-          <div class="color-chip" style="background: #4ade80;"></div>
-        </div>
-      </div>
-      <div class="classic-app violet" id="violet-app">
-        <div class="classic-titlebar">
-          <div class="window-controls">
-            <div class="window-dot close"></div>
-            <div class="window-dot minimize"></div>
-            <div class="window-dot maximize"></div>
-          </div>
-          <span class="titlebar-text">Rocket - rocket</span>
-        </div>
-        <div class="classic-main">
-          <div class="classic-sidebar">
-            <div class="sidebar-header">
-              <svg class="branch-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M6 3v12M18 9a3 3 0 100-6 3 3 0 000 6zM6 21a3 3 0 100-6 3 3 0 000 6zM18 9a9 9 0 01-9 9"/>
-              </svg>
-              <span class="branch-name">main</span>
-            </div>
-            <div class="sidebar-content">
-              <div class="file-group">
-                <div class="file-group-header"><span>Staged</span><span class="file-group-count">2</span></div>
-                <div class="file-item">
-                  <svg class="file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
-                  <span class="file-name">cmd/main.go</span>
-                  <span class="file-status staged">A</span>
-                </div>
-                <div class="file-item">
-                  <svg class="file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
-                  <span class="file-name">internal/git/repo.go</span>
-                  <span class="file-status staged">M</span>
-                </div>
-              </div>
-              <div class="file-group">
-                <div class="file-group-header"><span>Modified</span><span class="file-group-count">2</span></div>
-                <div class="file-item selected">
-                  <svg class="file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
-                  <span class="file-name">internal/ui/diff.go</span>
-                  <span class="file-status modified">M</span>
-                </div>
-                <div class="file-item">
-                  <svg class="file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
-                  <span class="file-name">go.mod</span>
-                  <span class="file-status modified">M</span>
-                </div>
-              </div>
-            </div>
-            <div class="sidebar-actions">
-              <button class="sidebar-btn">Stage All</button>
-              <button class="sidebar-btn">Unstage All</button>
-            </div>
-          </div>
-          <div class="classic-diff">
-            <div class="diff-header">
-              <span class="diff-file-path">internal/ui/diff.go</span>
-              <div class="diff-stats"><span class="added">+24</span><span class="removed">-8</span></div>
-            </div>
-            <div class="diff-content">
-              <div class="diff-line"><span class="line-number">45</span><span class="line-sign"></span><span class="line-content">package ui</span></div>
-              <div class="diff-line"><span class="line-number">46</span><span class="line-sign"></span><span class="line-content"></span></div>
-              <div class="diff-line removed"><span class="line-number">47</span><span class="line-sign">-</span><span class="line-content">func RenderDiff(old, new string) string {</span></div>
-              <div class="diff-line added"><span class="line-number">47</span><span class="line-sign">+</span><span class="line-content">func RenderDiff(old, new string, opts DiffOptions) string {</span></div>
-              <div class="diff-line"><span class="line-number">48</span><span class="line-sign"></span><span class="line-content">    diffs := diff.Do(old, new)</span></div>
-              <div class="diff-line added"><span class="line-number">49</span><span class="line-sign">+</span><span class="line-content">    if opts.WordDiff {</span></div>
-              <div class="diff-line added"><span class="line-number">50</span><span class="line-sign">+</span><span class="line-content">        diffs = highlightWords(diffs)</span></div>
-              <div class="diff-line added"><span class="line-number">51</span><span class="line-sign">+</span><span class="line-content">    }</span></div>
-            </div>
-          </div>
-          <div class="classic-commit">
-            <div class="commit-header">
-              <h3 class="commit-title">
-                <svg class="commit-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v6M12 16v6"/></svg>
-                コミット
-              </h3>
-            </div>
-            <div class="commit-form">
-              <div class="commit-input-group">
-                <label class="commit-label">件名</label>
-                <input type="text" class="commit-subject" placeholder="変更の要約...">
-              </div>
-              <div class="commit-input-group" style="flex: 1;">
-                <label class="commit-label">本文</label>
-                <textarea class="commit-body" placeholder="詳細..."></textarea>
-              </div>
-            </div>
-            <div class="commit-actions">
-              <button class="commit-btn">Commit</button>
-            </div>
-          </div>
-        </div>
+      <div class="status-right">
+        <span class="status-item">rocket-app</span>
       </div>
     </div>
   </div>
+
+  <div class="toast-container" id="toast-container"></div>
 
   <script>
-    const themeBtns = document.querySelectorAll('.theme-btn');
-    const apps = ['cobalt-app', 'emerald-app', 'rose-app', 'amber-app', 'slate-app', 'violet-app'];
-
-    themeBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        themeBtns.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-
-        const theme = btn.dataset.theme;
-        apps.forEach(appId => {
-          const app = document.getElementById(appId);
-          if (theme === 'light') {
-            app.classList.add('light');
-          } else {
-            app.classList.remove('light');
-          }
-        });
-      });
-    });
+function switchView(v) {
+  document.querySelectorAll('.nav-item').forEach(function(i){i.classList.toggle('active',i.dataset.view===v);});
+  document.querySelectorAll('.view').forEach(function(el){el.classList.remove('active');});
+  var t=document.getElementById('view-'+v); if(t) t.classList.add('active');
+}
+function selectFile(el) {
+  document.querySelectorAll('.file-item').forEach(function(i){i.classList.remove('selected');});
+  el.classList.add('selected');
+}
+function toggleSection(header) {
+  header.classList.toggle('collapsed');
+  var fl=header.nextElementSibling;
+  if(fl) fl.style.display=header.classList.contains('collapsed')?'none':'block';
+}
+function performCommit() {
+  var s=document.getElementById('commit-subject').value;
+  if(!s.trim()){showToast('error','Please enter a commit message');return;}
+  showToast('success','Commit created');
+  document.getElementById('commit-subject').value='';
+  document.getElementById('commit-body').value='';
+}
+function showToast(type,msg) {
+  var c=document.getElementById('toast-container');
+  var t=document.createElement('div'); t.className='toast '+type; t.textContent=msg;
+  c.appendChild(t); setTimeout(function(){t.remove();},3000);
+}
+function renderInlineDiff() {
+  document.getElementById('diff-inline').innerHTML=
+    '<div class="diff-hunk">'+
+      '<div class="diff-hunk-header">@@ -1,10 +1,15 @@ package auth</div>'+
+      '<div class="diff-line"><span class="line-num">1</span><span class="line-content">package auth</span></div>'+
+      '<div class="diff-line"><span class="line-num">2</span><span class="line-content"></span></div>'+
+      '<div class="diff-line"><span class="line-num">3</span><span class="line-content">import (</span></div>'+
+      '<div class="diff-line add"><span class="line-num">4</span><span class="line-content">+    "context"</span></div>'+
+      '<div class="diff-line add"><span class="line-num">5</span><span class="line-content">+    "errors"</span></div>'+
+      '<div class="diff-line"><span class="line-num">6</span><span class="line-content">    "fmt"</span></div>'+
+      '<div class="diff-line del"><span class="line-num">7</span><span class="line-content">-    "log"</span></div>'+
+      '<div class="diff-line add"><span class="line-num">8</span><span class="line-content">+    "log/slog"</span></div>'+
+      '<div class="diff-line"><span class="line-num">9</span><span class="line-content">)</span></div>'+
+    '</div>'+
+    '<div class="diff-hunk">'+
+      '<div class="diff-hunk-header">@@ -25,6 +30,20 @@ func NewHandler() *Handler {</div>'+
+      '<div class="diff-line"><span class="line-num">25</span><span class="line-content">func NewHandler() *Handler {</span></div>'+
+      '<div class="diff-line add"><span class="line-num">26</span><span class="line-content">+    return &amp;Handler{</span></div>'+
+      '<div class="diff-line add"><span class="line-num">27</span><span class="line-content">+        logger: slog.Default(),</span></div>'+
+      '<div class="diff-line add"><span class="line-num">28</span><span class="line-content">+    }</span></div>'+
+      '<div class="diff-line del"><span class="line-num">29</span><span class="line-content">-    return &amp;Handler{}</span></div>'+
+      '<div class="diff-line"><span class="line-num">30</span><span class="line-content">}</span></div>'+
+    '</div>';
+}
+function setColorTheme(el) {
+  var app=document.getElementById('app');
+  document.querySelectorAll('.color-dot').forEach(function(d){d.classList.remove('active');});
+  el.classList.add('active');
+  var t=el.dataset.theme;
+  app.className=app.className.replace(/theme-\w+/g,'').trim();
+  if(t!=='cobalt') app.classList.add('theme-'+t);
+}
+function setMode(mode,btn) {
+  var app=document.getElementById('app');
+  document.querySelectorAll('.mode-btn').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  if(mode==='light'){app.classList.add('light');document.body.style.background='#e0e0e0';}
+  else{app.classList.remove('light');document.body.style.background='#0a0c0f';}
+}
+document.addEventListener('DOMContentLoaded', renderInlineDiff);
   </script>
 </body>
 </html>
