@@ -3570,3 +3570,120 @@ function removeWorktree(path) {
     showToast('warning', 'Worktree removed');
   }
 }
+
+function openNewTab() {
+  const recentRepos = [
+    { name: 'rocket-app', path: '/Users/dev/go/src/github.com/HMasataka/rocket', branch: 'main', lastOpened: '2 min ago' },
+    { name: 'api-server', path: '/Users/dev/go/src/github.com/HMasataka/api-server', branch: 'develop', lastOpened: '3 hours ago' },
+    { name: 'web-client', path: '/Users/dev/projects/web-client', branch: 'main', lastOpened: 'yesterday' },
+    { name: 'infra-config', path: '/Users/dev/projects/infra-config', branch: 'main', lastOpened: '3 days ago' },
+    { name: 'shared-lib', path: '/Users/dev/go/src/github.com/HMasataka/shared-lib', branch: 'v2', lastOpened: '1 week ago' },
+  ];
+
+  // Hide sidebar, show new tab content in main area
+  const main = document.querySelector('main');
+  const sidebar = document.getElementById('sidebar');
+  sidebar.style.display = 'none';
+  main.innerHTML = getNewTabHTML(recentRepos);
+}
+
+function getNewTabHTML(recentRepos) {
+  const repoRows = recentRepos.map(r => `
+    <div class="newtab-repo-row" onclick="openRepo('${r.path}')">
+      <div class="newtab-repo-icon">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 1.75C2 .784 2.784 0 3.75 0h6.586c.464 0 .909.184 1.237.513l2.914 2.914c.329.328.513.773.513 1.237v9.586A1.75 1.75 0 0 1 13.25 16h-9.5A1.75 1.75 0 0 1 2 14.25Zm1.75-.25a.25.25 0 0 0-.25.25v12.5c0 .138.112.25.25.25h9.5a.25.25 0 0 0 .25-.25V6h-2.75A1.75 1.75 0 0 1 9 4.25V1.5Zm6.75.062V4.25c0 .138.112.25.25.25h2.688l-.011-.013-2.914-2.914-.013-.011Z"/></svg>
+      </div>
+      <div class="newtab-repo-info">
+        <div class="newtab-repo-name">${r.name}</div>
+        <div class="newtab-repo-path">${r.path}</div>
+      </div>
+      <div class="newtab-repo-meta">
+        <span class="newtab-repo-branch">
+          <svg viewBox="0 0 16 16" fill="currentColor" width="12" height="12"><path d="M9.5 3.25a2.25 2.25 0 1 1 3 2.122V6A2.5 2.5 0 0 1 10 8.5H6a1 1 0 0 0-1 1v1.128a2.251 2.251 0 1 1-1.5 0V5.372a2.25 2.25 0 1 1 1.5 0v1.836A2.492 2.492 0 0 1 6 7h4a1 1 0 0 0 1-1v-.628A2.25 2.25 0 0 1 9.5 3.25z"/></svg>
+          ${r.branch}
+        </span>
+        <span class="newtab-repo-date">${r.lastOpened}</span>
+      </div>
+    </div>
+  `).join('');
+
+  return `
+    <div class="newtab-page">
+      <div class="newtab-content">
+        <div class="newtab-header">
+          <h1 class="newtab-title">Open Repository</h1>
+          <p class="newtab-desc">Select a recent repository or open a new one</p>
+        </div>
+
+        <div class="newtab-actions">
+          <button class="btn btn-primary" onclick="browseRepo()">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M1 3.5A1.5 1.5 0 0 1 2.5 2h3.879a1.5 1.5 0 0 1 1.06.44l1.122 1.12A1.5 1.5 0 0 0 9.62 4H13.5A1.5 1.5 0 0 1 15 5.5v8a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 1 13.5v-10Z"/></svg>
+            Open Folder
+          </button>
+          <button class="btn btn-secondary" onclick="cloneRepo()">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1.002 1.002 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4.018 4.018 0 0 1-.128-1.287z"/><path d="M11.285 9.458l1.372-1.372a3 3 0 1 0-4.243-4.243L6.586 5.671A3 3 0 0 0 7.414 10.5l.586-.586a1.002 1.002 0 0 0 .154-.199 2 2 0 0 1-.861-3.337L9.12 4.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287z"/></svg>
+            Clone
+          </button>
+          <button class="btn btn-secondary" onclick="initRepo()">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/></svg>
+            Init
+          </button>
+        </div>
+
+        <div class="newtab-section">
+          <div class="newtab-section-header">
+            <span class="newtab-section-title">Recent Repositories</span>
+            <span class="newtab-section-count">${recentRepos.length}</span>
+          </div>
+          <div class="newtab-repo-list">
+            ${repoRows}
+          </div>
+        </div>
+      </div>
+    </div>
+    <style>
+      .newtab-page { display: flex; align-items: flex-start; justify-content: center; width: 100%; height: 100%; overflow-y: auto; padding: 60px 20px; box-sizing: border-box; }
+      .newtab-content { width: 100%; max-width: 640px; }
+
+      .newtab-header { margin-bottom: 32px; }
+      .newtab-title { font-size: 24px; font-weight: 700; margin: 0 0 8px; }
+      .newtab-desc { font-size: 14px; color: var(--text-muted); margin: 0; }
+
+      .newtab-actions { display: flex; gap: 12px; margin-bottom: 40px; }
+
+      .newtab-section { margin-bottom: 24px; }
+      .newtab-section-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+      .newtab-section-title { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+      .newtab-section-count { background: var(--bg-tertiary); padding: 2px 8px; border-radius: 10px; font-size: 11px; color: var(--text-muted); }
+
+      .newtab-repo-list { border-top: 1px solid var(--border); }
+      .newtab-repo-row { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.15s; }
+      .newtab-repo-row:hover { background: var(--bg-tertiary); }
+      .newtab-repo-icon { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: var(--bg-tertiary); border-radius: 8px; color: var(--text-muted); flex-shrink: 0; }
+      .newtab-repo-icon svg { width: 18px; height: 18px; }
+      .newtab-repo-info { flex: 1; min-width: 0; }
+      .newtab-repo-name { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+      .newtab-repo-path { font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .newtab-repo-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; }
+      .newtab-repo-branch { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--accent); font-family: 'JetBrains Mono', monospace; }
+      .newtab-repo-branch svg { width: 12px; height: 12px; }
+      .newtab-repo-date { font-size: 11px; color: var(--text-muted); }
+    </style>
+  `;
+}
+
+function openRepo(path) {
+  showToast('info', 'Opening ' + path.split('/').pop() + '...');
+}
+
+function browseRepo() {
+  showToast('info', 'Opening folder picker...');
+}
+
+function cloneRepo() {
+  openModal('clone');
+}
+
+function initRepo() {
+  showToast('info', 'Initializing new repository...');
+}
