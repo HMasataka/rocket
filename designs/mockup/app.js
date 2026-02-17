@@ -925,7 +925,7 @@ function getSearchModalHTML() {
     </div>
     <div class="modal-body">
       <div class="search-input-group">
-        <input type="text" class="modal-input search-main" placeholder="Enter search keyword..." autofocus>
+        <input type="text" class="search-input search-main" placeholder="Search in repository..." autofocus>
       </div>
       <div class="search-filters">
         <button class="filter-btn active">Code</button>
@@ -949,7 +949,17 @@ function getSearchModalHTML() {
     </div>
     <style>
       .search-input-group { margin-bottom: 16px; }
-      .search-main { width: 100%; padding: 12px 16px; font-size: 14px; }
+      .search-main {
+        width: 100%;
+        padding: 14px 16px 14px 44px;
+        font-size: 14px;
+        border-radius: 10px;
+        background-size: 18px;
+        background-position: 14px center;
+      }
+      .search-main:focus {
+        box-shadow: 0 0 0 4px var(--accent-dim);
+      }
       .search-filters { display: flex; gap: 8px; margin-bottom: 16px; }
       .filter-btn { padding: 6px 14px; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 6px; color: var(--text-secondary); font-size: 12px; cursor: pointer; }
       .filter-btn:hover { border-color: var(--accent); }
