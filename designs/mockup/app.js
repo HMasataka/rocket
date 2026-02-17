@@ -1103,18 +1103,117 @@ function getHistoryViewHTML() {
       <div class="commit-detail-panel">
         <div class="panel-header">
           <span class="panel-title">Commit Details</span>
+          <div class="panel-actions">
+            <button class="icon-btn" title="Copy SHA">
+              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
+            </button>
+            <button class="icon-btn" title="Browse files">
+              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M1 3.5A1.5 1.5 0 0 1 2.5 2h3.879a1.5 1.5 0 0 1 1.06.44l1.122 1.12A1.5 1.5 0 0 0 9.62 4H13.5A1.5 1.5 0 0 1 15 5.5v8a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 1 13.5v-10Z"/></svg>
+            </button>
+          </div>
         </div>
-        <div class="commit-detail">
-          <p class="empty-state">Select a commit</p>
+        <div class="commit-detail" id="commit-detail-content">
+          <div class="detail-header">
+            <div class="detail-avatar">
+              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0Zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4Zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10Z"/></svg>
+            </div>
+            <div class="detail-author-info">
+              <div class="detail-author">John Developer</div>
+              <div class="detail-author-email">john@example.com</div>
+            </div>
+            <div class="detail-date">
+              <div class="detail-date-relative">2 hours ago</div>
+              <div class="detail-date-absolute">Feb 17, 2026 14:32</div>
+            </div>
+          </div>
+
+          <div class="detail-commit-info">
+            <div class="detail-hash-row">
+              <span class="detail-label">Commit</span>
+              <span class="detail-hash">a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6</span>
+            </div>
+            <div class="detail-parent-row">
+              <span class="detail-label">Parent</span>
+              <a href="#" class="detail-parent-hash">b2c3d4e5</a>
+            </div>
+          </div>
+
+          <div class="detail-message-section">
+            <div class="detail-message-title">feat: Add user authentication</div>
+            <div class="detail-message-body">
+              Implemented JWT-based authentication system with refresh tokens.
+
+              - Added login/logout endpoints
+              - Implemented token refresh mechanism
+              - Added middleware for protected routes
+              - Updated user model with password hashing
+            </div>
+          </div>
+
+          <div class="detail-stats">
+            <div class="stat-item additions">
+              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/></svg>
+              <span>127 additions</span>
+            </div>
+            <div class="stat-item deletions">
+              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8z"/></svg>
+              <span>23 deletions</span>
+            </div>
+            <div class="stat-item files">
+              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.414A2 2 0 0 0 13.414 3L11 .586A2 2 0 0 0 9.586 0H4zm5.5 1.5v2a1 1 0 0 0 1 1h2l-3-3z"/></svg>
+              <span>5 files changed</span>
+            </div>
+          </div>
+
+          <div class="detail-files">
+            <div class="detail-section-title">Changed Files</div>
+            <div class="changed-file added">
+              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/></svg>
+              <span class="file-path">internal/auth/handler.go</span>
+              <span class="file-stats">+89 -0</span>
+            </div>
+            <div class="changed-file modified">
+              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z"/></svg>
+              <span class="file-path">internal/auth/middleware.go</span>
+              <span class="file-stats">+24 -8</span>
+            </div>
+            <div class="changed-file modified">
+              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z"/></svg>
+              <span class="file-path">internal/models/user.go</span>
+              <span class="file-stats">+12 -15</span>
+            </div>
+            <div class="changed-file added">
+              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/></svg>
+              <span class="file-path">internal/auth/token.go</span>
+              <span class="file-stats">+45 -0</span>
+            </div>
+            <div class="changed-file deleted">
+              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8z"/></svg>
+              <span class="file-path">internal/auth/legacy.go</span>
+              <span class="file-stats">+0 -23</span>
+            </div>
+          </div>
+
+          <div class="detail-actions">
+            <button class="btn btn-secondary">
+              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 3a5 5 0 1 1-4.546 2.914.5.5 0 0 0-.908-.417A6 6 0 1 0 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 0-.41-.192L5.23 2.308a.25.25 0 0 0 0 .384l2.36 1.966A.25.25 0 0 0 8 4.466z"/></svg>
+              Revert
+            </button>
+            <button class="btn btn-secondary">
+              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 1.5a2.5 2.5 0 1 1 5 0 2.5 2.5 0 0 1-5 0zM6.5 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/></svg>
+              Cherry-pick
+            </button>
+          </div>
         </div>
       </div>
     </div>
     <style>
-      .history-layout { display: grid; grid-template-columns: 1fr 350px; height: 100%; overflow: hidden; }
+      .history-layout { display: grid; grid-template-columns: 1fr 400px; height: 100%; overflow: hidden; }
       .history-panel { display: flex; flex-direction: column; overflow: hidden; border-right: 1px solid var(--border); }
       .commit-list { flex: 1; overflow-y: auto; }
-      .commit-row { display: flex; padding: 12px 16px; border-bottom: 1px solid var(--border); cursor: pointer; }
+      .commit-row { display: flex; padding: 12px 16px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.15s; }
       .commit-row:hover { background: var(--bg-tertiary); }
+      .commit-row.selected { background: var(--accent-dim); border-left: 3px solid var(--accent); }
       .commit-graph { width: 30px; display: flex; flex-direction: column; align-items: center; }
       .graph-node { width: 10px; height: 10px; background: var(--accent); border-radius: 50%; }
       .graph-line { flex: 1; width: 2px; background: var(--border); margin-top: 4px; }
@@ -1122,6 +1221,51 @@ function getHistoryViewHTML() {
       .commit-message { font-size: 13px; font-weight: 500; margin-bottom: 6px; }
       .commit-meta { display: flex; gap: 12px; font-size: 11px; color: var(--text-muted); }
       .commit-hash { font-family: 'JetBrains Mono', monospace; color: var(--accent); }
+
+      .commit-detail-panel { display: flex; flex-direction: column; overflow: hidden; }
+      .commit-detail { flex: 1; padding: 20px; overflow-y: auto; }
+
+      .detail-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+      .detail-avatar { width: 40px; height: 40px; background: var(--bg-tertiary); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+      .detail-avatar svg { width: 20px; height: 20px; color: var(--text-muted); }
+      .detail-author-info { flex: 1; }
+      .detail-author { font-size: 14px; font-weight: 600; }
+      .detail-author-email { font-size: 12px; color: var(--text-muted); }
+      .detail-date { text-align: right; }
+      .detail-date-relative { font-size: 13px; color: var(--text-secondary); }
+      .detail-date-absolute { font-size: 11px; color: var(--text-muted); }
+
+      .detail-commit-info { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; padding: 12px; background: var(--bg-tertiary); border-radius: 8px; }
+      .detail-hash-row, .detail-parent-row { display: flex; align-items: center; gap: 12px; font-size: 12px; }
+      .detail-label { color: var(--text-muted); min-width: 50px; }
+      .detail-hash { font-family: 'JetBrains Mono', monospace; color: var(--text-secondary); font-size: 11px; }
+      .detail-parent-hash { font-family: 'JetBrains Mono', monospace; color: var(--accent); font-size: 12px; text-decoration: none; }
+      .detail-parent-hash:hover { text-decoration: underline; }
+
+      .detail-message-section { margin-bottom: 20px; }
+      .detail-message-title { font-size: 16px; font-weight: 600; margin-bottom: 12px; line-height: 1.4; }
+      .detail-message-body { font-size: 13px; color: var(--text-secondary); line-height: 1.6; white-space: pre-wrap; padding: 12px; background: var(--bg-secondary); border-radius: 8px; border-left: 3px solid var(--accent); }
+
+      .detail-stats { display: flex; gap: 16px; margin-bottom: 20px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+      .stat-item { display: flex; align-items: center; gap: 6px; font-size: 12px; }
+      .stat-item svg { width: 14px; height: 14px; }
+      .stat-item.additions { color: var(--success); }
+      .stat-item.deletions { color: var(--danger); }
+      .stat-item.files { color: var(--text-muted); }
+
+      .detail-files { margin-bottom: 20px; }
+      .detail-section-title { font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+      .changed-file { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 6px; font-size: 12px; transition: background 0.15s; cursor: pointer; }
+      .changed-file:hover { background: var(--bg-tertiary); }
+      .changed-file svg { width: 14px; height: 14px; flex-shrink: 0; }
+      .changed-file.added svg { color: var(--success); }
+      .changed-file.modified svg { color: var(--warning); }
+      .changed-file.deleted svg { color: var(--danger); }
+      .file-path { flex: 1; font-family: 'JetBrains Mono', monospace; color: var(--text-secondary); }
+      .file-stats { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted); }
+
+      .detail-actions { display: flex; gap: 8px; padding-top: 16px; border-top: 1px solid var(--border); }
+      .detail-actions .btn { flex: 1; }
       .commit-detail-panel { display: flex; flex-direction: column; overflow: hidden; }
       .commit-detail { flex: 1; padding: 16px; overflow-y: auto; }
       .empty-state { color: var(--text-muted); text-align: center; padding: 40px; }
