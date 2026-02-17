@@ -1884,7 +1884,7 @@ function getBranchesViewHTML() {
           <span class="page-desc">Manage local and remote branches</span>
         </div>
         <div class="page-actions">
-          <button class="btn btn-primary btn-sm" onclick="createBranch()">+ New Branch</button>
+          <button class="btn btn-secondary btn-sm" onclick="createBranch()">+ New Branch</button>
         </div>
       </div>
       <div class="branches-content">
@@ -3256,11 +3256,8 @@ function getStashViewHTML() {
           <h2 class="operation-title">Stash</h2>
           <span class="operation-desc">Temporarily save changes without committing</span>
         </div>
-        <div class="header-actions">
-          <button class="btn btn-secondary" onclick="createStash()">
-            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/></svg>
-            Stash Changes
-          </button>
+        <div class="page-actions">
+          <button class="btn btn-secondary btn-sm" onclick="createStash()">+ Stash Changes</button>
         </div>
       </div>
       <div class="operation-two-column">
