@@ -1351,10 +1351,7 @@ function getCherryPickViewHTML() {
   return `
     <div class="operation-layout">
       <div class="operation-header">
-        <div class="operation-title">
-          <span class="operation-icon" style="background: linear-gradient(135deg, #f472b6, #ec4899);">🍒</span>
-          <h2>Cherry-pick</h2>
-        </div>
+        <h2 class="operation-title">Cherry-pick</h2>
         <span class="operation-desc">特定のコミットを現在のブランチに適用</span>
       </div>
       <div class="operation-content">
@@ -1403,9 +1400,7 @@ function getCherryPickViewHTML() {
     <style>
       .operation-layout { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
       .operation-header { display: flex; align-items: center; gap: 16px; padding: 16px 24px; border-bottom: 1px solid var(--border); }
-      .operation-title { display: flex; align-items: center; gap: 12px; }
-      .operation-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
-      .operation-title h2 { font-size: 18px; font-weight: 600; margin: 0; }
+      .operation-title { font-size: 18px; font-weight: 600; margin: 0; }
       .operation-desc { font-size: 13px; color: var(--text-muted); margin-left: auto; }
       .operation-content { display: flex; flex: 1; overflow: hidden; }
       .operation-main { flex: 1; overflow-y: auto; padding: 20px; }
@@ -1461,10 +1456,7 @@ function getRevertViewHTML() {
   return `
     <div class="operation-layout">
       <div class="operation-header">
-        <div class="operation-title">
-          <span class="operation-icon" style="background: linear-gradient(135deg, #fbbf24, #f59e0b);">↩️</span>
-          <h2>Revert</h2>
-        </div>
+        <h2 class="operation-title">Revert</h2>
         <span class="operation-desc">コミットの変更を打ち消す新しいコミットを作成</span>
       </div>
       <div class="operation-content">
@@ -1554,10 +1546,7 @@ function getResetViewHTML() {
   return `
     <div class="operation-layout">
       <div class="operation-header">
-        <div class="operation-title">
-          <span class="operation-icon" style="background: linear-gradient(135deg, #f87171, #ef4444);">🔄</span>
-          <h2>Reset</h2>
-        </div>
+        <h2 class="operation-title">Reset</h2>
         <span class="operation-desc">HEADを指定コミットに移動</span>
       </div>
       <div class="operation-content">
@@ -1683,10 +1672,7 @@ function getReflogViewHTML() {
   return `
     <div class="operation-layout">
       <div class="operation-header">
-        <div class="operation-title">
-          <span class="operation-icon" style="background: linear-gradient(135deg, #a78bfa, #8b5cf6);">📜</span>
-          <h2>Reflog</h2>
-        </div>
+        <h2 class="operation-title">Reflog</h2>
         <span class="operation-desc">HEADの移動履歴 - 失われたコミットを復元</span>
       </div>
       <div class="reflog-content">
@@ -1760,10 +1746,7 @@ function getSubmodulesViewHTML() {
   return `
     <div class="operation-layout">
       <div class="operation-header">
-        <div class="operation-title">
-          <span class="operation-icon" style="background: var(--accent-dim);">📦</span>
-          <h2>サブモジュール</h2>
-        </div>
+        <h2 class="operation-title">サブモジュール</h2>
         <span class="operation-desc">サブモジュールの追加・更新・削除</span>
         <button class="btn btn-primary btn-sm" onclick="addSubmodule()">+ 追加</button>
       </div>
@@ -1849,10 +1832,7 @@ function getWorktreesViewHTML() {
   return `
     <div class="operation-layout">
       <div class="operation-header">
-        <div class="operation-title">
-          <span class="operation-icon" style="background: var(--success-dim);">🌲</span>
-          <h2>ワークツリー</h2>
-        </div>
+        <h2 class="operation-title">ワークツリー</h2>
         <span class="operation-desc">複数ワークツリーの管理</span>
         <button class="btn btn-primary btn-sm" onclick="addWorktree()">+ 追加</button>
       </div>
