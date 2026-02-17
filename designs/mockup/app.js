@@ -5,7 +5,8 @@ const state = {
   theme: 'dark',
   selectedFile: null,
   hunkMode: false,
-  lineSelectMode: false
+  lineSelectMode: false,
+  diffViewMode: 'inline'
 };
 
 // ===== Sample Data =====
@@ -107,17 +108,49 @@ function loadViewContent(viewName) {
     case 'advanced':
       view.innerHTML = getAdvancedViewHTML();
       break;
+    case 'cherry-pick':
+      view.innerHTML = getCherryPickViewHTML();
+      break;
+    case 'revert':
+      view.innerHTML = getRevertViewHTML();
+      break;
+    case 'reset':
+      view.innerHTML = getResetViewHTML();
+      break;
+    case 'reflog':
+      view.innerHTML = getReflogViewHTML();
+      break;
+    case 'submodules':
+      view.innerHTML = getSubmodulesViewHTML();
+      break;
+    case 'worktrees':
+      view.innerHTML = getWorktreesViewHTML();
+      break;
   }
   view.dataset.loaded = 'true';
 }
 
 // ===== Diff View =====
 function initDiffView() {
-  const diffContent = document.getElementById('diff-content');
-  diffContent.innerHTML = getSampleDiffHTML();
+  renderInlineDiff();
+  renderSplitDiff();
+  initSplitScrollSync();
 }
 
-function getSampleDiffHTML() {
+function renderInlineDiff() {
+  const diffInline = document.getElementById('diff-inline');
+  diffInline.innerHTML = getInlineDiffHTML();
+}
+
+function renderSplitDiff() {
+  const leftCode = document.getElementById('split-left-code');
+  const rightCode = document.getElementById('split-right-code');
+
+  leftCode.innerHTML = getSplitLeftHTML();
+  rightCode.innerHTML = getSplitRightHTML();
+}
+
+function getInlineDiffHTML() {
   return `
     <div class="diff-hunk">
       <div class="diff-hunk-header">
@@ -215,12 +248,103 @@ function getSampleDiffHTML() {
   `;
 }
 
-function setDiffView(mode) {
-  document.querySelectorAll('.view-toggle .toggle-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.textContent.toLowerCase() === mode);
+function getSplitLeftHTML() {
+  // Original file (shows deletions)
+  return `
+    <div class="split-hunk-header">@@ -1,10 +1,15 @@ package auth</div>
+    <div class="split-line unchanged"><span class="line-num">1</span><span class="line-content">package auth</span></div>
+    <div class="split-line unchanged"><span class="line-num">2</span><span class="line-content"></span></div>
+    <div class="split-line unchanged"><span class="line-num">3</span><span class="line-content">import (</span></div>
+    <div class="split-line empty"><span class="line-num"></span><span class="line-content"></span></div>
+    <div class="split-line empty"><span class="line-num"></span><span class="line-content"></span></div>
+    <div class="split-line unchanged"><span class="line-num">4</span><span class="line-content">    "fmt"</span></div>
+    <div class="split-line del"><span class="line-num">5</span><span class="line-content">    "<span class="word-del">log</span>"</span></div>
+    <div class="split-line unchanged"><span class="line-num">6</span><span class="line-content">)</span></div>
+    <div class="split-line unchanged"><span class="line-num">7</span><span class="line-content"></span></div>
+    <div class="split-hunk-header">@@ -25,6 +30,20 @@ func NewHandler() *Handler {</div>
+    <div class="split-line unchanged"><span class="line-num">25</span><span class="line-content">func NewHandler() *Handler {</span></div>
+    <div class="split-line del"><span class="line-num">26</span><span class="line-content">    return &Handler<span class="word-del">{}</span></span></div>
+    <div class="split-line empty"><span class="line-num"></span><span class="line-content"></span></div>
+    <div class="split-line empty"><span class="line-num"></span><span class="line-content"></span></div>
+    <div class="split-line unchanged"><span class="line-num">27</span><span class="line-content">}</span></div>
+    <div class="split-line unchanged"><span class="line-num">28</span><span class="line-content"></span></div>
+    <div class="split-line unchanged"><span class="line-num">29</span><span class="line-content">func (h *Handler) Authenticate(ctx context.Context) error {</span></div>
+    <div class="split-line unchanged"><span class="line-num">30</span><span class="line-content">    // TODO: implement</span></div>
+    <div class="split-line unchanged"><span class="line-num">31</span><span class="line-content">    return nil</span></div>
+    <div class="split-line unchanged"><span class="line-num">32</span><span class="line-content">}</span></div>
+  `;
+}
+
+function getSplitRightHTML() {
+  // Modified file (shows additions)
+  return `
+    <div class="split-hunk-header">@@ -1,10 +1,15 @@ package auth</div>
+    <div class="split-line unchanged"><span class="line-num">1</span><span class="line-content">package auth</span></div>
+    <div class="split-line unchanged"><span class="line-num">2</span><span class="line-content"></span></div>
+    <div class="split-line unchanged"><span class="line-num">3</span><span class="line-content">import (</span></div>
+    <div class="split-line add"><span class="line-num">4</span><span class="line-content">    "<span class="word-add">context</span>"</span></div>
+    <div class="split-line add"><span class="line-num">5</span><span class="line-content">    "<span class="word-add">errors</span>"</span></div>
+    <div class="split-line unchanged"><span class="line-num">6</span><span class="line-content">    "fmt"</span></div>
+    <div class="split-line add"><span class="line-num">7</span><span class="line-content">    "<span class="word-add">log/slog</span>"</span></div>
+    <div class="split-line unchanged"><span class="line-num">8</span><span class="line-content">)</span></div>
+    <div class="split-line unchanged"><span class="line-num">9</span><span class="line-content"></span></div>
+    <div class="split-hunk-header">@@ -25,6 +30,20 @@ func NewHandler() *Handler {</div>
+    <div class="split-line unchanged"><span class="line-num">30</span><span class="line-content">func NewHandler() *Handler {</span></div>
+    <div class="split-line add"><span class="line-num">31</span><span class="line-content">    return &Handler<span class="word-add">{</span></span></div>
+    <div class="split-line add"><span class="line-num">32</span><span class="line-content"><span class="word-add">        logger: slog.Default(),</span></span></div>
+    <div class="split-line add"><span class="line-num">33</span><span class="line-content"><span class="word-add">    }</span></span></div>
+    <div class="split-line unchanged"><span class="line-num">34</span><span class="line-content">}</span></div>
+    <div class="split-line unchanged"><span class="line-num">35</span><span class="line-content"></span></div>
+    <div class="split-line unchanged"><span class="line-num">36</span><span class="line-content">func (h *Handler) Authenticate(ctx context.Context) error {</span></div>
+    <div class="split-line unchanged"><span class="line-num">37</span><span class="line-content">    // TODO: implement</span></div>
+    <div class="split-line unchanged"><span class="line-num">38</span><span class="line-content">    return nil</span></div>
+    <div class="split-line unchanged"><span class="line-num">39</span><span class="line-content">}</span></div>
+  `;
+}
+
+function initSplitScrollSync() {
+  const leftCode = document.getElementById('split-left-code');
+  const rightCode = document.getElementById('split-right-code');
+
+  let isSyncing = false;
+
+  leftCode.addEventListener('scroll', () => {
+    if (isSyncing) return;
+    isSyncing = true;
+    rightCode.scrollTop = leftCode.scrollTop;
+    rightCode.scrollLeft = leftCode.scrollLeft;
+    requestAnimationFrame(() => isSyncing = false);
   });
-  // In a real app, this would switch between inline and split view
-  showToast('info', `${mode === 'split' ? 'Split' : 'Inline'}ビューに切り替えました`);
+
+  rightCode.addEventListener('scroll', () => {
+    if (isSyncing) return;
+    isSyncing = true;
+    leftCode.scrollTop = rightCode.scrollTop;
+    leftCode.scrollLeft = rightCode.scrollLeft;
+    requestAnimationFrame(() => isSyncing = false);
+  });
+}
+
+function setDiffView(mode) {
+  const toggle = document.getElementById('diff-view-toggle');
+  const inlineView = document.getElementById('diff-inline');
+  const splitView = document.getElementById('diff-split');
+
+  // Update toggle buttons
+  toggle.querySelectorAll('.toggle-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.view === mode);
+  });
+
+  // Switch views
+  if (mode === 'split') {
+    inlineView.classList.remove('active');
+    splitView.classList.add('active');
+  } else {
+    splitView.classList.remove('active');
+    inlineView.classList.add('active');
+  }
+
+  state.diffViewMode = mode;
 }
 
 function toggleHunkMode() {
@@ -1091,28 +1215,28 @@ function getAdvancedViewHTML() {
       </div>
       <div class="advanced-content">
         <div class="advanced-grid">
-          <div class="advanced-card" onclick="showToast('info', 'Cherry-pick画面を開きます')">
+          <div class="advanced-card" onclick="switchView('cherry-pick')">
             <div class="advanced-icon" style="background: linear-gradient(135deg, #f472b6, #ec4899);">🍒</div>
             <div class="advanced-info">
               <div class="advanced-title">Cherry-pick</div>
               <div class="advanced-desc">特定のコミットを現在のブランチに適用</div>
             </div>
           </div>
-          <div class="advanced-card" onclick="showToast('info', 'Revert画面を開きます')">
+          <div class="advanced-card" onclick="switchView('revert')">
             <div class="advanced-icon" style="background: linear-gradient(135deg, #fbbf24, #f59e0b);">↩️</div>
             <div class="advanced-info">
               <div class="advanced-title">Revert</div>
               <div class="advanced-desc">コミットの変更を打ち消す</div>
             </div>
           </div>
-          <div class="advanced-card" onclick="showToast('info', 'Reset画面を開きます')">
+          <div class="advanced-card" onclick="switchView('reset')">
             <div class="advanced-icon" style="background: linear-gradient(135deg, #f87171, #ef4444);">🔄</div>
             <div class="advanced-info">
               <div class="advanced-title">Reset</div>
               <div class="advanced-desc">HEADを指定コミットに移動</div>
             </div>
           </div>
-          <div class="advanced-card" onclick="showToast('info', 'Reflog画面を開きます')">
+          <div class="advanced-card" onclick="switchView('reflog')">
             <div class="advanced-icon" style="background: linear-gradient(135deg, #a78bfa, #8b5cf6);">📜</div>
             <div class="advanced-info">
               <div class="advanced-title">Reflog</div>
@@ -1122,14 +1246,14 @@ function getAdvancedViewHTML() {
         </div>
         <h3 class="section-title">モジュール管理</h3>
         <div class="advanced-grid">
-          <div class="advanced-card" onclick="showToast('info', 'サブモジュール画面を開きます')">
+          <div class="advanced-card" onclick="switchView('submodules')">
             <div class="advanced-icon" style="background: var(--accent-dim);">📦</div>
             <div class="advanced-info">
               <div class="advanced-title">サブモジュール</div>
               <div class="advanced-desc">サブモジュールの追加・更新・削除</div>
             </div>
           </div>
-          <div class="advanced-card" onclick="showToast('info', 'ワークツリー画面を開きます')">
+          <div class="advanced-card" onclick="switchView('worktrees')">
             <div class="advanced-icon" style="background: var(--success-dim);">🌲</div>
             <div class="advanced-info">
               <div class="advanced-title">ワークツリー</div>
@@ -1261,5 +1385,729 @@ function initKeyboardShortcuts() {
       e.preventDefault();
       performCommit();
     }
+    // D key to toggle diff view (when not in input)
+    if (e.key === 'd' && !e.metaKey && !e.ctrlKey && state.currentView === 'changes') {
+      const activeElement = document.activeElement;
+      const isInput = activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA';
+      if (!isInput) {
+        e.preventDefault();
+        const newMode = state.diffViewMode === 'inline' ? 'split' : 'inline';
+        setDiffView(newMode);
+      }
+    }
   });
+}
+
+// ===== Advanced Git Operations Views =====
+
+function getCherryPickViewHTML() {
+  const commits = sampleData.commits;
+  const commitRows = commits.map(c => `
+    <div class="cherry-commit-row" onclick="toggleCherryPick(this, '${c.hash}')">
+      <div class="cherry-checkbox">
+        <input type="checkbox" data-hash="${c.hash}">
+      </div>
+      <div class="cherry-graph">
+        <div class="graph-node cherry"></div>
+        <div class="graph-line"></div>
+      </div>
+      <div class="cherry-info">
+        <div class="cherry-message">${c.message}</div>
+        <div class="cherry-meta">
+          <span class="cherry-hash">${c.hash}</span>
+          <span class="cherry-author">${c.author}</span>
+          <span class="cherry-date">${c.date}</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  return `
+    <div class="operation-layout">
+      <div class="operation-header">
+        <button class="back-btn" onclick="switchView('advanced')">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/></svg>
+          戻る
+        </button>
+        <div class="operation-title">
+          <span class="operation-icon" style="background: linear-gradient(135deg, #f472b6, #ec4899);">🍒</span>
+          <h2>Cherry-pick</h2>
+        </div>
+      </div>
+      <div class="operation-content">
+        <div class="operation-main">
+          <div class="operation-panel">
+            <div class="panel-header">
+              <span class="panel-title">適用するコミットを選択</span>
+              <div class="panel-actions">
+                <input type="text" class="search-input" placeholder="コミットを検索...">
+              </div>
+            </div>
+            <div class="cherry-commit-list">${commitRows}</div>
+          </div>
+        </div>
+        <div class="operation-sidebar">
+          <div class="operation-options">
+            <h3>オプション</h3>
+            <label class="option-item">
+              <input type="checkbox" checked>
+              <span>コミットを作成 (-x)</span>
+            </label>
+            <label class="option-item">
+              <input type="checkbox">
+              <span>変更のみ適用 (--no-commit)</span>
+            </label>
+            <label class="option-item">
+              <input type="checkbox">
+              <span>マージコミットを許可 (-m)</span>
+            </label>
+          </div>
+          <div class="operation-preview">
+            <h3>選択中</h3>
+            <div class="selected-commits" id="cherry-selected">
+              <p class="empty-hint">コミットを選択してください</p>
+            </div>
+          </div>
+          <div class="operation-actions">
+            <button class="btn btn-secondary" onclick="switchView('advanced')">キャンセル</button>
+            <button class="btn btn-primary" onclick="executeCherryPick()">
+              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/></svg>
+              Cherry-pick実行
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <style>
+      .operation-layout { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
+      .operation-header { display: flex; align-items: center; gap: 16px; padding: 16px 24px; border-bottom: 1px solid var(--border); }
+      .back-btn { display: flex; align-items: center; gap: 6px; padding: 8px 12px; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 6px; color: var(--text-secondary); font-size: 13px; cursor: pointer; }
+      .back-btn:hover { background: var(--bg-secondary); color: var(--text-primary); }
+      .back-btn svg { width: 14px; height: 14px; }
+      .operation-title { display: flex; align-items: center; gap: 12px; }
+      .operation-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+      .operation-title h2 { font-size: 18px; font-weight: 600; margin: 0; }
+      .operation-content { display: flex; flex: 1; overflow: hidden; }
+      .operation-main { flex: 1; overflow-y: auto; padding: 20px; }
+      .operation-panel { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+      .cherry-commit-list { max-height: 500px; overflow-y: auto; }
+      .cherry-commit-row { display: flex; align-items: flex-start; padding: 14px 16px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.15s; }
+      .cherry-commit-row:hover { background: var(--bg-tertiary); }
+      .cherry-commit-row.selected { background: var(--accent-dim); }
+      .cherry-checkbox { margin-right: 12px; padding-top: 2px; }
+      .cherry-checkbox input { width: 16px; height: 16px; accent-color: var(--accent); }
+      .cherry-graph { width: 24px; display: flex; flex-direction: column; align-items: center; margin-right: 12px; }
+      .graph-node.cherry { width: 12px; height: 12px; background: linear-gradient(135deg, #f472b6, #ec4899); border-radius: 50%; }
+      .cherry-info { flex: 1; }
+      .cherry-message { font-size: 13px; font-weight: 500; margin-bottom: 6px; }
+      .cherry-meta { display: flex; gap: 12px; font-size: 11px; color: var(--text-muted); }
+      .cherry-hash { font-family: 'JetBrains Mono', monospace; color: var(--accent); }
+      .operation-sidebar { width: 320px; border-left: 1px solid var(--border); display: flex; flex-direction: column; padding: 20px; gap: 20px; overflow-y: auto; }
+      .operation-options h3, .operation-preview h3 { font-size: 13px; font-weight: 600; margin-bottom: 12px; color: var(--text-secondary); }
+      .option-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; font-size: 13px; cursor: pointer; }
+      .option-item input { accent-color: var(--accent); }
+      .selected-commits { padding: 12px; background: var(--bg-tertiary); border-radius: 8px; min-height: 80px; }
+      .empty-hint { color: var(--text-muted); font-size: 12px; text-align: center; margin: 0; }
+      .selected-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; font-size: 12px; }
+      .selected-item .hash { font-family: 'JetBrains Mono', monospace; color: var(--accent); }
+      .operation-actions { margin-top: auto; display: flex; gap: 8px; padding-top: 20px; border-top: 1px solid var(--border); }
+      .operation-actions .btn { flex: 1; }
+    </style>
+  `;
+}
+
+function getRevertViewHTML() {
+  const commits = sampleData.commits;
+  const commitRows = commits.map((c, i) => `
+    <div class="revert-commit-row ${i === 0 ? 'selected' : ''}" onclick="selectRevertCommit(this, '${c.hash}')">
+      <div class="revert-radio">
+        <input type="radio" name="revert-commit" value="${c.hash}" ${i === 0 ? 'checked' : ''}>
+      </div>
+      <div class="revert-graph">
+        <div class="graph-node revert"></div>
+        <div class="graph-line"></div>
+      </div>
+      <div class="revert-info">
+        <div class="revert-message">${c.message}</div>
+        <div class="revert-meta">
+          <span class="revert-hash">${c.hash}</span>
+          <span class="revert-author">${c.author}</span>
+          <span class="revert-date">${c.date}</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  return `
+    <div class="operation-layout">
+      <div class="operation-header">
+        <button class="back-btn" onclick="switchView('advanced')">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/></svg>
+          戻る
+        </button>
+        <div class="operation-title">
+          <span class="operation-icon" style="background: linear-gradient(135deg, #fbbf24, #f59e0b);">↩️</span>
+          <h2>Revert</h2>
+        </div>
+      </div>
+      <div class="operation-content">
+        <div class="operation-main">
+          <div class="operation-panel">
+            <div class="panel-header">
+              <span class="panel-title">取り消すコミットを選択</span>
+              <div class="panel-actions">
+                <input type="text" class="search-input" placeholder="コミットを検索...">
+              </div>
+            </div>
+            <div class="revert-commit-list">${commitRows}</div>
+          </div>
+        </div>
+        <div class="operation-sidebar">
+          <div class="operation-options">
+            <h3>オプション</h3>
+            <label class="option-item">
+              <input type="checkbox" checked>
+              <span>リバートコミットを作成</span>
+            </label>
+            <label class="option-item">
+              <input type="checkbox">
+              <span>変更のみ適用 (--no-commit)</span>
+            </label>
+            <label class="option-item">
+              <input type="checkbox">
+              <span>エディタを開く (--edit)</span>
+            </label>
+          </div>
+          <div class="operation-preview">
+            <h3>リバート後のコミットメッセージ</h3>
+            <textarea class="revert-message-input" placeholder="Revert &quot;feat: ユーザー認証機能を追加&quot;&#10;&#10;This reverts commit a1b2c3d."></textarea>
+          </div>
+          <div class="operation-actions">
+            <button class="btn btn-secondary" onclick="switchView('advanced')">キャンセル</button>
+            <button class="btn btn-warning" onclick="executeRevert()">
+              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L7.5 2.707V14.5a.5.5 0 0 0 .5.5z"/></svg>
+              Revert実行
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <style>
+      .revert-commit-list { max-height: 500px; overflow-y: auto; }
+      .revert-commit-row { display: flex; align-items: flex-start; padding: 14px 16px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.15s; }
+      .revert-commit-row:hover { background: var(--bg-tertiary); }
+      .revert-commit-row.selected { background: var(--warning-dim); border-left: 3px solid var(--warning); }
+      .revert-radio { margin-right: 12px; padding-top: 2px; }
+      .revert-radio input { width: 16px; height: 16px; accent-color: var(--warning); }
+      .revert-graph { width: 24px; display: flex; flex-direction: column; align-items: center; margin-right: 12px; }
+      .graph-node.revert { width: 12px; height: 12px; background: linear-gradient(135deg, #fbbf24, #f59e0b); border-radius: 50%; }
+      .revert-info { flex: 1; }
+      .revert-message { font-size: 13px; font-weight: 500; margin-bottom: 6px; }
+      .revert-meta { display: flex; gap: 12px; font-size: 11px; color: var(--text-muted); }
+      .revert-hash { font-family: 'JetBrains Mono', monospace; color: var(--warning); }
+      .revert-message-input { width: 100%; height: 120px; padding: 12px; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 8px; color: var(--text-primary); font-family: 'JetBrains Mono', monospace; font-size: 12px; resize: none; }
+      .revert-message-input:focus { outline: none; border-color: var(--warning); }
+      .btn-warning { background: var(--warning); color: #000; }
+      .btn-warning:hover { background: #d97706; }
+    </style>
+  `;
+}
+
+function getResetViewHTML() {
+  const commits = sampleData.commits;
+  const commitRows = commits.map((c, i) => `
+    <div class="reset-commit-row ${i === 0 ? 'selected' : ''}" onclick="selectResetCommit(this, '${c.hash}')">
+      <div class="reset-radio">
+        <input type="radio" name="reset-commit" value="${c.hash}" ${i === 0 ? 'checked' : ''}>
+      </div>
+      <div class="reset-graph">
+        <div class="graph-node reset"></div>
+        <div class="graph-line"></div>
+      </div>
+      <div class="reset-info">
+        <div class="reset-message">${c.message}</div>
+        <div class="reset-meta">
+          <span class="reset-hash">${c.hash}</span>
+          <span class="reset-author">${c.author}</span>
+          <span class="reset-date">${c.date}</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  return `
+    <div class="operation-layout">
+      <div class="operation-header">
+        <button class="back-btn" onclick="switchView('advanced')">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/></svg>
+          戻る
+        </button>
+        <div class="operation-title">
+          <span class="operation-icon" style="background: linear-gradient(135deg, #f87171, #ef4444);">🔄</span>
+          <h2>Reset</h2>
+        </div>
+      </div>
+      <div class="operation-content">
+        <div class="operation-main">
+          <div class="operation-panel">
+            <div class="panel-header">
+              <span class="panel-title">リセット先のコミットを選択</span>
+              <div class="panel-actions">
+                <input type="text" class="search-input" placeholder="コミットを検索...">
+              </div>
+            </div>
+            <div class="reset-commit-list">${commitRows}</div>
+          </div>
+        </div>
+        <div class="operation-sidebar">
+          <div class="operation-options">
+            <h3>リセットモード</h3>
+            <div class="reset-mode-selector">
+              <label class="reset-mode soft">
+                <input type="radio" name="reset-mode" value="soft">
+                <div class="mode-content">
+                  <div class="mode-title">--soft</div>
+                  <div class="mode-desc">HEADのみ移動。変更はステージ済みに残る</div>
+                </div>
+              </label>
+              <label class="reset-mode mixed selected">
+                <input type="radio" name="reset-mode" value="mixed" checked>
+                <div class="mode-content">
+                  <div class="mode-title">--mixed (デフォルト)</div>
+                  <div class="mode-desc">HEAD+インデックスをリセット。変更は作業ツリーに残る</div>
+                </div>
+              </label>
+              <label class="reset-mode hard">
+                <input type="radio" name="reset-mode" value="hard">
+                <div class="mode-content">
+                  <div class="mode-title">--hard</div>
+                  <div class="mode-desc danger">すべてリセット。変更は完全に失われる</div>
+                </div>
+              </label>
+            </div>
+          </div>
+          <div class="reset-warning">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/></svg>
+            <span>この操作は取り消せません。慎重に実行してください。</span>
+          </div>
+          <div class="operation-actions">
+            <button class="btn btn-secondary" onclick="switchView('advanced')">キャンセル</button>
+            <button class="btn btn-danger" onclick="executeReset()">
+              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/><path d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z"/></svg>
+              Reset実行
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <style>
+      .reset-commit-list { max-height: 500px; overflow-y: auto; }
+      .reset-commit-row { display: flex; align-items: flex-start; padding: 14px 16px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.15s; }
+      .reset-commit-row:hover { background: var(--bg-tertiary); }
+      .reset-commit-row.selected { background: var(--danger-dim); border-left: 3px solid var(--danger); }
+      .reset-radio { margin-right: 12px; padding-top: 2px; }
+      .reset-radio input { width: 16px; height: 16px; accent-color: var(--danger); }
+      .reset-graph { width: 24px; display: flex; flex-direction: column; align-items: center; margin-right: 12px; }
+      .graph-node.reset { width: 12px; height: 12px; background: linear-gradient(135deg, #f87171, #ef4444); border-radius: 50%; }
+      .reset-info { flex: 1; }
+      .reset-message { font-size: 13px; font-weight: 500; margin-bottom: 6px; }
+      .reset-meta { display: flex; gap: 12px; font-size: 11px; color: var(--text-muted); }
+      .reset-hash { font-family: 'JetBrains Mono', monospace; color: var(--danger); }
+      .reset-mode-selector { display: flex; flex-direction: column; gap: 8px; }
+      .reset-mode { display: flex; align-items: flex-start; gap: 10px; padding: 12px; background: var(--bg-tertiary); border: 2px solid transparent; border-radius: 8px; cursor: pointer; }
+      .reset-mode:hover { background: var(--bg-secondary); }
+      .reset-mode.selected { border-color: var(--accent); }
+      .reset-mode input { margin-top: 2px; accent-color: var(--accent); }
+      .mode-content { flex: 1; }
+      .mode-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+      .mode-desc { font-size: 11px; color: var(--text-muted); }
+      .mode-desc.danger { color: var(--danger); }
+      .reset-warning { display: flex; align-items: center; gap: 10px; padding: 12px; background: var(--danger-dim); border-radius: 8px; font-size: 12px; color: var(--danger); }
+      .reset-warning svg { width: 16px; height: 16px; flex-shrink: 0; }
+      .btn-danger { background: var(--danger); color: #fff; }
+      .btn-danger:hover { background: #dc2626; }
+    </style>
+  `;
+}
+
+function getReflogViewHTML() {
+  const reflogEntries = [
+    { index: 0, hash: 'a1b2c3d', action: 'commit', message: 'feat: ユーザー認証機能を追加', date: '2分前' },
+    { index: 1, hash: 'e4f5g6h', action: 'checkout', message: 'moving from feature/auth to main', date: '10分前' },
+    { index: 2, hash: 'i7j8k9l', action: 'commit', message: 'fix: ログインバグを修正', date: '1時間前' },
+    { index: 3, hash: 'm0n1o2p', action: 'rebase', message: 'rebase finished', date: '2時間前' },
+    { index: 4, hash: 'q3r4s5t', action: 'reset', message: 'moving to HEAD~1', date: '3時間前' },
+    { index: 5, hash: 'u6v7w8x', action: 'pull', message: 'merge origin/main', date: '昨日' },
+    { index: 6, hash: 'y9z0a1b', action: 'cherry-pick', message: 'cherry-picked abc123', date: '昨日' },
+  ];
+
+  const actionColors = {
+    'commit': 'var(--success)',
+    'checkout': 'var(--accent)',
+    'rebase': 'var(--warning)',
+    'reset': 'var(--danger)',
+    'pull': 'var(--info)',
+    'cherry-pick': '#ec4899'
+  };
+
+  const rows = reflogEntries.map(e => `
+    <div class="reflog-row" onclick="selectReflogEntry(this, ${e.index})">
+      <div class="reflog-index">HEAD@{${e.index}}</div>
+      <div class="reflog-hash">${e.hash}</div>
+      <div class="reflog-action" style="color: ${actionColors[e.action] || 'var(--text-secondary)'};">${e.action}</div>
+      <div class="reflog-message">${e.message}</div>
+      <div class="reflog-date">${e.date}</div>
+      <div class="reflog-actions">
+        <button class="icon-btn" onclick="checkoutReflog(${e.index}, event)" title="Checkout">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/></svg>
+        </button>
+        <button class="icon-btn" onclick="resetToReflog(${e.index}, event)" title="Reset to here">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41z"/></svg>
+        </button>
+      </div>
+    </div>
+  `).join('');
+
+  return `
+    <div class="operation-layout">
+      <div class="operation-header">
+        <button class="back-btn" onclick="switchView('advanced')">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/></svg>
+          戻る
+        </button>
+        <div class="operation-title">
+          <span class="operation-icon" style="background: linear-gradient(135deg, #a78bfa, #8b5cf6);">📜</span>
+          <h2>Reflog</h2>
+        </div>
+        <div class="operation-hint">HEADの移動履歴。失われたコミットを復元できます</div>
+      </div>
+      <div class="reflog-content">
+        <div class="reflog-table">
+          <div class="reflog-header">
+            <div class="reflog-index">参照</div>
+            <div class="reflog-hash">ハッシュ</div>
+            <div class="reflog-action">アクション</div>
+            <div class="reflog-message">メッセージ</div>
+            <div class="reflog-date">日時</div>
+            <div class="reflog-actions">操作</div>
+          </div>
+          ${rows}
+        </div>
+      </div>
+    </div>
+    <style>
+      .operation-hint { font-size: 12px; color: var(--text-muted); margin-left: auto; }
+      .reflog-content { flex: 1; overflow-y: auto; padding: 20px; }
+      .reflog-table { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+      .reflog-header { display: grid; grid-template-columns: 100px 80px 100px 1fr 80px 80px; padding: 12px 16px; background: var(--bg-tertiary); font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+      .reflog-row { display: grid; grid-template-columns: 100px 80px 100px 1fr 80px 80px; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.15s; }
+      .reflog-row:hover { background: var(--bg-tertiary); }
+      .reflog-row:last-child { border-bottom: none; }
+      .reflog-index { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--accent); }
+      .reflog-hash { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-muted); }
+      .reflog-action { font-size: 12px; font-weight: 500; }
+      .reflog-message { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .reflog-date { font-size: 11px; color: var(--text-muted); }
+      .reflog-actions { display: flex; gap: 4px; justify-content: flex-end; }
+    </style>
+  `;
+}
+
+function getSubmodulesViewHTML() {
+  const submodules = [
+    { path: 'vendor/lib-auth', url: 'git@github.com:example/lib-auth.git', branch: 'main', commit: 'abc1234', status: 'up-to-date' },
+    { path: 'vendor/lib-crypto', url: 'git@github.com:example/lib-crypto.git', branch: 'v2.x', commit: 'def5678', status: 'behind' },
+  ];
+
+  const rows = submodules.map(s => `
+    <div class="submodule-card ${s.status}">
+      <div class="submodule-header">
+        <div class="submodule-icon">📦</div>
+        <div class="submodule-info">
+          <div class="submodule-path">${s.path}</div>
+          <div class="submodule-url">${s.url}</div>
+        </div>
+        <div class="submodule-status ${s.status}">
+          ${s.status === 'up-to-date' ? '✓ 最新' : '⚠ 更新あり'}
+        </div>
+      </div>
+      <div class="submodule-details">
+        <div class="submodule-detail">
+          <span class="detail-label">ブランチ:</span>
+          <span class="detail-value">${s.branch}</span>
+        </div>
+        <div class="submodule-detail">
+          <span class="detail-label">コミット:</span>
+          <span class="detail-value hash">${s.commit}</span>
+        </div>
+      </div>
+      <div class="submodule-actions">
+        <button class="btn btn-secondary btn-sm" onclick="updateSubmodule('${s.path}')">更新</button>
+        <button class="btn btn-secondary btn-sm" onclick="openSubmodule('${s.path}')">開く</button>
+        <button class="btn btn-secondary btn-sm" onclick="removeSubmodule('${s.path}')">削除</button>
+      </div>
+    </div>
+  `).join('');
+
+  return `
+    <div class="operation-layout">
+      <div class="operation-header">
+        <button class="back-btn" onclick="switchView('advanced')">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/></svg>
+          戻る
+        </button>
+        <div class="operation-title">
+          <span class="operation-icon" style="background: var(--accent-dim);">📦</span>
+          <h2>サブモジュール</h2>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="addSubmodule()">+ サブモジュール追加</button>
+      </div>
+      <div class="submodules-content">
+        <div class="submodules-toolbar">
+          <button class="btn btn-secondary" onclick="updateAllSubmodules()">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/><path d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z"/></svg>
+            すべて更新
+          </button>
+          <button class="btn btn-secondary" onclick="initSubmodules()">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L7.5 13.293V1.5A.5.5 0 0 1 8 1z"/></svg>
+            Init & Update
+          </button>
+        </div>
+        <div class="submodules-list">
+          ${rows || '<p class="empty-state">サブモジュールがありません</p>'}
+        </div>
+      </div>
+    </div>
+    <style>
+      .submodules-content { flex: 1; overflow-y: auto; padding: 20px; }
+      .submodules-toolbar { display: flex; gap: 12px; margin-bottom: 20px; }
+      .submodules-list { display: flex; flex-direction: column; gap: 12px; }
+      .submodule-card { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+      .submodule-card.behind { border-left: 3px solid var(--warning); }
+      .submodule-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+      .submodule-icon { font-size: 24px; }
+      .submodule-info { flex: 1; }
+      .submodule-path { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+      .submodule-url { font-size: 12px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+      .submodule-status { font-size: 12px; padding: 4px 10px; border-radius: 6px; }
+      .submodule-status.up-to-date { background: var(--success-dim); color: var(--success); }
+      .submodule-status.behind { background: var(--warning-dim); color: var(--warning); }
+      .submodule-details { display: flex; gap: 24px; margin-bottom: 12px; padding: 12px; background: var(--bg-tertiary); border-radius: 6px; }
+      .submodule-detail { display: flex; gap: 8px; font-size: 12px; }
+      .detail-label { color: var(--text-muted); }
+      .detail-value { color: var(--text-primary); }
+      .detail-value.hash { font-family: 'JetBrains Mono', monospace; color: var(--accent); }
+      .submodule-actions { display: flex; gap: 8px; }
+      .btn-sm { padding: 6px 12px; font-size: 12px; }
+    </style>
+  `;
+}
+
+function getWorktreesViewHTML() {
+  const worktrees = [
+    { path: '/Users/dev/rocket', branch: 'main', isMain: true, commit: 'a1b2c3d', status: 'clean' },
+    { path: '/Users/dev/rocket-feature', branch: 'feature/auth', isMain: false, commit: 'x9y8z7w', status: 'modified' },
+    { path: '/Users/dev/rocket-hotfix', branch: 'hotfix/login', isMain: false, commit: 'p0q1r2s', status: 'clean' },
+  ];
+
+  const rows = worktrees.map(w => `
+    <div class="worktree-card ${w.isMain ? 'main' : ''} ${w.status}">
+      <div class="worktree-header">
+        <div class="worktree-icon">${w.isMain ? '🏠' : '🌲'}</div>
+        <div class="worktree-info">
+          <div class="worktree-path">${w.path}</div>
+          <div class="worktree-branch">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M9.5 3.25a2.25 2.25 0 1 1 3 2.122V6A2.5 2.5 0 0 1 10 8.5H6a1 1 0 0 0-1 1v1.128a2.251 2.251 0 1 1-1.5 0V5.372a2.25 2.25 0 1 1 1.5 0v1.836A2.492 2.492 0 0 1 6 7h4a1 1 0 0 0 1-1v-.628A2.25 2.25 0 0 1 9.5 3.25z"/></svg>
+            ${w.branch}
+          </div>
+        </div>
+        <div class="worktree-badges">
+          ${w.isMain ? '<span class="worktree-badge main">メイン</span>' : ''}
+          <span class="worktree-badge ${w.status}">${w.status === 'clean' ? '✓ Clean' : '● Modified'}</span>
+        </div>
+      </div>
+      <div class="worktree-details">
+        <div class="worktree-detail">
+          <span class="detail-label">コミット:</span>
+          <span class="detail-value hash">${w.commit}</span>
+        </div>
+      </div>
+      ${!w.isMain ? `
+        <div class="worktree-actions">
+          <button class="btn btn-secondary btn-sm" onclick="openWorktree('${w.path}')">開く</button>
+          <button class="btn btn-secondary btn-sm" onclick="removeWorktree('${w.path}')">削除</button>
+        </div>
+      ` : ''}
+    </div>
+  `).join('');
+
+  return `
+    <div class="operation-layout">
+      <div class="operation-header">
+        <button class="back-btn" onclick="switchView('advanced')">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/></svg>
+          戻る
+        </button>
+        <div class="operation-title">
+          <span class="operation-icon" style="background: var(--success-dim);">🌲</span>
+          <h2>ワークツリー</h2>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="addWorktree()">+ ワークツリー追加</button>
+      </div>
+      <div class="worktrees-content">
+        <div class="worktrees-hint">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>
+          <span>ワークツリーを使うと、同じリポジトリの異なるブランチを同時に作業できます</span>
+        </div>
+        <div class="worktrees-list">
+          ${rows}
+        </div>
+      </div>
+    </div>
+    <style>
+      .worktrees-content { flex: 1; overflow-y: auto; padding: 20px; }
+      .worktrees-hint { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: var(--accent-dim); border-radius: 8px; font-size: 13px; color: var(--accent); margin-bottom: 20px; }
+      .worktrees-hint svg { width: 16px; height: 16px; flex-shrink: 0; }
+      .worktrees-list { display: flex; flex-direction: column; gap: 12px; }
+      .worktree-card { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+      .worktree-card.main { border-color: var(--accent); }
+      .worktree-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+      .worktree-icon { font-size: 24px; }
+      .worktree-info { flex: 1; }
+      .worktree-path { font-size: 14px; font-weight: 600; margin-bottom: 4px; font-family: 'JetBrains Mono', monospace; }
+      .worktree-branch { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--accent); }
+      .worktree-branch svg { width: 14px; height: 14px; }
+      .worktree-badges { display: flex; gap: 8px; }
+      .worktree-badge { font-size: 11px; padding: 3px 8px; border-radius: 4px; }
+      .worktree-badge.main { background: var(--accent-dim); color: var(--accent); }
+      .worktree-badge.clean { background: var(--success-dim); color: var(--success); }
+      .worktree-badge.modified { background: var(--warning-dim); color: var(--warning); }
+      .worktree-details { display: flex; gap: 24px; margin-bottom: 12px; padding: 12px; background: var(--bg-tertiary); border-radius: 6px; }
+      .worktree-detail { display: flex; gap: 8px; font-size: 12px; }
+      .worktree-actions { display: flex; gap: 8px; }
+    </style>
+  `;
+}
+
+// ===== Advanced Operation Handlers =====
+
+function toggleCherryPick(element, hash) {
+  element.classList.toggle('selected');
+  const checkbox = element.querySelector('input[type="checkbox"]');
+  checkbox.checked = !checkbox.checked;
+  updateCherryPickSelection();
+}
+
+function updateCherryPickSelection() {
+  const selected = document.querySelectorAll('.cherry-commit-row.selected');
+  const container = document.getElementById('cherry-selected');
+  if (selected.length === 0) {
+    container.innerHTML = '<p class="empty-hint">コミットを選択してください</p>';
+  } else {
+    const items = Array.from(selected).map(row => {
+      const hash = row.querySelector('input').dataset.hash;
+      const msg = row.querySelector('.cherry-message').textContent;
+      return `<div class="selected-item"><span class="hash">${hash}</span> ${msg.substring(0, 30)}...</div>`;
+    }).join('');
+    container.innerHTML = items;
+  }
+}
+
+function executeCherryPick() {
+  const selected = document.querySelectorAll('.cherry-commit-row.selected');
+  if (selected.length === 0) {
+    showToast('error', 'コミットを選択してください');
+    return;
+  }
+  showToast('success', `${selected.length}件のコミットをcherry-pickしました`);
+  switchView('advanced');
+}
+
+function selectRevertCommit(element, hash) {
+  document.querySelectorAll('.revert-commit-row').forEach(r => r.classList.remove('selected'));
+  element.classList.add('selected');
+  element.querySelector('input').checked = true;
+}
+
+function executeRevert() {
+  showToast('success', 'コミットをリバートしました');
+  switchView('advanced');
+}
+
+function selectResetCommit(element, hash) {
+  document.querySelectorAll('.reset-commit-row').forEach(r => r.classList.remove('selected'));
+  element.classList.add('selected');
+  element.querySelector('input').checked = true;
+}
+
+function executeReset() {
+  showToast('warning', 'リポジトリをリセットしました');
+  switchView('advanced');
+}
+
+function selectReflogEntry(element, index) {
+  document.querySelectorAll('.reflog-row').forEach(r => r.classList.remove('selected'));
+  element.classList.add('selected');
+}
+
+function checkoutReflog(index, event) {
+  event.stopPropagation();
+  showToast('success', `HEAD@{${index}} にチェックアウトしました`);
+}
+
+function resetToReflog(index, event) {
+  event.stopPropagation();
+  showToast('warning', `HEAD@{${index}} にリセットしました`);
+}
+
+function addSubmodule() {
+  const url = prompt('サブモジュールのURL:');
+  if (url) {
+    showToast('success', 'サブモジュールを追加しました');
+  }
+}
+
+function updateSubmodule(path) {
+  showToast('info', `${path} を更新中...`);
+  setTimeout(() => showToast('success', 'サブモジュールを更新しました'), 1000);
+}
+
+function openSubmodule(path) {
+  showToast('info', `${path} を開きます`);
+}
+
+function removeSubmodule(path) {
+  if (confirm(`${path} を削除しますか？`)) {
+    showToast('warning', 'サブモジュールを削除しました');
+  }
+}
+
+function updateAllSubmodules() {
+  showToast('info', 'すべてのサブモジュールを更新中...');
+  setTimeout(() => showToast('success', 'すべてのサブモジュールを更新しました'), 1500);
+}
+
+function initSubmodules() {
+  showToast('info', 'サブモジュールを初期化中...');
+  setTimeout(() => showToast('success', 'サブモジュールを初期化しました'), 1000);
+}
+
+function addWorktree() {
+  const branch = prompt('ブランチ名:');
+  if (branch) {
+    const path = prompt('ワークツリーのパス:');
+    if (path) {
+      showToast('success', `ワークツリーを作成しました: ${path}`);
+    }
+  }
+}
+
+function openWorktree(path) {
+  showToast('info', `${path} を開きます`);
+}
+
+function removeWorktree(path) {
+  if (confirm(`${path} を削除しますか？`)) {
+    showToast('warning', 'ワークツリーを削除しました');
+  }
 }

@@ -540,6 +540,206 @@ body {
 .diff-line.del { background: var(--diff-del-bg); }
 .diff-line.del .line-content { color: var(--danger); }
 
+/* ===== Split View ===== */
+.diff-content {
+  display: none;
+}
+
+.diff-content.active {
+  display: flex;
+  flex-direction: column;
+}
+
+.diff-inline.active {
+  display: block;
+}
+
+.diff-split {
+  flex-direction: row;
+  height: 100%;
+}
+
+.diff-split.active {
+  display: flex;
+}
+
+.split-pane {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.split-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.split-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.split-left .split-label {
+  color: var(--danger);
+}
+
+.split-right .split-label {
+  color: var(--success);
+}
+
+.split-info {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.split-divider {
+  width: 1px;
+  background: var(--border);
+  flex-shrink: 0;
+}
+
+.split-code {
+  flex: 1;
+  overflow: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.split-line {
+  display: flex;
+  min-height: 22px;
+  padding: 0 12px;
+}
+
+.split-line:hover {
+  background: var(--bg-hover);
+}
+
+.split-line .line-num {
+  width: 35px;
+  text-align: right;
+  padding-right: 12px;
+  color: var(--text-muted);
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.split-line .line-content {
+  flex: 1;
+  white-space: pre;
+  min-width: 0;
+}
+
+/* Split view line states */
+.split-line.unchanged {
+  background: transparent;
+}
+
+.split-line.del {
+  background: var(--diff-del-bg);
+}
+
+.split-line.del .line-content {
+  color: var(--danger);
+}
+
+.split-line.add {
+  background: var(--diff-add-bg);
+}
+
+.split-line.add .line-content {
+  color: var(--success);
+}
+
+.split-line.empty {
+  background: var(--bg-tertiary);
+}
+
+.split-line.empty .line-content {
+  visibility: hidden;
+}
+
+.split-line.empty .line-num {
+  color: transparent;
+}
+
+/* Word-level highlighting */
+.word-del {
+  background: var(--diff-del-line);
+  border-radius: 2px;
+  padding: 0 2px;
+  margin: 0 -2px;
+}
+
+.word-add {
+  background: var(--diff-add-line);
+  border-radius: 2px;
+  padding: 0 2px;
+  margin: 0 -2px;
+}
+
+/* Synchronized scrolling indicator */
+.split-sync-indicator {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 10px;
+  background: var(--accent-dim);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  font-size: 10px;
+  color: var(--accent);
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+}
+
+.split-sync-indicator.visible {
+  opacity: 1;
+}
+
+/* Split hunk header */
+.split-hunk-header {
+  padding: 6px 12px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+  color: var(--text-muted);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+/* Split view always side-by-side */
+.diff-split {
+  flex-direction: row !important;
+}
+
+.split-pane {
+  min-width: 100px;
+}
+
+/* On very small screens, allow horizontal scroll */
+@media (max-width: 600px) {
+  .diff-split {
+    min-width: 600px;
+    overflow-x: auto;
+  }
+}
+
 /* ===== Commit Panel ===== */
 .commit-panel {
   background: var(--bg-secondary);
