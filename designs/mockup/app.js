@@ -781,7 +781,6 @@ function getAIAssistModalHTML() {
       .ai-option-desc { font-size: 12px; color: var(--text-muted); }
       .ai-cli-selector { display: flex; align-items: center; gap: 12px; padding-top: 16px; border-top: 1px solid var(--border); }
       .ai-cli-selector label { font-size: 13px; color: var(--text-secondary); }
-      .modal-select { padding: 8px 12px; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 6px; color: var(--text-primary); font-family: inherit; font-size: 13px; }
     </style>
   `;
 }
