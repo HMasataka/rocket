@@ -323,21 +323,24 @@ body {
 }
 
 .panel-header {
-  padding: 12px 16px;
+  padding: 14px 16px;
   border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 16px;
 }
 
 .panel-title {
   font-size: 13px;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .panel-actions {
   display: flex;
-  gap: 4px;
+  gap: 8px;
+  align-items: center;
 }
 
 .icon-btn {
@@ -579,6 +582,39 @@ body {
 .diff-line.add .line-content { color: var(--success); }
 .diff-line.del { background: var(--diff-del-bg); }
 .diff-line.del .line-content { color: var(--danger); }
+
+/* ===== Search Input ===== */
+.search-input {
+  padding: 8px 12px 8px 32px;
+  background: var(--bg-secondary);
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  width: 220px;
+  transition: all 0.2s ease;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%236b7280'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: 10px center;
+  background-size: 14px;
+}
+
+.search-input::placeholder {
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+.search-input:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  background-color: var(--bg);
+  box-shadow: 0 0 0 3px var(--accent-dim);
+}
 
 /* ===== Split View ===== */
 .diff-content {

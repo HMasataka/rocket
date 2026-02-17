@@ -1112,7 +1112,6 @@ function getHistoryViewHTML() {
     <style>
       .history-layout { display: grid; grid-template-columns: 1fr 350px; height: 100%; overflow: hidden; }
       .history-panel { display: flex; flex-direction: column; overflow: hidden; border-right: 1px solid var(--border); }
-      .search-input { padding: 6px 10px; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 6px; color: var(--text-primary); font-size: 12px; width: 200px; }
       .commit-list { flex: 1; overflow-y: auto; }
       .commit-row { display: flex; padding: 12px 16px; border-bottom: 1px solid var(--border); cursor: pointer; }
       .commit-row:hover { background: var(--bg-tertiary); }
