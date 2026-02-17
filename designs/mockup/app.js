@@ -1092,8 +1092,10 @@ function getHistoryViewHTML() {
   return `
     <div class="page-layout">
       <div class="page-header">
-        <h2 class="page-title">History</h2>
-        <span class="page-desc">Browse commit history and view changes</span>
+        <div class="page-info">
+          <h2 class="page-title">History</h2>
+          <span class="page-desc">Browse commit history and view changes</span>
+        </div>
       </div>
       <div class="history-content">
         <div class="history-panel">
@@ -1214,10 +1216,6 @@ function getHistoryViewHTML() {
       </div>
     </div>
     <style>
-      .page-layout { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
-      .page-header { display: flex; align-items: center; gap: 16px; padding: 16px 24px; border-bottom: 1px solid var(--border); }
-      .page-title { font-size: 14px; font-weight: 600; margin: 0; }
-      .page-desc { font-size: 13px; color: var(--text-muted); }
       .history-content { display: grid; grid-template-columns: 1fr 400px; flex: 1; overflow: hidden; }
       .history-panel { display: flex; flex-direction: column; overflow: hidden; border-right: 1px solid var(--border); }
       .commit-list { flex: 1; overflow-y: auto; }
@@ -1304,8 +1302,10 @@ function getBranchesViewHTML() {
   return `
     <div class="page-layout">
       <div class="page-header">
-        <h2 class="page-title">Branches</h2>
-        <span class="page-desc">Manage local and remote branches</span>
+        <div class="page-info">
+          <h2 class="page-title">Branches</h2>
+          <span class="page-desc">Manage local and remote branches</span>
+        </div>
         <div class="page-actions">
           <button class="btn btn-primary btn-sm" onclick="createBranch()">+ New Branch</button>
         </div>
@@ -1313,11 +1313,6 @@ function getBranchesViewHTML() {
       <div class="branch-list">${branchList}</div>
     </div>
     <style>
-      .page-layout { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
-      .page-header { display: flex; align-items: center; gap: 16px; padding: 16px 24px; border-bottom: 1px solid var(--border); }
-      .page-title { font-size: 14px; font-weight: 600; margin: 0; }
-      .page-desc { font-size: 13px; color: var(--text-muted); }
-      .page-actions { margin-left: auto; }
       .branch-list { flex: 1; overflow-y: auto; }
       .branch-row { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--border); cursor: pointer; }
       .branch-row:hover { background: var(--bg-tertiary); }
@@ -1355,8 +1350,10 @@ function getRemotesViewHTML() {
   return `
     <div class="page-layout">
       <div class="page-header">
-        <h2 class="page-title">Remotes</h2>
-        <span class="page-desc">Configure remote repositories</span>
+        <div class="page-info">
+          <h2 class="page-title">Remotes</h2>
+          <span class="page-desc">Configure remote repositories</span>
+        </div>
         <div class="page-actions">
           <button class="btn btn-primary btn-sm" onclick="addRemote()">+ Add Remote</button>
         </div>
@@ -1364,11 +1361,6 @@ function getRemotesViewHTML() {
       <div class="remote-list">${remoteList}</div>
     </div>
     <style>
-      .page-layout { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
-      .page-header { display: flex; align-items: center; gap: 16px; padding: 16px 24px; border-bottom: 1px solid var(--border); }
-      .page-title { font-size: 14px; font-weight: 600; margin: 0; }
-      .page-desc { font-size: 13px; color: var(--text-muted); }
-      .page-actions { margin-left: auto; }
       .remote-list { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
       .remote-item { display: flex; align-items: center; gap: 12px; padding: 16px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px; }
       .remote-icon { color: var(--accent); }
@@ -1527,8 +1519,10 @@ function getCherryPickViewHTML() {
   return `
     <div class="operation-layout">
       <div class="operation-header">
-        <h2 class="operation-title">Cherry-pick</h2>
-        <span class="operation-desc">Apply specific commits to the current branch</span>
+        <div class="operation-info">
+          <h2 class="operation-title">Cherry-pick</h2>
+          <span class="operation-desc">Apply specific commits to the current branch</span>
+        </div>
       </div>
       <div class="operation-content">
         <div class="operation-main">
@@ -1585,10 +1579,6 @@ function getCherryPickViewHTML() {
       </div>
     </div>
     <style>
-      .operation-layout { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
-      .operation-header { display: flex; align-items: center; gap: 16px; padding: 16px 24px; border-bottom: 1px solid var(--border); }
-      .operation-title { font-size: 14px; font-weight: 600; margin: 0; }
-      .operation-desc { font-size: 13px; color: var(--text-muted); margin-left: auto; }
       .operation-content { display: flex; flex: 1; overflow: hidden; }
       .operation-main { flex: 1; overflow-y: auto; padding: 20px; }
       .operation-panel { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
@@ -1655,8 +1645,10 @@ function getRevertViewHTML() {
   return `
     <div class="operation-layout">
       <div class="operation-header">
-        <h2 class="operation-title">Revert</h2>
-        <span class="operation-desc">Create a new commit that undoes changes</span>
+        <div class="operation-info">
+          <h2 class="operation-title">Revert</h2>
+          <span class="operation-desc">Create a new commit that undoes changes</span>
+        </div>
       </div>
       <div class="operation-content">
         <div class="operation-main">
@@ -1770,8 +1762,10 @@ function getResetViewHTML() {
   return `
     <div class="operation-layout">
       <div class="operation-header">
-        <h2 class="operation-title">Reset</h2>
-        <span class="operation-desc">Move HEAD to specified commit</span>
+        <div class="operation-info">
+          <h2 class="operation-title">Reset</h2>
+          <span class="operation-desc">Move HEAD to specified commit</span>
+        </div>
       </div>
       <div class="operation-content">
         <div class="operation-main">
@@ -1902,8 +1896,10 @@ function getReflogViewHTML() {
   return `
     <div class="operation-layout">
       <div class="operation-header">
-        <h2 class="operation-title">Reflog</h2>
-        <span class="operation-desc">HEAD history - Recover lost commits</span>
+        <div class="operation-info">
+          <h2 class="operation-title">Reflog</h2>
+          <span class="operation-desc">HEAD history - Recover lost commits</span>
+        </div>
       </div>
       <div class="reflog-content">
         <div class="reflog-table">
@@ -1976,9 +1972,13 @@ function getSubmodulesViewHTML() {
   return `
     <div class="operation-layout">
       <div class="operation-header">
-        <h2 class="operation-title">Submodules</h2>
-        <span class="operation-desc">Add, update, and remove submodules</span>
-        <button class="btn btn-primary btn-sm" onclick="addSubmodule()">+ Add</button>
+        <div class="operation-info">
+          <h2 class="operation-title">Submodules</h2>
+          <span class="operation-desc">Add, update, and remove submodules</span>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-primary btn-sm" onclick="addSubmodule()">+ Add</button>
+        </div>
       </div>
       <div class="submodules-content">
         <div class="submodules-toolbar">
@@ -2062,9 +2062,13 @@ function getWorktreesViewHTML() {
   return `
     <div class="operation-layout">
       <div class="operation-header">
-        <h2 class="operation-title">Worktrees</h2>
-        <span class="operation-desc">Manage multiple worktrees</span>
-        <button class="btn btn-primary btn-sm" onclick="addWorktree()">+ Add</button>
+        <div class="operation-info">
+          <h2 class="operation-title">Worktrees</h2>
+          <span class="operation-desc">Manage multiple worktrees</span>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-primary btn-sm" onclick="addWorktree()">+ Add</button>
+        </div>
       </div>
       <div class="worktrees-content">
         <div class="worktrees-hint">
