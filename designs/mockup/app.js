@@ -49,21 +49,100 @@ const sampleData = {
   ],
   commits: [
     // Graph structure: column (0=main, 1=feature/auth, 2=feature/ui), type (commit/merge/branch)
-    { hash: 'a1b2c3d', message: 'Merge branch feature/auth into main', author: 'tanaka', date: '2 hours ago', branch: 'main', col: 0, type: 'merge', mergeFrom: 1, refs: ['HEAD', 'main', 'origin/main'] },
-    { hash: 'b2c3d4e', message: 'feat: Complete OAuth integration', author: 'yamada', date: '3 hours ago', branch: 'feature/auth', col: 1, type: 'commit', refs: [] },
-    { hash: 'c3d4e5f', message: 'feat: Add token refresh logic', author: 'yamada', date: '5 hours ago', branch: 'feature/auth', col: 1, type: 'commit', refs: [] },
-    { hash: 'd4e5f6g', message: 'fix: Fix CSS layout issue', author: 'suzuki', date: '6 hours ago', branch: 'feature/ui', col: 2, type: 'commit', refs: ['feature/ui-redesign'] },
-    { hash: 'e4f5g6h', message: 'feat: Add login form validation', author: 'yamada', date: '8 hours ago', branch: 'feature/auth', col: 1, type: 'commit', refs: ['feature/auth'] },
-    { hash: 'f5g6h7i', message: 'refactor: Improve component structure', author: 'suzuki', date: '1 day ago', branch: 'feature/ui', col: 2, type: 'commit', refs: [] },
-    { hash: 'g6h7i8j', message: 'docs: Update API documentation', author: 'tanaka', date: '1 day ago', branch: 'main', col: 0, type: 'commit', refs: [] },
-    { hash: 'h7i8j9k', message: 'feat: Start auth feature branch', author: 'yamada', date: '2 days ago', branch: 'feature/auth', col: 1, type: 'branch', branchFrom: 0, refs: [] },
-    { hash: 'i8j9k0l', message: 'feat: Start UI redesign', author: 'suzuki', date: '2 days ago', branch: 'feature/ui', col: 2, type: 'branch', branchFrom: 0, refs: [] },
-    { hash: 'j9k0l1m', message: 'fix: Fix login redirect bug', author: 'tanaka', date: '3 days ago', branch: 'main', col: 0, type: 'commit', refs: [] },
-    { hash: 'k0l1m2n', message: 'Merge branch hotfix/login into main', author: 'tanaka', date: '4 days ago', branch: 'main', col: 0, type: 'merge', mergeFrom: 3, refs: [] },
-    { hash: 'l1m2n3o', message: 'fix: Critical login hotfix', author: 'yamada', date: '4 days ago', branch: 'hotfix/login', col: 3, type: 'commit', refs: [] },
-    { hash: 'm2n3o4p', message: 'chore: Update dependencies', author: 'tanaka', date: '5 days ago', branch: 'main', col: 0, type: 'commit', refs: [] },
-    { hash: 'n3o4p5q', message: 'feat: Add settings screen', author: 'suzuki', date: '1 week ago', branch: 'main', col: 0, type: 'commit', refs: ['v1.0.0'] },
-    { hash: 'o4p5q6r', message: 'Initial commit', author: 'tanaka', date: '2 weeks ago', branch: 'main', col: 0, type: 'commit', refs: [] }
+    { hash: 'a1b2c3d', message: 'Merge branch feature/auth into main', author: 'tanaka', date: '2 hours ago', branch: 'main', col: 0, type: 'merge', mergeFrom: 1, refs: ['HEAD', 'main', 'origin/main'],
+      changedFiles: [
+        { path: 'src/auth/handler.go', status: 'M', additions: 45, deletions: 12, conflict: false },
+        { path: 'src/auth/middleware.go', status: 'M', additions: 23, deletions: 5, conflict: false },
+        { path: 'tests/auth_test.go', status: 'A', additions: 67, deletions: 0, conflict: false }
+      ]
+    },
+    { hash: 'b2c3d4e', message: 'feat: Complete OAuth integration', author: 'yamada', date: '3 hours ago', branch: 'feature/auth', col: 1, type: 'commit', refs: [],
+      changedFiles: [
+        { path: 'src/oauth/client.go', status: 'A', additions: 156, deletions: 0, conflict: false },
+        { path: 'src/oauth/token.go', status: 'A', additions: 89, deletions: 0, conflict: false },
+        { path: 'src/config/oauth.go', status: 'M', additions: 12, deletions: 3, conflict: true },
+        { path: 'go.mod', status: 'M', additions: 2, deletions: 0, conflict: false }
+      ]
+    },
+    { hash: 'c3d4e5f', message: 'feat: Add token refresh logic', author: 'yamada', date: '5 hours ago', branch: 'feature/auth', col: 1, type: 'commit', refs: [],
+      changedFiles: [
+        { path: 'src/auth/token.go', status: 'M', additions: 78, deletions: 15, conflict: false },
+        { path: 'src/auth/refresh.go', status: 'A', additions: 124, deletions: 0, conflict: false }
+      ]
+    },
+    { hash: 'd4e5f6g', message: 'fix: Fix CSS layout issue', author: 'suzuki', date: '6 hours ago', branch: 'feature/ui', col: 2, type: 'commit', refs: ['feature/ui-redesign'],
+      changedFiles: [
+        { path: 'src/ui/styles/layout.css', status: 'M', additions: 34, deletions: 28, conflict: true },
+        { path: 'src/ui/components/Grid.vue', status: 'M', additions: 12, deletions: 8, conflict: false }
+      ]
+    },
+    { hash: 'e4f5g6h', message: 'feat: Add login form validation', author: 'yamada', date: '8 hours ago', branch: 'feature/auth', col: 1, type: 'commit', refs: ['feature/auth'],
+      changedFiles: [
+        { path: 'src/auth/validation.go', status: 'A', additions: 95, deletions: 0, conflict: false },
+        { path: 'src/auth/login.go', status: 'M', additions: 42, deletions: 10, conflict: false },
+        { path: 'tests/validation_test.go', status: 'A', additions: 156, deletions: 0, conflict: false }
+      ]
+    },
+    { hash: 'f5g6h7i', message: 'refactor: Improve component structure', author: 'suzuki', date: '1 day ago', branch: 'feature/ui', col: 2, type: 'commit', refs: [],
+      changedFiles: [
+        { path: 'src/ui/components/Button.vue', status: 'M', additions: 25, deletions: 45, conflict: false },
+        { path: 'src/ui/components/Input.vue', status: 'M', additions: 18, deletions: 32, conflict: false },
+        { path: 'src/ui/components/Card.vue', status: 'A', additions: 67, deletions: 0, conflict: false }
+      ]
+    },
+    { hash: 'g6h7i8j', message: 'docs: Update API documentation', author: 'tanaka', date: '1 day ago', branch: 'main', col: 0, type: 'commit', refs: [],
+      changedFiles: [
+        { path: 'docs/api/README.md', status: 'M', additions: 234, deletions: 56, conflict: false },
+        { path: 'docs/api/auth.md', status: 'A', additions: 189, deletions: 0, conflict: false }
+      ]
+    },
+    { hash: 'h7i8j9k', message: 'feat: Start auth feature branch', author: 'yamada', date: '2 days ago', branch: 'feature/auth', col: 1, type: 'branch', branchFrom: 0, refs: [],
+      changedFiles: [
+        { path: 'src/auth/init.go', status: 'A', additions: 23, deletions: 0, conflict: false }
+      ]
+    },
+    { hash: 'i8j9k0l', message: 'feat: Start UI redesign', author: 'suzuki', date: '2 days ago', branch: 'feature/ui', col: 2, type: 'branch', branchFrom: 0, refs: [],
+      changedFiles: [
+        { path: 'src/ui/design-system.md', status: 'A', additions: 45, deletions: 0, conflict: false }
+      ]
+    },
+    { hash: 'j9k0l1m', message: 'fix: Fix login redirect bug', author: 'tanaka', date: '3 days ago', branch: 'main', col: 0, type: 'commit', refs: [],
+      changedFiles: [
+        { path: 'src/routes/auth.go', status: 'M', additions: 8, deletions: 3, conflict: false },
+        { path: 'src/middleware/redirect.go', status: 'M', additions: 15, deletions: 7, conflict: true }
+      ]
+    },
+    { hash: 'k0l1m2n', message: 'Merge branch hotfix/login into main', author: 'tanaka', date: '4 days ago', branch: 'main', col: 0, type: 'merge', mergeFrom: 3, refs: [],
+      changedFiles: [
+        { path: 'src/auth/login.go', status: 'M', additions: 5, deletions: 2, conflict: false }
+      ]
+    },
+    { hash: 'l1m2n3o', message: 'fix: Critical login hotfix', author: 'yamada', date: '4 days ago', branch: 'hotfix/login', col: 3, type: 'commit', refs: [],
+      changedFiles: [
+        { path: 'src/auth/session.go', status: 'M', additions: 12, deletions: 8, conflict: false },
+        { path: 'src/auth/cookie.go', status: 'M', additions: 6, deletions: 4, conflict: false }
+      ]
+    },
+    { hash: 'm2n3o4p', message: 'chore: Update dependencies', author: 'tanaka', date: '5 days ago', branch: 'main', col: 0, type: 'commit', refs: [],
+      changedFiles: [
+        { path: 'go.mod', status: 'M', additions: 15, deletions: 12, conflict: false },
+        { path: 'go.sum', status: 'M', additions: 45, deletions: 38, conflict: false }
+      ]
+    },
+    { hash: 'n3o4p5q', message: 'feat: Add settings screen', author: 'suzuki', date: '1 week ago', branch: 'main', col: 0, type: 'commit', refs: ['v1.0.0'],
+      changedFiles: [
+        { path: 'src/ui/pages/Settings.vue', status: 'A', additions: 234, deletions: 0, conflict: false },
+        { path: 'src/store/settings.go', status: 'A', additions: 89, deletions: 0, conflict: false },
+        { path: 'src/routes/settings.go', status: 'A', additions: 45, deletions: 0, conflict: false }
+      ]
+    },
+    { hash: 'o4p5q6r', message: 'Initial commit', author: 'tanaka', date: '2 weeks ago', branch: 'main', col: 0, type: 'commit', refs: [],
+      changedFiles: [
+        { path: 'README.md', status: 'A', additions: 56, deletions: 0, conflict: false },
+        { path: 'go.mod', status: 'A', additions: 8, deletions: 0, conflict: false },
+        { path: 'main.go', status: 'A', additions: 23, deletions: 0, conflict: false }
+      ]
+    }
   ],
   stashes: [
     { index: 0, message: 'WIP: Auth feature in progress', branch: 'feature/auth', date: '1 hour ago' },
@@ -2026,8 +2105,9 @@ function initKeyboardShortcuts() {
 
 function getCherryPickViewHTML() {
   const commits = sampleData.commits;
-  const commitRows = commits.map(c => `
-    <div class="cherry-commit-row" onclick="toggleCherryPick(this, '${c.hash}')">
+  const defaultCommit = commits[0];
+  const commitRows = commits.map((c, i) => `
+    <div class="cherry-commit-row ${i === 0 ? 'selected' : ''}" onclick="selectOperationCommit(this, '${c.hash}', 'cherry')" data-hash="${c.hash}">
       <div class="cherry-checkbox">
         <input type="checkbox" data-hash="${c.hash}">
       </div>
@@ -2046,6 +2126,8 @@ function getCherryPickViewHTML() {
     </div>
   `).join('');
 
+  const filesPreview = getChangesPreviewHTML(defaultCommit, 'cherry');
+
   return `
     <div class="operation-layout">
       <div class="operation-header">
@@ -2054,8 +2136,8 @@ function getCherryPickViewHTML() {
           <span class="operation-desc">Apply specific commits to the current branch</span>
         </div>
       </div>
-      <div class="operation-content">
-        <div class="operation-main">
+      <div class="operation-two-column">
+        <div class="operation-left-panel">
           <div class="operation-panel">
             <div class="panel-header">
               <span class="panel-title">Select commits to apply</span>
@@ -2065,95 +2147,296 @@ function getCherryPickViewHTML() {
             </div>
             <div class="cherry-commit-list">${commitRows}</div>
           </div>
+          <div class="operation-options-inline">
+            <h3>Cherry-pick Mode</h3>
+            <div class="option-mode-selector">
+              <label class="option-mode selected" onclick="selectOptionMode(this, 'cherry', 'normal')">
+                <input type="radio" name="cherry-mode" value="normal" checked>
+                <div class="mode-content">
+                  <div class="mode-title">Normal (-x)</div>
+                  <div class="mode-desc">Create commit with original info in message</div>
+                </div>
+              </label>
+              <label class="option-mode" onclick="selectOptionMode(this, 'cherry', 'no-commit')">
+                <input type="radio" name="cherry-mode" value="no-commit">
+                <div class="mode-content">
+                  <div class="mode-title">No Commit (--no-commit)</div>
+                  <div class="mode-desc">Apply changes without creating a commit</div>
+                </div>
+              </label>
+              <label class="option-mode" onclick="selectOptionMode(this, 'cherry', 'merge')">
+                <input type="radio" name="cherry-mode" value="merge">
+                <div class="mode-content">
+                  <div class="mode-title">Allow Merge (-m)</div>
+                  <div class="mode-desc">Allow cherry-picking merge commits</div>
+                </div>
+              </label>
+            </div>
+          </div>
         </div>
-        <div class="operation-sidebar">
-          <div class="operation-options">
-            <h3>Options</h3>
-            <div class="option-selector">
-              <label class="option-card selected">
-                <input type="checkbox" checked>
-                <div class="option-content">
-                  <div class="option-title">Create commit (-x)</div>
-                  <div class="option-desc">Record original commit info in the message</div>
-                </div>
-              </label>
-              <label class="option-card">
-                <input type="checkbox">
-                <div class="option-content">
-                  <div class="option-title">Apply changes only (--no-commit)</div>
-                  <div class="option-desc">Apply changes without creating a commit</div>
-                </div>
-              </label>
-              <label class="option-card">
-                <input type="checkbox">
-                <div class="option-content">
-                  <div class="option-title">Allow merge commits (-m)</div>
-                  <div class="option-desc">Allow cherry-picking merge commits</div>
-                </div>
-              </label>
-            </div>
+        <div class="operation-right-panel" id="cherry-changes-panel">
+          ${filesPreview}
+        </div>
+      </div>
+      <div class="operation-footer">
+        <div class="operation-summary" id="cherry-summary">
+          <span class="summary-stat"><strong>1</strong> commit selected</span>
+          <span class="summary-divider"></span>
+          <span class="summary-stat additions">+${defaultCommit.changedFiles.reduce((a, f) => a + f.additions, 0)}</span>
+          <span class="summary-stat deletions">-${defaultCommit.changedFiles.reduce((a, f) => a + f.deletions, 0)}</span>
+          <span class="summary-divider"></span>
+          <span class="summary-stat">${defaultCommit.changedFiles.length} files</span>
+        </div>
+        <button class="btn btn-primary" onclick="executeCherryPick()">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/></svg>
+          Execute Cherry-pick
+        </button>
+      </div>
+    </div>
+    ${getOperationStyles()}
+  `;
+}
+
+function getChangesPreviewHTML(commit, type) {
+  const colorClass = type === 'cherry' ? 'cherry' : type === 'revert' ? 'warning' : 'danger';
+  const conflictFiles = commit.changedFiles.filter(f => f.conflict);
+  const totalAdditions = commit.changedFiles.reduce((a, f) => a + f.additions, 0);
+  const totalDeletions = commit.changedFiles.reduce((a, f) => a + f.deletions, 0);
+
+  const filesHTML = commit.changedFiles.map(f => {
+    const statusIcon = f.status === 'A' ? '+' : f.status === 'D' ? '-' : '~';
+    const statusClass = f.status === 'A' ? 'added' : f.status === 'D' ? 'deleted' : 'modified';
+    return `
+      <div class="preview-file ${f.conflict ? 'has-conflict' : ''}">
+        <div class="preview-file-status ${statusClass}">${statusIcon}</div>
+        <div class="preview-file-path">${f.path}</div>
+        <div class="preview-file-stats">
+          <span class="stat-add">+${f.additions}</span>
+          <span class="stat-del">-${f.deletions}</span>
+        </div>
+        ${f.conflict ? '<div class="conflict-badge">Conflict</div>' : ''}
+      </div>
+    `;
+  }).join('');
+
+  return `
+    <div class="changes-preview">
+      <div class="preview-header">
+        <div class="preview-commit-info">
+          <div class="preview-hash ${colorClass}">${commit.hash}</div>
+          <div class="preview-message">${commit.message}</div>
+          <div class="preview-author">${commit.author} · ${commit.date}</div>
+        </div>
+      </div>
+
+      ${conflictFiles.length > 0 ? `
+        <div class="conflict-warning">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/></svg>
+          <div class="conflict-text">
+            <strong>${conflictFiles.length} potential conflict${conflictFiles.length > 1 ? 's' : ''}</strong>
+            <span>${conflictFiles.map(f => f.path.split('/').pop()).join(', ')}</span>
           </div>
-          <div class="operation-preview">
-            <h3>Selected</h3>
-            <div class="selected-commits" id="cherry-selected">
-              <p class="empty-hint">Select commits</p>
-            </div>
+        </div>
+      ` : ''}
+
+      <div class="preview-section">
+        <div class="section-header">
+          <span class="section-title">Changed Files</span>
+          <span class="section-count">${commit.changedFiles.length}</span>
+        </div>
+        <div class="preview-files-list">
+          ${filesHTML}
+        </div>
+      </div>
+
+      <div class="preview-stats-bar">
+        <div class="stats-label">Impact</div>
+        <div class="stats-visual">
+          <div class="stats-bar">
+            <div class="stats-bar-add" style="width: ${(totalAdditions / (totalAdditions + totalDeletions || 1)) * 100}%"></div>
+            <div class="stats-bar-del" style="width: ${(totalDeletions / (totalAdditions + totalDeletions || 1)) * 100}%"></div>
           </div>
-          <div class="operation-actions">
-            <button class="btn btn-primary" onclick="executeCherryPick()">
-              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/></svg>
-              Execute Cherry-pick
-            </button>
+          <div class="stats-numbers">
+            <span class="additions">+${totalAdditions}</span>
+            <span class="deletions">-${totalDeletions}</span>
           </div>
         </div>
       </div>
     </div>
+  `;
+}
+
+function getOperationStyles() {
+  return `
     <style>
-      .operation-content { display: flex; flex: 1; overflow: hidden; }
-      .operation-main { flex: 1; overflow-y: auto; padding: 20px; }
-      .operation-panel { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
-      .cherry-commit-list { max-height: 500px; overflow-y: auto; }
-      .cherry-commit-row { display: flex; align-items: flex-start; padding: 14px 16px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.15s; }
-      .cherry-commit-row:hover { background: var(--bg-tertiary); }
-      .cherry-commit-row.selected { background: var(--accent-dim); }
-      .cherry-checkbox { margin-right: 12px; padding-top: 2px; }
-      .cherry-checkbox input { width: 1.15em; height: 1.15em; appearance: none; -webkit-appearance: none; border-radius: 50%; border: 0.1em solid #6b6b76; background: transparent; cursor: pointer; display: grid; place-content: center; }
-      .cherry-checkbox input::before { content: ""; width: 0.65em; height: 0.65em; border-radius: 50%; transform: scale(0); transition: 120ms transform ease-in-out; background-color: var(--accent); }
-      .cherry-checkbox input:checked { border-color: var(--accent); }
-      .cherry-checkbox input:checked::before { transform: scale(1); }
-      .cherry-graph { width: 24px; display: flex; flex-direction: column; align-items: center; margin-right: 12px; }
+      .operation-two-column { display: grid; grid-template-columns: 1fr 1fr; flex: 1; overflow: hidden; }
+      .operation-left-panel { display: flex; flex-direction: column; border-right: 1px solid var(--border); overflow: hidden; padding: 20px; gap: 16px; }
+      .operation-right-panel { display: flex; flex-direction: column; overflow-y: auto; padding: 20px; background: var(--bg-secondary); }
+      .operation-panel { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; flex: 1; display: flex; flex-direction: column; }
+
+      .cherry-commit-list, .revert-commit-list, .reset-commit-list { flex: 1; overflow-y: auto; }
+      .cherry-commit-row, .revert-commit-row, .reset-commit-row { display: flex; align-items: flex-start; padding: 14px 16px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.15s; }
+      .cherry-commit-row:hover, .revert-commit-row:hover, .reset-commit-row:hover { background: var(--bg-tertiary); }
+      .cherry-commit-row.selected { background: var(--accent-dim); border-left: 3px solid #ec4899; }
+      .revert-commit-row.selected { background: var(--warning-dim); border-left: 3px solid var(--warning); }
+      .reset-commit-row.selected { background: var(--danger-dim); border-left: 3px solid var(--danger); }
+
+      .cherry-checkbox, .revert-radio, .reset-radio { margin-right: 12px; padding-top: 2px; }
+      .cherry-checkbox input, .revert-radio input, .reset-radio input { width: 1.15em; height: 1.15em; appearance: none; -webkit-appearance: none; border-radius: 50%; border: 0.1em solid #6b6b76; background: transparent; cursor: pointer; display: grid; place-content: center; }
+      .cherry-checkbox input::before, .revert-radio input::before, .reset-radio input::before { content: ""; width: 0.65em; height: 0.65em; border-radius: 50%; transform: scale(0); transition: 120ms transform ease-in-out; }
+      .cherry-checkbox input::before { background-color: #ec4899; }
+      .revert-radio input::before { background-color: var(--warning); }
+      .reset-radio input::before { background-color: var(--danger); }
+      .cherry-checkbox input:checked, .revert-radio input:checked, .reset-radio input:checked { border-color: currentColor; }
+      .cherry-checkbox input:checked { border-color: #ec4899; }
+      .revert-radio input:checked { border-color: var(--warning); }
+      .reset-radio input:checked { border-color: var(--danger); }
+      .cherry-checkbox input:checked::before, .revert-radio input:checked::before, .reset-radio input:checked::before { transform: scale(1); }
+
+      .cherry-graph, .revert-graph, .reset-graph { width: 24px; display: flex; flex-direction: column; align-items: center; margin-right: 12px; }
       .graph-node.cherry { width: 12px; height: 12px; background: linear-gradient(135deg, #f472b6, #ec4899); border-radius: 50%; }
-      .cherry-info { flex: 1; }
-      .cherry-message { font-size: 13px; font-weight: 500; margin-bottom: 6px; }
-      .cherry-meta { display: flex; gap: 12px; font-size: 11px; color: var(--text-muted); }
-      .cherry-hash { font-family: 'JetBrains Mono', monospace; color: var(--accent); }
-      .operation-sidebar { width: 320px; border-left: 1px solid var(--border); display: flex; flex-direction: column; padding: 20px; gap: 20px; overflow-y: auto; }
-      .operation-options h3, .operation-preview h3 { font-size: 13px; font-weight: 600; margin-bottom: 12px; color: var(--text-secondary); }
-      .option-selector { display: flex; flex-direction: column; gap: 8px; }
-      .option-card { display: flex; align-items: flex-start; gap: 10px; padding: 12px; background: var(--bg-tertiary); border: 2px solid transparent; border-radius: 8px; cursor: pointer; transition: all 0.15s; }
-      .option-card:hover { background: var(--bg-secondary); }
-      .option-card.selected { border-color: var(--accent); }
-      .option-card input { width: 1.15em; height: 1.15em; margin-top: 2px; appearance: none; -webkit-appearance: none; border-radius: 50%; border: 0.1em solid #6b6b76; background: transparent; cursor: pointer; display: grid; place-content: center; }
-      .option-card input::before { content: ""; width: 0.65em; height: 0.65em; border-radius: 50%; transform: scale(0); transition: 120ms transform ease-in-out; background-color: var(--accent); }
-      .option-card input:checked { border-color: var(--accent); }
-      .option-card input:checked::before { transform: scale(1); }
-      .option-content { flex: 1; }
-      .option-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
-      .option-desc { font-size: 11px; color: var(--text-muted); }
-      .selected-commits { padding: 12px; background: var(--bg-tertiary); border-radius: 8px; min-height: 60px; }
-      .empty-hint { color: var(--text-muted); font-size: 12px; text-align: center; margin: 0; }
-      .selected-item { display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: 12px; }
-      .selected-item .hash { font-family: 'JetBrains Mono', monospace; color: var(--accent); }
-      .operation-actions { margin-top: auto; display: flex; gap: 8px; padding-top: 20px; border-top: 1px solid var(--border); }
-      .operation-actions .btn { flex: 1; }
+      .graph-node.revert { width: 12px; height: 12px; background: linear-gradient(135deg, #fbbf24, #f59e0b); border-radius: 50%; }
+      .graph-node.reset { width: 12px; height: 12px; background: linear-gradient(135deg, #f87171, #ef4444); border-radius: 50%; }
+
+      .cherry-info, .revert-info, .reset-info { flex: 1; min-width: 0; }
+      .cherry-message, .revert-message, .reset-message { font-size: 13px; font-weight: 500; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .cherry-meta, .revert-meta, .reset-meta { display: flex; gap: 12px; font-size: 11px; color: var(--text-muted); }
+      .cherry-hash { font-family: 'JetBrains Mono', monospace; color: #ec4899; }
+      .revert-hash { font-family: 'JetBrains Mono', monospace; color: var(--warning); }
+      .reset-hash { font-family: 'JetBrains Mono', monospace; color: var(--danger); }
+
+      .operation-options-inline { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+      .operation-options-inline h3 { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+
+      .option-mode-selector { display: flex; flex-direction: column; gap: 8px; }
+      .option-mode { display: flex; align-items: flex-start; gap: 10px; padding: 12px; background: var(--bg-primary); border: 2px solid transparent; border-radius: 8px; cursor: pointer; transition: all 0.15s; }
+      .option-mode:hover { background: var(--bg-tertiary); }
+      .option-mode.selected { border-color: var(--accent); }
+      .option-mode input { display: none; }
+
+      .changes-preview { display: flex; flex-direction: column; gap: 16px; }
+      .preview-header { padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+      .preview-commit-info { display: flex; flex-direction: column; gap: 6px; }
+      .preview-hash { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; }
+      .preview-hash.cherry { color: #ec4899; }
+      .preview-hash.warning { color: var(--warning); }
+      .preview-hash.danger { color: var(--danger); }
+      .preview-message { font-size: 15px; font-weight: 600; line-height: 1.4; }
+      .preview-author { font-size: 12px; color: var(--text-muted); }
+
+      .conflict-warning { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 10px; }
+      .conflict-warning svg { width: 20px; height: 20px; color: var(--danger); flex-shrink: 0; margin-top: 2px; }
+      .conflict-text { display: flex; flex-direction: column; gap: 4px; }
+      .conflict-text strong { font-size: 13px; color: var(--danger); }
+      .conflict-text span { font-size: 12px; color: var(--text-muted); }
+
+      .preview-section { display: flex; flex-direction: column; gap: 12px; }
+      .section-header { display: flex; align-items: center; justify-content: space-between; }
+      .section-title { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+      .section-count { background: var(--bg-tertiary); padding: 2px 8px; border-radius: 10px; font-size: 11px; color: var(--text-muted); }
+
+      .preview-files-list { display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: var(--bg-primary); }
+      .preview-file { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--border); font-size: 12px; }
+      .preview-file:last-child { border-bottom: none; }
+      .preview-file.has-conflict { background: rgba(239, 68, 68, 0.05); }
+      .preview-file-status { width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; border-radius: 4px; font-weight: 700; font-size: 11px; }
+      .preview-file-status.added { background: rgba(34, 197, 94, 0.2); color: var(--success); }
+      .preview-file-status.deleted { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+      .preview-file-status.modified { background: rgba(59, 130, 246, 0.2); color: var(--accent); }
+      .preview-file-path { flex: 1; font-family: 'JetBrains Mono', monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .preview-file-stats { display: flex; gap: 8px; font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+      .stat-add { color: var(--success); }
+      .stat-del { color: var(--danger); }
+      .conflict-badge { padding: 2px 8px; background: var(--danger); color: #fff; border-radius: 4px; font-size: 10px; font-weight: 600; text-transform: uppercase; }
+
+      .preview-stats-bar { display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--bg-primary); border: 1px solid var(--border); border-radius: 10px; }
+      .stats-label { font-size: 12px; font-weight: 600; color: var(--text-muted); }
+      .stats-visual { flex: 1; display: flex; align-items: center; gap: 16px; }
+      .stats-bar { flex: 1; height: 8px; background: var(--bg-tertiary); border-radius: 4px; overflow: hidden; display: flex; }
+      .stats-bar-add { background: linear-gradient(90deg, #22c55e, #16a34a); height: 100%; }
+      .stats-bar-del { background: linear-gradient(90deg, #ef4444, #dc2626); height: 100%; }
+      .stats-numbers { display: flex; gap: 12px; font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; }
+      .stats-numbers .additions { color: var(--success); }
+      .stats-numbers .deletions { color: var(--danger); }
+
+      .operation-footer { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-top: 1px solid var(--border); background: var(--bg-secondary); }
+      .operation-summary { display: flex; align-items: center; gap: 12px; font-size: 13px; }
+      .summary-stat { color: var(--text-secondary); }
+      .summary-stat strong { color: var(--text-primary); }
+      .summary-stat.additions { color: var(--success); font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+      .summary-stat.deletions { color: var(--danger); font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+      .summary-divider { width: 1px; height: 16px; background: var(--border); }
+
+      .reset-mode-selector { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+      .reset-mode { display: flex; align-items: flex-start; gap: 10px; padding: 12px; background: var(--bg-primary); border: 2px solid transparent; border-radius: 8px; cursor: pointer; transition: all 0.15s; }
+      .reset-mode:hover { background: var(--bg-tertiary); }
+      .reset-mode.selected { border-color: var(--accent); }
+      .reset-mode.hard.selected { border-color: var(--danger); }
+      .reset-mode input { display: none; }
+      .mode-content { flex: 1; }
+      .mode-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+      .mode-desc { font-size: 11px; color: var(--text-muted); }
+      .mode-desc.danger { color: var(--danger); }
+
+      .reset-warning { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; font-size: 12px; color: var(--danger); margin-top: 16px; }
+      .reset-warning svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+      .btn-warning { background: var(--warning); color: #000; }
+      .btn-warning:hover { background: #d97706; }
+      .btn-danger { background: var(--danger); color: #fff; }
+      .btn-danger:hover { background: #dc2626; }
     </style>
   `;
 }
 
+function selectOperationCommit(element, hash, type) {
+  const commit = sampleData.commits.find(c => c.hash === hash);
+  if (!commit) return;
+
+  // Update selection
+  const listClass = type === 'cherry' ? '.cherry-commit-row' : type === 'revert' ? '.revert-commit-row' : '.reset-commit-row';
+  document.querySelectorAll(listClass).forEach(row => row.classList.remove('selected'));
+  element.classList.add('selected');
+
+  // Update radio/checkbox
+  const input = element.querySelector('input');
+  if (input) {
+    if (input.type === 'radio') {
+      input.checked = true;
+    } else {
+      input.checked = !input.checked;
+    }
+  }
+
+  // Update preview panel
+  const panelId = type === 'cherry' ? 'cherry-changes-panel' : type === 'revert' ? 'revert-changes-panel' : 'reset-changes-panel';
+  const panel = document.getElementById(panelId);
+  if (panel) {
+    panel.innerHTML = getChangesPreviewHTML(commit, type);
+  }
+
+  // Update summary
+  const summaryId = type === 'cherry' ? 'cherry-summary' : type === 'revert' ? 'revert-summary' : 'reset-summary';
+  const summary = document.getElementById(summaryId);
+  if (summary) {
+    const totalAdd = commit.changedFiles.reduce((a, f) => a + f.additions, 0);
+    const totalDel = commit.changedFiles.reduce((a, f) => a + f.deletions, 0);
+    summary.innerHTML = `
+      <span class="summary-stat"><strong>1</strong> commit selected</span>
+      <span class="summary-divider"></span>
+      <span class="summary-stat additions">+${totalAdd}</span>
+      <span class="summary-stat deletions">-${totalDel}</span>
+      <span class="summary-divider"></span>
+      <span class="summary-stat">${commit.changedFiles.length} files</span>
+    `;
+  }
+}
+
 function getRevertViewHTML() {
   const commits = sampleData.commits;
+  const defaultCommit = commits[0];
   const commitRows = commits.map((c, i) => `
-    <div class="revert-commit-row ${i === 0 ? 'selected' : ''}" onclick="selectRevertCommit(this, '${c.hash}')">
+    <div class="revert-commit-row ${i === 0 ? 'selected' : ''}" onclick="selectOperationCommit(this, '${c.hash}', 'revert')" data-hash="${c.hash}">
       <div class="revert-radio">
         <input type="radio" name="revert-commit" value="${c.hash}" ${i === 0 ? 'checked' : ''}>
       </div>
@@ -2172,6 +2455,8 @@ function getRevertViewHTML() {
     </div>
   `).join('');
 
+  const filesPreview = getChangesPreviewHTML(defaultCommit, 'revert');
+
   return `
     <div class="operation-layout">
       <div class="operation-header">
@@ -2180,8 +2465,8 @@ function getRevertViewHTML() {
           <span class="operation-desc">Create a new commit that undoes changes</span>
         </div>
       </div>
-      <div class="operation-content">
-        <div class="operation-main">
+      <div class="operation-two-column">
+        <div class="operation-left-panel">
           <div class="operation-panel">
             <div class="panel-header">
               <span class="panel-title">Select commit to revert</span>
@@ -2191,86 +2476,61 @@ function getRevertViewHTML() {
             </div>
             <div class="revert-commit-list">${commitRows}</div>
           </div>
-        </div>
-        <div class="operation-sidebar">
-          <div class="operation-options">
-            <h3>Options</h3>
-            <div class="option-selector">
-              <label class="option-card selected">
-                <input type="checkbox" checked>
-                <div class="option-content">
-                  <div class="option-title">Create revert commit</div>
-                  <div class="option-desc">Automatically create a revert commit</div>
+          <div class="operation-options-inline">
+            <h3>Revert Mode</h3>
+            <div class="option-mode-selector">
+              <label class="option-mode selected" onclick="selectOptionMode(this, 'revert', 'auto')">
+                <input type="radio" name="revert-mode" value="auto" checked>
+                <div class="mode-content">
+                  <div class="mode-title">Auto Commit</div>
+                  <div class="mode-desc">Automatically create a revert commit</div>
                 </div>
               </label>
-              <label class="option-card">
-                <input type="checkbox">
-                <div class="option-content">
-                  <div class="option-title">Apply changes only (--no-commit)</div>
-                  <div class="option-desc">Apply changes without creating a commit</div>
+              <label class="option-mode" onclick="selectOptionMode(this, 'revert', 'no-commit')">
+                <input type="radio" name="revert-mode" value="no-commit">
+                <div class="mode-content">
+                  <div class="mode-title">No Commit (--no-commit)</div>
+                  <div class="mode-desc">Apply changes without creating a commit</div>
                 </div>
               </label>
-              <label class="option-card">
-                <input type="checkbox">
-                <div class="option-content">
-                  <div class="option-title">Open editor (--edit)</div>
-                  <div class="option-desc">Edit the commit message before committing</div>
+              <label class="option-mode" onclick="selectOptionMode(this, 'revert', 'edit')">
+                <input type="radio" name="revert-mode" value="edit">
+                <div class="mode-content">
+                  <div class="mode-title">Edit Message (--edit)</div>
+                  <div class="mode-desc">Edit the commit message before committing</div>
                 </div>
               </label>
             </div>
           </div>
-          <div class="operation-preview">
-            <h3>Revert commit message</h3>
-            <textarea class="revert-message-input" placeholder="Revert &quot;feat: Add user authentication&quot;&#10;&#10;This reverts commit a1b2c3d."></textarea>
-          </div>
-          <div class="operation-actions">
-            <button class="btn btn-warning" onclick="executeRevert()">
-              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L7.5 2.707V14.5a.5.5 0 0 0 .5.5z"/></svg>
-              Execute Revert
-            </button>
-          </div>
+        </div>
+        <div class="operation-right-panel" id="revert-changes-panel">
+          ${filesPreview}
         </div>
       </div>
+      <div class="operation-footer">
+        <div class="operation-summary" id="revert-summary">
+          <span class="summary-stat"><strong>1</strong> commit selected</span>
+          <span class="summary-divider"></span>
+          <span class="summary-stat additions">+${defaultCommit.changedFiles.reduce((a, f) => a + f.additions, 0)}</span>
+          <span class="summary-stat deletions">-${defaultCommit.changedFiles.reduce((a, f) => a + f.deletions, 0)}</span>
+          <span class="summary-divider"></span>
+          <span class="summary-stat">${defaultCommit.changedFiles.length} files</span>
+        </div>
+        <button class="btn btn-warning" onclick="executeRevert()">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L7.5 2.707V14.5a.5.5 0 0 0 .5.5z"/></svg>
+          Execute Revert
+        </button>
+      </div>
     </div>
-    <style>
-      .revert-commit-list { max-height: 500px; overflow-y: auto; }
-      .revert-commit-row { display: flex; align-items: flex-start; padding: 14px 16px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.15s; }
-      .revert-commit-row:hover { background: var(--bg-tertiary); }
-      .revert-commit-row.selected { background: var(--warning-dim); border-left: 3px solid var(--warning); }
-      .revert-radio { margin-right: 12px; padding-top: 2px; }
-      .revert-radio input { width: 1.15em; height: 1.15em; appearance: none; -webkit-appearance: none; border-radius: 50%; border: 0.1em solid #6b6b76; background: transparent; cursor: pointer; display: grid; place-content: center; }
-      .revert-radio input::before { content: ""; width: 0.65em; height: 0.65em; border-radius: 50%; transform: scale(0); transition: 120ms transform ease-in-out; background-color: var(--warning); }
-      .revert-radio input:checked { border-color: var(--warning); }
-      .revert-radio input:checked::before { transform: scale(1); }
-      .revert-graph { width: 24px; display: flex; flex-direction: column; align-items: center; margin-right: 12px; }
-      .graph-node.revert { width: 12px; height: 12px; background: linear-gradient(135deg, #fbbf24, #f59e0b); border-radius: 50%; }
-      .revert-info { flex: 1; }
-      .revert-message { font-size: 13px; font-weight: 500; margin-bottom: 6px; }
-      .revert-meta { display: flex; gap: 12px; font-size: 11px; color: var(--text-muted); }
-      .revert-hash { font-family: 'JetBrains Mono', monospace; color: var(--warning); }
-      .revert-message-input { width: 100%; height: 120px; padding: 12px; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 8px; color: var(--text-primary); font-family: 'JetBrains Mono', monospace; font-size: 12px; resize: none; }
-      .revert-message-input:focus { outline: none; border-color: var(--warning); }
-      .option-selector { display: flex; flex-direction: column; gap: 8px; }
-      .option-card { display: flex; align-items: flex-start; gap: 10px; padding: 12px; background: var(--bg-tertiary); border: 2px solid transparent; border-radius: 8px; cursor: pointer; transition: all 0.15s; }
-      .option-card:hover { background: var(--bg-secondary); }
-      .option-card.selected { border-color: var(--warning); }
-      .option-card input { width: 1.15em; height: 1.15em; margin-top: 2px; appearance: none; -webkit-appearance: none; border-radius: 50%; border: 0.1em solid #6b6b76; background: transparent; cursor: pointer; display: grid; place-content: center; }
-      .option-card input::before { content: ""; width: 0.65em; height: 0.65em; border-radius: 50%; transform: scale(0); transition: 120ms transform ease-in-out; background-color: var(--warning); }
-      .option-card input:checked { border-color: var(--warning); }
-      .option-card input:checked::before { transform: scale(1); }
-      .option-content { flex: 1; }
-      .option-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
-      .option-desc { font-size: 11px; color: var(--text-muted); }
-      .btn-warning { background: var(--warning); color: #000; }
-      .btn-warning:hover { background: #d97706; }
-    </style>
+    ${getOperationStyles()}
   `;
 }
 
 function getResetViewHTML() {
   const commits = sampleData.commits;
+  const defaultCommit = commits[0];
   const commitRows = commits.map((c, i) => `
-    <div class="reset-commit-row ${i === 0 ? 'selected' : ''}" onclick="selectResetCommit(this, '${c.hash}')">
+    <div class="reset-commit-row ${i === 0 ? 'selected' : ''}" onclick="selectOperationCommit(this, '${c.hash}', 'reset')" data-hash="${c.hash}">
       <div class="reset-radio">
         <input type="radio" name="reset-commit" value="${c.hash}" ${i === 0 ? 'checked' : ''}>
       </div>
@@ -2289,6 +2549,8 @@ function getResetViewHTML() {
     </div>
   `).join('');
 
+  const filesPreview = getChangesPreviewHTML(defaultCommit, 'reset');
+
   return `
     <div class="operation-layout">
       <div class="operation-header">
@@ -2297,8 +2559,8 @@ function getResetViewHTML() {
           <span class="operation-desc">Move HEAD to specified commit</span>
         </div>
       </div>
-      <div class="operation-content">
-        <div class="operation-main">
+      <div class="operation-two-column">
+        <div class="operation-left-panel">
           <div class="operation-panel">
             <div class="panel-header">
               <span class="panel-title">Select target commit for reset</span>
@@ -2308,26 +2570,24 @@ function getResetViewHTML() {
             </div>
             <div class="reset-commit-list">${commitRows}</div>
           </div>
-        </div>
-        <div class="operation-sidebar">
-          <div class="operation-options">
+          <div class="operation-options-inline">
             <h3>Reset Mode</h3>
             <div class="reset-mode-selector">
-              <label class="reset-mode soft">
+              <label class="reset-mode soft" onclick="selectResetMode(this, 'soft')">
                 <input type="radio" name="reset-mode" value="soft">
                 <div class="mode-content">
                   <div class="mode-title">--soft</div>
                   <div class="mode-desc">Only move HEAD. Changes remain staged</div>
                 </div>
               </label>
-              <label class="reset-mode mixed selected">
+              <label class="reset-mode mixed selected" onclick="selectResetMode(this, 'mixed')">
                 <input type="radio" name="reset-mode" value="mixed" checked>
                 <div class="mode-content">
                   <div class="mode-title">--mixed (default)</div>
                   <div class="mode-desc">Reset HEAD and index. Changes remain in working tree</div>
                 </div>
               </label>
-              <label class="reset-mode hard">
+              <label class="reset-mode hard" onclick="selectResetMode(this, 'hard')">
                 <input type="radio" name="reset-mode" value="hard">
                 <div class="mode-content">
                   <div class="mode-title">--hard</div>
@@ -2335,54 +2595,46 @@ function getResetViewHTML() {
                 </div>
               </label>
             </div>
-          </div>
-          <div class="reset-warning">
-            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/></svg>
-            <span>This operation cannot be undone. Proceed with caution.</span>
-          </div>
-          <div class="operation-actions">
-            <button class="btn btn-danger" onclick="executeReset()">
-              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/><path d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z"/></svg>
-              Execute Reset
-            </button>
+            <div class="reset-warning">
+              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/></svg>
+              <span>This operation cannot be undone. Proceed with caution.</span>
+            </div>
           </div>
         </div>
+        <div class="operation-right-panel" id="reset-changes-panel">
+          ${filesPreview}
+        </div>
+      </div>
+      <div class="operation-footer">
+        <div class="operation-summary" id="reset-summary">
+          <span class="summary-stat"><strong>1</strong> commit selected</span>
+          <span class="summary-divider"></span>
+          <span class="summary-stat additions">+${defaultCommit.changedFiles.reduce((a, f) => a + f.additions, 0)}</span>
+          <span class="summary-stat deletions">-${defaultCommit.changedFiles.reduce((a, f) => a + f.deletions, 0)}</span>
+          <span class="summary-divider"></span>
+          <span class="summary-stat">${defaultCommit.changedFiles.length} files</span>
+        </div>
+        <button class="btn btn-danger" onclick="executeReset()">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/><path d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z"/></svg>
+          Execute Reset
+        </button>
       </div>
     </div>
-    <style>
-      .reset-commit-list { max-height: 500px; overflow-y: auto; }
-      .reset-commit-row { display: flex; align-items: flex-start; padding: 14px 16px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.15s; }
-      .reset-commit-row:hover { background: var(--bg-tertiary); }
-      .reset-commit-row.selected { background: var(--danger-dim); border-left: 3px solid var(--danger); }
-      .reset-radio { margin-right: 12px; padding-top: 2px; }
-      .reset-radio input { width: 1.15em; height: 1.15em; appearance: none; -webkit-appearance: none; border-radius: 50%; border: 0.1em solid #6b6b76; background: transparent; cursor: pointer; display: grid; place-content: center; }
-      .reset-radio input::before { content: ""; width: 0.65em; height: 0.65em; border-radius: 50%; transform: scale(0); transition: 120ms transform ease-in-out; background-color: var(--danger); }
-      .reset-radio input:checked { border-color: var(--danger); }
-      .reset-radio input:checked::before { transform: scale(1); }
-      .reset-graph { width: 24px; display: flex; flex-direction: column; align-items: center; margin-right: 12px; }
-      .graph-node.reset { width: 12px; height: 12px; background: linear-gradient(135deg, #f87171, #ef4444); border-radius: 50%; }
-      .reset-info { flex: 1; }
-      .reset-message { font-size: 13px; font-weight: 500; margin-bottom: 6px; }
-      .reset-meta { display: flex; gap: 12px; font-size: 11px; color: var(--text-muted); }
-      .reset-hash { font-family: 'JetBrains Mono', monospace; color: var(--danger); }
-      .reset-mode-selector { display: flex; flex-direction: column; gap: 8px; }
-      .reset-mode { display: flex; align-items: flex-start; gap: 10px; padding: 12px; background: var(--bg-tertiary); border: 2px solid transparent; border-radius: 8px; cursor: pointer; transition: all 0.15s; }
-      .reset-mode:hover { background: var(--bg-secondary); }
-      .reset-mode.selected { border-color: var(--accent); }
-      .reset-mode input { width: 1.15em; height: 1.15em; margin-top: 2px; appearance: none; -webkit-appearance: none; border-radius: 50%; border: 0.1em solid #6b6b76; background: transparent; cursor: pointer; display: grid; place-content: center; }
-      .reset-mode input::before { content: ""; width: 0.65em; height: 0.65em; border-radius: 50%; transform: scale(0); transition: 120ms transform ease-in-out; background-color: var(--accent); }
-      .reset-mode input:checked { border-color: var(--accent); }
-      .reset-mode input:checked::before { transform: scale(1); }
-      .mode-content { flex: 1; }
-      .mode-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
-      .mode-desc { font-size: 11px; color: var(--text-muted); }
-      .mode-desc.danger { color: var(--danger); }
-      .reset-warning { display: flex; align-items: center; gap: 10px; padding: 12px; background: var(--danger-dim); border-radius: 8px; font-size: 12px; color: var(--danger); }
-      .reset-warning svg { width: 16px; height: 16px; flex-shrink: 0; }
-      .btn-danger { background: var(--danger); color: #fff; }
-      .btn-danger:hover { background: #dc2626; }
-    </style>
+    ${getOperationStyles()}
   `;
+}
+
+function selectResetMode(element, mode) {
+  document.querySelectorAll('.reset-mode').forEach(m => m.classList.remove('selected'));
+  element.classList.add('selected');
+  element.querySelector('input').checked = true;
+}
+
+function selectOptionMode(element, type, mode) {
+  const container = element.closest('.option-mode-selector');
+  container.querySelectorAll('.option-mode').forEach(m => m.classList.remove('selected'));
+  element.classList.add('selected');
+  element.querySelector('input').checked = true;
 }
 
 function getReflogViewHTML() {
