@@ -1903,7 +1903,7 @@ function getBranchesViewHTML() {
               </div>
               ${defaultBranch.current ? '<span class="current-badge">HEAD</span>' : ''}
               <div class="branch-detail-actions">
-                <button class="btn btn-secondary btn-sm" onclick="checkoutBranch('${defaultBranch.name}')">Checkout</button>
+                <button class="btn btn-secondary btn-sm" onclick="switchBranch('${defaultBranch.name}')">Switch</button>
                 <button class="btn btn-secondary btn-sm" onclick="mergeBranch('${defaultBranch.name}')">Merge</button>
               </div>
             </div>
@@ -1975,9 +1975,9 @@ function getBranchesViewHTML() {
             <svg viewBox="0 0 16 16" fill="currentColor"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/><path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1z"/></svg>
             Delete
           </button>
-          <button class="btn btn-primary" onclick="checkoutBranch('${defaultBranch.name}')">
+          <button class="btn btn-primary" onclick="switchBranch('${defaultBranch.name}')">
             <svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/></svg>
-            Checkout
+            Switch
           </button>
         </div>
       </div>
@@ -2144,8 +2144,8 @@ function selectBranch(element, branchName) {
   }
 }
 
-function checkoutBranch(branchName) {
-  showToast('success', `Checked out branch: ${branchName}`);
+function switchBranch(branchName) {
+  showToast('success', `Switched to branch: ${branchName}`);
 }
 
 function mergeBranch(branchName) {
