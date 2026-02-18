@@ -35,6 +35,16 @@
     },
     ".branch-selector": {
       "main": "branches-dialog"
+    },
+    ".toggle-btn": {
+      "Split": "changes-split",
+      "Inline": "changes"
+    },
+    ".file-action[title=\"Resolve\"]": {
+      "!": "conflict"
+    },
+    ".conflict-actions .btn-primary": {
+      "3-way Merge Viewer": "merge-viewer"
     }
   },
   "ignore": ["mockup"]
