@@ -440,52 +440,8 @@
 
 /* ===== Responsive Design ===== */
 
-/* Large screens (1400px+) */
-@media (min-width: 1400px) {
-  .changes-layout .file-panel {
-    flex: 0 0 280px;
-  }
-  .changes-layout .commit-panel {
-    flex: 0 0 340px;
-  }
-  
-}
-
-/* Medium screens (1024px - 1199px) */
-@media (max-width: 1199px) {
-  .changes-layout .file-panel {
-    flex: 0 0 220px;
-  }
-  .changes-layout .commit-panel {
-    flex: 0 0 260px;
-  }
-  
-  
-  
-}
-
 /* Tablet / Small screens (768px - 1023px) */
 @media (max-width: 1023px) {
-  .changes-layout {
-    flex-direction: column;
-  }
-  .changes-layout .file-panel {
-    flex: 0 0 auto;
-    width: 100%;
-    max-height: 180px;
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-  }
-  .changes-layout .diff-panel {
-    flex: 1 1 auto;
-  }
-  .changes-layout .commit-panel {
-    flex: 0 0 auto;
-    width: 100%;
-    max-height: 180px;
-    border-left: none;
-    border-top: 1px solid var(--border);
-  }
   .commit-form {
     flex-direction: row;
     flex-wrap: wrap;
@@ -503,33 +459,4 @@
   .commit-actions {
     flex: 0 0 auto;
   }
-  
-  
-  
-  
-}
-
-/* Mobile / Very small screens (below 768px) */
-@media (max-width: 767px) {
-  
-  .changes-layout {
-    flex-direction: column;
-  }
-  .changes-layout .file-panel {
-    flex: 0 0 auto;
-    width: 100%;
-    max-height: 150px;
-  }
-  .changes-layout .commit-panel {
-    flex: 0 0 auto;
-    width: 100%;
-    max-height: 160px;
-  }
-  
-  
-  
-  
-  
-  
-  
 }
