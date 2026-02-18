@@ -4,7 +4,7 @@
   align-items: center;
   gap: 6px;
   padding: 10px 20px;
-  border: none;
+  border: 1px solid transparent;
   border-radius: 6px;
   font-family: inherit;
   font-size: 13px;
