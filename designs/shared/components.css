@@ -345,18 +345,18 @@
 .preview-file-expand svg { width: 16px; height: 16px; }
 .preview-file.expanded .preview-file-expand { transform: rotate(180deg); color: var(--accent); }
 
-/* ===== Diff Common ===== */
-.diff-preview-content { overflow-y: auto; }
-.diff-hunk { font-family: 'JetBrains Mono', monospace; font-size: 11px; }
-.diff-hunk-header { padding: 6px 12px; background: var(--purple-dim); color: var(--purple); font-size: 10px; }
-.diff-line { display: flex; }
-.diff-line .line-num { width: 32px; padding: 2px 8px; text-align: right; color: var(--text-muted); background: var(--bg-tertiary); flex-shrink: 0; }
-.diff-line .line-code { flex: 1; padding: 2px 12px; white-space: pre; }
-.diff-line.add { background: rgba(34, 197, 94, 0.1); }
-.diff-line.add .line-code { color: var(--success); }
-.diff-line.del { background: rgba(239, 68, 68, 0.1); }
-.diff-line.del .line-code { color: var(--danger); }
-.diff-line.context .line-code { color: var(--text-secondary); }
+/* ===== Diff Common (operation/history pages) ===== */
+:is(.preview-file-diff, .unified-file-diff) .diff-preview-content { overflow-y: auto; }
+:is(.preview-file-diff, .unified-file-diff) .diff-hunk { font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+:is(.preview-file-diff, .unified-file-diff) .diff-hunk-header { padding: 6px 12px; background: var(--purple-dim); color: var(--purple); font-size: 10px; }
+:is(.preview-file-diff, .unified-file-diff) .diff-line { display: flex; }
+:is(.preview-file-diff, .unified-file-diff) .diff-line .line-num { width: 32px; padding: 2px 8px; text-align: right; color: var(--text-muted); background: var(--bg-tertiary); flex-shrink: 0; }
+:is(.preview-file-diff, .unified-file-diff) .diff-line .line-code { flex: 1; padding: 2px 12px; white-space: pre; }
+:is(.preview-file-diff, .unified-file-diff) .diff-line.add { background: rgba(34, 197, 94, 0.1); }
+:is(.preview-file-diff, .unified-file-diff) .diff-line.add .line-code { color: var(--success); }
+:is(.preview-file-diff, .unified-file-diff) .diff-line.del { background: rgba(239, 68, 68, 0.1); }
+:is(.preview-file-diff, .unified-file-diff) .diff-line.del .line-code { color: var(--danger); }
+:is(.preview-file-diff, .unified-file-diff) .diff-line.context .line-code { color: var(--text-secondary); }
 
 /* ===== Preview File Diff (operation pages) ===== */
 .preview-file-diff { border-bottom: 1px solid var(--border); background: var(--bg-secondary); overflow: hidden; }
