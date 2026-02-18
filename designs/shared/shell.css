@@ -257,6 +257,18 @@
 
 .view.active { display: flex; flex-direction: column; width: 100%; height: 100%; min-height: 0; }
 
+/* ===== Changes Layout ===== */
+.changes-layout {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.changes-layout .file-panel { width: 250px; flex: 0 0 250px; }
+.changes-layout .diff-panel { flex: 1 1 auto; min-width: 0; }
+.changes-layout .commit-panel { width: 300px; flex: 0 0 300px; }
+
 /* ===== Status Bar ===== */
 .statusbar {
   height: 24px;
