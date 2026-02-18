@@ -1,26 +1,10 @@
+/* ===== Background: File Panel ===== */
 .file-panel {
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
-
-.panel-header {
-  padding: 14px 16px;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.panel-title {
-  font-size: 13px;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.panel-title.dim { color: var(--text-muted); font-weight: 400; }
 
 .file-section { border-bottom: 1px solid var(--border); }
 .file-section:last-child { border-bottom: none; }
@@ -34,7 +18,7 @@
   align-items: center;
   gap: 6px;
   cursor: pointer;
-  transition: color 0.15s ease;
+  transition: background-color 0.15s ease;
 }
 
 .file-section-header:hover { background: var(--bg-tertiary); }
@@ -77,10 +61,69 @@
   color: var(--text-secondary);
 }
 
-/* ===== Diff Panel ===== */
+/* ===== Background: Diff Panel ===== */
 .diff-panel {
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+}
+
+/* ===== Conflict Modal ===== */
+.conflict-modal {
+  width: 90vw;
+  max-width: 1200px;
+  max-height: 85vh;
+}
+
+/* ===== Modal Header Layout ===== */
+.modal-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.modal-header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.conflict-operation {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ===== Conflict Progress Counter ===== */
+.conflict-progress {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+}
+
+.conflict-progress-resolved {
+  color: var(--success);
+  font-weight: 600;
+}
+
+.conflict-progress-sep { color: var(--text-muted); }
+
+.conflict-progress-total {
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.conflict-progress-label {
+  color: var(--text-muted);
+  font-size: 11px;
+  margin-left: 2px;
+}
+
+/* ===== Conflict Body ===== */
+.conflict-body {
+  display: flex;
+  padding: 0;
   overflow: hidden;
 }
 
@@ -282,34 +325,22 @@
 
 /* ===== Responsive Design ===== */
 @media (min-width: 1400px) {
-  
   .conflict-file-list { width: 280px; }
 }
 
 @media (max-width: 1199px) {
-  
-  
-  
   .conflict-modal { width: 95vw; }
   .conflict-file-list { width: 220px; }
 }
 
 @media (max-width: 1023px) {
-  
-  
-  
   .conflict-file-list { width: 200px; }
 }
 
 @media (max-width: 767px) {
-  
-  
-  
-  
-  
-  
-  
   .conflict-modal { width: 95vw !important; max-width: 95vw !important; height: 90vh; max-height: 90vh; }
   .conflict-body { flex-direction: column; }
   .conflict-file-list { width: 100%; max-height: 150px; border-right: none; border-bottom: 1px solid var(--border); }
+  .conflict-operation { display: none; }
+  .conflict-progress { font-size: 11px; }
 }
