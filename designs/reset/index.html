@@ -36,9 +36,6 @@
 
     <!-- Toolbar -->
     <div class="toolbar">
-      <button class="sidebar-toggle" title="Sidebar">
-        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/></svg>
-      </button>
       <div class="toolbar-group">
         <div class="branch-selector">
           <svg viewBox="0 0 16 16" fill="currentColor"><path d="M9.5 3.25a2.25 2.25 0 1 1 3 2.122V6A2.5 2.5 0 0 1 10 8.5H6a1 1 0 0 0-1 1v1.128a2.251 2.251 0 1 1-1.5 0V5.372a2.25 2.25 0 1 1 1.5 0v1.836A2.492 2.492 0 0 1 6 7h4a1 1 0 0 0 1-1v-.628A2.25 2.25 0 0 1 9.5 3.25zm-6 0a.75.75 0 1 0 1.5 0 .75.75 0 0 0-1.5 0zm8.25-.75a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5zM4.25 12a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5z"/></svg>
@@ -299,25 +296,25 @@
               </div>
               <div class="operation-options-inline">
                 <h3>Reset Mode</h3>
-                <div class="reset-mode-selector">
-                  <label class="reset-mode soft">
+                <div class="option-mode-selector">
+                  <label class="option-mode soft">
                     <input type="radio" name="reset-mode" value="soft">
                     <div class="mode-content">
-                      <div class="mode-title">--soft</div>
+                      <div class="mode-title">Soft (--soft)</div>
                       <div class="mode-desc">Only move HEAD. Changes remain staged</div>
                     </div>
                   </label>
-                  <label class="reset-mode mixed selected">
+                  <label class="option-mode mixed selected">
                     <input type="radio" name="reset-mode" value="mixed" checked>
                     <div class="mode-content">
-                      <div class="mode-title">--mixed (default)</div>
+                      <div class="mode-title">Mixed (--mixed)</div>
                       <div class="mode-desc">Reset HEAD and index. Changes remain in working tree</div>
                     </div>
                   </label>
-                  <label class="reset-mode hard">
+                  <label class="option-mode hard">
                     <input type="radio" name="reset-mode" value="hard">
                     <div class="mode-content">
-                      <div class="mode-title">--hard</div>
+                      <div class="mode-title">Hard (--hard)</div>
                       <div class="mode-desc danger">Reset everything. Changes will be lost</div>
                     </div>
                   </label>
