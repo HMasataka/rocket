@@ -1,51 +1,100 @@
 {
-  "selectors": {
-    "nav": ".nav-item",
-    "toolbar": ".toolbar-btn",
-    "activeClass": "active",
-    "modalClose": ".modal-close",
-    "modalCloseText": ".modal-footer .btn-secondary"
-  },
-  "mapping": {
-    "Stash": "stash",
-    "Cherry-pick": "cherry-pick"
-  },
-  "toolbar": {
-    "Tags": "tags",
-    "AI": "ai-assist",
-    "origin": "remote"
-  },
-  "custom": {
-    ".ai-option-title": {
-      "Generate Commit Message": "ai-commit",
-      "Code Review": "ai-review"
+  "links": [
+    {
+      "selector": ".nav-item:not(.active)",
+      "match": "text",
+      "mapping": {
+        "Stash": "stash",
+        "Cherry-pick": "cherry-pick"
+      }
     },
-    ".settings-nav-item": {
-      "Appearance": "settings-appearance",
-      "Editor": "settings-editor",
-      "AI Settings": "settings-ai",
-      "Keybindings": "settings-keybindings",
-      "External Tools": "settings-tools"
+    {
+      "selector": ".toolbar-btn",
+      "match": "title",
+      "mapping": {
+        "Tags": "tags",
+        "AI Assist": "ai-assist",
+        "Remote": "remote"
+      }
     },
-    ".titlebar-btn[title=\"Settings\"]": {
-      "Settings": "settings-appearance"
+    {
+      "selector": ".ai-option-title",
+      "match": "text",
+      "mapping": {
+        "Generate Commit Message": "ai-commit",
+        "Code Review": "ai-review"
+      }
     },
-    ".tab-add": {
-      "New Tab": "open-repository"
+    {
+      "selector": ".settings-nav-item",
+      "match": "text",
+      "mapping": {
+        "Appearance": "settings-appearance",
+        "Editor": "settings-editor",
+        "AI Settings": "settings-ai",
+        "Keybindings": "settings-keybindings",
+        "External Tools": "settings-tools"
+      }
     },
-    ".branch-selector": {
-      "main": "branches-dialog"
+    {
+      "selector": ".titlebar-btn[title='Settings']",
+      "match": "title",
+      "target": "settings-appearance"
     },
-    ".toggle-btn": {
-      "Split": "changes-split",
-      "Inline": "changes"
+    {
+      "selector": ".tab-add",
+      "match": "text",
+      "target": "open-repository"
     },
-    ".file-action[title=\"Resolve\"]": {
-      "!": "conflict"
+    {
+      "selector": ".branch-selector",
+      "match": "text",
+      "target": "branches-dialog"
     },
-    ".conflict-actions .btn-primary": {
-      "3-way Merge Viewer": "merge-viewer"
+    {
+      "selector": ".toggle-btn",
+      "match": "text",
+      "mapping": {
+        "Split": "changes-split",
+        "Inline": "changes"
+      }
+    },
+    {
+      "selector": ".file-action[title='Resolve']",
+      "match": "title",
+      "target": "conflict"
+    },
+    {
+      "selector": ".conflict-actions .btn-primary",
+      "match": "text",
+      "mapping": {
+        "3-way Merge Viewer": "merge-viewer"
+      }
     }
-  },
+  ],
+  "modals": [
+    "tags",
+    "branches-dialog",
+    "open-repository",
+    "settings-appearance",
+    "settings-editor",
+    "settings-ai",
+    "settings-keybindings",
+    "settings-tools",
+    "ai-assist",
+    "ai-commit",
+    "ai-review",
+    "remote",
+    "conflict",
+    "merge-viewer"
+  ],
+  "close": [
+    ".modal-close",
+    {
+      "selector": ".modal-footer .btn-secondary",
+      "match": "text",
+      "value": "Close"
+    }
+  ],
   "ignore": ["mockup"]
 }
