@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rocket - File History</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../shared/variables.css">
+  <link rel="stylesheet" href="../shared/shell.css">
+  <link rel="stylesheet" href="../shared/components.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app">
+    <!-- Title Bar -->
+    <div class="titlebar">
+      <div class="window-controls">
+        <div class="window-dot close"></div>
+        <div class="window-dot minimize"></div>
+        <div class="window-dot maximize"></div>
+      </div>
+      <div class="titlebar-tabs">
+        <button class="tab active">rocket-app</button>
+        <button class="tab tab-add" title="New Tab">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/></svg>
+        </button>
+      </div>
+      <div class="titlebar-actions">
+        <button class="titlebar-btn" title="Settings">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="toolbar-group">
+        <div class="branch-selector">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M9.5 3.25a2.25 2.25 0 1 1 3 2.122V6A2.5 2.5 0 0 1 10 8.5H6a1 1 0 0 0-1 1v1.128a2.251 2.251 0 1 1-1.5 0V5.372a2.25 2.25 0 1 1 1.5 0v1.836A2.492 2.492 0 0 1 6 7h4a1 1 0 0 0 1-1v-.628A2.25 2.25 0 0 1 9.5 3.25zm-6 0a.75.75 0 1 0 1.5 0 .75.75 0 0 0-1.5 0zm8.25-.75a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5zM4.25 12a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5z"/></svg>
+          <span>main</span>
+          <svg viewBox="0 0 16 16" fill="currentColor" class="chevron"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708z"/></svg>
+        </div>
+      </div>
+      <div class="toolbar-group">
+        <button class="toolbar-btn" title="Fetch">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L7.5 13.293V1.5A.5.5 0 0 1 8 1z"/></svg>
+          <span>Fetch</span>
+        </button>
+        <button class="toolbar-btn" title="Pull">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L7.5 13.293V1.5A.5.5 0 0 1 8 1z"/></svg>
+          <span>Pull</span>
+        </button>
+        <button class="toolbar-btn" title="Push">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L7.5 2.707V14.5a.5.5 0 0 0 .5.5z"/></svg>
+          <span>Push</span>
+        </button>
+      </div>
+      <div class="toolbar-group">
+        <button class="toolbar-btn" title="Tags">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 2a1 1 0 0 1 1-1h4.586a1 1 0 0 1 .707.293l7 7a1 1 0 0 1 0 1.414l-4.586 4.586a1 1 0 0 1-1.414 0l-7-7A1 1 0 0 1 2 6.586V2zm3.5 4a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"/></svg>
+          <span>Tags</span>
+        </button>
+      </div>
+      <div class="toolbar-group">
+        <button class="toolbar-btn remote-btn" title="Remote">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1.002 1.002 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4.018 4.018 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243L6.586 4.672z"/></svg>
+          <span>origin</span>
+          <svg class="dropdown-arrow" viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 6.646a.5.5 0 0 1 .708 0L8 9.293l2.646-2.647a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708z"/></svg>
+        </button>
+      </div>
+      <div class="toolbar-spacer"></div>
+      <div class="toolbar-group">
+        <button class="toolbar-btn ai-btn" title="AI Assist">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M6 12.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5ZM3 8.062C3 6.76 4.235 5.765 5.53 5.886a26.58 26.58 0 0 0 4.94 0C11.765 5.765 13 6.76 13 8.062v1.157a.933.933 0 0 1-.765.935c-.845.147-2.34.346-4.235.346-1.895 0-3.39-.2-4.235-.346A.933.933 0 0 1 3 9.219V8.062Zm4.542-.827a.25.25 0 0 0-.217.068l-.92.9a24.767 24.767 0 0 1-1.871-.183.25.25 0 0 0-.068.495c.55.076 1.232.149 2.02.193a.25.25 0 0 0 .189-.071l.754-.736.847 1.71a.25.25 0 0 0 .404.062l.932-.97a25.286 25.286 0 0 0 1.922-.188.25.25 0 0 0-.068-.495c-.538.074-1.207.145-1.98.189a.25.25 0 0 0-.166.076l-.754.785-.842-1.7a.25.25 0 0 0-.182-.135Z"/><path d="M8.5 1.866a1 1 0 1 0-1 0V3h-2A4.5 4.5 0 0 0 1 7.5V8a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1v1a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-1a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1v-.5A4.5 4.5 0 0 0 10.5 3h-2V1.866ZM14 7.5V13a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V7.5A3.5 3.5 0 0 1 5.5 4h5A3.5 3.5 0 0 1 14 7.5Z"/></svg>
+          <span>AI</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="main-layout">
+      <!-- Left Sidebar -->
+      <nav class="sidebar">
+        <div class="sidebar-section">
+          <div class="section-label">Workspace</div>
+          <div class="nav-item">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/></svg>
+            Changes
+            <span class="nav-badge">5</span>
+          </div>
+          <div class="nav-item">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022l-.074.997zm2.004.45a7.003 7.003 0 0 0-.985-.299l.219-.976c.383.086.76.2 1.126.342l-.36.933zm1.37.71a7.01 7.01 0 0 0-.439-.27l.493-.87a8.025 8.025 0 0 1 .979.654l-.615.789a6.996 6.996 0 0 0-.418-.302zm1.834 1.79a6.99 6.99 0 0 0-.653-.796l.724-.69c.27.285.52.59.747.91l-.818.576zm.744 1.352a7.08 7.08 0 0 0-.214-.468l.893-.45a7.976 7.976 0 0 1 .45 1.088l-.95.313a7.023 7.023 0 0 0-.179-.483zm.53 2.507a6.991 6.991 0 0 0-.1-1.025l.985-.17c.067.386.106.778.116 1.17l-1 .025zm-.131 1.538c.033-.17.06-.339.081-.51l.993.123a7.957 7.957 0 0 1-.23 1.155l-.964-.267c.046-.165.086-.332.12-.501zm-.952 2.379c.184-.29.346-.594.486-.908l.914.405c-.16.36-.345.706-.555 1.038l-.845-.535zm-.964 1.205c.122-.122.239-.248.35-.378l.758.653a8.073 8.073 0 0 1-.401.432l-.707-.707z"/><path d="M8 1a7 7 0 1 0 4.95 11.95l.707.707A8.001 8.001 0 1 1 8 0v1z"/><path d="M7.5 3a.5.5 0 0 1 .5.5v5.21l3.248 1.856a.5.5 0 0 1-.496.868l-3.5-2A.5.5 0 0 1 7 9V3.5a.5.5 0 0 1 .5-.5z"/></svg>
+            History
+          </div>
+          <div class="nav-item active">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M1 3.5A1.5 1.5 0 0 1 2.5 2h3.879a1.5 1.5 0 0 1 1.06.44l1.122 1.12A1.5 1.5 0 0 0 9.62 4H13.5A1.5 1.5 0 0 1 15 5.5v8a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 1 13.5v-10Z"/></svg>
+            Files
+          </div>
+        </div>
+        <div class="sidebar-section">
+          <div class="section-label">Branches</div>
+          <div class="nav-item">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M9.5 3.25a2.25 2.25 0 1 1 3 2.122V6A2.5 2.5 0 0 1 10 8.5H6a1 1 0 0 0-1 1v1.128a2.251 2.251 0 1 1-1.5 0V5.372a2.25 2.25 0 1 1 1.5 0v1.836A2.492 2.492 0 0 1 6 7h4a1 1 0 0 0 1-1v-.628A2.25 2.25 0 0 1 9.5 3.25z"/></svg>
+            Branches
+          </div>
+          <div class="nav-item">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M14.5 3a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h13zm-13-1A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-13z"/></svg>
+            Stash
+            <span class="nav-badge">2</span>
+          </div>
+        </div>
+        <div class="sidebar-section">
+          <div class="section-label">Advanced</div>
+          <div class="nav-item">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 1.5a2.5 2.5 0 1 1 5 0 2.5 2.5 0 0 1-5 0zM6.5 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm4 4.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM9 7a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0zm-7 5.5a2.5 2.5 0 1 1 5 0 2.5 2.5 0 0 1-5 0zM4.5 11a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/><path d="M6 4.5v.585a2.5 2.5 0 0 0 1 .915V4.5a.5.5 0 0 0-1 0zm4.5 3.915A2.5 2.5 0 0 0 9 7.585V10.5a.5.5 0 0 0 1 0V8.415zM4 10.5a.5.5 0 0 1 1 0v.585a2.5 2.5 0 0 0 1 .915V10.5a.5.5 0 0 0-1 0v-.585a2.5 2.5 0 0 0-1-.915z"/></svg>
+            Cherry-pick
+          </div>
+          <div class="nav-item">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 3a5 5 0 1 1-4.546 2.914.5.5 0 0 0-.908-.417A6 6 0 1 0 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 0-.41-.192L5.23 2.308a.25.25 0 0 0 0 .384l2.36 1.966A.25.25 0 0 0 8 4.466z"/></svg>
+            Revert
+          </div>
+          <div class="nav-item">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/><path d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z"/></svg>
+            Reset
+          </div>
+          <div class="nav-item">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022l-.074.997zm2.004.45a7.003 7.003 0 0 0-.985-.299l.219-.976c.383.086.76.2 1.126.342l-.36.933zm1.37.71a7.01 7.01 0 0 0-.439-.27l.493-.87a8.025 8.025 0 0 1 .979.654l-.615.789a6.996 6.996 0 0 0-.418-.302zm1.834 1.79a6.99 6.99 0 0 0-.653-.796l.724-.69c.27.285.52.59.747.91l-.818.576zm.744 1.352a7.08 7.08 0 0 0-.214-.468l.893-.45a7.976 7.976 0 0 1 .45 1.088l-.95.313a7.023 7.023 0 0 0-.179-.483zM8 1a7 7 0 1 0 4.95 11.95l.707.707A8.001 8.001 0 1 1 8 0v1z"/><path d="M7.5 3a.5.5 0 0 1 .5.5v5.21l3.248 1.856a.5.5 0 0 1-.496.868l-3.5-2A.5.5 0 0 1 7 9V3.5a.5.5 0 0 1 .5-.5z"/></svg>
+            Reflog
+          </div>
+        </div>
+        <div class="sidebar-section">
+          <div class="section-label">Modules</div>
+          <div class="nav-item">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2zm2-1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H4z"/><path d="M8 4a.5.5 0 0 1 .5.5V6H10a.5.5 0 0 1 0 1H8.5v1.5a.5.5 0 0 1-1 0V7H6a.5.5 0 0 1 0-1h1.5V4.5A.5.5 0 0 1 8 4z"/></svg>
+            Submodules
+          </div>
+          <div class="nav-item">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M14.5 3a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h13zm-13-1A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-13z"/><path d="M5 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 5 8zm0-2.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm0 5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm-1-5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0zM4 8a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0zm0 2.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0z"/></svg>
+            Worktrees
+          </div>
+        </div>
+        <div class="sidebar-section">
+          <div class="section-label">Tools</div>
+          <div class="nav-item">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg>
+            Search
+          </div>
+        </div>
+      </nav>
+
+      <!-- Main Content Area -->
+      <main class="content">
+        <div class="page-layout">
+          <!-- File History Header -->
+          <div class="fh-header">
+            <div class="fh-file-info">
+              <svg class="fh-file-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M14 4.5V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h5.5L14 4.5z"/></svg>
+              <div class="fh-file-path">
+                <span class="fh-path-dir">src/auth/</span><span class="fh-path-name">handler.go</span>
+              </div>
+              <span class="fh-commit-count">12 commits</span>
+            </div>
+            <div class="fh-actions">
+              <button class="icon-btn" title="View File">
+                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/><path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/></svg>
+              </button>
+              <button class="icon-btn" title="Blame">
+                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2zm2-1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H4z"/><path d="M4 4h8v1H4V4zm0 2.5h8v1H4v-1zm0 2.5h8v1H4V9zm0 2.5h5v1H4v-1z"/></svg>
+              </button>
+              <button class="icon-btn" title="Copy Path">
+                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Two Column Layout -->
+          <div class="fh-content">
+            <!-- Commit List Panel -->
+            <div class="fh-list-panel">
+              <div class="fh-commit-list">
+                <!-- Selected commit -->
+                <div class="fh-commit selected">
+                  <div class="fh-commit-main">
+                    <span class="fh-commit-message">feat: Add user authentication</span>
+                    <div class="fh-commit-refs">
+                      <span class="commit-ref ref-head">HEAD</span>
+                      <span class="commit-ref ref-branch">main</span>
+                    </div>
+                  </div>
+                  <div class="fh-commit-meta">
+                    <span class="fh-commit-hash">a1b2c3d</span>
+                    <span class="fh-commit-author">tanaka</span>
+                    <span class="fh-commit-date">2 hours ago</span>
+                  </div>
+                  <div class="fh-commit-stats">
+                    <span class="stat-add">+24</span>
+                    <span class="stat-del">-8</span>
+                  </div>
+                </div>
+
+                <div class="fh-commit">
+                  <div class="fh-commit-main">
+                    <span class="fh-commit-message">refactor: Extract session management</span>
+                  </div>
+                  <div class="fh-commit-meta">
+                    <span class="fh-commit-hash">b2c3d4e</span>
+                    <span class="fh-commit-author">yamada</span>
+                    <span class="fh-commit-date">1 day ago</span>
+                  </div>
+                  <div class="fh-commit-stats">
+                    <span class="stat-add">+45</span>
+                    <span class="stat-del">-32</span>
+                  </div>
+                </div>
+
+                <div class="fh-commit">
+                  <div class="fh-commit-main">
+                    <span class="fh-commit-message">fix: Fix login redirect after timeout</span>
+                  </div>
+                  <div class="fh-commit-meta">
+                    <span class="fh-commit-hash">c3d4e5f</span>
+                    <span class="fh-commit-author">suzuki</span>
+                    <span class="fh-commit-date">3 days ago</span>
+                  </div>
+                  <div class="fh-commit-stats">
+                    <span class="stat-add">+6</span>
+                    <span class="stat-del">-2</span>
+                  </div>
+                </div>
+
+                <div class="fh-commit">
+                  <div class="fh-commit-main">
+                    <span class="fh-commit-message">feat: Add password hashing with bcrypt</span>
+                  </div>
+                  <div class="fh-commit-meta">
+                    <span class="fh-commit-hash">d4e5f6g</span>
+                    <span class="fh-commit-author">tanaka</span>
+                    <span class="fh-commit-date">5 days ago</span>
+                  </div>
+                  <div class="fh-commit-stats">
+                    <span class="stat-add">+18</span>
+                    <span class="stat-del">-3</span>
+                  </div>
+                </div>
+
+                <div class="fh-commit">
+                  <div class="fh-commit-main">
+                    <span class="fh-commit-message">refactor: Rename AuthService to Handler</span>
+                    <div class="fh-commit-refs">
+                      <span class="commit-ref ref-version">v0.3.0</span>
+                    </div>
+                  </div>
+                  <div class="fh-commit-meta">
+                    <span class="fh-commit-hash">e5f6g7h</span>
+                    <span class="fh-commit-author">yamada</span>
+                    <span class="fh-commit-date">1 week ago</span>
+                  </div>
+                  <div class="fh-commit-stats">
+                    <span class="stat-add">+12</span>
+                    <span class="stat-del">-12</span>
+                  </div>
+                </div>
+
+                <div class="fh-commit">
+                  <div class="fh-commit-main">
+                    <span class="fh-commit-message">feat: Implement JWT token generation</span>
+                  </div>
+                  <div class="fh-commit-meta">
+                    <span class="fh-commit-hash">f6g7h8i</span>
+                    <span class="fh-commit-author">tanaka</span>
+                    <span class="fh-commit-date">1 week ago</span>
+                  </div>
+                  <div class="fh-commit-stats">
+                    <span class="stat-add">+56</span>
+                    <span class="stat-del">-0</span>
+                  </div>
+                </div>
+
+                <div class="fh-commit">
+                  <div class="fh-commit-main">
+                    <span class="fh-commit-message">fix: Handle empty credentials gracefully</span>
+                  </div>
+                  <div class="fh-commit-meta">
+                    <span class="fh-commit-hash">g7h8i9j</span>
+                    <span class="fh-commit-author">suzuki</span>
+                    <span class="fh-commit-date">2 weeks ago</span>
+                  </div>
+                  <div class="fh-commit-stats">
+                    <span class="stat-add">+8</span>
+                    <span class="stat-del">-1</span>
+                  </div>
+                </div>
+
+                <div class="fh-commit">
+                  <div class="fh-commit-main">
+                    <span class="fh-commit-message">feat: Add logout endpoint</span>
+                  </div>
+                  <div class="fh-commit-meta">
+                    <span class="fh-commit-hash">h8i9j0k</span>
+                    <span class="fh-commit-author">yamada</span>
+                    <span class="fh-commit-date">2 weeks ago</span>
+                  </div>
+                  <div class="fh-commit-stats">
+                    <span class="stat-add">+22</span>
+                    <span class="stat-del">-0</span>
+                  </div>
+                </div>
+
+                <div class="fh-commit">
+                  <div class="fh-commit-main">
+                    <span class="fh-commit-message">docs: Add handler documentation</span>
+                  </div>
+                  <div class="fh-commit-meta">
+                    <span class="fh-commit-hash">i9j0k1l</span>
+                    <span class="fh-commit-author">tanaka</span>
+                    <span class="fh-commit-date">3 weeks ago</span>
+                  </div>
+                  <div class="fh-commit-stats">
+                    <span class="stat-add">+15</span>
+                    <span class="stat-del">-0</span>
+                  </div>
+                </div>
+
+                <div class="fh-commit">
+                  <div class="fh-commit-main">
+                    <span class="fh-commit-message">refactor: Use context for request handling</span>
+                    <div class="fh-commit-refs">
+                      <span class="commit-ref ref-version">v0.2.0</span>
+                    </div>
+                  </div>
+                  <div class="fh-commit-meta">
+                    <span class="fh-commit-hash">j0k1l2m</span>
+                    <span class="fh-commit-author">suzuki</span>
+                    <span class="fh-commit-date">1 month ago</span>
+                  </div>
+                  <div class="fh-commit-stats">
+                    <span class="stat-add">+34</span>
+                    <span class="stat-del">-28</span>
+                  </div>
+                </div>
+
+                <div class="fh-commit">
+                  <div class="fh-commit-main">
+                    <span class="fh-commit-message">feat: Add login endpoint</span>
+                  </div>
+                  <div class="fh-commit-meta">
+                    <span class="fh-commit-hash">k1l2m3n</span>
+                    <span class="fh-commit-author">tanaka</span>
+                    <span class="fh-commit-date">1 month ago</span>
+                  </div>
+                  <div class="fh-commit-stats">
+                    <span class="stat-add">+48</span>
+                    <span class="stat-del">-0</span>
+                  </div>
+                </div>
+
+                <div class="fh-commit">
+                  <div class="fh-commit-main">
+                    <span class="fh-commit-message">feat: Create auth handler scaffold</span>
+                    <div class="fh-commit-refs">
+                      <span class="commit-ref ref-version">v0.1.0</span>
+                    </div>
+                  </div>
+                  <div class="fh-commit-meta">
+                    <span class="fh-commit-hash">l2m3n4o</span>
+                    <span class="fh-commit-author">tanaka</span>
+                    <span class="fh-commit-date">2 months ago</span>
+                  </div>
+                  <div class="fh-commit-stats">
+                    <span class="stat-add">+25</span>
+                    <span class="stat-del">-0</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Diff Detail Panel -->
+            <div class="fh-detail-panel">
+              <!-- Commit Info -->
+              <div class="fh-detail-info">
+                <div class="fh-detail-commit-row">
+                  <div class="fh-detail-avatar">
+                    <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0Zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4Zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10Z"/></svg>
+                  </div>
+                  <div class="fh-detail-author-block">
+                    <span class="fh-detail-author">tanaka</span>
+                    <span class="fh-detail-email">tanaka@example.com</span>
+                  </div>
+                  <div class="fh-detail-date-block">
+                    <span class="fh-detail-date-relative">2 hours ago</span>
+                    <span class="fh-detail-date-absolute">Feb 18, 2026 14:32</span>
+                  </div>
+                </div>
+                <div class="fh-detail-message">
+                  <div class="fh-detail-message-title">feat: Add user authentication</div>
+                  <div class="fh-detail-message-body">Implemented JWT-based authentication with session management.
+Added ValidateToken method and updated middleware handler.</div>
+                </div>
+                <div class="fh-detail-hash-info">
+                  <span class="detail-label">Commit</span>
+                  <span class="fh-detail-full-hash">a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6</span>
+                </div>
+              </div>
+
+              <!-- Diff for this file -->
+              <div class="fh-diff">
+                <div class="fh-diff-header">
+                  <div class="fh-diff-stats-summary">
+                    <span class="stat-add">+24</span>
+                    <span class="stat-del">-8</span>
+                  </div>
+                  <div class="fh-diff-toggle">
+                    <button class="toggle-btn active">Inline</button>
+                    <button class="toggle-btn">Split</button>
+                  </div>
+                </div>
+                <div class="fh-diff-content">
+                  <div class="diff-hunk">
+                    <div class="diff-hunk-header">@@ -1,8 +1,10 @@ package auth</div>
+                    <div class="diff-line context"><span class="line-num old">1</span><span class="line-num new">1</span><span class="line-code">package auth</span></div>
+                    <div class="diff-line context"><span class="line-num old">2</span><span class="line-num new">2</span><span class="line-code"></span></div>
+                    <div class="diff-line context"><span class="line-num old">3</span><span class="line-num new">3</span><span class="line-code">import (</span></div>
+                    <div class="diff-line context"><span class="line-num old">4</span><span class="line-num new">4</span><span class="line-code">    "context"</span></div>
+                    <div class="diff-line context"><span class="line-num old">5</span><span class="line-num new">5</span><span class="line-code">    "errors"</span></div>
+                    <div class="diff-line context"><span class="line-num old">6</span><span class="line-num new">6</span><span class="line-code">    "fmt"</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">7</span><span class="line-code">    "log/slog"</span></div>
+                    <div class="diff-line context"><span class="line-num old">7</span><span class="line-num new">8</span><span class="line-code">    "net/http"</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">9</span><span class="line-code">    "time"</span></div>
+                    <div class="diff-line context"><span class="line-num old">8</span><span class="line-num new">10</span><span class="line-code">)</span></div>
+                  </div>
+                  <div class="diff-hunk">
+                    <div class="diff-hunk-header">@@ -12,6 +14,20 @@ type Handler struct {</div>
+                    <div class="diff-line context"><span class="line-num old">12</span><span class="line-num new">14</span><span class="line-code">type Handler struct {</span></div>
+                    <div class="diff-line context"><span class="line-num old">13</span><span class="line-num new">15</span><span class="line-code">    logger  *slog.Logger</span></div>
+                    <div class="diff-line context"><span class="line-num old">14</span><span class="line-num new">16</span><span class="line-code">    store   SessionStore</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">17</span><span class="line-code">    secret  []byte</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">18</span><span class="line-code">    timeout time.Duration</span></div>
+                    <div class="diff-line context"><span class="line-num old">15</span><span class="line-num new">19</span><span class="line-code">}</span></div>
+                    <div class="diff-line context"><span class="line-num old">16</span><span class="line-num new">20</span><span class="line-code"></span></div>
+                    <div class="diff-line del"><span class="line-num old">17</span><span class="line-num new"></span><span class="line-code">func NewHandler(logger *slog.Logger, store SessionStore) *Handler {</span></div>
+                    <div class="diff-line del"><span class="line-num old">18</span><span class="line-num new"></span><span class="line-code">    return &Handler{</span></div>
+                    <div class="diff-line del"><span class="line-num old">19</span><span class="line-num new"></span><span class="line-code">        logger: logger,</span></div>
+                    <div class="diff-line del"><span class="line-num old">20</span><span class="line-num new"></span><span class="line-code">        store:  store,</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">21</span><span class="line-code">func NewHandler(logger *slog.Logger, store SessionStore, secret []byte) *Handler {</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">22</span><span class="line-code">    return &Handler{</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">23</span><span class="line-code">        logger:  logger,</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">24</span><span class="line-code">        store:   store,</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">25</span><span class="line-code">        secret:  secret,</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">26</span><span class="line-code">        timeout: 30 * time.Minute,</span></div>
+                    <div class="diff-line context"><span class="line-num old">21</span><span class="line-num new">27</span><span class="line-code">    }</span></div>
+                    <div class="diff-line context"><span class="line-num old">22</span><span class="line-num new">28</span><span class="line-code">}</span></div>
+                  </div>
+                  <div class="diff-hunk">
+                    <div class="diff-hunk-header">@@ -24,6 +40,26 @@ func NewHandler(logger *slog.Logger, store SessionStore, secret []byte) *Handler</div>
+                    <div class="diff-line context"><span class="line-num old">24</span><span class="line-num new">30</span><span class="line-code"></span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">31</span><span class="line-code">// ValidateToken checks if the provided token is valid</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">32</span><span class="line-code">func (h *Handler) ValidateToken(ctx context.Context, token string) (*Claims, error) {</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">33</span><span class="line-code">    claims, err := jwt.ParseWithClaims(token, &Claims{}, func(t *jwt.Token) (interface{}, error) {</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">34</span><span class="line-code">        return h.secret, nil</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">35</span><span class="line-code">    })</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">36</span><span class="line-code">    if err != nil {</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">37</span><span class="line-code">        return nil, fmt.Errorf("invalid token: %w", err)</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">38</span><span class="line-code">    }</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">39</span><span class="line-code">    return claims.(*Claims), nil</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">40</span><span class="line-code">}</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">41</span><span class="line-code"></span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">42</span><span class="line-code">// RefreshToken generates a new token from an existing valid token</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">43</span><span class="line-code">func (h *Handler) RefreshToken(ctx context.Context, token string) (string, error) {</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">44</span><span class="line-code">    claims, err := h.ValidateToken(ctx, token)</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">45</span><span class="line-code">    if err != nil {</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">46</span><span class="line-code">        return "", fmt.Errorf("refresh token: %w", err)</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">47</span><span class="line-code">    }</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">48</span><span class="line-code">    claims.ExpiresAt = time.Now().Add(h.timeout).Unix()</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">49</span><span class="line-code">    newToken, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString(h.secret)</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">50</span><span class="line-code">    if err != nil {</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">51</span><span class="line-code">        return "", fmt.Errorf("sign token: %w", err)</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">52</span><span class="line-code">    }</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">53</span><span class="line-code">    return newToken, nil</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">54</span><span class="line-code">}</span></div>
+                  </div>
+                  <div class="diff-hunk">
+                    <div class="diff-hunk-header">@@ -32,18 +68,30 @@ func (h *Handler) Login(ctx context.Context, username, password string) (*Sessio</div>
+                    <div class="diff-line context"><span class="line-num old">32</span><span class="line-num new">68</span><span class="line-code">func (h *Handler) Login(ctx context.Context, username, password string) (*Session, error) {</span></div>
+                    <div class="diff-line context"><span class="line-num old">33</span><span class="line-num new">69</span><span class="line-code">    if username == "" || password == "" {</span></div>
+                    <div class="diff-line del"><span class="line-num old">34</span><span class="line-num new"></span><span class="line-code">        return nil, errors.New("credentials required")</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">70</span><span class="line-code">        return nil, errors.New("username and password are required")</span></div>
+                    <div class="diff-line context"><span class="line-num old">35</span><span class="line-num new">71</span><span class="line-code">    }</span></div>
+                    <div class="diff-line context"><span class="line-num old">36</span><span class="line-num new">72</span><span class="line-code"></span></div>
+                    <div class="diff-line del"><span class="line-num old">37</span><span class="line-num new"></span><span class="line-code">    h.logger.Info("login", "user", username)</span></div>
+                    <div class="diff-line del"><span class="line-num old">38</span><span class="line-num new"></span><span class="line-code">    session, err := h.store.Create(username)</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">73</span><span class="line-code">    h.logger.Info("login attempt", "user", username)</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">74</span><span class="line-code">    session, err := h.store.Create(ctx, username)</span></div>
+                    <div class="diff-line context"><span class="line-num old">39</span><span class="line-num new">75</span><span class="line-code">    if err != nil {</span></div>
+                    <div class="diff-line del"><span class="line-num old">40</span><span class="line-num new"></span><span class="line-code">        return nil, err</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">76</span><span class="line-code">        return nil, fmt.Errorf("create session: %w", err)</span></div>
+                    <div class="diff-line context"><span class="line-num old">41</span><span class="line-num new">77</span><span class="line-code">    }</span></div>
+                    <div class="diff-line context"><span class="line-num old">42</span><span class="line-num new">78</span><span class="line-code"></span></div>
+                    <div class="diff-line del"><span class="line-num old">43</span><span class="line-num new"></span><span class="line-code">    return session, nil</span></div>
+                    <div class="diff-line del"><span class="line-num old">44</span><span class="line-num new"></span><span class="line-code">}</span></div>
+                    <div class="diff-line del"><span class="line-num old">45</span><span class="line-num new"></span><span class="line-code"></span></div>
+                    <div class="diff-line del"><span class="line-num old">46</span><span class="line-num new"></span><span class="line-code">// Deprecated: Use Login instead</span></div>
+                    <div class="diff-line del"><span class="line-num old">47</span><span class="line-num new"></span><span class="line-code">func (h *Handler) Authenticate(user, pass string) bool {</span></div>
+                    <div class="diff-line del"><span class="line-num old">48</span><span class="line-num new"></span><span class="line-code">    return h.store.Verify(user, pass)</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">79</span><span class="line-code">    token, err := h.generateToken(session)</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">80</span><span class="line-code">    if err != nil {</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">81</span><span class="line-code">        return nil, fmt.Errorf("generate token: %w", err)</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">82</span><span class="line-code">    }</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">83</span><span class="line-code">    session.Token = token</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">84</span><span class="line-code"></span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">85</span><span class="line-code">    return session, nil</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">86</span><span class="line-code">}</span></div>
+                  </div>
+                  <div class="diff-hunk">
+                    <div class="diff-hunk-header">@@ -50,3 +98,32 @@ func (h *Handler) Authenticate(user, pass string) bool {</div>
+                    <div class="diff-line context"><span class="line-num old">50</span><span class="line-num new">88</span><span class="line-code"></span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">89</span><span class="line-code">// Logout invalidates the current session</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">90</span><span class="line-code">func (h *Handler) Logout(ctx context.Context, token string) error {</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">91</span><span class="line-code">    claims, err := h.ValidateToken(ctx, token)</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">92</span><span class="line-code">    if err != nil {</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">93</span><span class="line-code">        return fmt.Errorf("logout: %w", err)</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">94</span><span class="line-code">    }</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">95</span><span class="line-code">    if err := h.store.Delete(ctx, claims.SessionID); err != nil {</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">96</span><span class="line-code">        return fmt.Errorf("delete session: %w", err)</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">97</span><span class="line-code">    }</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">98</span><span class="line-code">    h.logger.Info("logout", "user", claims.Username, "session", claims.SessionID)</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">99</span><span class="line-code">    return nil</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">100</span><span class="line-code">}</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">101</span><span class="line-code"></span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">102</span><span class="line-code">// generateToken creates a JWT token for the given session</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">103</span><span class="line-code">func (h *Handler) generateToken(session *Session) (string, error) {</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">104</span><span class="line-code">    claims := &Claims{</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">105</span><span class="line-code">        Username:  session.Username,</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">106</span><span class="line-code">        SessionID: session.ID,</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">107</span><span class="line-code">        StandardClaims: jwt.StandardClaims{</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">108</span><span class="line-code">            ExpiresAt: time.Now().Add(h.timeout).Unix(),</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">109</span><span class="line-code">            IssuedAt:  time.Now().Unix(),</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">110</span><span class="line-code">        },</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">111</span><span class="line-code">    }</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">112</span><span class="line-code">    token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString(h.secret)</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">113</span><span class="line-code">    if err != nil {</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">114</span><span class="line-code">        return "", fmt.Errorf("sign token: %w", err)</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">115</span><span class="line-code">    }</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">116</span><span class="line-code">    return token, nil</span></div>
+                    <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">117</span><span class="line-code">}</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Status Bar -->
+    <div class="statusbar">
+      <div class="status-left">
+        <span class="status-item">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M9.5 3.25a2.25 2.25 0 1 1 3 2.122V6A2.5 2.5 0 0 1 10 8.5H6a1 1 0 0 0-1 1v1.128a2.251 2.251 0 1 1-1.5 0V5.372a2.25 2.25 0 1 1 1.5 0v1.836A2.492 2.492 0 0 1 6 7h4a1 1 0 0 0 1-1v-.628A2.25 2.25 0 0 1 9.5 3.25z"/></svg>
+          main
+        </span>
+        <span class="status-item sync">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/></svg>
+          Synced with origin/main
+        </span>
+      </div>
+      <div class="status-right">
+        <span class="status-item">rocket-app</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

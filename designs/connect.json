@@ -95,6 +95,11 @@
         "Execute Cherry-pick": "conflict",
         "Execute Revert": "conflict"
       }
+    },
+    {
+      "selector": ".icon-btn[title='File History']",
+      "match": "title",
+      "target": "file-history"
     }
   ],
   "modals": [
