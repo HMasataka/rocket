@@ -18,45 +18,6 @@
   overflow: hidden;
 }
 
-.panel-header {
-  padding: 14px 16px;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.panel-title {
-  font-size: 13px;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.panel-actions {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.icon-btn {
-  width: 28px;
-  height: 28px;
-  border: none;
-  border-radius: 6px;
-  background: transparent;
-  color: var(--text-muted);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.icon-btn:hover { background: var(--bg-tertiary); color: var(--text-primary); }
-
-.icon-btn svg { width: 16px; height: 16px; }
-
 .file-section { border-bottom: 1px solid var(--border); }
 .file-section:last-child { border-bottom: none; }
 
@@ -92,7 +53,6 @@
 
 .file-item:hover { background: var(--bg-tertiary); }
 .file-item:hover .file-action { display: flex; }
-
 .file-item.selected { background: var(--accent-dim); }
 
 .file-status {
@@ -108,6 +68,7 @@
 
 .file-status.add { background: var(--success-dim); color: var(--success); }
 .file-status.modify { background: var(--warning-dim); color: var(--warning); }
+.file-status.delete { background: var(--danger-dim); color: var(--danger); }
 .file-status.untracked { background: var(--bg-tertiary); color: var(--text-muted); }
 
 .file-name {
@@ -165,87 +126,132 @@
 }
 
 .toggle-btn:hover { color: var(--text-secondary); }
-
 .toggle-btn.active { background: var(--accent); color: #fff; }
 
 /* ===== Diff Content Display ===== */
 .diff-content { display: none; }
-.diff-content.active { display: flex; flex-direction: column; }
+.diff-content.active { display: flex; flex: 1; min-height: 0; }
 
-.diff-line {
+/* ===== Split Diff View ===== */
+.diff-split {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.split-pane {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.split-header {
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-secondary);
+  flex-shrink: 0;
+}
+
+.split-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.split-left .split-label { color: var(--danger); }
+.split-right .split-label { color: var(--success); }
+
+.split-info {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.split-code {
+  flex: 1;
+  overflow-y: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.split-hunk-header {
+  padding: 6px 16px;
+  background: var(--bg-tertiary);
+  color: var(--text-muted);
+  font-size: 11px;
+  border-bottom: 1px solid var(--border);
+  user-select: none;
+}
+
+.split-line {
   display: flex;
   padding: 0 16px;
   min-height: 22px;
+  align-items: stretch;
+  transition: background-color 0.1s ease;
 }
 
-.diff-line:hover { background: var(--bg-hover); }
+.split-line:hover { background: var(--bg-hover); }
 
-.line-checkbox {
-  width: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transition: opacity 0.15s ease;
-}
-
-.diff-line:hover .line-checkbox { opacity: 1; }
-.line-checkbox:has(input:checked) { opacity: 1; }
-
-.line-checkbox input {
-  width: 14px;
-  height: 14px;
-  appearance: none;
-  -webkit-appearance: none;
-  border: 1.5px solid var(--text-muted);
-  border-radius: 3px;
-  background: var(--bg-secondary);
-  cursor: pointer;
-  position: relative;
-  transition: all 0.15s ease;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-}
-
-.line-checkbox input:hover {
-  border-color: var(--accent);
-  background: var(--accent-dim);
-  box-shadow: 0 0 0 3px var(--accent-dim);
-}
-
-.line-checkbox input:checked {
-  background: var(--accent);
-  border-color: var(--accent);
-}
-
-.line-checkbox input:checked::after {
-  content: "";
-  position: absolute;
-  left: 4px;
-  top: 1px;
-  width: 4px;
-  height: 8px;
-  border: solid var(--bg);
-  border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
-}
-
-.line-num {
+.split-line .line-num {
   width: 40px;
   text-align: right;
   padding-right: 12px;
   color: var(--text-muted);
   user-select: none;
+  flex-shrink: 0;
 }
 
-.line-content {
+.split-line .line-content {
   flex: 1;
   white-space: pre;
+  min-width: 0;
+  color: var(--text-primary);
 }
 
-.diff-line.add { background: var(--diff-add-bg); }
-.diff-line.add .line-content { color: var(--success); }
-.diff-line.del { background: var(--diff-del-bg); }
-.diff-line.del .line-content { color: var(--danger); }
+.split-line.unchanged { background: transparent; }
+.split-line.unchanged .line-content { color: var(--text-secondary); }
+
+.split-line.add { background: rgba(63, 185, 80, 0.1); }
+.split-line.add .line-content { color: var(--success); }
+
+.split-line.del { background: rgba(248, 81, 73, 0.1); }
+.split-line.del .line-content { color: var(--danger); }
+
+.split-line.empty { background: var(--bg-secondary); }
+.split-line.empty .line-num { color: transparent; }
+.split-line.empty .line-content { color: transparent; }
+
+/* ===== Word-level Diff Highlights ===== */
+.word-add {
+  background: rgba(63, 185, 80, 0.25);
+  padding: 1px 2px;
+  border-radius: 2px;
+}
+
+.word-del {
+  background: rgba(248, 81, 73, 0.25);
+  padding: 1px 2px;
+  border-radius: 2px;
+}
+
+/* ===== Split Divider ===== */
+.split-divider {
+  width: 1px;
+  flex-shrink: 0;
+  background: var(--border);
+}
 
 /* ===== Commit Panel ===== */
 .commit-panel {
@@ -260,6 +266,7 @@
   gap: 6px;
   font-size: 12px;
   color: var(--text-muted);
+  cursor: pointer;
 }
 
 .amend-toggle input { accent-color: var(--accent); }
@@ -302,7 +309,6 @@
 }
 
 .ai-generate-btn:hover { background: var(--purple); color: #fff; }
-
 .ai-generate-btn svg { width: 18px; height: 18px; }
 
 .commit-body {
@@ -326,7 +332,7 @@
   justify-content: flex-end;
 }
 
-/* ===== Responsive Design ===== */
+/* ===== Responsive ===== */
 @media (max-width: 600px) {
   .diff-split { min-width: 600px; overflow-x: auto; }
 }
