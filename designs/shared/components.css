@@ -109,6 +109,12 @@
 
 .modal.active { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); }
 
+.settings-modal {
+  width: 720px;
+  max-width: 90vw;
+  height: 70vh;
+}
+
 .modal-header {
   padding: 16px 20px;
   border-bottom: 1px solid var(--border);
