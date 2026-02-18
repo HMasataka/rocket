@@ -47,6 +47,13 @@
       "target": "open-repository"
     },
     {
+      "selector": ".newtab-actions .btn-secondary",
+      "match": "text",
+      "mapping": {
+        "Init": "init"
+      }
+    },
+    {
       "selector": ".branch-selector",
       "match": "text",
       "target": "branches-dialog"
@@ -93,6 +100,7 @@
     "tags",
     "branches-dialog",
     "open-repository",
+    "init",
     "settings-appearance",
     "settings-editor",
     "settings-ai",

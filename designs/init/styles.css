@@ -1,0 +1,147 @@
+/* ===== Init Modal ===== */
+.modal { width: 520px; }
+
+/* ===== Init Form ===== */
+.init-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.init-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.init-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.init-optional {
+  font-weight: 400;
+  text-transform: none;
+  color: var(--text-muted);
+  letter-spacing: 0;
+}
+
+.init-input {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  transition: border-color 0.15s ease;
+}
+
+.init-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.init-input::placeholder {
+  color: var(--text-muted);
+}
+
+.init-input.readonly {
+  opacity: 0.6;
+  cursor: default;
+  background: var(--bg-secondary);
+}
+
+/* ===== Textarea ===== */
+.init-desc {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 13px;
+  resize: vertical;
+  min-height: 72px;
+  transition: border-color 0.15s ease;
+}
+
+.init-desc:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.init-desc::placeholder {
+  color: var(--text-muted);
+}
+
+/* ===== Path Group (input + browse button) ===== */
+.init-path-group {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  transition: border-color 0.15s ease;
+}
+
+.init-path-group:focus-within {
+  border-color: var(--accent);
+}
+
+.init-path-icon {
+  width: 16px;
+  height: 16px;
+  color: var(--text-muted);
+  margin-left: 12px;
+  flex-shrink: 0;
+}
+
+.init-path-group .init-input {
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  flex: 1;
+  min-width: 0;
+}
+
+.init-path-group .init-input:focus {
+  border-color: transparent;
+}
+
+.init-browse-btn {
+  padding: 10px 16px;
+  background: var(--bg-secondary);
+  border: none;
+  border-left: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.init-browse-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+/* ===== Derived Text ===== */
+.init-derived {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* ===== Select Override ===== */
+.init-field .modal-select {
+  width: 100%;
+}
