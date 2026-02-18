@@ -1,0 +1,41 @@
+{
+  "selectors": {
+    "nav": ".nav-item",
+    "toolbar": ".toolbar-btn",
+    "activeClass": "active",
+    "modalClose": ".modal-close",
+    "modalCloseText": ".modal-footer .btn-secondary"
+  },
+  "mapping": {
+    "Stash": "stash",
+    "Cherry-pick": "cherry-pick"
+  },
+  "toolbar": {
+    "Tags": "tags",
+    "AI": "ai-assist",
+    "origin": "remote"
+  },
+  "custom": {
+    ".ai-option-title": {
+      "Generate Commit Message": "ai-commit",
+      "Code Review": "ai-review"
+    },
+    ".settings-nav-item": {
+      "Appearance": "settings-appearance",
+      "Editor": "settings-editor",
+      "AI Settings": "settings-ai",
+      "Keybindings": "settings-keybindings",
+      "External Tools": "settings-tools"
+    },
+    ".titlebar-btn[title=\"Settings\"]": {
+      "Settings": "settings-appearance"
+    },
+    ".tab-add": {
+      "New Tab": "open-repository"
+    },
+    ".branch-selector": {
+      "main": "branches-dialog"
+    }
+  },
+  "ignore": ["mockup"]
+}
