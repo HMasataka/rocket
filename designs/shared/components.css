@@ -33,6 +33,9 @@
 .btn-success { background: var(--success); color: #fff; }
 .btn-success:hover { filter: brightness(1.1); }
 
+.btn-warning { background: var(--warning); color: #fff; }
+.btn-warning:hover { filter: brightness(1.1); }
+
 /* ===== Icon Button ===== */
 .icon-btn {
   width: 28px;
