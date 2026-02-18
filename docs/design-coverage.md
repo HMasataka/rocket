@@ -28,10 +28,8 @@ docs/features.md の機能一覧と designs/ ディレクトリの対応状況�
 ### コミット
 
 - [x] コミットメッセージ入力（件名+本文） (`changes/` `changes-split/` のCommitフォーム)
-- [ ] コミットテンプレート
 - [x] Amend（直前コミット修正） (`changes/` `changes-split/` のAmendトグル)
 - [ ] 署名付きコミット（GPG/SSH）
-- [ ] Co-Author追加
 
 ### ブランチ管理
 
