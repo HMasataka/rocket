@@ -1,0 +1,12 @@
+version: '3'
+
+tasks:
+  designs:link:
+    desc: デザインモックにページ遷移スクリプトを注入して designs-linked へ出力
+    cmds:
+      - connect --out-dir ./designs-linked ./designs
+
+  designs:clean:
+    desc: designs-linked から注入済みスクリプトを除去
+    cmds:
+      - connect --clean --out-dir ./designs-linked ./designs
