@@ -103,7 +103,8 @@
     "ai-review",
     "remote",
     "conflict",
-    "merge-viewer"
+    "merge-viewer",
+    "search"
   ],
   "close": [
     ".modal-close",
