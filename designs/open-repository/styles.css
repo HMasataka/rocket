@@ -37,14 +37,6 @@
 .newtab-repo-date { font-size: 11px; color: var(--text-muted); }
 
 /* ===== Responsive Design ===== */
-
-
 @media (max-width: 767px) {
-  
-  
-  
-  
-  
-  
   .newtab-page { padding: 40px 16px; }
 }

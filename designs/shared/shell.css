@@ -265,9 +265,9 @@
   overflow: hidden;
 }
 
-.changes-layout .file-panel { width: 250px; flex: 0 0 250px; }
-.changes-layout .diff-panel { flex: 1 1 auto; min-width: 0; }
-.changes-layout .commit-panel { width: 300px; flex: 0 0 300px; }
+.changes-layout .file-panel { width: 250px; flex: 0 0 250px; border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+.changes-layout .diff-panel { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; overflow: hidden; }
+.changes-layout .commit-panel { width: 300px; flex: 0 0 300px; border-left: 1px solid var(--border); display: flex; flex-direction: column; }
 
 /* ===== Status Bar ===== */
 .statusbar {
