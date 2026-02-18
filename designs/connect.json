@@ -5,7 +5,8 @@
       "match": "text",
       "mapping": {
         "Stash": "stash",
-        "Cherry-pick": "cherry-pick"
+        "Cherry-pick": "cherry-pick",
+        "Files": "file-tree"
       }
     },
     {
