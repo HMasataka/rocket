@@ -60,15 +60,32 @@
       }
     },
     {
-      "selector": ".file-action[title='Resolve']",
-      "match": "title",
-      "target": "conflict"
-    },
-    {
-      "selector": ".conflict-actions .btn-primary",
+      "selector": ".conflict-detail-actions .btn-primary",
       "match": "text",
       "mapping": {
         "3-way Merge Viewer": "merge-viewer"
+      }
+    },
+    {
+      "selector": ".branch-detail-actions .btn-secondary",
+      "match": "text",
+      "mapping": {
+        "Merge": "conflict"
+      }
+    },
+    {
+      "selector": ".operation-footer .btn-secondary",
+      "match": "text",
+      "mapping": {
+        "Rebase": "conflict"
+      }
+    },
+    {
+      "selector": ".operation-footer .btn-primary",
+      "match": "text",
+      "mapping": {
+        "Execute Cherry-pick": "conflict",
+        "Execute Revert": "conflict"
       }
     }
   ],

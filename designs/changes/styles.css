@@ -403,10 +403,6 @@ body {
 .file-status.modify { background: var(--warning-dim); color: var(--warning); }
 .file-status.delete { background: var(--danger-dim); color: var(--danger); }
 .file-status.untracked { background: var(--bg-tertiary); color: var(--text-muted); }
-.file-status.conflict { background: var(--danger-dim); color: var(--danger); }
-
-.file-item.conflict { border-left: 2px solid var(--danger); }
-
 .file-name {
   flex: 1;
   overflow: hidden;

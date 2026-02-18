@@ -143,18 +143,13 @@
         </div>
       </nav>
 
-      <!-- Main Content Area -->
+      <!-- Main Content Area (dimmed background) -->
       <main class="content">
         <div class="view active">
           <div class="changes-layout">
-            <!-- File List -->
             <div class="file-panel">
               <div class="panel-header">
                 <span class="panel-title">Changed Files</span>
-                <div class="panel-actions">
-                  <button class="btn btn-secondary btn-xs" title="Unstage All">Unstage All</button>
-                  <button class="btn btn-secondary btn-xs" title="Stage All">Stage All</button>
-                </div>
               </div>
               <div class="file-section">
                 <div class="file-section-header">
@@ -163,187 +158,20 @@
                   <span class="count">2</span>
                 </div>
                 <div class="file-list">
-                  <div class="file-item staged selected">
+                  <div class="file-item staged">
                     <span class="file-status add">A</span>
                     <span class="file-name">src/auth/handler.go</span>
-                    <button class="file-action" title="Unstage">−</button>
                   </div>
                   <div class="file-item staged">
                     <span class="file-status modify">M</span>
                     <span class="file-name">src/main.go</span>
-                    <button class="file-action" title="Unstage">−</button>
-                  </div>
-                </div>
-              </div>
-              <div class="file-section">
-                <div class="file-section-header">
-                  <svg viewBox="0 0 16 16" fill="currentColor" class="chevron"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708z"/></svg>
-                  <span>Modified</span>
-                  <span class="count">2</span>
-                </div>
-                <div class="file-list">
-                  <div class="file-item">
-                    <span class="file-status modify">M</span>
-                    <span class="file-name">src/config/settings.go</span>
-                    <button class="file-action" title="Stage">+</button>
-                  </div>
-                  <div class="file-item">
-                    <span class="file-status modify">M</span>
-                    <span class="file-name">go.mod</span>
-                    <button class="file-action" title="Stage">+</button>
-                  </div>
-                </div>
-              </div>
-              <div class="file-section">
-                <div class="file-section-header">
-                  <svg viewBox="0 0 16 16" fill="currentColor" class="chevron"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708z"/></svg>
-                  <span>Untracked</span>
-                  <span class="count">1</span>
-                </div>
-                <div class="file-list">
-                  <div class="file-item">
-                    <span class="file-status untracked">?</span>
-                    <span class="file-name">src/auth/token.go</span>
-                    <button class="file-action" title="Stage">+</button>
                   </div>
                 </div>
               </div>
             </div>
-
-            <!-- Diff Panel -->
             <div class="diff-panel">
               <div class="panel-header">
-                <span class="panel-title">src/auth/handler.go</span>
-                <div class="panel-actions">
-                  <div class="view-toggle">
-                    <button class="toggle-btn active">Inline</button>
-                    <button class="toggle-btn">Split</button>
-                  </div>
-                  <button class="icon-btn" title="Hunk Staging">
-                    <svg viewBox="0 0 16 16" fill="currentColor"><path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/><path d="M3 4h10v1H3V4zm0 3h10v1H3V7zm0 3h7v1H3v-1z"/></svg>
-                  </button>
-                </div>
-              </div>
-              <div class="diff-content diff-inline active">
-                <div class="diff-hunk">
-                  <div class="diff-hunk-header">
-                    <span>@@ -1,10 +1,15 @@ package auth</span>
-                    <div class="hunk-actions">
-                      <button class="hunk-btn">Stage Hunk</button>
-                      <button class="hunk-btn">Discard</button>
-                    </div>
-                  </div>
-                  <div class="diff-line">
-                    <div class="line-checkbox"><input type="checkbox"></div>
-                    <span class="line-num">1</span>
-                    <span class="line-content">package auth</span>
-                  </div>
-                  <div class="diff-line">
-                    <div class="line-checkbox"><input type="checkbox"></div>
-                    <span class="line-num">2</span>
-                    <span class="line-content"></span>
-                  </div>
-                  <div class="diff-line">
-                    <div class="line-checkbox"><input type="checkbox"></div>
-                    <span class="line-num">3</span>
-                    <span class="line-content">import (</span>
-                  </div>
-                  <div class="diff-line add">
-                    <div class="line-checkbox"><input type="checkbox"></div>
-                    <span class="line-num">4</span>
-                    <span class="line-content">+    "context"</span>
-                  </div>
-                  <div class="diff-line add">
-                    <div class="line-checkbox"><input type="checkbox"></div>
-                    <span class="line-num">5</span>
-                    <span class="line-content">+    "errors"</span>
-                  </div>
-                  <div class="diff-line">
-                    <div class="line-checkbox"><input type="checkbox"></div>
-                    <span class="line-num">6</span>
-                    <span class="line-content">    "fmt"</span>
-                  </div>
-                  <div class="diff-line del">
-                    <div class="line-checkbox"><input type="checkbox"></div>
-                    <span class="line-num">7</span>
-                    <span class="line-content">-    "log"</span>
-                  </div>
-                  <div class="diff-line add">
-                    <div class="line-checkbox"><input type="checkbox"></div>
-                    <span class="line-num">8</span>
-                    <span class="line-content">+    "log/slog"</span>
-                  </div>
-                  <div class="diff-line">
-                    <div class="line-checkbox"><input type="checkbox"></div>
-                    <span class="line-num">9</span>
-                    <span class="line-content">)</span>
-                  </div>
-                </div>
-                <div class="diff-hunk">
-                  <div class="diff-hunk-header">
-                    <span>@@ -25,6 +30,20 @@ func NewHandler() *Handler {</span>
-                    <div class="hunk-actions">
-                      <button class="hunk-btn">Stage Hunk</button>
-                      <button class="hunk-btn">Discard</button>
-                    </div>
-                  </div>
-                  <div class="diff-line">
-                    <div class="line-checkbox"><input type="checkbox"></div>
-                    <span class="line-num">25</span>
-                    <span class="line-content">func NewHandler() *Handler {</span>
-                  </div>
-                  <div class="diff-line add">
-                    <div class="line-checkbox"><input type="checkbox"></div>
-                    <span class="line-num">26</span>
-                    <span class="line-content">+    return &Handler{</span>
-                  </div>
-                  <div class="diff-line add">
-                    <div class="line-checkbox"><input type="checkbox"></div>
-                    <span class="line-num">27</span>
-                    <span class="line-content">+        logger: slog.Default(),</span>
-                  </div>
-                  <div class="diff-line add">
-                    <div class="line-checkbox"><input type="checkbox"></div>
-                    <span class="line-num">28</span>
-                    <span class="line-content">+    }</span>
-                  </div>
-                  <div class="diff-line del">
-                    <div class="line-checkbox"><input type="checkbox"></div>
-                    <span class="line-num">29</span>
-                    <span class="line-content">-    return &Handler{}</span>
-                  </div>
-                  <div class="diff-line">
-                    <div class="line-checkbox"><input type="checkbox"></div>
-                    <span class="line-num">30</span>
-                    <span class="line-content">}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Commit Panel -->
-            <div class="commit-panel">
-              <div class="panel-header">
-                <span class="panel-title">Commit</span>
-                <label class="amend-toggle">
-                  <input type="checkbox">
-                  <span>Amend</span>
-                </label>
-              </div>
-              <div class="commit-form">
-                <div class="commit-input-group">
-                  <input type="text" class="commit-subject" placeholder="Commit message (subject)">
-                  <button class="ai-generate-btn" title="Generate with AI">
-                    <svg viewBox="0 0 16 16" fill="currentColor"><path d="M6 12.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5ZM3 8.062C3 6.76 4.235 5.765 5.53 5.886a26.58 26.58 0 0 0 4.94 0C11.765 5.765 13 6.76 13 8.062v1.157a.933.933 0 0 1-.765.935c-.845.147-2.34.346-4.235.346-1.895 0-3.39-.2-4.235-.346A.933.933 0 0 1 3 9.219V8.062Z"/></svg>
-                  </button>
-                </div>
-                <textarea class="commit-body" placeholder="Description (optional)"></textarea>
-                <div class="commit-actions">
-                  <button class="btn btn-primary">
-                    <svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/></svg>
-                    Commit
-                  </button>
-                </div>
+                <span class="panel-title dim">Select a file to view diff</span>
               </div>
             </div>
           </div>
@@ -358,9 +186,9 @@
           <svg viewBox="0 0 16 16" fill="currentColor"><path d="M9.5 3.25a2.25 2.25 0 1 1 3 2.122V6A2.5 2.5 0 0 1 10 8.5H6a1 1 0 0 0-1 1v1.128a2.251 2.251 0 1 1-1.5 0V5.372a2.25 2.25 0 1 1 1.5 0v1.836A2.492 2.492 0 0 1 6 7h4a1 1 0 0 0 1-1v-.628A2.25 2.25 0 0 1 9.5 3.25z"/></svg>
           main
         </span>
-        <span class="status-item sync">
-          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/></svg>
-          Synced with origin/main
+        <span class="status-item warning">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/></svg>
+          Merge conflict in progress
         </span>
       </div>
       <div class="status-right">
@@ -373,35 +201,154 @@
   <div class="modal-overlay active"></div>
 
   <!-- Resolve Conflict Modal -->
-  <div class="modal active">
+  <div class="modal conflict-modal active">
     <div class="modal-header">
-      <span class="modal-title">Resolve Conflict</span>
-      <button class="modal-close">
-        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg>
-      </button>
+      <div class="modal-header-left">
+        <span class="modal-title">Resolve Conflict</span>
+        <span class="conflict-operation">merge feature/config → main</span>
+      </div>
+      <div class="modal-header-right">
+        <span class="conflict-progress">
+          <span class="conflict-progress-resolved">1</span>
+          <span class="conflict-progress-sep">/</span>
+          <span class="conflict-progress-total">4</span>
+          <span class="conflict-progress-label">resolved</span>
+        </span>
+        <button class="modal-close">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg>
+        </button>
+      </div>
     </div>
-    <div class="modal-body">
-      <div class="conflict-info">
-        <span>src/config/settings.go</span>
-        <span class="conflict-count">3 conflicts</span>
+
+    <div class="conflict-progress-bar">
+      <div class="conflict-progress-fill" style="width: 25%"></div>
+    </div>
+
+    <div class="modal-body conflict-body">
+      <!-- Conflict File List -->
+      <div class="conflict-file-list">
+        <div class="conflict-file-item resolved">
+          <span class="conflict-file-status">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/></svg>
+          </span>
+          <span class="conflict-file-name">go.mod</span>
+          <span class="conflict-file-count">1 conflict</span>
+        </div>
+        <div class="conflict-file-item selected">
+          <span class="conflict-file-status unresolved">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/></svg>
+          </span>
+          <span class="conflict-file-name">src/config/settings.go</span>
+          <span class="conflict-file-count">3 conflicts</span>
+        </div>
+        <div class="conflict-file-item">
+          <span class="conflict-file-status unresolved">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/></svg>
+          </span>
+          <span class="conflict-file-name">src/server/router.go</span>
+          <span class="conflict-file-count">2 conflicts</span>
+        </div>
+        <div class="conflict-file-item">
+          <span class="conflict-file-status unresolved">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/></svg>
+          </span>
+          <span class="conflict-file-name">src/middleware/auth.go</span>
+          <span class="conflict-file-count">1 conflict</span>
+        </div>
       </div>
-      <div class="conflict-content">
-        <div class="conflict-block">
-          <div class="conflict-header ours">&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD (current)</div>
-          <pre class="conflict-code">    Port: 8080,
+
+      <!-- Conflict Detail -->
+      <div class="conflict-detail">
+        <div class="conflict-detail-header">
+          <span class="conflict-detail-filename">src/config/settings.go</span>
+          <span class="conflict-detail-count">3 conflicts</span>
+        </div>
+
+        <div class="conflict-blocks">
+          <!-- Conflict 1 -->
+          <div class="conflict-section">
+            <div class="conflict-section-label">
+              <span class="conflict-section-num">1 / 3</span>
+              <span class="conflict-section-location">Line 12-18</span>
+            </div>
+            <div class="conflict-block">
+              <div class="conflict-header ours">&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD (current)</div>
+              <pre class="conflict-code">    Port: 8080,
     Host: "localhost",</pre>
-          <div class="conflict-header marker">=======</div>
-          <pre class="conflict-code">    Port: 3000,
+              <div class="conflict-header marker">=======</div>
+              <pre class="conflict-code">    Port: 3000,
     Host: "0.0.0.0",</pre>
-          <div class="conflict-header theirs">&gt;&gt;&gt;&gt;&gt;&gt;&gt; feature/config</div>
+              <div class="conflict-header theirs">&gt;&gt;&gt;&gt;&gt;&gt;&gt; feature/config</div>
+            </div>
+            <div class="conflict-actions">
+              <button class="btn btn-secondary btn-sm">Accept Ours</button>
+              <button class="btn btn-secondary btn-sm">Accept Theirs</button>
+              <button class="btn btn-secondary btn-sm">Accept Both</button>
+            </div>
+          </div>
+
+          <!-- Conflict 2 -->
+          <div class="conflict-section">
+            <div class="conflict-section-label">
+              <span class="conflict-section-num">2 / 3</span>
+              <span class="conflict-section-location">Line 25-34</span>
+            </div>
+            <div class="conflict-block">
+              <div class="conflict-header ours">&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD (current)</div>
+              <pre class="conflict-code">    ReadTimeout:  30 * time.Second,
+    WriteTimeout: 30 * time.Second,</pre>
+              <div class="conflict-header marker">=======</div>
+              <pre class="conflict-code">    ReadTimeout:  10 * time.Second,
+    WriteTimeout: 10 * time.Second,
+    IdleTimeout:  60 * time.Second,</pre>
+              <div class="conflict-header theirs">&gt;&gt;&gt;&gt;&gt;&gt;&gt; feature/config</div>
+            </div>
+            <div class="conflict-actions">
+              <button class="btn btn-secondary btn-sm">Accept Ours</button>
+              <button class="btn btn-secondary btn-sm">Accept Theirs</button>
+              <button class="btn btn-secondary btn-sm">Accept Both</button>
+            </div>
+          </div>
+
+          <!-- Conflict 3 -->
+          <div class="conflict-section">
+            <div class="conflict-section-label">
+              <span class="conflict-section-num">3 / 3</span>
+              <span class="conflict-section-location">Line 42-50</span>
+            </div>
+            <div class="conflict-block">
+              <div class="conflict-header ours">&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD (current)</div>
+              <pre class="conflict-code">    LogLevel: "info",</pre>
+              <div class="conflict-header marker">=======</div>
+              <pre class="conflict-code">    LogLevel: "debug",
+    LogFormat: "json",</pre>
+              <div class="conflict-header theirs">&gt;&gt;&gt;&gt;&gt;&gt;&gt; feature/config</div>
+            </div>
+            <div class="conflict-actions">
+              <button class="btn btn-secondary btn-sm">Accept Ours</button>
+              <button class="btn btn-secondary btn-sm">Accept Theirs</button>
+              <button class="btn btn-secondary btn-sm">Accept Both</button>
+            </div>
+          </div>
         </div>
-        <div class="conflict-actions">
-          <button class="btn btn-secondary">Accept Ours</button>
-          <button class="btn btn-secondary">Accept Theirs</button>
-          <button class="btn btn-secondary">Accept Both</button>
-          <button class="btn btn-primary">3-way Merge Viewer</button>
+
+        <div class="conflict-detail-actions">
+          <button class="btn btn-secondary btn-sm">Accept All Ours</button>
+          <button class="btn btn-secondary btn-sm">Accept All Theirs</button>
+          <button class="btn btn-primary btn-sm">3-way Merge Viewer</button>
+          <button class="btn btn-success btn-sm">Mark as Resolved</button>
         </div>
       </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-danger-outline">Abort Merge</button>
+      <div class="modal-footer-spacer"></div>
+      <button class="btn btn-secondary">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg>
+        Close
+      </button>
+      <button class="btn btn-primary" disabled>Continue Merge</button>
     </div>
   </div>
 </body>
