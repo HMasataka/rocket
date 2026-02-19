@@ -24,7 +24,6 @@
       "selector": ".ai-option-title",
       "match": "text",
       "mapping": {
-        "Generate Commit Message": "ai-commit",
         "Code Review": "ai-review"
       }
     },
@@ -136,6 +135,13 @@
       "target": "history-filter"
     },
     {
+      "selector": ".hosting-actions .btn-primary",
+      "match": "text",
+      "mapping": {
+        "Create PR": "hosting-create-pr"
+      }
+    },
+    {
       "selector": ".hosting-tab",
       "match": "text",
       "mapping": {
@@ -162,7 +168,8 @@
     "conflict",
     "merge-viewer",
     "search",
-    "discard-changes"
+    "discard-changes",
+    "hosting-create-pr"
   ],
   "close": [
     ".modal-close",

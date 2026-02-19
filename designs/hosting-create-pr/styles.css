@@ -1,0 +1,382 @@
+/* ===== Modal Size ===== */
+.create-pr-modal {
+  width: 640px;
+  max-width: 90vw;
+}
+
+/* ===== Modal Title ===== */
+.create-pr-modal .modal-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.create-pr-modal .modal-title svg {
+  width: 18px;
+  height: 18px;
+  color: var(--success);
+}
+
+/* ===== Form Sections ===== */
+.pr-form-section {
+  margin-bottom: 20px;
+}
+
+.pr-form-section:last-child {
+  margin-bottom: 0;
+}
+
+.pr-form-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+/* ===== Branch Flow ===== */
+.pr-branch-flow {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.pr-branch-selector {
+  flex: 1;
+}
+
+.pr-branch-select {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--accent);
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.pr-branch-select:hover {
+  border-color: var(--accent);
+}
+
+.pr-branch-select svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.pr-branch-select .chevron {
+  width: 12px;
+  height: 12px;
+  color: var(--text-muted);
+  margin-left: auto;
+}
+
+.pr-branch-arrow {
+  display: flex;
+  align-items: center;
+  padding-bottom: 4px;
+  color: var(--text-muted);
+}
+
+.pr-branch-arrow svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* ===== Branch Diff Summary ===== */
+.pr-branch-diff-summary {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 12px;
+  background: var(--bg-secondary);
+  border-radius: 6px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.pr-diff-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pr-diff-stat svg {
+  width: 14px;
+  height: 14px;
+}
+
+.pr-diff-stat strong {
+  color: var(--text-primary);
+}
+
+.pr-diff-stat.additions {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 600;
+  color: var(--success);
+}
+
+.pr-diff-stat.deletions {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 600;
+  color: var(--danger);
+}
+
+/* ===== Label Row ===== */
+.pr-form-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.pr-form-label-row .pr-form-label {
+  margin-bottom: 0;
+}
+
+/* ===== Form Input ===== */
+.pr-form-input {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  transition: border-color 0.15s ease;
+}
+
+.pr-form-input:hover {
+  border-color: var(--text-muted);
+}
+
+.pr-form-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-dim);
+}
+
+.pr-form-input::placeholder {
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+
+/* ===== Form Textarea ===== */
+.pr-form-textarea {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  line-height: 1.6;
+  resize: vertical;
+  transition: border-color 0.15s ease;
+}
+
+.pr-form-textarea:hover {
+  border-color: var(--text-muted);
+}
+
+.pr-form-textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-dim);
+  color: var(--text-primary);
+}
+
+/* ===== AI Generate Button ===== */
+.ai-generate-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  background: var(--accent-dim);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  border-radius: 6px;
+  color: var(--accent);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ai-generate-btn:hover {
+  background: color-mix(in srgb, var(--accent) 25%, transparent);
+  border-color: var(--accent);
+}
+
+.ai-generate-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* ===== Form Row (side by side) ===== */
+.pr-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.pr-form-half {
+  min-width: 0;
+}
+
+/* ===== Reviewer / Label Chips ===== */
+.pr-reviewer-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.pr-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px 4px 4px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-size: 12px;
+}
+
+.pr-chip-avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--bg-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.pr-chip-remove {
+  width: 16px;
+  height: 16px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.15s ease;
+}
+
+.pr-chip-remove:hover {
+  background: var(--danger-dim);
+  color: var(--danger);
+}
+
+.pr-chip-remove svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* Label Chips */
+.pr-chip.label-chip {
+  background: color-mix(in srgb, var(--label-color) 15%, transparent);
+  border-color: color-mix(in srgb, var(--label-color) 30%, transparent);
+  color: var(--label-color);
+  padding: 4px 8px;
+}
+
+.pr-chip.label-chip .pr-chip-remove {
+  color: var(--label-color);
+  opacity: 0.6;
+}
+
+.pr-chip.label-chip .pr-chip-remove:hover {
+  opacity: 1;
+  background: color-mix(in srgb, var(--label-color) 25%, transparent);
+}
+
+/* Add Button */
+.pr-chip-add {
+  width: 28px;
+  height: 28px;
+  border: 1px dashed var(--border);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.pr-chip-add:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-dim);
+}
+
+.pr-chip-add svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* ===== Form Options ===== */
+.pr-form-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pr-form-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.pr-form-checkbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.pr-form-checkbox:hover {
+  color: var(--text-primary);
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 767px) {
+  .pr-branch-flow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .pr-branch-arrow {
+    justify-content: center;
+    transform: rotate(90deg);
+    padding: 0;
+  }
+
+  .pr-form-row {
+    grid-template-columns: 1fr;
+  }
+}
