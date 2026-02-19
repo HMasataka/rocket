@@ -97,7 +97,7 @@ docs/features.md の機能一覧と designs/ ディレクトリの対応状況�
 - [x] AIアクション実行 (`ai-assist/`)
 - [x] AI設定 (`settings-ai/`)
 - [x] PR/MR説明文生成 (`hosting-create-pr/`)
-- [ ] PRレビュー効率化ビュー
+- [x] PRレビュー効率化ビュー (`hosting-pr-review/`)
 - [ ] コンフリクト解決支援（AI）
 - [ ] コミット履歴の要約・Changelog生成
 

@@ -142,6 +142,18 @@
       }
     },
     {
+      "selector": ".hosting-footer-actions .btn-primary",
+      "match": "text",
+      "mapping": {
+        "Checkout PR": "hosting-pr-review"
+      }
+    },
+    {
+      "selector": ".review-back-btn",
+      "match": "title",
+      "target": "hosting"
+    },
+    {
       "selector": ".hosting-tab",
       "match": "text",
       "mapping": {
