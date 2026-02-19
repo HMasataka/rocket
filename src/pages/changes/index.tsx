@@ -2,9 +2,9 @@ import { useCallback, useEffect } from "react";
 import type { StagingState } from "../../services/git";
 import { useGitStore } from "../../stores/gitStore";
 import { useUIStore } from "../../stores/uiStore";
-import { FilePanel } from "./organisms/FilePanel";
-import { DiffPanel } from "./organisms/DiffPanel";
 import { CommitPanel } from "./organisms/CommitPanel";
+import { DiffPanel } from "./organisms/DiffPanel";
+import { FilePanel } from "./organisms/FilePanel";
 
 export function ChangesPage() {
   const status = useGitStore((s) => s.status);

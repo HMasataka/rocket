@@ -1,6 +1,6 @@
 import { useEffect } from "react";
-import { AppShell } from "./components/templates/AppShell";
 import { ToastContainer } from "./components/organisms/ToastContainer";
+import { AppShell } from "./components/templates/AppShell";
 import { ChangesPage } from "./pages/changes";
 import { useGitStore } from "./stores/gitStore";
 import { useUIStore } from "./stores/uiStore";

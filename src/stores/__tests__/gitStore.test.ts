@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@tauri-apps/api/core", () => ({
   invoke: vi.fn(),
@@ -23,7 +23,9 @@ describe("gitStore", () => {
 
   describe("fetchStatus", () => {
     it("sets status on success", async () => {
-      const mockStatus = { files: [{ path: "a.txt", kind: "modified", staging: "unstaged" }] };
+      const mockStatus = {
+        files: [{ path: "a.txt", kind: "modified", staging: "unstaged" }],
+      };
       mockedInvoke.mockResolvedValueOnce(mockStatus);
 
       await useGitStore.getState().fetchStatus();
@@ -76,7 +78,9 @@ describe("gitStore", () => {
     it("sets error on failure", async () => {
       mockedInvoke.mockRejectedValueOnce(new Error("diff error"));
 
-      await expect(useGitStore.getState().fetchDiff("a.txt", false)).rejects.toThrow();
+      await expect(
+        useGitStore.getState().fetchDiff("a.txt", false),
+      ).rejects.toThrow();
 
       expect(useGitStore.getState().error).toContain("diff error");
     });

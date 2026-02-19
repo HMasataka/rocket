@@ -9,13 +9,14 @@ export function ToastContainer() {
   return (
     <div className="toast-container">
       {toasts.map((toast) => (
-        <div
+        <button
           key={toast.id}
+          type="button"
           className={`toast ${toast.kind}`}
           onClick={() => removeToast(toast.id)}
         >
           {toast.message}
-        </div>
+        </button>
       ))}
     </div>
   );

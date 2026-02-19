@@ -11,8 +11,11 @@ export function DiffHunkView({ hunk }: DiffHunkProps) {
       <div className="diff-hunk-header">
         <span>{hunk.header}</span>
       </div>
-      {hunk.lines.map((line, i) => (
-        <DiffLineRow key={i} line={line} />
+      {hunk.lines.map((line) => (
+        <DiffLineRow
+          key={`${line.kind}-${line.old_lineno ?? "n"}-${line.new_lineno ?? "n"}`}
+          line={line}
+        />
       ))}
     </div>
   );

@@ -15,10 +15,10 @@ export function DiffPanel({ selectedFile, diffs }: DiffPanelProps) {
         </span>
       </div>
       <div className="diff-content" style={{ display: "block" }}>
-        {diffs.map((fileDiff, i) => (
-          <div key={i}>
-            {fileDiff.hunks.map((hunk, j) => (
-              <DiffHunkView key={j} hunk={hunk} />
+        {diffs.map((fileDiff) => (
+          <div key={fileDiff.new_path ?? fileDiff.old_path}>
+            {fileDiff.hunks.map((hunk) => (
+              <DiffHunkView key={hunk.header} hunk={hunk} />
             ))}
           </div>
         ))}

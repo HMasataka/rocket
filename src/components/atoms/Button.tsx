@@ -22,17 +22,12 @@ export function Button({
   className,
   ...props
 }: ButtonProps) {
-  const classes = [
-    "btn",
-    `btn-${variant}`,
-    sizeClass[size],
-    className,
-  ]
+  const classes = ["btn", `btn-${variant}`, sizeClass[size], className]
     .filter(Boolean)
     .join(" ");
 
   return (
-    <button className={classes} {...props}>
+    <button type="button" className={classes} {...props}>
       {children}
     </button>
   );

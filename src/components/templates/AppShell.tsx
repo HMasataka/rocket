@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
-import { Titlebar } from "../organisms/Titlebar";
 import { Sidebar } from "../organisms/Sidebar";
 import { Statusbar } from "../organisms/Statusbar";
+import { Titlebar } from "../organisms/Titlebar";
 
 interface AppShellProps {
   branch: string | null;

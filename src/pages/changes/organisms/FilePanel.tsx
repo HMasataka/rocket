@@ -1,5 +1,5 @@
-import type { FileStatus, StagingState } from "../../../services/git";
 import { Button } from "../../../components/atoms/Button";
+import type { FileStatus, StagingState } from "../../../services/git";
 import { FileSection } from "../molecules/FileSection";
 
 interface FilePanelProps {

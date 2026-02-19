@@ -27,7 +27,8 @@ export function FileSection({
 
   return (
     <div className="file-section">
-      <div
+      <button
+        type="button"
         className={`file-section-header${collapsed ? " collapsed" : ""}`}
         onClick={() => setCollapsed((c) => !c)}
       >
@@ -35,12 +36,13 @@ export function FileSection({
           viewBox="0 0 16 16"
           fill="currentColor"
           className="chevron"
+          aria-hidden="true"
         >
           <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708z" />
         </svg>
         <span>{title}</span>
         <span className="count">{files.length}</span>
-      </div>
+      </button>
       {!collapsed && (
         <div className="file-list">
           {files.map((file) => (
@@ -48,8 +50,7 @@ export function FileSection({
               key={`${file.staging}-${file.path}`}
               file={file}
               selected={
-                selectedFile === file.path &&
-                selectedFileStaged === isStaged
+                selectedFile === file.path && selectedFileStaged === isStaged
               }
               onSelect={onSelectFile}
               onAction={onFileAction}
