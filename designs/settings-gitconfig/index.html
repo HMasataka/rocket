@@ -385,6 +385,14 @@
             <div class="settings-section">
               <h3>Commit</h3>
               <div class="gitconfig-row">
+                <label class="gitconfig-key">gpg.format</label>
+                <select class="modal-select">
+                  <option value="openpgp">openpgp</option>
+                  <option value="ssh" selected>ssh</option>
+                  <option value="x509">x509</option>
+                </select>
+              </div>
+              <div class="gitconfig-row">
                 <label class="gitconfig-key">commit.gpgSign</label>
                 <div class="settings-toggle active">
                   <div class="settings-toggle-knob"></div>

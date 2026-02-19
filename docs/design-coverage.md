@@ -118,8 +118,7 @@ docs/features.md の機能一覧と designs/ ディレクトリの対応状況�
 
 ### その他
 
-- [x] Gitconfig編集
-- [ ] GPG鍵管理
-- [ ] SSH鍵管理
+- [x] Gitconfig編集 (`settings-gitconfig/`)
+- [x] GPG/SSH署名設定 (`settings-gitconfig/` の `gpg.format` / `user.signingKey`)
 - [ ] 通知
 - [x] 自動fetch
