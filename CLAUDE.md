@@ -1,66 +1,71 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+このファイルは Claude Code (claude.ai/code) がこのリポジトリで作業する際のガイドです。
 
-## Project Overview
+## プロジェクト概要
 
-Rocket is a cross-platform Git GUI client. Tech stack: Rust + Tauri v2 (backend), React + TypeScript (frontend), git2-rs + git CLI hybrid (git operations). See `docs/adr/` for architecture decisions.
+Rocket はクロスプラットフォームの Git GUI クライアント。技術スタック: Rust + Tauri v2（バックエンド）、React + TypeScript（フロントエンド）、git2-rs + git CLI ハイブリッド（Git操作）。技術選定の詳細は `docs/adr/` を参照。
 
-Currently in **design phase (v0.0)** — no production code yet. The repository contains UI/UX mockups and project documentation.
+現在 **デザインフェーズ (v0.0)** — プロダクションコードはまだない。リポジトリには UI/UX モックアップとドキュメントのみ。
 
-## Commands
+## 開発環境
+
+Nix flake + direnv で開発ツールチェーンを管理する。パッケージの追加・変更は `flake.nix` の `packages` に記述する。
 
 ```bash
-# Development environment (Nix + direnv)
-direnv allow              # Auto-loads nix devShell on cd
-
-# Design mockups — inject navigation links for browsable prototypes
-task designs:link         # Output to designs-linked/
-task designs:clean        # Remove injected scripts
+direnv allow              # cd 時に nix devShell を自動ロード
 ```
 
-## Design System Architecture
+## コマンド
 
-### Page Structure
+```bash
+# デザインモックアップにページ遷移スクリプトを注入
+task designs:link         # designs-linked/ へ出力
+task designs:clean        # 注入済みスクリプトを除去
+```
 
-Each design page lives in its own directory under `designs/`:
+## デザインシステム
+
+### ページ構成
+
+各デザインページは `designs/` 配下のディレクトリに格納:
 
 ```
 designs/<page-name>/
-  index.html    # Full-page HTML mockup
-  styles.css    # Page-specific styles only
+  index.html    # HTML モックアップ
+  styles.css    # ページ固有のスタイルのみ
 ```
 
-### Shared CSS (`designs/shared/`)
+### 共通 CSS (`designs/shared/`)
 
-| File                | Purpose                                                            |
-| ------------------- | ------------------------------------------------------------------ |
-| `variables.css`     | CSS custom properties (colors, spacing, typography)                |
-| `shell.css`         | App shell layout (titlebar, toolbar, sidebar, statusbar)           |
-| `components.css`    | Reusable components (buttons, modals, settings layout)             |
-| `changes-view.css`  | Changes/diff view (file list, diff lines, commit panel, AI review) |
-| `settings-form.css` | Settings form controls (inputs, toggles, theme/color pickers)      |
+| ファイル | 役割 |
+|---|---|
+| `variables.css` | CSS カスタムプロパティ（カラー、スペーシング、タイポグラフィ） |
+| `shell.css` | アプリシェルのレイアウト（タイトルバー、ツールバー、サイドバー、ステータスバー） |
+| `components.css` | 再利用コンポーネント（ボタン、モーダル、設定レイアウト） |
+| `changes-view.css` | Changes/diff ビュー（ファイルリスト、差分行、コミットパネル、AI レビュー） |
+| `settings-form.css` | 設定フォーム部品（入力欄、トグル、テーマ/カラーピッカー） |
 
-All dialog/overlay pages use the Changes view as a dimmed background. When updating Changes view features, update the background HTML across all dialog pages too.
+すべてのダイアログ/オーバーレイページは Changes ビューを暗転した背景として使用する。Changes ビューの機能を更新したら、全ダイアログページの背景 HTML も合わせて更新すること。
 
-### Navigation (`designs/connect.json`)
+### ナビゲーション (`designs/connect.json`)
 
-Maps click targets (CSS selectors) to page transitions. The `connect` CLI tool injects navigation scripts based on this config. Modal pages are listed in the `modals` array.
+CSS セレクタとページ遷移先のマッピングを定義。`connect` CLI ツールがこの設定に基づきナビゲーションスクリプトを注入する。モーダルページは `modals` 配列に列挙。
 
-### Conventions
+### 規約
 
-- Purple (`--purple` / `--purple-dim`) is the AI feature accent color
-- Page-specific `styles.css` should only contain styles unique to that page — shared styles go in `shared/`
-- Settings pages link: `variables.css` → `shell.css` → `components.css` → `changes-view.css` → `settings-form.css` → `styles.css`
-- Dialog pages link: `variables.css` → `shell.css` → `components.css` → `changes-view.css` → `styles.css`
+- 紫（`--purple` / `--purple-dim`）は AI 機能のアクセントカラー
+- ページ固有の `styles.css` にはそのページ固有のスタイルのみ記述 — 共通スタイルは `shared/` に置く
+- 設定ページの CSS 読み込み順: `variables.css` → `shell.css` → `components.css` → `changes-view.css` → `settings-form.css` → `styles.css`
+- ダイアログページの CSS 読み込み順: `variables.css` → `shell.css` → `components.css` → `changes-view.css` → `styles.css`
 
-## Documentation
+## ドキュメント
 
-- `docs/features.md` — Full feature specification
-- `docs/roadmap.md` — Development roadmap (v0.0–v1.x+)
-- `docs/design-coverage.md` — Tracks which features have mockups
-- `docs/adr/` — Architecture Decision Records (Rust, Tauri v2, git2-rs hybrid)
+- `docs/features.md` — 機能仕様
+- `docs/roadmap.md` — 開発ロードマップ (v0.0–v1.x+)
+- `docs/design-coverage.md` — デザインカバレッジ（どの機能にモックアップがあるか）
+- `docs/adr/` — アーキテクチャ決定記録（Rust, Tauri v2, git2-rs ハイブリッド）
 
-## Language
+## 言語
 
-Documentation and commit messages are in Japanese. Code and CSS class names are in English.
+ドキュメントとコミットメッセージは日本語。コードと CSS クラス名は英語。
