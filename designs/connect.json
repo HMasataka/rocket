@@ -60,11 +60,19 @@
       "target": "branches-dialog"
     },
     {
-      "selector": ".toggle-btn",
+      "selector": ".view-toggle .toggle-btn",
       "match": "text",
       "mapping": {
         "Split": "changes-split",
         "Inline": "changes"
+      }
+    },
+    {
+      "selector": ".fh-diff-toggle .toggle-btn",
+      "match": "text",
+      "mapping": {
+        "Split": "file-history-split",
+        "Inline": "file-history"
       }
     },
     {
