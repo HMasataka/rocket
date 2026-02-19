@@ -93,8 +93,7 @@ docs/features.md の機能一覧と designs/ ディレクトリの対応状況�
 ## AI連携
 
 - [x] コミットメッセージ生成 (`ai-commit/`)
-- [x] コードレビュー支援 (`ai-review/`)
-- [x] AIアクション実行 (`ai-assist/`)
+- [x] コードレビュー支援 (`changes/` `changes-split/` に統合、`ai-review/` `ai-assist/` 削除)
 - [x] AI設定 (`settings-ai/`)
 - [x] PR/MR説明文生成 (`hosting-create-pr/`)
 - [x] PRレビュー効率化ビュー (`hosting-pr-review/`)

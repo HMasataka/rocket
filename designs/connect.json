@@ -16,15 +16,7 @@
       "match": "title",
       "mapping": {
         "Tags": "tags",
-        "AI Assist": "ai-assist",
         "Remote": "remote"
-      }
-    },
-    {
-      "selector": ".ai-option-title",
-      "match": "text",
-      "mapping": {
-        "Code Review": "ai-review"
       }
     },
     {
@@ -173,9 +165,7 @@
     "settings-ai",
     "settings-keybindings",
     "settings-tools",
-    "ai-assist",
     "ai-commit",
-    "ai-review",
     "remote",
     "conflict",
     "merge-viewer",

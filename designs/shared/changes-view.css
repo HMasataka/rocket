@@ -311,4 +311,249 @@
 .commit-actions {
   display: flex;
   justify-content: flex-end;
+  gap: 8px;
+}
+
+/* ===== AI Review Button ===== */
+.ai-review-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  background: var(--purple-dim);
+  border: 1px solid color-mix(in srgb, var(--purple) 30%, transparent);
+  border-radius: 6px;
+  color: var(--purple);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ai-review-btn:hover {
+  background: color-mix(in srgb, var(--purple) 25%, transparent);
+  border-color: var(--purple);
+}
+
+.ai-review-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.ai-review-count {
+  padding: 1px 6px;
+  background: var(--purple);
+  color: #fff;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  min-width: 18px;
+  text-align: center;
+}
+
+/* ===== File Review Badge ===== */
+.file-review-badge {
+  padding: 0 5px;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  min-width: 16px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.file-review-badge.warning {
+  background: var(--warning-dim);
+  color: var(--warning);
+}
+
+.file-review-badge.danger {
+  background: var(--danger-dim);
+  color: var(--danger);
+}
+
+/* ===== AI Review Inline Comment ===== */
+.ai-review-inline {
+  margin: 4px 12px 4px 50px;
+  background: var(--bg-secondary);
+  border: 1px solid color-mix(in srgb, var(--purple) 30%, transparent);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.ai-review-inline-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: var(--purple-dim);
+  border-bottom: 1px solid color-mix(in srgb, var(--purple) 20%, transparent);
+  color: var(--purple);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.ai-review-inline-header svg {
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
+}
+
+.ai-review-inline-type {
+  margin-left: auto;
+  padding: 1px 6px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.ai-review-inline-type.warning {
+  background: var(--warning-dim);
+  color: var(--warning);
+}
+
+.ai-review-inline-type.danger {
+  background: var(--danger-dim);
+  color: var(--danger);
+}
+
+.ai-review-inline-line {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.ai-review-inline-message {
+  padding: 8px 10px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  border-bottom: 1px solid color-mix(in srgb, var(--purple) 15%, transparent);
+}
+
+/* ===== AI Review Fix Preview ===== */
+.ai-review-fix {
+  border-bottom: 1px solid color-mix(in srgb, var(--purple) 15%, transparent);
+}
+
+.ai-review-fix-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 10px;
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border);
+  border-top: 1px solid color-mix(in srgb, var(--purple) 15%, transparent);
+}
+
+.ai-review-fix-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.ai-review-fix-stat {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  margin-left: auto;
+}
+
+.ai-review-fix-stat.add { color: var(--success); }
+.ai-review-fix-stat.del { color: var(--danger); }
+
+.ai-review-fix-diff {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  line-height: 1.6;
+  background: var(--bg-primary);
+}
+
+.ai-review-fix-line {
+  display: flex;
+  padding: 0 10px;
+  min-height: 20px;
+}
+
+.ai-review-fix-line.add {
+  background: var(--diff-add-bg);
+}
+
+.ai-review-fix-line.add .ai-review-fix-code {
+  color: var(--success);
+}
+
+.ai-review-fix-line.add .ai-review-fix-code::before {
+  content: "+";
+  color: var(--success);
+  margin-right: 4px;
+}
+
+.ai-review-fix-line.del {
+  background: var(--diff-del-bg);
+}
+
+.ai-review-fix-line.del .ai-review-fix-code {
+  color: var(--danger);
+  text-decoration: line-through;
+  text-decoration-color: color-mix(in srgb, var(--danger) 50%, transparent);
+}
+
+.ai-review-fix-line.del .ai-review-fix-code::before {
+  content: "−";
+  color: var(--danger);
+  margin-right: 4px;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.ai-review-fix-num {
+  width: 24px;
+  text-align: right;
+  padding-right: 8px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.ai-review-fix-code {
+  flex: 1;
+  white-space: pre;
+}
+
+.ai-review-inline-actions {
+  display: flex;
+  gap: 6px;
+  padding: 6px 10px;
+  justify-content: flex-end;
+}
+
+/* ===== AI Review Generate Fix Button ===== */
+.ai-review-generate-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  background: var(--purple-dim);
+  border: 1px solid color-mix(in srgb, var(--purple) 30%, transparent);
+  border-radius: 4px;
+  color: var(--purple);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ai-review-generate-btn:hover {
+  background: var(--purple);
+  color: #fff;
+  border-color: var(--purple);
+}
+
+.ai-review-generate-btn svg {
+  width: 12px;
+  height: 12px;
 }
