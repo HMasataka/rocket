@@ -1,0 +1,188 @@
+/* ===== Changes View (background) ===== */
+.file-panel { border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+
+.panel-header { padding: 14px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.panel-title { font-size: 13px; font-weight: 600; white-space: nowrap; }
+.panel-actions { display: flex; gap: 8px; align-items: center; }
+
+.file-section { border-bottom: 1px solid var(--border); }
+.file-section:last-child { border-bottom: none; }
+.file-section-header { padding: 8px 12px; font-size: 11px; font-weight: 600; color: var(--text-muted); display: flex; align-items: center; gap: 6px; cursor: pointer; user-select: none; }
+.file-section-header:hover { background: var(--bg-tertiary); }
+.file-section-header .chevron { width: 12px; height: 12px; transition: transform 0.15s; }
+.file-section-header .count { margin-left: auto; color: var(--accent); }
+.file-list { overflow-y: auto; }
+
+.file-item { padding: 6px 12px 6px 24px; font-size: 12px; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: background-color 0.15s ease; }
+.file-item:hover { background: var(--bg-tertiary); }
+.file-item.selected { background: var(--accent-dim); }
+
+.file-status { width: 16px; height: 16px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; }
+.file-status.add { background: var(--success-dim); color: var(--success); }
+.file-status.modify { background: var(--warning-dim); color: var(--warning); }
+.file-status.untracked { background: var(--bg-tertiary); color: var(--text-muted); }
+
+.file-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-secondary); }
+.file-item.selected .file-name { color: var(--text-primary); }
+
+.file-action { width: 20px; height: 20px; border: none; border-radius: 4px; background: transparent; color: var(--text-muted); display: none; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; }
+
+/* Diff Panel */
+.diff-panel { display: flex; flex-direction: column; overflow: hidden; }
+
+.view-toggle { display: flex; background: var(--bg-tertiary); border-radius: 6px; padding: 2px; }
+.toggle-btn { padding: 4px 10px; border: none; border-radius: 4px; background: transparent; color: var(--text-muted); font-family: inherit; font-size: 11px; cursor: pointer; transition: all 0.15s ease; }
+.toggle-btn:hover { color: var(--text-secondary); }
+.toggle-btn.active { background: var(--accent); color: #fff; }
+
+.diff-content { flex: 1; overflow: auto; font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1.6; padding: 0; }
+.diff-content.active { display: flex; flex-direction: column; }
+.diff-inline.active { display: block; }
+
+.diff-hunk { border-bottom: 1px solid var(--border); }
+.diff-hunk-header { padding: 8px 16px; background: var(--bg-tertiary); color: var(--text-muted); font-size: 11px; display: flex; align-items: center; justify-content: space-between; }
+
+.diff-line { display: flex; padding: 0 16px; min-height: 22px; }
+.diff-line:hover { background: var(--bg-hover); }
+.line-num { width: 40px; text-align: right; padding-right: 12px; color: var(--text-muted); user-select: none; }
+.line-content { flex: 1; white-space: pre; }
+.diff-line.add { background: var(--diff-add-bg); }
+.diff-line.add .line-content { color: var(--success); }
+.diff-line.del { background: var(--diff-del-bg); }
+.diff-line.del .line-content { color: var(--danger); }
+
+.hunk-actions { display: flex; gap: 4px; }
+.hunk-btn { padding: 4px 8px; border: 1px solid var(--border); border-radius: 4px; background: transparent; color: var(--text-secondary); font-family: inherit; font-size: 10px; cursor: pointer; transition: all 0.15s ease; }
+.hunk-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+/* Commit Panel */
+.commit-panel { border-left: 1px solid var(--border); display: flex; flex-direction: column; }
+.amend-toggle { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); }
+.amend-toggle input { accent-color: var(--accent); }
+.commit-form { flex: 1; display: flex; flex-direction: column; padding: 16px; gap: 12px; }
+.commit-input-group { display: flex; gap: 8px; }
+.commit-subject { flex: 1; padding: 10px 14px; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 6px; color: var(--text-primary); font-family: inherit; font-size: 13px; }
+.commit-subject:focus { outline: none; border-color: var(--accent); }
+.commit-subject::placeholder { color: var(--text-muted); }
+.ai-generate-btn { width: 40px; border: 1px solid var(--purple); border-radius: 6px; background: var(--purple-dim); color: var(--purple); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.15s; }
+.ai-generate-btn:hover { background: var(--purple); color: #fff; }
+.ai-generate-btn svg { width: 18px; height: 18px; }
+.commit-body { flex: 1; min-height: 100px; padding: 10px 14px; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 6px; color: var(--text-primary); font-family: inherit; font-size: 13px; resize: none; }
+.commit-body:focus { outline: none; border-color: var(--accent); }
+.commit-body::placeholder { color: var(--text-muted); }
+.commit-actions { display: flex; justify-content: flex-end; }
+
+/* ===== Settings Form Elements (shared across settings pages) ===== */
+.settings-input { flex: 1; padding: 8px 12px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 6px; color: var(--text-primary); font-family: 'JetBrains Mono', monospace; font-size: 12px; transition: border-color 0.15s ease; }
+.settings-input:focus { border-color: var(--accent); outline: none; }
+.settings-input::placeholder { color: var(--text-muted); }
+.settings-toggle { width: 36px; height: 20px; background: var(--bg-hover); border-radius: 10px; cursor: pointer; position: relative; transition: background 0.2s; flex-shrink: 0; }
+.settings-toggle.active { background: var(--accent); }
+.settings-toggle-knob { width: 16px; height: 16px; background: #fff; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: left 0.2s; }
+.settings-toggle.active .settings-toggle-knob { left: 18px; }
+
+/* ===== Git Config Scope Bar ===== */
+.gitconfig-scope-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.gitconfig-scope-toggle {
+  display: flex;
+  background: var(--bg-secondary);
+  border-radius: 6px;
+  padding: 2px;
+}
+
+.gitconfig-scope-btn {
+  padding: 4px 12px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.gitconfig-scope-btn:hover {
+  color: var(--text-secondary);
+}
+
+.gitconfig-scope-btn.active {
+  background: var(--accent);
+  color: #fff;
+}
+
+.gitconfig-scope-path {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* ===== Git Config Rows ===== */
+.gitconfig-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 0;
+}
+
+.gitconfig-row + .gitconfig-row {
+  border-top: 1px solid var(--border);
+}
+
+.gitconfig-key {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--text-secondary);
+  min-width: 180px;
+  flex-shrink: 0;
+}
+
+.gitconfig-row .settings-input {
+  flex: 1;
+}
+
+.gitconfig-row .modal-select {
+  min-width: 140px;
+}
+
+/* ===== Alias List ===== */
+.gitconfig-alias-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.gitconfig-alias-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.gitconfig-alias-row:last-child {
+  border-bottom: none;
+}
+
+.gitconfig-alias-name {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  min-width: 60px;
+}
+
+.gitconfig-alias-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+}

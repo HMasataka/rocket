@@ -118,7 +118,7 @@ docs/features.md の機能一覧と designs/ ディレクトリの対応状況�
 
 ### その他
 
-- [ ] Gitconfig編集
+- [x] Gitconfig編集
 - [ ] GPG鍵管理
 - [ ] SSH鍵管理
 - [ ] 通知

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rocket - Settings / Keybindings</title>
+  <title>Rocket - Settings / Git Config</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -170,8 +170,6 @@
                   <button class="btn btn-secondary btn-xs" title="Stage All">Stage All</button>
                 </div>
               </div>
-
-              <!-- Staged Files -->
               <div class="file-section">
                 <div class="file-section-header">
                   <svg viewBox="0 0 16 16" fill="currentColor" class="chevron"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708z"/></svg>
@@ -191,8 +189,6 @@
                   </div>
                 </div>
               </div>
-
-              <!-- Unstaged Files -->
               <div class="file-section">
                 <div class="file-section-header">
                   <svg viewBox="0 0 16 16" fill="currentColor" class="chevron"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708z"/></svg>
@@ -212,8 +208,6 @@
                   </div>
                 </div>
               </div>
-
-              <!-- Untracked Files -->
               <div class="file-section">
                 <div class="file-section-header">
                   <svg viewBox="0 0 16 16" fill="currentColor" class="chevron"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708z"/></svg>
@@ -239,12 +233,8 @@
                     <button class="toggle-btn active">Inline</button>
                     <button class="toggle-btn">Split</button>
                   </div>
-                  <button class="icon-btn" title="Hunk Staging">
-                    <svg viewBox="0 0 16 16" fill="currentColor"><path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/><path d="M3 4h10v1H3V4zm0 3h10v1H3V7zm0 3h7v1H3v-1z"/></svg>
-                  </button>
                 </div>
               </div>
-              <!-- Inline View -->
               <div class="diff-content diff-inline active">
                 <div class="diff-hunk">
                   <div class="diff-hunk-header">
@@ -255,88 +245,40 @@
                     </div>
                   </div>
                   <div class="diff-line">
-                    <div class="line-checkbox"><input type="checkbox"></div>
                     <span class="line-num">1</span>
                     <span class="line-content">package auth</span>
                   </div>
                   <div class="diff-line">
-                    <div class="line-checkbox"><input type="checkbox"></div>
                     <span class="line-num">2</span>
                     <span class="line-content"></span>
                   </div>
                   <div class="diff-line">
-                    <div class="line-checkbox"><input type="checkbox"></div>
                     <span class="line-num">3</span>
                     <span class="line-content">import (</span>
                   </div>
                   <div class="diff-line add">
-                    <div class="line-checkbox"><input type="checkbox"></div>
                     <span class="line-num">4</span>
                     <span class="line-content">+    "context"</span>
                   </div>
                   <div class="diff-line add">
-                    <div class="line-checkbox"><input type="checkbox"></div>
                     <span class="line-num">5</span>
                     <span class="line-content">+    "errors"</span>
                   </div>
                   <div class="diff-line">
-                    <div class="line-checkbox"><input type="checkbox"></div>
                     <span class="line-num">6</span>
                     <span class="line-content">    "fmt"</span>
                   </div>
                   <div class="diff-line del">
-                    <div class="line-checkbox"><input type="checkbox"></div>
                     <span class="line-num">7</span>
                     <span class="line-content">-    "log"</span>
                   </div>
                   <div class="diff-line add">
-                    <div class="line-checkbox"><input type="checkbox"></div>
                     <span class="line-num">8</span>
                     <span class="line-content">+    "log/slog"</span>
                   </div>
                   <div class="diff-line">
-                    <div class="line-checkbox"><input type="checkbox"></div>
                     <span class="line-num">9</span>
                     <span class="line-content">)</span>
-                  </div>
-                </div>
-                <div class="diff-hunk">
-                  <div class="diff-hunk-header">
-                    <span>@@ -25,6 +30,20 @@ func NewHandler() *Handler {</span>
-                    <div class="hunk-actions">
-                      <button class="hunk-btn">Stage Hunk</button>
-                      <button class="hunk-btn">Discard</button>
-                    </div>
-                  </div>
-                  <div class="diff-line">
-                    <div class="line-checkbox"><input type="checkbox"></div>
-                    <span class="line-num">25</span>
-                    <span class="line-content">func NewHandler() *Handler {</span>
-                  </div>
-                  <div class="diff-line add">
-                    <div class="line-checkbox"><input type="checkbox"></div>
-                    <span class="line-num">26</span>
-                    <span class="line-content">+    return &Handler{</span>
-                  </div>
-                  <div class="diff-line add">
-                    <div class="line-checkbox"><input type="checkbox"></div>
-                    <span class="line-num">27</span>
-                    <span class="line-content">+        logger: slog.Default(),</span>
-                  </div>
-                  <div class="diff-line add">
-                    <div class="line-checkbox"><input type="checkbox"></div>
-                    <span class="line-num">28</span>
-                    <span class="line-content">+    }</span>
-                  </div>
-                  <div class="diff-line del">
-                    <div class="line-checkbox"><input type="checkbox"></div>
-                    <span class="line-num">29</span>
-                    <span class="line-content">-    return &Handler{}</span>
-                  </div>
-                  <div class="diff-line">
-                    <div class="line-checkbox"><input type="checkbox"></div>
-                    <span class="line-num">30</span>
-                    <span class="line-content">}</span>
                   </div>
                 </div>
               </div>
@@ -406,96 +348,147 @@
         <nav class="settings-nav">
           <div class="settings-nav-item">Appearance</div>
           <div class="settings-nav-item">Editor</div>
-          <div class="settings-nav-item">Git Config</div>
+          <div class="settings-nav-item active">Git Config</div>
           <div class="settings-nav-item">AI Settings</div>
-          <div class="settings-nav-item active">Keybindings</div>
+          <div class="settings-nav-item">Keybindings</div>
           <div class="settings-nav-item">External Tools</div>
         </nav>
         <div class="settings-content">
           <div class="settings-tab">
+            <!-- Scope Toggle -->
+            <div class="gitconfig-scope-bar">
+              <div class="gitconfig-scope-toggle">
+                <button class="gitconfig-scope-btn active">Local</button>
+                <button class="gitconfig-scope-btn">Global</button>
+              </div>
+              <span class="gitconfig-scope-path">~/.config/git/config</span>
+            </div>
+
+            <!-- User -->
             <div class="settings-section">
-              <h3>Preset</h3>
-              <div class="setting-row">
-                <label>Keybinding Preset</label>
+              <h3>User</h3>
+              <div class="gitconfig-row">
+                <label class="gitconfig-key">user.name</label>
+                <input type="text" class="settings-input" value="Masataka Hisasue">
+              </div>
+              <div class="gitconfig-row">
+                <label class="gitconfig-key">user.email</label>
+                <input type="text" class="settings-input" value="masataka@example.com">
+              </div>
+              <div class="gitconfig-row">
+                <label class="gitconfig-key">user.signingKey</label>
+                <input type="text" class="settings-input" value="ABCDEF1234567890" placeholder="GPG or SSH key ID">
+              </div>
+            </div>
+
+            <!-- Commit -->
+            <div class="settings-section">
+              <h3>Commit</h3>
+              <div class="gitconfig-row">
+                <label class="gitconfig-key">commit.gpgSign</label>
+                <div class="settings-toggle active">
+                  <div class="settings-toggle-knob"></div>
+                </div>
+              </div>
+              <div class="gitconfig-row">
+                <label class="gitconfig-key">commit.template</label>
+                <input type="text" class="settings-input" value="" placeholder="~/.gitmessage">
+              </div>
+            </div>
+
+            <!-- Core -->
+            <div class="settings-section">
+              <h3>Core</h3>
+              <div class="gitconfig-row">
+                <label class="gitconfig-key">core.editor</label>
+                <input type="text" class="settings-input" value="vim">
+              </div>
+              <div class="gitconfig-row">
+                <label class="gitconfig-key">core.autocrlf</label>
                 <select class="modal-select">
-                  <option value="default" selected>Default</option>
-                  <option value="vim">Vim</option>
-                  <option value="emacs">Emacs</option>
+                  <option value="input" selected>input</option>
+                  <option value="true">true</option>
+                  <option value="false">false</option>
+                </select>
+              </div>
+              <div class="gitconfig-row">
+                <label class="gitconfig-key">core.excludesFile</label>
+                <input type="text" class="settings-input" value="~/.gitignore_global" placeholder="~/.gitignore_global">
+              </div>
+            </div>
+
+            <!-- Pull / Push / Merge -->
+            <div class="settings-section">
+              <h3>Pull &amp; Push</h3>
+              <div class="gitconfig-row">
+                <label class="gitconfig-key">pull.rebase</label>
+                <select class="modal-select">
+                  <option value="false">false</option>
+                  <option value="true" selected>true</option>
+                  <option value="merges">merges</option>
+                </select>
+              </div>
+              <div class="gitconfig-row">
+                <label class="gitconfig-key">push.default</label>
+                <select class="modal-select">
+                  <option value="simple" selected>simple</option>
+                  <option value="current">current</option>
+                  <option value="upstream">upstream</option>
+                  <option value="matching">matching</option>
+                </select>
+              </div>
+              <div class="gitconfig-row">
+                <label class="gitconfig-key">push.autoSetupRemote</label>
+                <div class="settings-toggle active">
+                  <div class="settings-toggle-knob"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Merge -->
+            <div class="settings-section">
+              <h3>Merge</h3>
+              <div class="gitconfig-row">
+                <label class="gitconfig-key">merge.ff</label>
+                <select class="modal-select">
+                  <option value="true" selected>true</option>
+                  <option value="false">false</option>
+                  <option value="only">only</option>
+                </select>
+              </div>
+              <div class="gitconfig-row">
+                <label class="gitconfig-key">merge.conflictStyle</label>
+                <select class="modal-select">
+                  <option value="merge">merge</option>
+                  <option value="diff3" selected>diff3</option>
+                  <option value="zdiff3">zdiff3</option>
                 </select>
               </div>
             </div>
+
+            <!-- Aliases (read-only display) -->
             <div class="settings-section">
-              <h3>General</h3>
-              <div class="keybinding-list">
-                <div class="keybinding-row">
-                  <span class="keybinding-action">Open Settings</span>
-                  <kbd class="keybinding-key">⌘ ,</kbd>
+              <h3>Aliases</h3>
+              <div class="gitconfig-alias-list">
+                <div class="gitconfig-alias-row">
+                  <span class="gitconfig-alias-name">co</span>
+                  <span class="gitconfig-alias-value">checkout</span>
                 </div>
-                <div class="keybinding-row">
-                  <span class="keybinding-action">Search</span>
-                  <kbd class="keybinding-key">⌘ F</kbd>
+                <div class="gitconfig-alias-row">
+                  <span class="gitconfig-alias-name">br</span>
+                  <span class="gitconfig-alias-value">branch</span>
                 </div>
-                <div class="keybinding-row">
-                  <span class="keybinding-action">Toggle Sidebar</span>
-                  <kbd class="keybinding-key">⌘ B</kbd>
+                <div class="gitconfig-alias-row">
+                  <span class="gitconfig-alias-name">ci</span>
+                  <span class="gitconfig-alias-value">commit</span>
                 </div>
-                <div class="keybinding-row">
-                  <span class="keybinding-action">New Tab</span>
-                  <kbd class="keybinding-key">⌘ T</kbd>
+                <div class="gitconfig-alias-row">
+                  <span class="gitconfig-alias-name">st</span>
+                  <span class="gitconfig-alias-value">status</span>
                 </div>
-                <div class="keybinding-row">
-                  <span class="keybinding-action">Close Tab</span>
-                  <kbd class="keybinding-key">⌘ W</kbd>
-                </div>
-              </div>
-            </div>
-            <div class="settings-section">
-              <h3>Git Operations</h3>
-              <div class="keybinding-list">
-                <div class="keybinding-row">
-                  <span class="keybinding-action">Commit</span>
-                  <kbd class="keybinding-key">⌘ Enter</kbd>
-                </div>
-                <div class="keybinding-row">
-                  <span class="keybinding-action">Push</span>
-                  <kbd class="keybinding-key">⌘ ⇧ P</kbd>
-                </div>
-                <div class="keybinding-row">
-                  <span class="keybinding-action">Pull</span>
-                  <kbd class="keybinding-key">⌘ ⇧ L</kbd>
-                </div>
-                <div class="keybinding-row">
-                  <span class="keybinding-action">Fetch</span>
-                  <kbd class="keybinding-key">⌘ ⇧ F</kbd>
-                </div>
-                <div class="keybinding-row">
-                  <span class="keybinding-action">Stage All</span>
-                  <kbd class="keybinding-key">⌘ ⇧ A</kbd>
-                </div>
-                <div class="keybinding-row">
-                  <span class="keybinding-action">Unstage All</span>
-                  <kbd class="keybinding-key">⌘ ⇧ U</kbd>
-                </div>
-              </div>
-            </div>
-            <div class="settings-section">
-              <h3>Navigation</h3>
-              <div class="keybinding-list">
-                <div class="keybinding-row">
-                  <span class="keybinding-action">Changes</span>
-                  <kbd class="keybinding-key">⌘ 1</kbd>
-                </div>
-                <div class="keybinding-row">
-                  <span class="keybinding-action">History</span>
-                  <kbd class="keybinding-key">⌘ 2</kbd>
-                </div>
-                <div class="keybinding-row">
-                  <span class="keybinding-action">Branches</span>
-                  <kbd class="keybinding-key">⌘ 3</kbd>
-                </div>
-                <div class="keybinding-row">
-                  <span class="keybinding-action">Stash</span>
-                  <kbd class="keybinding-key">⌘ 4</kbd>
+                <div class="gitconfig-alias-row">
+                  <span class="gitconfig-alias-name">lg</span>
+                  <span class="gitconfig-alias-value">log --oneline --graph --decorate</span>
                 </div>
               </div>
             </div>

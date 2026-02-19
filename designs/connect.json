@@ -25,6 +25,7 @@
       "mapping": {
         "Appearance": "settings-appearance",
         "Editor": "settings-editor",
+        "Git Config": "settings-gitconfig",
         "AI Settings": "settings-ai",
         "Keybindings": "settings-keybindings",
         "External Tools": "settings-tools"
@@ -162,6 +163,7 @@
     "init",
     "settings-appearance",
     "settings-editor",
+    "settings-gitconfig",
     "settings-ai",
     "settings-keybindings",
     "settings-tools",
