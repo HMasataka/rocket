@@ -1,0 +1,39 @@
+/* ===== CSS Variables ===== */
+:root {
+  --bg-primary: #0f1419;
+  --bg-secondary: #151b22;
+  --bg-tertiary: #1c242d;
+  --bg-hover: #252d38;
+  --text-primary: #e6edf3;
+  --text-secondary: #8b949e;
+  --text-muted: #565d64;
+  --border: #2d3640;
+  --accent: #58a6ff;
+  --accent-dim: rgba(88, 166, 255, 0.15);
+  --success: #3fb950;
+  --success-dim: rgba(63, 185, 80, 0.15);
+  --warning: #d29922;
+  --warning-dim: rgba(210, 153, 34, 0.15);
+  --danger: #f85149;
+  --danger-dim: rgba(248, 81, 73, 0.15);
+  --purple: #a855f7;
+  --purple-dim: rgba(168, 85, 247, 0.15);
+  --diff-add-bg: rgba(63, 185, 80, 0.15);
+  --diff-add-line: rgba(63, 185, 80, 0.4);
+  --diff-del-bg: rgba(248, 81, 73, 0.15);
+  --diff-del-line: rgba(248, 81, 73, 0.4);
+}
+
+/* ===== Reset & Base ===== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #0a0c0f;
+  color: var(--text-primary);
+  overflow: hidden;
+}
