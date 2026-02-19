@@ -14,3 +14,77 @@
 .merge-code { flex: 1; margin: 0; padding: 16px; font-size: 12px; line-height: 1.6; overflow: auto; background: var(--bg-primary); font-family: 'JetBrains Mono', monospace; color: var(--text-primary); }
 .merge-result { flex: 1; padding: 16px; font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1.6; background: var(--bg-primary); border: none; color: var(--text-primary); resize: none; }
 .merge-result:focus { outline: none; }
+
+/* ===== Result Header Layout ===== */
+.merge-panel-header.result-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* ===== AI Suggest Button ===== */
+.ai-suggest-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  background: var(--purple-dim);
+  border: 1px solid color-mix(in srgb, var(--purple) 30%, transparent);
+  border-radius: 5px;
+  color: var(--purple);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ai-suggest-btn:hover {
+  background: color-mix(in srgb, var(--purple) 25%, transparent);
+  border-color: var(--purple);
+}
+
+.ai-suggest-btn svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* ===== AI Suggest Banner ===== */
+.ai-suggest-banner {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: var(--purple-dim);
+  border-bottom: 1px solid color-mix(in srgb, var(--purple) 20%, transparent);
+  font-size: 11px;
+  color: var(--purple);
+}
+
+.ai-suggest-banner svg {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+}
+
+.ai-suggest-banner span {
+  flex: 1;
+}
+
+.ai-suggest-undo {
+  padding: 2px 8px;
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--purple) 40%, transparent);
+  border-radius: 4px;
+  color: var(--purple);
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ai-suggest-undo:hover {
+  background: color-mix(in srgb, var(--purple) 20%, transparent);
+  border-color: var(--purple);
+}

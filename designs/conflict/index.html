@@ -285,11 +285,17 @@
         </div>
 
         <div class="conflict-blocks">
-          <!-- Conflict 1 -->
+          <!-- Conflict 1 (AI resolved) -->
           <div class="conflict-section">
             <div class="conflict-section-label">
               <span class="conflict-section-num">1 / 3</span>
-              <span class="conflict-section-location">Line 12-18</span>
+              <div class="conflict-section-right">
+                <span class="ai-resolved-badge">
+                  <svg viewBox="0 0 16 16" fill="currentColor"><path d="M6 12.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5ZM3 8.062C3 6.76 4.235 5.765 5.53 5.886a26.58 26.58 0 0 0 4.94 0C11.765 5.765 13 6.76 13 8.062v1.157a.933.933 0 0 1-.765.935c-.845.147-2.34.346-4.235.346-1.895 0-3.39-.2-4.235-.346A.933.933 0 0 1 3 9.219V8.062Z"/></svg>
+                  AI Resolved
+                </span>
+                <span class="conflict-section-location">Line 12-18</span>
+              </div>
             </div>
             <div class="conflict-block">
               <div class="conflict-header ours">&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD (current)</div>
@@ -300,10 +306,20 @@
     Host: "0.0.0.0",</pre>
               <div class="conflict-header theirs">&gt;&gt;&gt;&gt;&gt;&gt;&gt; feature/config</div>
             </div>
-            <div class="conflict-actions">
-              <button class="btn btn-secondary btn-sm">Accept Ours</button>
-              <button class="btn btn-secondary btn-sm">Accept Theirs</button>
-              <button class="btn btn-secondary btn-sm">Accept Both</button>
+            <div class="ai-suggestion">
+              <div class="ai-suggestion-header">
+                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M6 12.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5ZM3 8.062C3 6.76 4.235 5.765 5.53 5.886a26.58 26.58 0 0 0 4.94 0C11.765 5.765 13 6.76 13 8.062v1.157a.933.933 0 0 1-.765.935c-.845.147-2.34.346-4.235.346-1.895 0-3.39-.2-4.235-.346A.933.933 0 0 1 3 9.219V8.062Z"/></svg>
+                <span class="ai-suggestion-title">AI Suggestion</span>
+                <span class="ai-suggestion-confidence high">High confidence</span>
+              </div>
+              <pre class="ai-suggestion-code">    Port: 3000,
+    Host: "0.0.0.0",</pre>
+              <div class="ai-suggestion-reason">Theirs を採用: feature/config の設定（0.0.0.0:3000）はリモートアクセスに対応しており、本番環境に適しています。</div>
+              <div class="ai-suggestion-actions">
+                <button class="btn btn-secondary btn-sm">Reject</button>
+                <button class="btn btn-secondary btn-sm">Edit</button>
+                <button class="btn btn-primary btn-sm">Accept AI</button>
+              </div>
             </div>
           </div>
 
@@ -327,6 +343,10 @@
               <button class="btn btn-secondary btn-sm">Accept Ours</button>
               <button class="btn btn-secondary btn-sm">Accept Theirs</button>
               <button class="btn btn-secondary btn-sm">Accept Both</button>
+              <button class="ai-resolve-btn btn-sm">
+                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M6 12.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5ZM3 8.062C3 6.76 4.235 5.765 5.53 5.886a26.58 26.58 0 0 0 4.94 0C11.765 5.765 13 6.76 13 8.062v1.157a.933.933 0 0 1-.765.935c-.845.147-2.34.346-4.235.346-1.895 0-3.39-.2-4.235-.346A.933.933 0 0 1 3 9.219V8.062Z"/></svg>
+                AI Resolve
+              </button>
             </div>
           </div>
 
@@ -348,11 +368,20 @@
               <button class="btn btn-secondary btn-sm">Accept Ours</button>
               <button class="btn btn-secondary btn-sm">Accept Theirs</button>
               <button class="btn btn-secondary btn-sm">Accept Both</button>
+              <button class="ai-resolve-btn btn-sm">
+                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M6 12.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5ZM3 8.062C3 6.76 4.235 5.765 5.53 5.886a26.58 26.58 0 0 0 4.94 0C11.765 5.765 13 6.76 13 8.062v1.157a.933.933 0 0 1-.765.935c-.845.147-2.34.346-4.235.346-1.895 0-3.39-.2-4.235-.346A.933.933 0 0 1 3 9.219V8.062Z"/></svg>
+                AI Resolve
+              </button>
             </div>
           </div>
         </div>
 
         <div class="conflict-detail-actions">
+          <button class="ai-resolve-all-btn">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M6 12.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5ZM3 8.062C3 6.76 4.235 5.765 5.53 5.886a26.58 26.58 0 0 0 4.94 0C11.765 5.765 13 6.76 13 8.062v1.157a.933.933 0 0 1-.765.935c-.845.147-2.34.346-4.235.346-1.895 0-3.39-.2-4.235-.346A.933.933 0 0 1 3 9.219V8.062Z"/></svg>
+            AI Resolve All
+          </button>
+          <div class="conflict-detail-actions-sep"></div>
           <button class="btn btn-secondary btn-sm">Accept All Ours</button>
           <button class="btn btn-secondary btn-sm">Accept All Theirs</button>
           <button class="btn btn-primary btn-sm">3-way Merge Viewer</button>

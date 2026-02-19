@@ -257,6 +257,166 @@
   gap: 6px;
 }
 
+/* ===== AI Resolve Button ===== */
+.ai-resolve-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  background: var(--purple-dim);
+  border: 1px solid color-mix(in srgb, var(--purple) 30%, transparent);
+  border-radius: 6px;
+  color: var(--purple);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ai-resolve-btn:hover {
+  background: color-mix(in srgb, var(--purple) 25%, transparent);
+  border-color: var(--purple);
+}
+
+.ai-resolve-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* ===== AI Resolve All Button ===== */
+.ai-resolve-all-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: var(--purple);
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ai-resolve-all-btn:hover {
+  filter: brightness(1.15);
+}
+
+.ai-resolve-all-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.conflict-detail-actions-sep {
+  width: 1px;
+  height: 20px;
+  background: var(--border);
+  flex-shrink: 0;
+}
+
+/* ===== AI Resolved Badge ===== */
+.conflict-section-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ai-resolved-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  background: var(--purple-dim);
+  border: 1px solid color-mix(in srgb, var(--purple) 30%, transparent);
+  border-radius: 10px;
+  color: var(--purple);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.ai-resolved-badge svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* ===== AI Suggestion Panel ===== */
+.ai-suggestion {
+  background: var(--bg-secondary);
+  border: 1px solid color-mix(in srgb, var(--purple) 30%, transparent);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.ai-suggestion-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: var(--purple-dim);
+  border-bottom: 1px solid color-mix(in srgb, var(--purple) 20%, transparent);
+  color: var(--purple);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.ai-suggestion-header svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.ai-suggestion-confidence {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 8px;
+}
+
+.ai-suggestion-confidence.high {
+  background: var(--success-dim);
+  color: var(--success);
+}
+
+.ai-suggestion-confidence.medium {
+  background: var(--warning-dim);
+  color: var(--warning);
+}
+
+.ai-suggestion-confidence.low {
+  background: var(--danger-dim);
+  color: var(--danger);
+}
+
+.ai-suggestion-code {
+  margin: 0;
+  padding: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  line-height: 1.6;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  border-bottom: 1px solid color-mix(in srgb, var(--purple) 15%, transparent);
+}
+
+.ai-suggestion-reason {
+  padding: 10px 12px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  border-bottom: 1px solid color-mix(in srgb, var(--purple) 15%, transparent);
+}
+
+.ai-suggestion-actions {
+  display: flex;
+  gap: 6px;
+  padding: 10px 12px;
+  justify-content: flex-end;
+}
+
 /* ===== Conflict Detail Footer Actions ===== */
 .conflict-detail-actions {
   display: flex;
