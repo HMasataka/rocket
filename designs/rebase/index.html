@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rocket - Reset</title>
+  <title>Rocket - Interactive Rebase</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -39,7 +39,7 @@
       <div class="toolbar-group">
         <div class="branch-selector">
           <svg viewBox="0 0 16 16" fill="currentColor"><path d="M9.5 3.25a2.25 2.25 0 1 1 3 2.122V6A2.5 2.5 0 0 1 10 8.5H6a1 1 0 0 0-1 1v1.128a2.251 2.251 0 1 1-1.5 0V5.372a2.25 2.25 0 1 1 1.5 0v1.836A2.492 2.492 0 0 1 6 7h4a1 1 0 0 0 1-1v-.628A2.25 2.25 0 0 1 9.5 3.25zm-6 0a.75.75 0 1 0 1.5 0 .75.75 0 0 0-1.5 0zm8.25-.75a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5zM4.25 12a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5z"/></svg>
-          <span>main</span>
+          <span>feature/auth</span>
           <svg viewBox="0 0 16 16" fill="currentColor" class="chevron"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708z"/></svg>
         </div>
       </div>
@@ -121,16 +121,16 @@
             <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 3a5 5 0 1 1-4.546 2.914.5.5 0 0 0-.908-.417A6 6 0 1 0 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 0-.41-.192L5.23 2.308a.25.25 0 0 0 0 .384l2.36 1.966A.25.25 0 0 0 8 4.466z"/></svg>
             Revert
           </div>
-          <div class="nav-item active">
+          <div class="nav-item">
             <svg viewBox="0 0 16 16" fill="currentColor"><path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/><path d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z"/></svg>
             Reset
           </div>
-          <div class="nav-item">
+          <div class="nav-item active">
             <svg viewBox="0 0 16 16" fill="currentColor"><path d="M11.5 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L11 2.707V14.5a.5.5 0 0 0 .5.5zm-7-14a.5.5 0 0 0-.5.5v11.793l-3.146-3.147a.5.5 0 0 0-.708.708l4 4a.5.5 0 0 0 .708 0l4-4a.5.5 0 0 0-.708-.708L5 13.293V1.5a.5.5 0 0 0-.5-.5z"/></svg>
             Rebase
           </div>
           <div class="nav-item">
-            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022l-.074.997zm2.004.45a7.003 7.003 0 0 0-.985-.299l.219-.976c.383.086.76.2 1.126.342l-.36.933zm1.37.71a7.01 7.01 0 0 0-.439-.27l.493-.87a8.025 8.025 0 0 1 .979.654l-.615.789a6.996 6.996 0 0 0-.418-.302zm1.834 1.79a6.99 6.99 0 0 0-.653-.796l.724-.69c.27.285.52.59.747.91l-.818.576zm.744 1.352a7.08 7.08 0 0 0-.214-.468l.893-.45a7.976 7.976 0 0 1 .45 1.088l-.95.313a7.023 7.023 0 0 0-.179-.483zM8 1a7 7 0 1 0 4.95 11.95l.707.707A8.001 8.001 0 1 1 8 0v1z"/><path d="M7.5 3a.5.5 0 0 1 .5.5v5.21l3.248 1.856a.5.5 0 0 1-.496.868l-3.5-2A.5.5 0 0 1 7 9V3.5a.5.5 0 0 1 .5-.5z"/></svg>
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022l-.074.997zm2.004.45a7.003 7.003 0 0 0-.985-.299l.219-.976c.383.086.76.2 1.126.342l-.36.933zM8 1a7 7 0 1 0 4.95 11.95l.707.707A8.001 8.001 0 1 1 8 0v1z"/><path d="M7.5 3a.5.5 0 0 1 .5.5v5.21l3.248 1.856a.5.5 0 0 1-.496.868l-3.5-2A.5.5 0 0 1 7 9V3.5a.5.5 0 0 1 .5-.5z"/></svg>
             Reflog
           </div>
         </div>
@@ -159,201 +159,156 @@
         <div class="operation-layout">
           <div class="operation-header">
             <div class="operation-info">
-              <h2 class="operation-title">Reset</h2>
-              <span class="operation-desc">Move HEAD to specified commit</span>
+              <h2 class="operation-title">Interactive Rebase</h2>
+              <span class="operation-desc">Rebase 7 commits onto main</span>
+            </div>
+            <div class="rebase-onto-info">
+              <span class="rebase-onto-label">onto</span>
+              <span class="rebase-onto-ref">
+                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M9.5 3.25a2.25 2.25 0 1 1 3 2.122V6A2.5 2.5 0 0 1 10 8.5H6a1 1 0 0 0-1 1v1.128a2.251 2.251 0 1 1-1.5 0V5.372a2.25 2.25 0 1 1 1.5 0v1.836A2.492 2.492 0 0 1 6 7h4a1 1 0 0 0 1-1v-.628A2.25 2.25 0 0 1 9.5 3.25z"/></svg>
+                main
+              </span>
+              <span class="rebase-onto-hash">f8a9b2c</span>
             </div>
           </div>
+
           <div class="operation-two-column">
-            <!-- Left Panel: Commit List + Reset Mode -->
+            <!-- Left: Rebase Todo List -->
             <div class="operation-left-panel">
               <div class="operation-panel">
                 <div class="panel-header">
-                  <span class="panel-title">Select target commit for reset</span>
+                  <span class="panel-title">Rebase todo</span>
                   <div class="panel-actions">
-                    <input type="text" class="search-input" placeholder="Search commits...">
+                    <span class="rebase-legend">
+                      <span class="legend-item"><span class="legend-dot dot-pick"></span>pick</span>
+                      <span class="legend-item"><span class="legend-dot dot-squash"></span>squash</span>
+                      <span class="legend-item"><span class="legend-dot dot-drop"></span>drop</span>
+                    </span>
                   </div>
                 </div>
-                <div class="reset-commit-list">
-                  <!-- a1b2c3d (selected) -->
-                  <div class="reset-commit-row selected">
-                    <div class="reset-radio">
-                      <input type="radio" name="reset-commit" value="a1b2c3d" checked>
+                <div class="rebase-commit-list">
+                  <!-- Commit 1 - pick (oldest) -->
+                  <div class="rebase-commit">
+                    <div class="rebase-handle" title="Drag to reorder">
+                      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M7 2a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 5a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>
                     </div>
-                    <div class="reset-graph">
-                      <div class="graph-node reset"></div>
-                      <div class="graph-line"></div>
-                    </div>
-                    <div class="reset-info">
-                      <div class="reset-message">Merge branch feature/auth into main</div>
-                      <div class="reset-meta">
-                        <span class="reset-hash">a1b2c3d</span>
-                        <span class="reset-author">tanaka</span>
-                        <span class="reset-date">2 hours ago</span>
-                      </div>
-                    </div>
+                    <span class="rebase-action action-pick">pick</span>
+                    <span class="rebase-hash">a1b2c3d</span>
+                    <span class="rebase-msg">feat: Add authentication handler</span>
+                    <span class="rebase-author">tanaka</span>
                   </div>
-                  <!-- g6h7i8j -->
-                  <div class="reset-commit-row">
-                    <div class="reset-radio">
-                      <input type="radio" name="reset-commit" value="g6h7i8j">
+
+                  <!-- Commit 2 - pick (selected) -->
+                  <div class="rebase-commit selected">
+                    <div class="rebase-handle" title="Drag to reorder">
+                      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M7 2a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 5a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>
                     </div>
-                    <div class="reset-graph">
-                      <div class="graph-node reset"></div>
-                      <div class="graph-line"></div>
-                    </div>
-                    <div class="reset-info">
-                      <div class="reset-message">docs: Update API documentation</div>
-                      <div class="reset-meta">
-                        <span class="reset-hash">g6h7i8j</span>
-                        <span class="reset-author">tanaka</span>
-                        <span class="reset-date">1 day ago</span>
-                      </div>
-                    </div>
+                    <span class="rebase-action action-pick">pick</span>
+                    <span class="rebase-hash">b2c3d4e</span>
+                    <span class="rebase-msg">feat: Complete OAuth integration</span>
+                    <span class="rebase-author">yamada</span>
                   </div>
-                  <!-- j9k0l1m -->
-                  <div class="reset-commit-row">
-                    <div class="reset-radio">
-                      <input type="radio" name="reset-commit" value="j9k0l1m">
+
+                  <!-- Commit 3 - squash -->
+                  <div class="rebase-commit">
+                    <div class="rebase-handle" title="Drag to reorder">
+                      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M7 2a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 5a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>
                     </div>
-                    <div class="reset-graph">
-                      <div class="graph-node reset"></div>
-                      <div class="graph-line"></div>
-                    </div>
-                    <div class="reset-info">
-                      <div class="reset-message">fix: Fix login redirect bug</div>
-                      <div class="reset-meta">
-                        <span class="reset-hash">j9k0l1m</span>
-                        <span class="reset-author">tanaka</span>
-                        <span class="reset-date">3 days ago</span>
-                      </div>
-                    </div>
+                    <span class="rebase-action action-squash">squash</span>
+                    <span class="rebase-hash">c3d4e5f</span>
+                    <span class="rebase-msg">fix: Fix OAuth redirect URL</span>
+                    <span class="rebase-author">yamada</span>
                   </div>
-                  <!-- k0l1m2n -->
-                  <div class="reset-commit-row">
-                    <div class="reset-radio">
-                      <input type="radio" name="reset-commit" value="k0l1m2n">
+
+                  <!-- Commit 4 - pick -->
+                  <div class="rebase-commit">
+                    <div class="rebase-handle" title="Drag to reorder">
+                      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M7 2a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 5a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>
                     </div>
-                    <div class="reset-graph">
-                      <div class="graph-node reset"></div>
-                      <div class="graph-line"></div>
-                    </div>
-                    <div class="reset-info">
-                      <div class="reset-message">Merge branch hotfix/login into main</div>
-                      <div class="reset-meta">
-                        <span class="reset-hash">k0l1m2n</span>
-                        <span class="reset-author">tanaka</span>
-                        <span class="reset-date">4 days ago</span>
-                      </div>
-                    </div>
+                    <span class="rebase-action action-pick">pick</span>
+                    <span class="rebase-hash">d4e5f6g</span>
+                    <span class="rebase-msg">feat: Add token refresh logic</span>
+                    <span class="rebase-author">yamada</span>
                   </div>
-                  <!-- m2n3o4p -->
-                  <div class="reset-commit-row">
-                    <div class="reset-radio">
-                      <input type="radio" name="reset-commit" value="m2n3o4p">
+
+                  <!-- Commit 5 - reword -->
+                  <div class="rebase-commit">
+                    <div class="rebase-handle" title="Drag to reorder">
+                      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M7 2a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 5a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>
                     </div>
-                    <div class="reset-graph">
-                      <div class="graph-node reset"></div>
-                      <div class="graph-line"></div>
-                    </div>
-                    <div class="reset-info">
-                      <div class="reset-message">chore: Update dependencies</div>
-                      <div class="reset-meta">
-                        <span class="reset-hash">m2n3o4p</span>
-                        <span class="reset-author">tanaka</span>
-                        <span class="reset-date">5 days ago</span>
-                      </div>
-                    </div>
+                    <span class="rebase-action action-reword">reword</span>
+                    <span class="rebase-hash">e5f6g7h</span>
+                    <span class="rebase-msg">add test</span>
+                    <span class="rebase-author">suzuki</span>
                   </div>
-                  <!-- n3o4p5q -->
-                  <div class="reset-commit-row">
-                    <div class="reset-radio">
-                      <input type="radio" name="reset-commit" value="n3o4p5q">
+
+                  <!-- Commit 6 - fixup -->
+                  <div class="rebase-commit">
+                    <div class="rebase-handle" title="Drag to reorder">
+                      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M7 2a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 5a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>
                     </div>
-                    <div class="reset-graph">
-                      <div class="graph-node reset"></div>
-                      <div class="graph-line"></div>
-                    </div>
-                    <div class="reset-info">
-                      <div class="reset-message">feat: Add settings screen</div>
-                      <div class="reset-meta">
-                        <span class="reset-hash">n3o4p5q</span>
-                        <span class="reset-author">suzuki</span>
-                        <span class="reset-date">1 week ago</span>
-                      </div>
-                    </div>
+                    <span class="rebase-action action-fixup">fixup</span>
+                    <span class="rebase-hash">f6g7h8i</span>
+                    <span class="rebase-msg">fix typo in test assertions</span>
+                    <span class="rebase-author">suzuki</span>
                   </div>
-                  <!-- o4p5q6r -->
-                  <div class="reset-commit-row">
-                    <div class="reset-radio">
-                      <input type="radio" name="reset-commit" value="o4p5q6r">
+
+                  <!-- Commit 7 - drop (newest) -->
+                  <div class="rebase-commit">
+                    <div class="rebase-handle" title="Drag to reorder">
+                      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M7 2a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 5a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>
                     </div>
-                    <div class="reset-graph">
-                      <div class="graph-node reset"></div>
-                      <div class="graph-line"></div>
-                    </div>
-                    <div class="reset-info">
-                      <div class="reset-message">Initial commit</div>
-                      <div class="reset-meta">
-                        <span class="reset-hash">o4p5q6r</span>
-                        <span class="reset-author">tanaka</span>
-                        <span class="reset-date">2 weeks ago</span>
-                      </div>
-                    </div>
+                    <span class="rebase-action action-drop">drop</span>
+                    <span class="rebase-hash">g7h8i9j</span>
+                    <span class="rebase-msg">WIP: debugging logs</span>
+                    <span class="rebase-author">tanaka</span>
                   </div>
                 </div>
               </div>
-              <div class="operation-options-inline">
-                <h3>Reset Mode</h3>
-                <div class="option-mode-selector">
-                  <label class="option-mode soft">
-                    <input type="radio" name="reset-mode" value="soft">
-                    <div class="mode-content">
-                      <div class="mode-title">Soft (--soft)</div>
-                      <div class="mode-desc">Only move HEAD. Changes remain staged</div>
-                    </div>
-                  </label>
-                  <label class="option-mode mixed selected">
-                    <input type="radio" name="reset-mode" value="mixed" checked>
-                    <div class="mode-content">
-                      <div class="mode-title">Mixed (--mixed)</div>
-                      <div class="mode-desc">Reset HEAD and index. Changes remain in working tree</div>
-                    </div>
-                  </label>
-                  <label class="option-mode hard">
-                    <input type="radio" name="reset-mode" value="hard">
-                    <div class="mode-content">
-                      <div class="mode-title">Hard (--hard)</div>
-                      <div class="mode-desc danger">Reset everything. Changes will be lost</div>
-                    </div>
-                  </label>
+
+              <!-- Action Legend & Help -->
+              <div class="rebase-help">
+                <h3>Actions</h3>
+                <div class="rebase-help-grid">
+                  <span class="help-action action-pick">pick</span>
+                  <span class="help-desc">Use commit as-is</span>
+                  <span class="help-action action-reword">reword</span>
+                  <span class="help-desc">Edit commit message</span>
+                  <span class="help-action action-edit">edit</span>
+                  <span class="help-desc">Pause to amend commit</span>
+                  <span class="help-action action-squash">squash</span>
+                  <span class="help-desc">Meld into previous, keep message</span>
+                  <span class="help-action action-fixup">fixup</span>
+                  <span class="help-desc">Meld into previous, discard message</span>
+                  <span class="help-action action-drop">drop</span>
+                  <span class="help-desc">Remove commit entirely</span>
                 </div>
               </div>
             </div>
 
-            <!-- Right Panel: Changes Preview -->
+            <!-- Right: Changes Preview -->
             <div class="operation-right-panel">
               <div class="changes-preview">
                 <div class="preview-header">
                   <div class="preview-commit-info">
-                    <div class="preview-hash danger">a1b2c3d</div>
-                    <div class="preview-message">Merge branch feature/auth into main</div>
-                    <div class="preview-author">tanaka · 2 hours ago</div>
+                    <div class="preview-hash rebase">b2c3d4e</div>
+                    <div class="preview-message">feat: Complete OAuth integration</div>
+                    <div class="preview-author">yamada · 3 hours ago</div>
                   </div>
                 </div>
 
                 <div class="preview-section">
                   <div class="section-header">
                     <span class="section-title">Changed Files</span>
-                    <span class="section-count">3</span>
+                    <span class="section-count">4</span>
                   </div>
                   <div class="preview-files-list">
-                    <!-- src/auth/handler.go (expanded) -->
                     <div class="preview-file expanded">
                       <div class="preview-file-status modified">~</div>
                       <div class="preview-file-path">src/auth/handler.go</div>
                       <div class="preview-file-stats">
-                        <span class="stat-add">+45</span>
-                        <span class="stat-del">-12</span>
+                        <span class="stat-add">+38</span>
+                        <span class="stat-del">-5</span>
                       </div>
                       <div class="preview-file-expand">
                         <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 6.646a.5.5 0 0 1 .708 0L8 9.293l2.646-2.647a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708z"/></svg>
@@ -362,54 +317,49 @@
                     <div class="preview-file-diff" style="display: block;">
                       <div class="diff-preview-content">
                         <div class="diff-hunk">
-                          <div class="diff-hunk-header">@@ -1,12 +1,45 @@ handler.go</div>
-                          <div class="diff-line context"><span class="line-num old">1</span><span class="line-num new">1</span><span class="line-code">// Modified file: handler.go</span></div>
-                          <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">2</span><span class="line-code">// +45 lines added</span></div>
-                          <div class="diff-line del"><span class="line-num old">2</span><span class="line-num new"></span><span class="line-code">// -12 lines removed</span></div>
+                          <div class="diff-hunk-header">@@ -27,5 +27,38 @@ func (h *Handler) Login(...)</div>
+                          <div class="diff-line context"><span class="line-num old">27</span><span class="line-num new">27</span><span class="line-code">// Login authenticates a user</span></div>
+                          <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">28</span><span class="line-code">func (h *Handler) OAuthCallback(ctx context.Context, code string) (*Session, error) {</span></div>
+                          <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">29</span><span class="line-code">    token, err := h.oauth.Exchange(ctx, code)</span></div>
+                          <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">30</span><span class="line-code">    if err != nil {</span></div>
+                          <div class="diff-line del"><span class="line-num old">28</span><span class="line-num new"></span><span class="line-code">    // TODO: implement OAuth</span></div>
                         </div>
                       </div>
                     </div>
-                    <!-- src/auth/middleware.go -->
-                    <div class="preview-file">
-                      <div class="preview-file-status modified">~</div>
-                      <div class="preview-file-path">src/auth/middleware.go</div>
-                      <div class="preview-file-stats">
-                        <span class="stat-add">+23</span>
-                        <span class="stat-del">-5</span>
-                      </div>
-                      <div class="preview-file-expand">
-                        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 6.646a.5.5 0 0 1 .708 0L8 9.293l2.646-2.647a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708z"/></svg>
-                      </div>
-                    </div>
-                    <div class="preview-file-diff" style="display: none;">
-                      <div class="diff-preview-content">
-                        <div class="diff-hunk">
-                          <div class="diff-hunk-header">@@ -1,5 +1,23 @@ middleware.go</div>
-                          <div class="diff-line context"><span class="line-num old">1</span><span class="line-num new">1</span><span class="line-code">// Modified file: middleware.go</span></div>
-                          <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">2</span><span class="line-code">// +23 lines added</span></div>
-                          <div class="diff-line del"><span class="line-num old">2</span><span class="line-num new"></span><span class="line-code">// -5 lines removed</span></div>
-                        </div>
-                      </div>
-                    </div>
-                    <!-- tests/auth_test.go -->
+
                     <div class="preview-file">
                       <div class="preview-file-status added">+</div>
-                      <div class="preview-file-path">tests/auth_test.go</div>
+                      <div class="preview-file-path">src/auth/oauth.go</div>
                       <div class="preview-file-stats">
-                        <span class="stat-add">+67</span>
+                        <span class="stat-add">+85</span>
                         <span class="stat-del">-0</span>
                       </div>
                       <div class="preview-file-expand">
                         <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 6.646a.5.5 0 0 1 .708 0L8 9.293l2.646-2.647a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708z"/></svg>
                       </div>
                     </div>
-                    <div class="preview-file-diff" style="display: none;">
-                      <div class="diff-preview-content">
-                        <div class="diff-hunk">
-                          <div class="diff-hunk-header">@@ -1,0 +1,67 @@ auth_test.go</div>
-                          <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">1</span><span class="line-code">// New file: auth_test.go</span></div>
-                          <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">2</span><span class="line-code">// +67 lines added</span></div>
-                        </div>
+
+                    <div class="preview-file">
+                      <div class="preview-file-status modified">~</div>
+                      <div class="preview-file-path">src/config/settings.go</div>
+                      <div class="preview-file-stats">
+                        <span class="stat-add">+12</span>
+                        <span class="stat-del">-3</span>
+                      </div>
+                      <div class="preview-file-expand">
+                        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 6.646a.5.5 0 0 1 .708 0L8 9.293l2.646-2.647a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708z"/></svg>
+                      </div>
+                    </div>
+
+                    <div class="preview-file">
+                      <div class="preview-file-status modified">~</div>
+                      <div class="preview-file-path">go.mod</div>
+                      <div class="preview-file-stats">
+                        <span class="stat-add">+2</span>
+                        <span class="stat-del">-0</span>
+                      </div>
+                      <div class="preview-file-expand">
+                        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 6.646a.5.5 0 0 1 .708 0L8 9.293l2.646-2.647a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708z"/></svg>
                       </div>
                     </div>
                   </div>
@@ -419,12 +369,12 @@
                   <div class="stats-label">Impact</div>
                   <div class="stats-visual">
                     <div class="stats-bar">
-                      <div class="stats-bar-add" style="width: 88.8%"></div>
-                      <div class="stats-bar-del" style="width: 11.2%"></div>
+                      <div class="stats-bar-add" style="width: 94%"></div>
+                      <div class="stats-bar-del" style="width: 6%"></div>
                     </div>
                     <div class="stats-numbers">
-                      <span class="additions">+135</span>
-                      <span class="deletions">-17</span>
+                      <span class="additions">+137</span>
+                      <span class="deletions">-8</span>
                     </div>
                   </div>
                 </div>
@@ -435,16 +385,18 @@
           <!-- Footer -->
           <div class="operation-footer">
             <div class="operation-summary">
-              <span class="summary-stat"><strong>1</strong> commit selected</span>
+              <span class="summary-stat"><strong>7</strong> commits</span>
               <span class="summary-divider"></span>
-              <span class="summary-stat additions">+135</span>
-              <span class="summary-stat deletions">-17</span>
+              <span class="summary-stat">4 pick</span>
+              <span class="summary-stat rebase-squash-count">1 squash</span>
+              <span class="summary-stat rebase-fixup-count">1 fixup</span>
+              <span class="summary-stat rebase-drop-count">1 drop</span>
               <span class="summary-divider"></span>
-              <span class="summary-stat">3 files</span>
+              <span class="summary-stat rebase-reword-count">1 reword</span>
             </div>
-            <button class="btn btn-danger">
-              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/><path d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z"/></svg>
-              Execute Reset
+            <button class="btn btn-warning">
+              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M11.5 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L11 2.707V14.5a.5.5 0 0 0 .5.5zm-7-14a.5.5 0 0 0-.5.5v11.793l-3.146-3.147a.5.5 0 0 0-.708.708l4 4a.5.5 0 0 0 .708 0l4-4a.5.5 0 0 0-.708-.708L5 13.293V1.5a.5.5 0 0 0-.5-.5z"/></svg>
+              Start Rebase
             </button>
           </div>
         </div>
@@ -456,11 +408,11 @@
       <div class="status-left">
         <span class="status-item">
           <svg viewBox="0 0 16 16" fill="currentColor"><path d="M9.5 3.25a2.25 2.25 0 1 1 3 2.122V6A2.5 2.5 0 0 1 10 8.5H6a1 1 0 0 0-1 1v1.128a2.251 2.251 0 1 1-1.5 0V5.372a2.25 2.25 0 1 1 1.5 0v1.836A2.492 2.492 0 0 1 6 7h4a1 1 0 0 0 1-1v-.628A2.25 2.25 0 0 1 9.5 3.25z"/></svg>
-          main
+          feature/auth
         </span>
-        <span class="status-item sync">
-          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/></svg>
-          Synced with origin/main
+        <span class="status-item warning">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/></svg>
+          Rebase in progress
         </span>
       </div>
       <div class="status-right">

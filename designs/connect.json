@@ -6,6 +6,7 @@
       "mapping": {
         "Stash": "stash",
         "Cherry-pick": "cherry-pick",
+        "Rebase": "rebase",
         "Files": "file-tree"
       }
     },
@@ -102,6 +103,13 @@
       "mapping": {
         "Execute Cherry-pick": "conflict",
         "Execute Revert": "conflict"
+      }
+    },
+    {
+      "selector": ".operation-footer .btn-warning",
+      "match": "text",
+      "mapping": {
+        "Start Rebase": "conflict"
       }
     },
     {

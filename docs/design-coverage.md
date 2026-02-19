@@ -34,7 +34,6 @@ docs/features.md の機能一覧と designs/ ディレクトリの対応状況�
 
 - [x] ブランチ一覧 (`branches/`)
 - [x] ブランチ操作ダイアログ (`branches-dialog/`)
-- [ ] リベース
 - [ ] インタラクティブリベース
 
 ### リモート操作
