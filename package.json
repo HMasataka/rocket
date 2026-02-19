@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "test": "vitest run"
   },
   "packageManager": "pnpm@10.28.0",
   "devDependencies": {
