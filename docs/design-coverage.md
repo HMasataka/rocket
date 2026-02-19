@@ -22,7 +22,7 @@ docs/features.md の機能一覧と designs/ ディレクトリの対応状況�
 - [x] 差分ビューア・サイドバイサイド (`changes-split/`)
 - [x] ハンク単位ステージング (`changes/` のStage Hunk/Discardボタン)
 - [x] 行単位ステージング (`changes/` `changes-split/` のHunk Stagingアイコン)
-- [ ] 変更の破棄（確認ダイアログ）
+- [x] 変更の破棄（確認ダイアログ）
 
 ### コミット
 
@@ -34,7 +34,7 @@ docs/features.md の機能一覧と designs/ ディレクトリの対応状況�
 
 - [x] ブランチ一覧 (`branches/`)
 - [x] ブランチ操作ダイアログ (`branches-dialog/`)
-- [ ] インタラクティブリベース
+- [x] インタラクティブリベース
 
 ### リモート操作
 
@@ -43,7 +43,7 @@ docs/features.md の機能一覧と designs/ ディレクトリの対応状況�
 ### 履歴・ログ表示
 
 - [x] コミットグラフ・コミット詳細 (`history/`)
-- [ ] フィルタリング（作者/日付/パス/メッセージ）
+- [x] フィルタリング（作者/日付/パス/メッセージ）
 - [x] Blame表示
 - [x] ファイル履歴
 

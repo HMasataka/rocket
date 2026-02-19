@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rocket - History</title>
+  <title>Rocket - History (Filtered)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -165,26 +165,174 @@
           </div>
           <div class="history-content">
             <div class="history-panel">
+              <!-- Panel Toolbar with Filter Toggle -->
               <div class="panel-toolbar">
                 <div class="branch-legend">
                   <span class="legend-item"><span class="legend-dot" style="background: #58a6ff;"></span>main</span>
                   <span class="legend-item"><span class="legend-dot" style="background: #f78166;"></span>feature/auth</span>
-                  <span class="legend-item"><span class="legend-dot" style="background: #a371f7;"></span>feature/ui</span>
-                  <span class="legend-item"><span class="legend-dot" style="background: #7ee787;"></span>hotfix</span>
                 </div>
                 <div class="toolbar-right">
-                  <button class="filter-toggle" title="Toggle Filters">
+                  <button class="filter-toggle active" title="Toggle Filters">
                     <svg viewBox="0 0 16 16" fill="currentColor"><path d="M1.5 1.5A.5.5 0 0 1 2 1h12a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.128.334L10 8.692V13.5a.5.5 0 0 1-.342.474l-3 1A.5.5 0 0 1 6 14.5V8.692L1.628 3.834A.5.5 0 0 1 1.5 3.5v-2z"/></svg>
                     <span>Filter</span>
+                    <span class="filter-count">3</span>
                   </button>
-                  <input type="text" class="search-input" placeholder="Search...">
+                  <input type="text" class="search-input" placeholder="Search commits...">
                 </div>
               </div>
+
+              <!-- Filter Panel (expanded) -->
+              <div class="filter-panel">
+                <div class="filter-grid">
+                  <!-- Author Filter -->
+                  <div class="filter-group">
+                    <label class="filter-label">
+                      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0Zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4Zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10Z"/></svg>
+                      Author
+                    </label>
+                    <div class="filter-input-wrap">
+                      <input type="text" class="filter-input" placeholder="e.g. yamada" value="yamada">
+                      <button class="filter-clear" title="Clear">
+                        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.647-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg>
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Date Range Filter -->
+                  <div class="filter-group">
+                    <label class="filter-label">
+                      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/></svg>
+                      Date
+                    </label>
+                    <div class="filter-date-range">
+                      <div class="filter-input-wrap">
+                        <input type="text" class="filter-input" placeholder="From (YYYY-MM-DD)" value="2026-02-10">
+                        <button class="filter-clear" title="Clear">
+                          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.647-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg>
+                        </button>
+                      </div>
+                      <span class="filter-date-sep">~</span>
+                      <div class="filter-input-wrap">
+                        <input type="text" class="filter-input" placeholder="To (YYYY-MM-DD)">
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Path Filter -->
+                  <div class="filter-group">
+                    <label class="filter-label">
+                      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M1 3.5A1.5 1.5 0 0 1 2.5 2h3.879a1.5 1.5 0 0 1 1.06.44l1.122 1.12A1.5 1.5 0 0 0 9.62 4H13.5A1.5 1.5 0 0 1 15 5.5v8a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 1 13.5v-10Z"/></svg>
+                      Path
+                    </label>
+                    <div class="filter-input-wrap">
+                      <input type="text" class="filter-input" placeholder="e.g. internal/auth/**" value="internal/auth/**">
+                      <button class="filter-clear" title="Clear">
+                        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.647-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg>
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Message Filter -->
+                  <div class="filter-group">
+                    <label class="filter-label">
+                      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2.678 11.894a1 1 0 0 1 .287.801 10.97 10.97 0 0 1-.398 2c1.395-.323 2.247-.697 2.634-.893a1 1 0 0 1 .71-.074A8.06 8.06 0 0 0 8 14c4.418 0 8-3.134 8-7s-3.582-7-8-7-8 3.134-8 7c0 1.76.743 3.37 1.97 4.6a10.437 10.437 0 0 1-.524 1.294 6.596 6.596 0 0 1-.426.688z"/></svg>
+                      Message
+                    </label>
+                    <div class="filter-input-wrap">
+                      <input type="text" class="filter-input" placeholder="e.g. feat:, fix bug">
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Active Filter Chips -->
+                <div class="filter-active-bar">
+                  <div class="filter-chips">
+                    <span class="filter-chip">
+                      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0Zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4Zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10Z"/></svg>
+                      yamada
+                      <button class="chip-remove" title="Remove">
+                        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.647-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg>
+                      </button>
+                    </span>
+                    <span class="filter-chip">
+                      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/></svg>
+                      from 2026-02-10
+                      <button class="chip-remove" title="Remove">
+                        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.647-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg>
+                      </button>
+                    </span>
+                    <span class="filter-chip">
+                      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M1 3.5A1.5 1.5 0 0 1 2.5 2h3.879a1.5 1.5 0 0 1 1.06.44l1.122 1.12A1.5 1.5 0 0 0 9.62 4H13.5A1.5 1.5 0 0 1 15 5.5v8a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 1 13.5v-10Z"/></svg>
+                      internal/auth/**
+                      <button class="chip-remove" title="Remove">
+                        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.647-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg>
+                      </button>
+                    </span>
+                  </div>
+                  <div class="filter-actions">
+                    <span class="filter-result-count">Showing 4 of 15 commits</span>
+                    <button class="filter-clear-all">Clear All</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Commit List (filtered results) -->
               <div class="commit-list-wrapper">
-                <div class="graph-column" id="graph-column"></div>
-                <div class="commit-list" id="commit-list"></div>
+                <div class="commit-list">
+                  <div class="commit-row selected">
+                    <div class="commit-info">
+                      <div class="commit-message-row">
+                        <span class="commit-message">feat: Complete OAuth integration</span>
+                        <span class="commit-ref ref-branch">feature/auth</span>
+                      </div>
+                      <div class="commit-meta">
+                        <span class="commit-hash">b2c3d4e</span>
+                        <span class="commit-author">yamada</span>
+                        <span class="commit-date">3 hours ago</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="commit-row">
+                    <div class="commit-info">
+                      <div class="commit-message-row">
+                        <span class="commit-message">feat: Add token refresh logic</span>
+                      </div>
+                      <div class="commit-meta">
+                        <span class="commit-hash">c3d4e5f</span>
+                        <span class="commit-author">yamada</span>
+                        <span class="commit-date">5 hours ago</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="commit-row">
+                    <div class="commit-info">
+                      <div class="commit-message-row">
+                        <span class="commit-message">feat: Add login form validation</span>
+                      </div>
+                      <div class="commit-meta">
+                        <span class="commit-hash">e4f5g6h</span>
+                        <span class="commit-author">yamada</span>
+                        <span class="commit-date">Feb 12, 2026</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="commit-row">
+                    <div class="commit-info">
+                      <div class="commit-message-row">
+                        <span class="commit-message">feat: Start auth feature branch</span>
+                      </div>
+                      <div class="commit-meta">
+                        <span class="commit-hash">h7i8j9k</span>
+                        <span class="commit-author">yamada</span>
+                        <span class="commit-date">Feb 10, 2026</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
+
+            <!-- Commit Detail Panel -->
             <div class="commit-detail-panel">
               <div class="commit-detail">
                 <div class="detail-header">
@@ -192,146 +340,87 @@
                     <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0Zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4Zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10Z"/></svg>
                   </div>
                   <div class="detail-author-info">
-                    <div class="detail-author">John Developer</div>
-                    <div class="detail-author-email">john@example.com</div>
+                    <div class="detail-author">Yamada Taro</div>
+                    <div class="detail-author-email">yamada@example.com</div>
                   </div>
                   <div class="detail-date">
-                    <div class="detail-date-relative">2 hours ago</div>
-                    <div class="detail-date-absolute">Feb 17, 2026 14:32</div>
+                    <div class="detail-date-relative">3 hours ago</div>
+                    <div class="detail-date-absolute">Feb 19, 2026 11:45</div>
                   </div>
                 </div>
 
                 <div class="detail-commit-info">
                   <div class="detail-hash-row">
                     <span class="detail-label">Commit</span>
-                    <span class="detail-hash">a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6</span>
+                    <span class="detail-hash">b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7</span>
                   </div>
                   <div class="detail-parent-row">
                     <span class="detail-label">Parent</span>
-                    <span class="detail-parent-hash">b2c3d4e5</span>
+                    <span class="detail-parent-hash">c3d4e5f</span>
                   </div>
                 </div>
 
                 <div class="detail-message-section">
-                  <div class="detail-message-title">feat: Add user authentication</div>
+                  <div class="detail-message-title">feat: Complete OAuth integration</div>
                   <div class="detail-message-body">
-              Implemented JWT-based authentication system with refresh tokens.
+Completed the OAuth 2.0 integration with support for multiple providers.
 
-              - Added login/logout endpoints
-              - Implemented token refresh mechanism
-              - Added middleware for protected routes
-              - Updated user model with password hashing
-            </div>
+- Added Google and GitHub OAuth providers
+- Implemented PKCE flow for enhanced security
+- Added callback URL validation
+- Updated configuration for OAuth secrets
+                  </div>
                 </div>
 
                 <div class="detail-stats">
                   <div class="stat-item additions">
                     <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/></svg>
-                    <span>127 additions</span>
+                    <span>89 additions</span>
                   </div>
                   <div class="stat-item deletions">
                     <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8z"/></svg>
-                    <span>23 deletions</span>
+                    <span>12 deletions</span>
                   </div>
                   <div class="stat-item files">
                     <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.414A2 2 0 0 0 13.414 3L11 .586A2 2 0 0 0 9.586 0H4zm5.5 1.5v2a1 1 0 0 0 1 1h2l-3-3z"/></svg>
-                    <span>5 files changed</span>
+                    <span>3 files changed</span>
                   </div>
                 </div>
 
                 <div class="detail-files">
                   <div class="section-header">
                     <span class="section-title">Changed Files</span>
-                    <span class="section-count">5</span>
+                    <span class="section-count">3</span>
                   </div>
                   <div class="unified-files-list">
                     <div class="unified-file added">
                       <div class="unified-file-status added">+</div>
-                      <div class="unified-file-path">internal/auth/handler.go</div>
+                      <div class="unified-file-path">internal/auth/oauth.go</div>
                       <div class="unified-file-stats">
-                        <span class="stat-add">+89</span>
+                        <span class="stat-add">+67</span>
                         <span class="stat-del">-0</span>
                       </div>
                       <div class="unified-file-expand">
                         <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 6.646a.5.5 0 0 1 .708 0L8 9.293l2.646-2.647a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708z"/></svg>
                       </div>
                     </div>
-                    <div class="unified-file modified expanded">
+                    <div class="unified-file modified">
                       <div class="unified-file-status modified">~</div>
-                      <div class="unified-file-path">internal/auth/middleware.go</div>
+                      <div class="unified-file-path">internal/auth/handler.go</div>
                       <div class="unified-file-stats">
-                        <span class="stat-add">+24</span>
+                        <span class="stat-add">+18</span>
                         <span class="stat-del">-8</span>
                       </div>
                       <div class="unified-file-expand">
                         <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 6.646a.5.5 0 0 1 .708 0L8 9.293l2.646-2.647a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708z"/></svg>
                       </div>
                     </div>
-                    <div class="unified-file-diff">
-                      <div class="diff-preview-header">
-                        <span class="diff-preview-path">internal/auth/middleware.go</span>
-                        <div class="diff-preview-actions">
-                          <button class="icon-btn" title="View full file">
-                            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/><path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/></svg>
-                          </button>
-                          <button class="icon-btn" title="Copy path">
-                            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
-                          </button>
-                        </div>
-                      </div>
-                      <div class="diff-preview-content">
-                        <div class="diff-hunk">
-                          <div class="diff-hunk-header">@@ -12,6 +12,18 @@ func NewAuthMiddleware(config *Config) *AuthMiddleware {</div>
-                          <div class="diff-line context"><span class="line-num old">12</span><span class="line-num new">12</span><span class="line-code">    return &AuthMiddleware{config: config}</span></div>
-                          <div class="diff-line context"><span class="line-num old">13</span><span class="line-num new">13</span><span class="line-code">}</span></div>
-                          <div class="diff-line context"><span class="line-num old">14</span><span class="line-num new">14</span><span class="line-code"></span></div>
-                          <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">15</span><span class="line-code">// ValidateToken checks if the token is valid and not expired</span></div>
-                          <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">16</span><span class="line-code">func (m *AuthMiddleware) ValidateToken(token string) (*Claims, error) {</span></div>
-                          <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">17</span><span class="line-code">    claims, err := jwt.ParseWithClaims(token, &Claims{}, func(t *jwt.Token) (interface{}, error) {</span></div>
-                          <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">18</span><span class="line-code">        return m.config.SecretKey, nil</span></div>
-                          <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">19</span><span class="line-code">    })</span></div>
-                          <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">20</span><span class="line-code">    if err != nil {</span></div>
-                          <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">21</span><span class="line-code">        return nil, fmt.Errorf("invalid token: %w", err)</span></div>
-                          <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">22</span><span class="line-code">    }</span></div>
-                          <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">23</span><span class="line-code">    return claims.(*Claims), nil</span></div>
-                          <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">24</span><span class="line-code">}</span></div>
-                          <div class="diff-line context"><span class="line-num old">15</span><span class="line-num new">25</span><span class="line-code"></span></div>
-                          <div class="diff-line del"><span class="line-num old">16</span><span class="line-num new"></span><span class="line-code">// Deprecated: Use ValidateToken instead</span></div>
-                          <div class="diff-line del"><span class="line-num old">17</span><span class="line-num new"></span><span class="line-code">func (m *AuthMiddleware) CheckToken(token string) bool {</span></div>
-                          <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">26</span><span class="line-code">// Middleware returns the HTTP middleware handler</span></div>
-                          <div class="diff-line add"><span class="line-num old"></span><span class="line-num new">27</span><span class="line-code">func (m *AuthMiddleware) Middleware() func(http.Handler) http.Handler {</span></div>
-                          <div class="diff-line context"><span class="line-num old">18</span><span class="line-num new">28</span><span class="line-code">    return func(next http.Handler) http.Handler {</span></div>
-                        </div>
-                      </div>
-                    </div>
                     <div class="unified-file modified">
                       <div class="unified-file-status modified">~</div>
-                      <div class="unified-file-path">internal/models/user.go</div>
+                      <div class="unified-file-path">internal/auth/config.go</div>
                       <div class="unified-file-stats">
-                        <span class="stat-add">+12</span>
-                        <span class="stat-del">-15</span>
-                      </div>
-                      <div class="unified-file-expand">
-                        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 6.646a.5.5 0 0 1 .708 0L8 9.293l2.646-2.647a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708z"/></svg>
-                      </div>
-                    </div>
-                    <div class="unified-file added">
-                      <div class="unified-file-status added">+</div>
-                      <div class="unified-file-path">internal/auth/token.go</div>
-                      <div class="unified-file-stats">
-                        <span class="stat-add">+45</span>
-                        <span class="stat-del">-0</span>
-                      </div>
-                      <div class="unified-file-expand">
-                        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 6.646a.5.5 0 0 1 .708 0L8 9.293l2.646-2.647a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708z"/></svg>
-                      </div>
-                    </div>
-                    <div class="unified-file deleted">
-                      <div class="unified-file-status deleted">-</div>
-                      <div class="unified-file-path">internal/auth/legacy.go</div>
-                      <div class="unified-file-stats">
-                        <span class="stat-add">+0</span>
-                        <span class="stat-del">-23</span>
+                        <span class="stat-add">+4</span>
+                        <span class="stat-del">-4</span>
                       </div>
                       <div class="unified-file-expand">
                         <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 6.646a.5.5 0 0 1 .708 0L8 9.293l2.646-2.647a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708z"/></svg>
@@ -344,12 +433,12 @@
           </div>
           <div class="operation-footer">
             <div class="operation-summary">
-              <span class="summary-stat"><strong>a1b2c3d</strong></span>
+              <span class="summary-stat"><strong>b2c3d4e</strong></span>
               <span class="summary-divider"></span>
-              <span class="summary-stat additions">+127</span>
-              <span class="summary-stat deletions">-23</span>
+              <span class="summary-stat additions">+89</span>
+              <span class="summary-stat deletions">-12</span>
               <span class="summary-divider"></span>
-              <span class="summary-stat">5 files</span>
+              <span class="summary-stat">3 files</span>
             </div>
             <div class="operation-buttons">
               <button class="btn btn-secondary">
@@ -379,132 +468,13 @@
         </span>
       </div>
       <div class="status-right">
+        <span class="status-item">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M1.5 1.5A.5.5 0 0 1 2 1h12a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.128.334L10 8.692V13.5a.5.5 0 0 1-.342.474l-3 1A.5.5 0 0 1 6 14.5V8.692L1.628 3.834A.5.5 0 0 1 1.5 3.5v-2z"/></svg>
+          3 filters active
+        </span>
         <span class="status-item">rocket-app</span>
       </div>
     </div>
   </div>
-
-  <script>
-    // Commit graph rendering (static, no interactivity)
-    const commits = [
-      { hash: 'a1b2c3d', message: 'Merge branch feature/auth into main', author: 'tanaka', date: '2 hours ago', col: 0, type: 'merge', mergeFrom: 1, refs: ['HEAD', 'main', 'origin/main'] },
-      { hash: 'b2c3d4e', message: 'feat: Complete OAuth integration', author: 'yamada', date: '3 hours ago', col: 1, type: 'commit', refs: [] },
-      { hash: 'c3d4e5f', message: 'feat: Add token refresh logic', author: 'yamada', date: '5 hours ago', col: 1, type: 'commit', refs: [] },
-      { hash: 'd4e5f6g', message: 'fix: Fix CSS layout issue', author: 'suzuki', date: '6 hours ago', col: 2, type: 'commit', refs: ['feature/ui-redesign'] },
-      { hash: 'e4f5g6h', message: 'feat: Add login form validation', author: 'yamada', date: '8 hours ago', col: 1, type: 'commit', refs: ['feature/auth'] },
-      { hash: 'f5g6h7i', message: 'refactor: Improve component structure', author: 'suzuki', date: '1 day ago', col: 2, type: 'commit', refs: [] },
-      { hash: 'g6h7i8j', message: 'docs: Update API documentation', author: 'tanaka', date: '1 day ago', col: 0, type: 'commit', refs: [] },
-      { hash: 'h7i8j9k', message: 'feat: Start auth feature branch', author: 'yamada', date: '2 days ago', col: 1, type: 'branch', branchFrom: 0, refs: [] },
-      { hash: 'i8j9k0l', message: 'feat: Start UI redesign', author: 'suzuki', date: '2 days ago', col: 2, type: 'branch', branchFrom: 0, refs: [] },
-      { hash: 'j9k0l1m', message: 'fix: Fix login redirect bug', author: 'tanaka', date: '3 days ago', col: 0, type: 'commit', refs: [] },
-      { hash: 'k0l1m2n', message: 'Merge branch hotfix/login into main', author: 'tanaka', date: '4 days ago', col: 0, type: 'merge', mergeFrom: 3, refs: [] },
-      { hash: 'l1m2n3o', message: 'fix: Critical login hotfix', author: 'yamada', date: '4 days ago', col: 3, type: 'commit', refs: [] },
-      { hash: 'm2n3o4p', message: 'chore: Update dependencies', author: 'tanaka', date: '5 days ago', col: 0, type: 'commit', refs: [] },
-      { hash: 'n3o4p5q', message: 'feat: Add settings screen', author: 'suzuki', date: '1 week ago', col: 0, type: 'commit', refs: ['v1.0.0'] },
-      { hash: 'o4p5q6r', message: 'Initial commit', author: 'tanaka', date: '2 weeks ago', col: 0, type: 'commit', refs: [] }
-    ];
-
-    const branchColors = ['#58a6ff', '#f78166', '#a371f7', '#7ee787', '#ffa657'];
-    const ROW_HEIGHT = 52;
-    const COL_WIDTH = 20;
-    const NODE_RADIUS = 5;
-    const GRAPH_PADDING = 16;
-    const maxCol = Math.max(...commits.map(c => c.col));
-
-    function buildGraphSVG() {
-      const height = commits.length * ROW_HEIGHT;
-      const width = (maxCol + 1) * COL_WIDTH + GRAPH_PADDING * 2;
-      let paths = '';
-      let nodes = '';
-      const activeLanes = new Array(maxCol + 1).fill(false);
-
-      commits.forEach((commit, index) => {
-        const y = index * ROW_HEIGHT + ROW_HEIGHT / 2;
-        const x = GRAPH_PADDING + commit.col * COL_WIDTH;
-        const color = branchColors[commit.col % branchColors.length];
-
-        for (let col = 0; col <= maxCol; col++) {
-          if (activeLanes[col] && col !== commit.col) {
-            const laneX = GRAPH_PADDING + col * COL_WIDTH;
-            const laneColor = branchColors[col % branchColors.length];
-            paths += `<line x1="${laneX}" y1="${y - ROW_HEIGHT/2}" x2="${laneX}" y2="${y + ROW_HEIGHT/2}" stroke="${laneColor}" stroke-width="2" class="graph-lane"/>`;
-          }
-        }
-
-        if (commit.type === 'branch') {
-          const parentX = GRAPH_PADDING + commit.branchFrom * COL_WIDTH;
-          paths += `<path d="M ${parentX} ${y - ROW_HEIGHT/2} L ${parentX} ${y - 10} Q ${parentX} ${y} ${x} ${y}" stroke="${color}" stroke-width="2" fill="none"/>`;
-          paths += `<line x1="${parentX}" y1="${y}" x2="${parentX}" y2="${y + ROW_HEIGHT/2}" stroke="${branchColors[commit.branchFrom % branchColors.length]}" stroke-width="2"/>`;
-          activeLanes[commit.col] = true;
-        } else if (commit.type === 'merge') {
-          const mergeX = GRAPH_PADDING + commit.mergeFrom * COL_WIDTH;
-          paths += `<path d="M ${mergeX} ${y - ROW_HEIGHT/2} L ${mergeX} ${y - 10} Q ${mergeX} ${y} ${x} ${y}" stroke="${branchColors[commit.mergeFrom % branchColors.length]}" stroke-width="2" fill="none"/>`;
-          if (index < commits.length - 1) {
-            paths += `<line x1="${x}" y1="${y}" x2="${x}" y2="${y + ROW_HEIGHT/2}" stroke="${color}" stroke-width="2"/>`;
-          }
-          activeLanes[commit.mergeFrom] = false;
-        } else {
-          if (index < commits.length - 1) {
-            paths += `<line x1="${x}" y1="${y}" x2="${x}" y2="${y + ROW_HEIGHT/2}" stroke="${color}" stroke-width="2"/>`;
-          }
-          if (index > 0) {
-            paths += `<line x1="${x}" y1="${y - ROW_HEIGHT/2}" x2="${x}" y2="${y}" stroke="${color}" stroke-width="2"/>`;
-          }
-        }
-
-        if (commit.type === 'merge') {
-          nodes += `<circle cx="${x}" cy="${y}" r="${NODE_RADIUS + 2}" fill="var(--bg-primary)" stroke="${color}" stroke-width="2"/>`;
-          nodes += `<circle cx="${x}" cy="${y}" r="${NODE_RADIUS - 1}" fill="${color}"/>`;
-        } else {
-          nodes += `<circle cx="${x}" cy="${y}" r="${NODE_RADIUS}" fill="${color}"/>`;
-        }
-      });
-
-      return `<svg class="commit-graph-svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">${paths}${nodes}</svg>`;
-    }
-
-    function buildCommitList() {
-      return commits.map((c, index) => {
-        const refsHtml = c.refs.map(ref => {
-          let refClass = 'ref-tag';
-          if (ref === 'HEAD') refClass = 'ref-head';
-          else if (ref.startsWith('origin/')) refClass = 'ref-remote';
-          else if (ref.startsWith('v')) refClass = 'ref-version';
-          else refClass = 'ref-branch';
-          return `<span class="commit-ref ${refClass}">${ref}</span>`;
-        }).join('');
-
-        return `
-          <div class="commit-row${index === 0 ? ' selected' : ''}">
-            <div class="commit-info">
-              <div class="commit-message-row">
-                <span class="commit-message">${c.message}</span>
-                ${refsHtml}
-              </div>
-              <div class="commit-meta">
-                <span class="commit-hash">${c.hash}</span>
-                <span class="commit-author">${c.author}</span>
-                <span class="commit-date">${c.date}</span>
-              </div>
-            </div>
-          </div>`;
-      }).join('');
-    }
-
-    // Render on load
-    document.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('graph-column').innerHTML = buildGraphSVG();
-      document.getElementById('commit-list').innerHTML = buildCommitList();
-
-      // Synchronized scrolling
-      const commitList = document.querySelector('.commit-list');
-      const graphColumn = document.querySelector('.graph-column');
-      if (commitList && graphColumn) {
-        commitList.addEventListener('scroll', () => {
-          graphColumn.scrollTop = commitList.scrollTop;
-        });
-      }
-    });
-  </script>
 </body>
 </html>
