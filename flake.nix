@@ -16,10 +16,12 @@
             rustc
             rustfmt
             clippy
+            rust-analyzer
             nodejs
             pnpm
             cargo-tauri
           ];
+          RUST_SRC_PATH = "${pkgs.rustPlatform.rustLibSrc}";
         };
       });
 }
