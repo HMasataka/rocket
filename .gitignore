@@ -1,1 +1,5 @@
 designs-linked/
+
+# Nix / direnv
+.direnv/
+result
