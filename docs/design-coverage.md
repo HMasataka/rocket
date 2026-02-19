@@ -115,9 +115,9 @@ docs/features.md の機能一覧と designs/ ディレクトリの対応状況�
 
 ### GitHub/GitLab連携
 
-- [ ] PR/MR作成
-- [ ] Issue参照
-- [ ] CI/CD状態表示
+- [x] PR/MR作成 (`hosting/`)
+- [x] Issue参照 (`hosting/`)
+- [x] CI/CD状態表示 (`hosting/`)
 
 ### その他
 

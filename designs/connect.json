@@ -7,7 +7,8 @@
         "Stash": "stash",
         "Cherry-pick": "cherry-pick",
         "Rebase": "rebase",
-        "Files": "file-tree"
+        "Files": "file-tree",
+        "GitHub": "hosting"
       }
     },
     {
