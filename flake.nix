@@ -14,6 +14,11 @@
           packages = with pkgs; [
             cargo
             rustc
+            rustfmt
+            clippy
+            nodejs
+            pnpm
+            cargo-tauri
           ];
         };
       });

@@ -3,3 +3,10 @@ designs-linked/
 # Nix / direnv
 .direnv/
 result
+
+# Frontend
+node_modules/
+dist/
+
+# Rust / Tauri
+src-tauri/target/
