@@ -2,7 +2,7 @@
 
 ## 概要
 
-RocketはGo言語で構築されたモダンなGit GUIクライアントです。直感的なUIと高速なパフォーマンスを両立し、日常のGit操作を効率化します。
+RocketはRust (Tauri v2) + React (TypeScript) で構築されたモダンなGit GUIクライアントです。直感的なUIと高速なパフォーマンスを両立し、日常のGit操作を効率化します。
 
 ## コア機能
 
@@ -318,6 +318,14 @@ light:
 - **自動fetch**: バックグラウンドで定期的にfetch
 
 ## 技術仕様
+
+### 技術スタック
+
+- **言語**: Rust（ADR-0001）
+- **GUIフレームワーク**: Tauri v2（ADR-0002）
+- **フロントエンド**: React (TypeScript)（ADR-0002）
+- **Gitバックエンド**: git2-rs メイン + git CLI フォールバック（ADR-0003）
+- **配布**: Tauriバンドラーによるインストーラー自動生成（.dmg / .msi / .deb / .rpm / .AppImage）
 
 ### 対応プラットフォーム
 
