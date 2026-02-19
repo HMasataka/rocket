@@ -23,8 +23,14 @@ pub enum GitError {
     #[error("failed to commit: {0}")]
     CommitFailed(#[source] Box<dyn std::error::Error + Send + Sync>),
 
-    #[error("HEAD not found")]
-    HeadNotFound,
+    #[error("failed to get current branch: {0}")]
+    BranchNotFound(#[source] Box<dyn std::error::Error + Send + Sync>),
+
+    #[error("failed to read config: {0}")]
+    ConfigReadFailed(#[source] Box<dyn std::error::Error + Send + Sync>),
+
+    #[error("failed to write config: {0}")]
+    ConfigWriteFailed(#[source] Box<dyn std::error::Error + Send + Sync>),
 }
 
 pub type GitResult<T> = Result<T, GitError>;

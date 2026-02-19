@@ -29,22 +29,6 @@ pub struct RepoStatus {
     pub files: Vec<FileStatus>,
 }
 
-impl RepoStatus {
-    pub fn staged(&self) -> Vec<&FileStatus> {
-        self.files
-            .iter()
-            .filter(|f| f.staging == StagingState::Staged)
-            .collect()
-    }
-
-    pub fn unstaged(&self) -> Vec<&FileStatus> {
-        self.files
-            .iter()
-            .filter(|f| f.staging == StagingState::Unstaged)
-            .collect()
-    }
-}
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum DiffLineKind {

@@ -41,10 +41,6 @@ impl Git2Backend {
 }
 
 impl GitBackend for Git2Backend {
-    fn workdir(&self) -> &Path {
-        &self.workdir
-    }
-
     fn status(&self) -> GitResult<RepoStatus> {
         let repo = self.repo.lock().unwrap();
 
@@ -249,6 +245,61 @@ impl GitBackend for Git2Backend {
         }
 
         Ok(())
+    }
+
+    fn stage_all(&self) -> GitResult<()> {
+        let repo = self.repo.lock().unwrap();
+        let mut index = repo
+            .index()
+            .map_err(|e| GitError::StageFailed(Box::new(e)))?;
+
+        index
+            .add_all(["*"], git2::IndexAddOption::DEFAULT, None)
+            .map_err(|e| GitError::StageFailed(Box::new(e)))?;
+
+        index
+            .write()
+            .map_err(|e| GitError::StageFailed(Box::new(e)))?;
+
+        Ok(())
+    }
+
+    fn unstage_all(&self) -> GitResult<()> {
+        let repo = self.repo.lock().unwrap();
+
+        match repo.head() {
+            Ok(head) => {
+                let obj = head
+                    .peel(git2::ObjectType::Commit)
+                    .map_err(|e| GitError::UnstageFailed(Box::new(e)))?;
+                repo.reset_default(Some(&obj), ["*"])
+                    .map_err(|e| GitError::UnstageFailed(Box::new(e)))?;
+            }
+            Err(_) => {
+                // No HEAD (initial commit): clear the entire index
+                let mut index = repo
+                    .index()
+                    .map_err(|e| GitError::UnstageFailed(Box::new(e)))?;
+                index
+                    .clear()
+                    .map_err(|e| GitError::UnstageFailed(Box::new(e)))?;
+                index
+                    .write()
+                    .map_err(|e| GitError::UnstageFailed(Box::new(e)))?;
+            }
+        }
+
+        Ok(())
+    }
+
+    fn current_branch(&self) -> GitResult<String> {
+        let repo = self.repo.lock().unwrap();
+        let head = repo
+            .head()
+            .map_err(|e| GitError::BranchNotFound(Box::new(e)))?;
+
+        let name = head.shorthand().unwrap_or("HEAD").to_string();
+        Ok(name)
     }
 
     fn commit(&self, message: &str) -> GitResult<CommitResult> {
