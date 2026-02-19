@@ -134,6 +134,15 @@
       "selector": ".filter-toggle",
       "match": "text",
       "target": "history-filter"
+    },
+    {
+      "selector": ".hosting-tab",
+      "match": "text",
+      "mapping": {
+        "Pull Requests": "hosting",
+        "Issues": "hosting-issues",
+        "CI/CD": "hosting-cicd"
+      }
     }
   ],
   "modals": [

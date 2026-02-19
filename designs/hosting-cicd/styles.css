@@ -1,0 +1,365 @@
+/* ===== Run Item ===== */
+.run-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.run-item:hover {
+  background: var(--bg-hover);
+}
+
+.run-item.selected {
+  background: var(--accent-dim);
+  border-left: 3px solid var(--accent);
+}
+
+.run-item.selected:hover {
+  background: var(--accent-dim);
+}
+
+.run-status-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.run-status-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.run-status-icon.success { color: var(--success); }
+.run-status-icon.failure { color: var(--danger); }
+.run-status-icon.running { color: var(--warning); animation: pulse 1.5s infinite; }
+
+.run-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.run-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.run-title {
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.run-branch {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 1px 6px;
+  background: var(--bg-tertiary);
+  border-radius: 4px;
+  color: var(--accent);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.run-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.run-meta + .run-meta {
+  margin-top: 2px;
+}
+
+.run-number {
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--accent);
+}
+
+.run-duration {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  flex-shrink: 0;
+}
+
+.running-text {
+  color: var(--warning);
+}
+
+/* ===== Run Detail ===== */
+.run-detail {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.run-detail-header {
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.run-status-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 12px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.run-status-badge svg {
+  width: 12px;
+  height: 12px;
+}
+
+.run-status-badge.success { background: var(--success-dim); color: var(--success); border: 1px solid rgba(63, 185, 80, 0.3); }
+.run-status-badge.failure { background: var(--danger-dim); color: var(--danger); border: 1px solid rgba(248, 81, 73, 0.3); }
+.run-status-badge.running { background: var(--warning-dim, rgba(210, 153, 34, 0.15)); color: var(--warning); border: 1px solid rgba(210, 153, 34, 0.3); }
+
+.run-detail-commit {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.run-detail-commit svg {
+  width: 14px;
+  height: 14px;
+  color: var(--text-muted);
+}
+
+.run-detail-commit code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  padding: 2px 6px;
+  background: var(--bg-tertiary);
+  border-radius: 4px;
+  color: var(--accent);
+}
+
+/* ===== Trigger Info ===== */
+.run-trigger-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+}
+
+.run-trigger-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+}
+
+.run-trigger-label {
+  width: 70px;
+  flex-shrink: 0;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.run-trigger-value {
+  color: var(--text-secondary);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.run-trigger-value code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ===== Job List ===== */
+.job-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.job-item {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.job-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--bg-secondary);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.job-header:hover {
+  background: var(--bg-hover);
+}
+
+.job-status-icon {
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.job-status-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.job-status-icon.success { color: var(--success); }
+.job-status-icon.failure { color: var(--danger); }
+.job-status-icon.running { color: var(--warning); }
+
+.job-name {
+  flex: 1;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.job-duration {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* ===== Steps ===== */
+.job-steps {
+  border-top: 1px solid var(--border);
+}
+
+.step-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px 6px 32px;
+  font-size: 12px;
+  transition: background-color 0.15s ease;
+}
+
+.step-item:hover {
+  background: var(--bg-hover);
+}
+
+.step-item + .step-item {
+  border-top: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
+}
+
+.step-icon {
+  width: 14px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.step-icon svg {
+  width: 12px;
+  height: 12px;
+}
+
+.step-item.success .step-icon { color: var(--success); }
+.step-item.failure .step-icon { color: var(--danger); }
+.step-item.running .step-icon { color: var(--warning); }
+
+.step-name {
+  flex: 1;
+  color: var(--text-secondary);
+}
+
+.step-duration {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+/* ===== Artifacts ===== */
+.artifact-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.artifact-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--bg-secondary);
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.artifact-item:hover {
+  background: var(--bg-hover);
+}
+
+.artifact-item svg {
+  width: 14px;
+  height: 14px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.artifact-name {
+  flex: 1;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--accent);
+}
+
+.artifact-size {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* ===== Footer Helpers ===== */
+.success-text {
+  color: var(--success);
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 767px) {
+  .run-branch {
+    display: none;
+  }
+
+  .run-duration {
+    display: none;
+  }
+}
