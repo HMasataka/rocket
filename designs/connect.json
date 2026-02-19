@@ -108,6 +108,11 @@
       "selector": ".icon-btn[title='File History']",
       "match": "title",
       "target": "file-history"
+    },
+    {
+      "selector": ".icon-btn[title='Blame']",
+      "match": "title",
+      "target": "blame"
     }
   ],
   "modals": [

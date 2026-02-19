@@ -14,7 +14,6 @@ docs/features.md の機能一覧と designs/ ディレクトリの対応状況�
 - [x] クローン (`open-repository/` のCloneボタン)
 - [x] 初期化 (`init/`)
 - [x] 最近開いたリポジトリ (`open-repository/` のRecent Repositories)
-- [ ] 複数リポジトリのタブ表示
 - [x] .gitignoreテンプレート (`init/` の.gitignore Templateセレクト)
 
 ### 変更の確認・ステージング
@@ -46,8 +45,8 @@ docs/features.md の機能一覧と designs/ ディレクトリの対応状況�
 
 - [x] コミットグラフ・コミット詳細 (`history/`)
 - [ ] フィルタリング（作者/日付/パス/メッセージ）
-- [ ] Blame表示
-- [ ] ファイル履歴
+- [x] Blame表示
+- [x] ファイル履歴
 
 ### スタッシュ
 
