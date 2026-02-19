@@ -1,0 +1,119 @@
+/* ===== Discard Modal ===== */
+.discard-modal {
+  width: 460px;
+  max-width: 90vw;
+}
+
+/* ===== Modal Title with Warning Icon ===== */
+.discard-modal-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.discard-warning-icon {
+  width: 20px;
+  height: 20px;
+  color: var(--warning);
+  flex-shrink: 0;
+}
+
+/* ===== Discard Scope ===== */
+.discard-scope {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.discard-scope-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--warning);
+  background: var(--warning-dim);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.discard-scope-target {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.discard-scope-range {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-left: auto;
+}
+
+/* ===== Discard Preview ===== */
+.discard-preview {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  line-height: 1.6;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 16px;
+  max-height: 160px;
+  overflow-y: auto;
+}
+
+.discard-preview-line {
+  padding: 2px 12px;
+  white-space: pre;
+}
+
+.discard-preview-line.del {
+  background: var(--diff-del-bg);
+  color: var(--danger);
+}
+
+.discard-preview-line.add {
+  background: var(--diff-add-bg);
+  color: var(--success);
+}
+
+/* ===== Warning Message ===== */
+.discard-warning-message {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--danger-dim);
+  border: 1px solid rgba(248, 81, 73, 0.2);
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.discard-warning-message svg {
+  width: 16px;
+  height: 16px;
+  color: var(--danger);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 767px) {
+  .discard-scope {
+    flex-wrap: wrap;
+  }
+
+  .discard-scope-range {
+    margin-left: 0;
+    width: 100%;
+  }
+}

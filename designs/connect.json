@@ -121,6 +121,13 @@
       "selector": ".icon-btn[title='Blame']",
       "match": "title",
       "target": "blame"
+    },
+    {
+      "selector": ".hunk-btn",
+      "match": "text",
+      "mapping": {
+        "Discard": "discard-changes"
+      }
     }
   ],
   "modals": [
@@ -139,7 +146,8 @@
     "remote",
     "conflict",
     "merge-viewer",
-    "search"
+    "search",
+    "discard-changes"
   ],
   "close": [
     ".modal-close",
@@ -147,6 +155,11 @@
       "selector": ".modal-footer .btn-secondary",
       "match": "text",
       "value": "Close"
+    },
+    {
+      "selector": ".modal-footer .btn-secondary",
+      "match": "text",
+      "value": "Cancel"
     }
   ],
   "ignore": ["mockup"]
