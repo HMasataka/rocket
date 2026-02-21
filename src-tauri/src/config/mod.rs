@@ -21,8 +21,7 @@ pub fn load_config() -> GitResult<AppConfig> {
     if !path.exists() {
         return Ok(AppConfig::default());
     }
-    let content =
-        fs::read_to_string(&path).map_err(|e| GitError::ConfigReadFailed(Box::new(e)))?;
+    let content = fs::read_to_string(&path).map_err(|e| GitError::ConfigReadFailed(Box::new(e)))?;
     let config: AppConfig =
         toml::from_str(&content).map_err(|e| GitError::ConfigReadFailed(Box::new(e)))?;
     Ok(config)

@@ -70,8 +70,7 @@ fn stage_and_unstage_file() {
     assert!(status
         .files
         .iter()
-        .any(|f| f.path == "a.txt"
-            && f.staging == app_lib::git::types::StagingState::Staged));
+        .any(|f| f.path == "a.txt" && f.staging == app_lib::git::types::StagingState::Staged));
 
     // Unstage
     backend.unstage(Path::new("a.txt")).unwrap();

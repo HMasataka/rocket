@@ -2,10 +2,12 @@ mod commands;
 mod config;
 pub mod git;
 mod state;
+mod watcher;
 
 use std::sync::Mutex;
 
 use state::AppState;
+use tauri::Manager;
 
 /// CLI 引数 → last_opened_repo → カレントディレクトリ の優先順位でリポジトリパスを解決する
 fn resolve_repo_path() -> Option<std::path::PathBuf> {
@@ -43,11 +45,19 @@ pub fn run() {
         }
     }
 
+    // git2::Repository::discover で実際の workdir を解決する
+    let watch_path = repo_path.as_ref().and_then(|path| {
+        git2::Repository::discover(path)
+            .ok()
+            .and_then(|repo| repo.workdir().map(|p| p.to_path_buf()))
+    });
+
     tauri::Builder::default()
         .manage(AppState {
             repo: Mutex::new(repo),
+            watcher: Mutex::new(None),
         })
-        .setup(|app| {
+        .setup(move |app| {
             if cfg!(debug_assertions) {
                 app.handle().plugin(
                     tauri_plugin_log::Builder::default()
@@ -55,6 +65,19 @@ pub fn run() {
                         .build(),
                 )?;
             }
+
+            if let Some(path) = watch_path {
+                match watcher::start_watcher(app.handle().clone(), &path) {
+                    Ok(w) => {
+                        let state = app.state::<AppState>();
+                        *state.watcher.lock().unwrap() = Some(w);
+                    }
+                    Err(e) => {
+                        log::error!("ファイル監視の起動に失敗: {}", e);
+                    }
+                }
+            }
+
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![

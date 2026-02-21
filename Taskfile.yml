@@ -32,6 +32,38 @@ tasks:
     cmds:
       - pnpm test
 
+  fmt:
+    desc: 全フォーマット実行（Rust + フロントエンド）
+    cmds:
+      - task: fmt:rust
+      - task: fmt:front
+
+  fmt:check:
+    desc: 全フォーマットチェック（修正なし）
+    cmds:
+      - task: fmt:rust:check
+      - task: fmt:front:check
+
+  fmt:rust:
+    desc: cargo fmt でフォーマット実行
+    cmds:
+      - cargo fmt --manifest-path src-tauri/Cargo.toml
+
+  fmt:rust:check:
+    desc: cargo fmt でフォーマットチェック（修正なし）
+    cmds:
+      - cargo fmt --manifest-path src-tauri/Cargo.toml -- --check
+
+  fmt:front:
+    desc: Biome でフォーマット実行
+    cmds:
+      - pnpm biome format --write src/
+
+  fmt:front:check:
+    desc: Biome でフォーマットチェック（修正なし）
+    cmds:
+      - pnpm biome format src/
+
   lint:
     desc: Biome でリント・フォーマットチェック
     cmds:
