@@ -7,14 +7,41 @@ use std::sync::Mutex;
 
 use state::AppState;
 
+/// CLI 引数 → last_opened_repo → カレントディレクトリ の優先順位でリポジトリパスを解決する
+fn resolve_repo_path() -> Option<std::path::PathBuf> {
+    // 1. CLI 引数にパスが指定されている場合
+    if let Some(arg) = std::env::args().nth(1) {
+        return std::fs::canonicalize(&arg).ok();
+    }
+
+    // 2. last_opened_repo が設定されている場合
+    if let Ok(cfg) = config::load_config() {
+        if let Some(last) = cfg.last_opened_repo {
+            let path = std::path::PathBuf::from(&last);
+            if path.is_dir() {
+                return Some(path);
+            }
+        }
+    }
+
+    // 3. カレントディレクトリ
+    std::env::current_dir().ok()
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    let repo = std::env::current_dir()
-        .ok()
-        .and_then(|cwd| {
-            git::dispatcher::GitDispatcher::open_default(&cwd)
-                .ok()
-        });
+    let repo_path = resolve_repo_path();
+    let repo = repo_path
+        .as_ref()
+        .and_then(|path| git::dispatcher::GitDispatcher::open_default(path).ok());
+
+    // リポジトリを正常に開けた場合、last_opened_repo に保存
+    if let (Some(path), Some(_)) = (&repo_path, &repo) {
+        if let Ok(mut cfg) = config::load_config() {
+            cfg.last_opened_repo = Some(path.to_string_lossy().to_string());
+            let _ = config::save_config(&cfg);
+        }
+    }
 
     tauri::Builder::default()
         .manage(AppState {

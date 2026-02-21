@@ -39,10 +39,10 @@
   - [x] フロントエンドアーキテクチャ確定（ADR-0005）
   - [x] Biome（フォーマッタ・リンター）導入
   - [x] テスト基盤（Vitest / cargo test / テストCI）
-- [ ] CLI 起動
-  - [ ] `rocket .` でカレントディレクトリを開く
-  - [ ] `rocket /path/to/repo` で指定パスを開く
-  - [ ] 引数なしで最後に開いたリポジトリ or ホーム画面
+- [x] CLI 起動
+  - [x] `rocket .` でカレントディレクトリを開く
+  - [x] `rocket /path/to/repo` で指定パスを開く
+  - [x] 引数なしで最後に開いたリポジトリ or ホーム画面
 - [x] リポジトリ状態表示
   - [x] 変更ファイル一覧（Untracked / Modified / Staged）
   - [x] 基本的なファイルツリー表示
