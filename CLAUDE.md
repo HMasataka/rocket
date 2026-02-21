@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Rocket はクロスプラットフォームの Git GUI クライアント。技術スタック: Rust + Tauri v2（バックエンド）、React + TypeScript + Vite（フロントエンド）、git2-rs + git CLI ハイブリッド（Git操作）。技術選定の詳細は `docs/adr/` を参照。
 
-現在 **デザインフェーズ (v0.0)** — プロダクションコードはまだない。リポジトリには UI/UX モックアップとドキュメントのみ。
+現在 **v0.1 MVP** — 基本的なコミットワークフロー（状態表示・差分表示・ステージング・コミット）が動作する。
 
 ## 開発環境
 
@@ -19,45 +19,66 @@ pnpm install              # フロントエンドの依存をインストール
 
 ## コマンド
 
+タスクランナーは [Task](https://taskfile.dev/)（`Taskfile.yml`）を使用。
+
 ```bash
-# Tauri アプリを開発モードで起動（ホットリロード付き）
-cargo tauri dev
-
-# フロントエンドのみ起動（ブラウザで http://localhost:1420 で確認）
-pnpm dev
-
-# フロントエンドビルド（TypeScript チェック + Vite ビルド）
-pnpm build
-
-# プロダクションビルド（バイナリ生成）
-cargo tauri build
-
-# デザインモックアップにページ遷移スクリプトを注入
-task designs:link         # designs-linked/ へ出力
+task dev                  # Tauri アプリを開発モードで起動（ホットリロード付き）
+task dev:front            # フロントエンドのみ起動（ブラウザで http://localhost:1420）
+task build                # プロダクションビルド（バイナリ生成）
+task test                 # 全テスト実行（Rust + フロントエンド）
+task test:rust            # Rust テストのみ
+task test:front           # フロントエンドテストのみ（vitest）
+task lint                 # Biome でリント・フォーマットチェック
+task lint:fix             # Biome で自動修正
+task clippy               # Rust 静的解析
+task check                # lint + clippy + test を一括実行
+task designs:link         # デザインモックに遷移スクリプト注入
 task designs:clean        # 注入済みスクリプトを除去
 ```
 
 ## アーキテクチャ
 
-```
-src/                  # React フロントエンド (TypeScript)
-src-tauri/            # Rust バックエンド (Tauri v2)
-  src/lib.rs          # Tauri コマンド・プラグイン登録
-  src/main.rs         # エントリポイント
-  tauri.conf.json     # Tauri 設定 (identifier: com.github.hmasataka.rocket)
-  Cargo.toml          # Rust 依存管理
-designs/              # HTML/CSS デザインモックアップ（ページ単位）
-designs-linked/       # connect CLI で遷移スクリプト注入済み出力（gitignore）
-docs/                 # 機能仕様・ロードマップ・ADR
-```
-
-目標レイヤー構成（`docs/roadmap.md` に記載）:
+### 5層構成（ADR-0004）
 
 ```
-UI Layer (React / Tauri)  →  Tauri Command (IPC Bridge)  →  Application Layer  →  Domain Layer  →  Infrastructure Layer (git2-rs / git CLI / LLM CLI)
+UI Layer (React)  →  Tauri Command (IPC)  →  Application Layer  →  Domain Layer  →  Infrastructure Layer (git2-rs / git CLI)
 ```
 
-CI は GitHub Actions で macOS / Linux (ubuntu-24.04) / Windows のクロスプラットフォームビルドを実行（`.github/workflows/build.yml`）。
+依存方向は上→下の一方向。Domain Layer が GitBackend トレイトを定義し、Infrastructure Layer が実装する（依存性逆転）。
+
+### バックエンド（Rust / `src-tauri/src/`）
+
+- `lib.rs` — Tauri コマンド登録・AppState 初期化・プラグイン設定
+- `state.rs` — `AppState { repo: Mutex<Option<Box<dyn GitBackend>>> }`
+- `commands/git.rs` — Git 操作の Tauri コマンド（get_status, get_diff, stage_file, unstage_file, commit 等）
+- `commands/config.rs` — 設定の読み書きコマンド
+- `git/backend.rs` — `GitBackend` トレイト（抽象インターフェース）
+- `git/git2_backend.rs` — git2-rs による実装
+- `git/types.rs` — FileStatus, FileDiff, DiffHunk 等のシリアライズ可能な型
+- `config/mod.rs` — `~/.config/rocket/config.toml` の読み書き
+
+### フロントエンド（React / TypeScript / `src/`）（ADR-0005）
+
+**状態管理**: Zustand。**コンポーネント設計**: Atomic Design。**IPC 通信**: Service Layer。
+
+- `services/git.ts` — Tauri `invoke()` ラッパー + TypeScript 型定義（Rust 型と対応）
+- `stores/gitStore.ts` — Git 状態（status, diff, branch）の Zustand ストア
+- `stores/uiStore.ts` — UI 状態（選択ファイル、トースト通知）の Zustand ストア
+- `components/` — 共有コンポーネント（atoms: Button, StatusBadge / organisms: Sidebar, Statusbar, Titlebar, ToastContainer / templates: AppShell）
+- `pages/changes/` — Changes ページ（organisms: FilePanel, DiffPanel, CommitPanel / molecules: FileItem, FileSection, DiffHunk, DiffLine）
+
+データフロー: `Component → Store action → Service → invoke() → Rust Command → GitBackend`
+
+### コーディング規約
+
+- **フォーマッタ/リンター**: Biome（スペース2つインデント、ダブルクォート、recommended ルール）
+- **Rust**: clippy `-D warnings`
+- **テスト**: フロントエンド=Vitest、Rust=cargo test（`src-tauri/tests/` に結合テスト）
+
+### CI
+
+- `.github/workflows/build.yml` — macOS / Linux (ubuntu-24.04) / Windows クロスプラットフォームビルド
+- `.github/workflows/test.yml` — Rust テスト + clippy、フロントエンドテスト
 
 ## デザインシステム
 
@@ -99,7 +120,7 @@ CSS セレクタとページ遷移先のマッピングを定義。`connect` CLI
 - `docs/features.md` — 機能仕様
 - `docs/roadmap.md` — 開発ロードマップ (v0.0–v1.x+)
 - `docs/design-coverage.md` — デザインカバレッジ（どの機能にモックアップがあるか）
-- `docs/adr/` — アーキテクチャ決定記録（Rust, Tauri v2, git2-rs ハイブリッド）
+- `docs/adr/` — アーキテクチャ決定記録（0001: Rust, 0002: Tauri v2, 0003: git2-rs ハイブリッド, 0004: 5層アーキテクチャ, 0005: フロントエンド設計）
 
 ## 言語
 
