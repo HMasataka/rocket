@@ -46,7 +46,6 @@ pub fn run() {
     }
 
     // git2::Repository::discover で実際の workdir を解決する
-    // （CWD が src-tauri/ でも親ディレクトリのプロジェクトルートを正しく取得）
     let watch_path = repo_path.as_ref().and_then(|path| {
         git2::Repository::discover(path)
             .ok()
