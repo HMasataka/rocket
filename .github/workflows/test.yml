@@ -30,6 +30,9 @@ jobs:
         with:
           workspaces: src-tauri -> target
 
+      - name: Format check
+        run: cargo fmt --manifest-path src-tauri/Cargo.toml -- --check
+
       - name: Run tests
         run: cargo test --manifest-path src-tauri/Cargo.toml
 
@@ -47,4 +50,8 @@ jobs:
           cache: pnpm
 
       - run: pnpm install --frozen-lockfile
+
+      - name: Biome check
+        run: pnpm biome check src/
+
       - run: pnpm test
