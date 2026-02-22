@@ -1,4 +1,4 @@
-import type { CommitInfo } from "../../../services/history";
+import type { CommitInfo, CommitStats } from "../../../services/history";
 import { formatRelativeDate } from "../../../utils/date";
 import { refClass } from "../../../utils/refs";
 
@@ -6,12 +6,14 @@ interface FileHistoryCommitRowProps {
   commit: CommitInfo;
   isSelected: boolean;
   onSelect: (oid: string) => void;
+  stats?: CommitStats | null;
 }
 
 export function FileHistoryCommitRow({
   commit,
   isSelected,
   onSelect,
+  stats,
 }: FileHistoryCommitRowProps) {
   return (
     <button
@@ -41,6 +43,12 @@ export function FileHistoryCommitRow({
           {formatRelativeDate(commit.author_date)}
         </span>
       </div>
+      {stats && (
+        <div className="fh-commit-stats">
+          <span className="stat-add">+{stats.additions}</span>
+          <span className="stat-del">-{stats.deletions}</span>
+        </div>
+      )}
     </button>
   );
 }

@@ -1,5 +1,8 @@
+import { useState } from "react";
 import type { CommitDetail } from "../../../services/history";
 import { formatAbsoluteDate, formatRelativeDate } from "../../../utils/date";
+
+type DiffViewMode = "inline" | "split";
 
 interface FileHistoryDetailPanelProps {
   detail: CommitDetail | null;
@@ -8,6 +11,7 @@ interface FileHistoryDetailPanelProps {
 export function FileHistoryDetailPanel({
   detail,
 }: FileHistoryDetailPanelProps) {
+  const [diffViewMode, setDiffViewMode] = useState<DiffViewMode>("inline");
   if (!detail) {
     return (
       <div className="fh-detail-panel">
@@ -59,6 +63,22 @@ export function FileHistoryDetailPanel({
           <div className="fh-diff-stats-summary">
             <span className="stat-add">+{stats.additions}</span>
             <span className="stat-del">-{stats.deletions}</span>
+          </div>
+          <div className="fh-diff-toggle">
+            <button
+              type="button"
+              className={`toggle-btn${diffViewMode === "inline" ? " active" : ""}`}
+              onClick={() => setDiffViewMode("inline")}
+            >
+              Inline
+            </button>
+            <button
+              type="button"
+              className={`toggle-btn${diffViewMode === "split" ? " active" : ""}`}
+              onClick={() => setDiffViewMode("split")}
+            >
+              Split
+            </button>
           </div>
         </div>
         <div className="fh-diff-content">
