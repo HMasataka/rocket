@@ -30,14 +30,45 @@
   height: 12px;
   border-radius: 50%;
   cursor: pointer;
+  border: none;
+  padding: 0;
+  margin: 0;
+  outline: none;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: filter 0.15s ease;
+}
+
+.window-dot::after {
+  position: absolute;
+  font-size: 9px;
+  line-height: 1;
+  color: rgba(0, 0, 0, 0.5);
+  opacity: 0;
   transition: opacity 0.15s ease;
 }
 
-.window-dot:hover { opacity: 0.8; }
+.window-controls:hover .window-dot::after { opacity: 1; }
+.window-controls:hover .window-dot:hover { filter: brightness(0.9); }
 
 .window-dot.close { background: #ff5f57; }
+.window-dot.close::after { content: "\00d7"; }
+
 .window-dot.minimize { background: #febc2e; }
+.window-dot.minimize::after { content: "\2212"; }
+
 .window-dot.maximize { background: #28c840; }
+.window-dot.maximize::after {
+  content: "";
+  width: 0;
+  height: 0;
+  border-left: 3.5px solid transparent;
+  border-right: 3.5px solid transparent;
+  border-bottom: 5px solid rgba(0, 0, 0, 0.5);
+  font-size: 0;
+}
 
 .titlebar-tabs {
   display: flex;
