@@ -64,6 +64,15 @@ pub enum GitError {
 
     #[error("authentication failed: {0}")]
     AuthFailed(#[source] Box<dyn std::error::Error + Send + Sync>),
+
+    #[error("failed to get commit log: {0}")]
+    LogFailed(#[source] Box<dyn std::error::Error + Send + Sync>),
+
+    #[error("commit not found: {oid}")]
+    CommitNotFound { oid: String },
+
+    #[error("failed to get blame: {0}")]
+    BlameFailed(#[source] Box<dyn std::error::Error + Send + Sync>),
 }
 
 pub type GitResult<T> = Result<T, GitError>;

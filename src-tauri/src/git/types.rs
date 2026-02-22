@@ -135,3 +135,118 @@ pub enum MergeOption {
     FastForwardOnly,
     NoFastForward,
 }
+
+// === History / Log types ===
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CommitInfo {
+    pub oid: String,
+    pub short_oid: String,
+    pub message: String,
+    pub body: String,
+    pub author_name: String,
+    pub author_email: String,
+    pub author_date: i64,
+    pub parent_oids: Vec<String>,
+    pub refs: Vec<CommitRef>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CommitRef {
+    pub name: String,
+    pub kind: CommitRefKind,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum CommitRefKind {
+    Head,
+    LocalBranch,
+    RemoteBranch,
+    Tag,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CommitGraphRow {
+    pub oid: String,
+    pub column: usize,
+    pub node_type: GraphNodeType,
+    pub edges: Vec<GraphEdge>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum GraphNodeType {
+    Normal,
+    Merge,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct GraphEdge {
+    pub from_column: usize,
+    pub to_column: usize,
+    pub color_index: usize,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CommitDetail {
+    pub info: CommitInfo,
+    pub files: Vec<CommitFileChange>,
+    pub stats: CommitStats,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CommitFileChange {
+    pub path: String,
+    pub status: CommitFileStatus,
+    pub additions: u32,
+    pub deletions: u32,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum CommitFileStatus {
+    Added,
+    Modified,
+    Deleted,
+    Renamed,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CommitStats {
+    pub additions: u32,
+    pub deletions: u32,
+    pub files_changed: u32,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct BlameResult {
+    pub path: String,
+    pub lines: Vec<BlameLine>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct BlameLine {
+    pub line_number: u32,
+    pub content: String,
+    pub commit_oid: String,
+    pub commit_short_oid: String,
+    pub author_name: String,
+    pub author_date: i64,
+    pub is_block_start: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct LogFilter {
+    pub author: Option<String>,
+    pub since: Option<i64>,
+    pub until: Option<i64>,
+    pub message: Option<String>,
+    pub path: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CommitLogResult {
+    pub commits: Vec<CommitInfo>,
+    pub graph: Vec<CommitGraphRow>,
+}
