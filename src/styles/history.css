@@ -81,6 +81,11 @@
   color: var(--accent);
 }
 
+.filter-toggle.active:hover {
+  background: var(--accent-dim);
+  filter: brightness(1.1);
+}
+
 .filter-count {
   background: var(--accent);
   color: #fff;
@@ -492,6 +497,11 @@
   color: var(--text-muted);
 }
 
+.diff-preview-actions {
+  display: flex;
+  gap: 4px;
+}
+
 /* ===== File Action Buttons ===== */
 .detail-file-actions {
   display: flex;
@@ -562,9 +572,17 @@
   height: 12px;
 }
 
+/* ===== Filter Input ===== */
+.filter-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
 .filter-input {
   width: 100%;
   padding: 7px 10px;
+  padding-right: 28px;
   background: var(--bg-primary);
   border: 1px solid var(--border);
   border-radius: 6px;
@@ -580,19 +598,56 @@
   font-family: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
+.filter-input:hover {
+  border-color: var(--text-muted);
+}
+
 .filter-input:focus {
   outline: none;
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-dim);
 }
 
+/* Input with value - highlight border */
+.filter-input:not(:placeholder-shown) {
+  border-color: var(--accent);
+  background: rgba(88, 166, 255, 0.05);
+}
+
+.filter-clear {
+  position: absolute;
+  right: 4px;
+  width: 22px;
+  height: 22px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.filter-clear:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.filter-clear svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* ===== Date Range ===== */
 .filter-date-range {
   display: flex;
   align-items: center;
   gap: 6px;
 }
 
-.filter-date-range input {
+.filter-date-range .filter-input-wrap {
   flex: 1;
 }
 
@@ -629,6 +684,12 @@
   font-family: "JetBrains Mono", monospace;
   font-size: 11px;
   color: var(--accent);
+}
+
+.filter-chip svg {
+  width: 11px;
+  height: 11px;
+  opacity: 0.6;
 }
 
 .chip-remove {
@@ -685,6 +746,13 @@
 .filter-clear-all:hover {
   background: var(--bg-tertiary);
   color: var(--text-primary);
+  border-color: var(--text-muted);
+}
+
+/* ===== Footer Buttons ===== */
+.operation-buttons {
+  display: flex;
+  gap: 8px;
 }
 
 /* ===== Empty State ===== */
@@ -698,6 +766,12 @@
 }
 
 /* ===== Responsive ===== */
+@media (max-width: 1199px) {
+  .filter-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 1023px) {
   .history-content {
     grid-template-columns: 1fr;
@@ -709,5 +783,20 @@
   }
   .commit-detail-panel {
     max-height: 50%;
+  }
+}
+
+@media (max-width: 767px) {
+  .filter-active-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .filter-date-range {
+    flex-direction: column;
+  }
+
+  .filter-date-sep {
+    display: none;
   }
 }

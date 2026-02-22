@@ -41,18 +41,36 @@ export function FilterPanel({
             </svg>
             Author
           </span>
-          <input
-            type="text"
-            className="filter-input"
-            placeholder="e.g. yamada"
-            value={filter.author ?? ""}
-            onChange={(e) =>
-              onFilterChange({
-                ...filter,
-                author: e.target.value || null,
-              })
-            }
-          />
+          <div className="filter-input-wrap">
+            <input
+              type="text"
+              className="filter-input"
+              placeholder="e.g. yamada"
+              value={filter.author ?? ""}
+              onChange={(e) =>
+                onFilterChange({
+                  ...filter,
+                  author: e.target.value || null,
+                })
+              }
+            />
+            {filter.author && (
+              <button
+                type="button"
+                className="filter-clear"
+                title="Clear"
+                onClick={() => onFilterChange({ ...filter, author: null })}
+              >
+                <svg
+                  viewBox="0 0 16 16"
+                  fill="currentColor"
+                  role="presentation"
+                >
+                  <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.647-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z" />
+                </svg>
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="filter-group">
@@ -63,31 +81,67 @@ export function FilterPanel({
             Date
           </span>
           <div className="filter-date-range">
-            <input
-              type="text"
-              className="filter-input"
-              placeholder="From (YYYY-MM-DD)"
-              value={formatDateInput(filter.since)}
-              onChange={(e) =>
-                onFilterChange({
-                  ...filter,
-                  since: parseDateInput(e.target.value),
-                })
-              }
-            />
+            <div className="filter-input-wrap">
+              <input
+                type="text"
+                className="filter-input"
+                placeholder="From (YYYY-MM-DD)"
+                value={formatDateInput(filter.since)}
+                onChange={(e) =>
+                  onFilterChange({
+                    ...filter,
+                    since: parseDateInput(e.target.value),
+                  })
+                }
+              />
+              {filter.since && (
+                <button
+                  type="button"
+                  className="filter-clear"
+                  title="Clear"
+                  onClick={() => onFilterChange({ ...filter, since: null })}
+                >
+                  <svg
+                    viewBox="0 0 16 16"
+                    fill="currentColor"
+                    role="presentation"
+                  >
+                    <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.647-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z" />
+                  </svg>
+                </button>
+              )}
+            </div>
             <span className="filter-date-sep">~</span>
-            <input
-              type="text"
-              className="filter-input"
-              placeholder="To (YYYY-MM-DD)"
-              value={formatDateInput(filter.until)}
-              onChange={(e) =>
-                onFilterChange({
-                  ...filter,
-                  until: parseDateInput(e.target.value),
-                })
-              }
-            />
+            <div className="filter-input-wrap">
+              <input
+                type="text"
+                className="filter-input"
+                placeholder="To (YYYY-MM-DD)"
+                value={formatDateInput(filter.until)}
+                onChange={(e) =>
+                  onFilterChange({
+                    ...filter,
+                    until: parseDateInput(e.target.value),
+                  })
+                }
+              />
+              {filter.until && (
+                <button
+                  type="button"
+                  className="filter-clear"
+                  title="Clear"
+                  onClick={() => onFilterChange({ ...filter, until: null })}
+                >
+                  <svg
+                    viewBox="0 0 16 16"
+                    fill="currentColor"
+                    role="presentation"
+                  >
+                    <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.647-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z" />
+                  </svg>
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
@@ -98,18 +152,36 @@ export function FilterPanel({
             </svg>
             Path
           </span>
-          <input
-            type="text"
-            className="filter-input"
-            placeholder="e.g. internal/auth/**"
-            value={filter.path ?? ""}
-            onChange={(e) =>
-              onFilterChange({
-                ...filter,
-                path: e.target.value || null,
-              })
-            }
-          />
+          <div className="filter-input-wrap">
+            <input
+              type="text"
+              className="filter-input"
+              placeholder="e.g. internal/auth/**"
+              value={filter.path ?? ""}
+              onChange={(e) =>
+                onFilterChange({
+                  ...filter,
+                  path: e.target.value || null,
+                })
+              }
+            />
+            {filter.path && (
+              <button
+                type="button"
+                className="filter-clear"
+                title="Clear"
+                onClick={() => onFilterChange({ ...filter, path: null })}
+              >
+                <svg
+                  viewBox="0 0 16 16"
+                  fill="currentColor"
+                  role="presentation"
+                >
+                  <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.647-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z" />
+                </svg>
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="filter-group">
@@ -119,18 +191,36 @@ export function FilterPanel({
             </svg>
             Message
           </span>
-          <input
-            type="text"
-            className="filter-input"
-            placeholder="e.g. feat:, fix bug"
-            value={filter.message ?? ""}
-            onChange={(e) =>
-              onFilterChange({
-                ...filter,
-                message: e.target.value || null,
-              })
-            }
-          />
+          <div className="filter-input-wrap">
+            <input
+              type="text"
+              className="filter-input"
+              placeholder="e.g. feat:, fix bug"
+              value={filter.message ?? ""}
+              onChange={(e) =>
+                onFilterChange({
+                  ...filter,
+                  message: e.target.value || null,
+                })
+              }
+            />
+            {filter.message && (
+              <button
+                type="button"
+                className="filter-clear"
+                title="Clear"
+                onClick={() => onFilterChange({ ...filter, message: null })}
+              >
+                <svg
+                  viewBox="0 0 16 16"
+                  fill="currentColor"
+                  role="presentation"
+                >
+                  <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.647-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z" />
+                </svg>
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
