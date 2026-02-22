@@ -237,6 +237,21 @@
   box-shadow: 0 0 0 3px var(--accent-dim);
 }
 
+/* ===== Radio Group ===== */
+.radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.radio-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
 /* ===== Toast ===== */
 .toast-container {
   position: fixed;
