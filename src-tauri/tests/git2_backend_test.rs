@@ -4,7 +4,7 @@ use std::process::Command;
 
 use app_lib::git::backend::GitBackend;
 use app_lib::git::git2_backend::Git2Backend;
-use app_lib::git::types::{DiffOptions, MergeOption, PullOption};
+use app_lib::git::types::{DiffOptions, LogFilter, MergeOption, PullOption};
 
 fn init_test_repo(dir: &Path) {
     Command::new("git")
@@ -454,4 +454,153 @@ fn fetch_invalid_url_remote_fails() {
 
     let result = backend.fetch("bad");
     assert!(result.is_err());
+}
+
+#[test]
+fn get_commit_log_returns_commits() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+
+    fs::write(tmp.path().join("second.txt"), "second").unwrap();
+    backend.stage(Path::new("second.txt")).unwrap();
+    backend.commit("second commit").unwrap();
+
+    let filter = LogFilter {
+        author: None,
+        since: None,
+        until: None,
+        message: None,
+        path: None,
+    };
+    let result = backend.get_commit_log(&filter, 100, 0).unwrap();
+
+    assert_eq!(result.commits.len(), 2);
+    assert_eq!(result.commits[0].message, "second commit");
+    assert_eq!(result.commits[1].message, "initial commit");
+}
+
+#[test]
+fn get_commit_log_filters_by_author() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+
+    let filter = LogFilter {
+        author: Some("Test User".to_string()),
+        since: None,
+        until: None,
+        message: None,
+        path: None,
+    };
+    let result = backend.get_commit_log(&filter, 100, 0).unwrap();
+
+    assert_eq!(result.commits.len(), 1);
+
+    let filter_no_match = LogFilter {
+        author: Some("Nonexistent".to_string()),
+        since: None,
+        until: None,
+        message: None,
+        path: None,
+    };
+    let result = backend.get_commit_log(&filter_no_match, 100, 0).unwrap();
+
+    assert!(result.commits.is_empty());
+}
+
+#[test]
+fn get_commit_detail_returns_info_and_files() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+
+    fs::write(tmp.path().join("detail.txt"), "detail content").unwrap();
+    backend.stage(Path::new("detail.txt")).unwrap();
+    let commit_result = backend.commit("detail commit").unwrap();
+
+    let detail = backend.get_commit_detail(&commit_result.oid).unwrap();
+
+    assert_eq!(detail.info.message, "detail commit");
+    assert_eq!(detail.files.len(), 1);
+    assert_eq!(detail.files[0].path, "detail.txt");
+    assert_eq!(detail.stats.files_changed, 1);
+}
+
+#[test]
+fn get_commit_detail_invalid_oid_returns_error() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+
+    let result = backend.get_commit_detail("invalid_oid");
+
+    assert!(result.is_err());
+}
+
+#[test]
+fn get_blame_returns_correct_line_count() {
+    let tmp = tempfile::tempdir().unwrap();
+    init_test_repo(tmp.path());
+
+    let content = "line1\nline2\nline3\nline4\nline5\n";
+    fs::write(tmp.path().join("blame.txt"), content).unwrap();
+
+    let backend = Git2Backend::open(tmp.path()).unwrap();
+    backend.stage(Path::new("blame.txt")).unwrap();
+    backend.commit("add blame file").unwrap();
+
+    let blame_result = backend.get_blame("blame.txt", None).unwrap();
+
+    assert_eq!(blame_result.path, "blame.txt");
+    assert_eq!(blame_result.lines.len(), 5);
+
+    for (i, line) in blame_result.lines.iter().enumerate() {
+        assert_eq!(line.line_number, (i + 1) as u32);
+    }
+
+    assert_eq!(blame_result.lines[0].content, "line1");
+    assert_eq!(blame_result.lines[4].content, "line5");
+}
+
+#[test]
+fn get_blame_with_multiple_commits_tracks_authors() {
+    let tmp = tempfile::tempdir().unwrap();
+    init_test_repo(tmp.path());
+
+    fs::write(tmp.path().join("multi.txt"), "original\n").unwrap();
+    let backend = Git2Backend::open(tmp.path()).unwrap();
+    backend.stage(Path::new("multi.txt")).unwrap();
+    let first_commit = backend.commit("first").unwrap();
+
+    fs::write(tmp.path().join("multi.txt"), "original\nadded\n").unwrap();
+    backend.stage(Path::new("multi.txt")).unwrap();
+    backend.commit("second").unwrap();
+
+    let blame_result = backend.get_blame("multi.txt", None).unwrap();
+
+    assert_eq!(blame_result.lines.len(), 2);
+    assert_eq!(blame_result.lines[0].commit_oid, first_commit.oid);
+    assert_eq!(blame_result.lines[0].content, "original");
+    assert_eq!(blame_result.lines[1].content, "added");
+}
+
+#[test]
+fn get_file_history_returns_only_touching_commits() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+
+    fs::write(tmp.path().join("tracked.txt"), "v1").unwrap();
+    backend.stage(Path::new("tracked.txt")).unwrap();
+    backend.commit("add tracked").unwrap();
+
+    fs::write(tmp.path().join("other.txt"), "other").unwrap();
+    backend.stage(Path::new("other.txt")).unwrap();
+    backend.commit("add other").unwrap();
+
+    fs::write(tmp.path().join("tracked.txt"), "v2").unwrap();
+    backend.stage(Path::new("tracked.txt")).unwrap();
+    backend.commit("update tracked").unwrap();
+
+    let history = backend.get_file_history("tracked.txt", 100, 0).unwrap();
+
+    assert_eq!(history.len(), 2);
+    assert_eq!(history[0].message, "update tracked");
+    assert_eq!(history[1].message, "add tracked");
 }
