@@ -4,7 +4,11 @@ const iconColor = "rgba(77,18,10,0.85)";
 
 function CloseIcon() {
   return (
-    <svg viewBox="0 0 10 10" xmlns="http://www.w3.org/2000/svg">
+    <svg
+      viewBox="0 0 10 10"
+      role="presentation"
+      xmlns="http://www.w3.org/2000/svg"
+    >
       <path
         d="M2.5 2.5L7.5 7.5M7.5 2.5L2.5 7.5"
         stroke={iconColor}
@@ -18,7 +22,11 @@ function CloseIcon() {
 
 function MinimizeIcon() {
   return (
-    <svg viewBox="0 0 10 10" xmlns="http://www.w3.org/2000/svg">
+    <svg
+      viewBox="0 0 10 10"
+      role="presentation"
+      xmlns="http://www.w3.org/2000/svg"
+    >
       <path
         d="M1.5 5H8.5"
         stroke={iconColor}
@@ -32,7 +40,11 @@ function MinimizeIcon() {
 
 function MaximizeIcon() {
   return (
-    <svg viewBox="0 0 10 10" xmlns="http://www.w3.org/2000/svg">
+    <svg
+      viewBox="0 0 10 10"
+      role="presentation"
+      xmlns="http://www.w3.org/2000/svg"
+    >
       <path
         d="M2.5 1.5H6.5L1.5 6.5V2.5C1.5 1.95 1.95 1.5 2.5 1.5Z"
         fill={iconColor}
