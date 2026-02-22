@@ -8,6 +8,9 @@ import "./styles/components.css";
 import "./styles/changes-view.css";
 import "./styles/branches.css";
 import "./styles/remote.css";
+import "./styles/history.css";
+import "./styles/blame.css";
+import "./styles/file-history.css";
 
 const root = document.getElementById("root");
 if (!root) throw new Error("Root element not found");
