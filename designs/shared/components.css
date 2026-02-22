@@ -163,6 +163,31 @@
   flex: 1;
 }
 
+.modal-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.modal-input {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.modal-input:focus { border-color: var(--accent); }
+.modal-input::placeholder { color: var(--text-muted); }
+
+.modal-search { margin-bottom: 16px; }
+
 .modal-footer {
   padding: 16px 20px;
   border-top: 1px solid var(--border);
