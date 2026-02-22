@@ -1,15 +1,19 @@
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 
-use git2::{BranchType, DiffFormat, DiffOptions as Git2DiffOptions, Repository, StatusOptions};
+use git2::{
+    BranchType, DiffFormat, DiffOptions as Git2DiffOptions, Oid, Repository, Sort, StatusOptions,
+};
 
 use crate::git::auth::create_credentials_callback;
 use crate::git::backend::GitBackend;
 use crate::git::error::{GitError, GitResult};
 use crate::git::types::{
-    BranchInfo, CommitResult, DiffHunk, DiffLine, DiffLineKind, DiffOptions, FetchResult, FileDiff,
-    FileStatus, FileStatusKind, MergeKind, MergeOption, MergeResult, PullOption, PushResult,
-    RemoteInfo, RepoStatus, StagingState,
+    BlameLine, BlameResult, BranchInfo, CommitDetail, CommitFileChange, CommitFileStatus,
+    CommitGraphRow, CommitInfo, CommitLogResult, CommitRef, CommitRefKind, CommitResult,
+    CommitStats, DiffHunk, DiffLine, DiffLineKind, DiffOptions, FetchResult, FileDiff, FileStatus,
+    FileStatusKind, GraphEdge, GraphNodeType, LogFilter, MergeKind, MergeOption, MergeResult,
+    PullOption, PushResult, RemoteInfo, RepoStatus, StagingState,
 };
 
 pub struct Git2Backend {
@@ -630,6 +634,348 @@ impl GitBackend for Git2Backend {
             .map_err(|e| GitError::RemoteFailed(Box::new(e)))?;
         Ok(())
     }
+
+    fn get_commit_log(
+        &self,
+        filter: &LogFilter,
+        limit: usize,
+        skip: usize,
+    ) -> GitResult<CommitLogResult> {
+        let repo = self.repo.lock().unwrap();
+
+        let mut revwalk = repo
+            .revwalk()
+            .map_err(|e| GitError::LogFailed(Box::new(e)))?;
+        revwalk
+            .set_sorting(Sort::TIME | Sort::TOPOLOGICAL)
+            .map_err(|e| GitError::LogFailed(Box::new(e)))?;
+        revwalk
+            .push_head()
+            .map_err(|e| GitError::LogFailed(Box::new(e)))?;
+
+        let ref_map = build_ref_map(&repo);
+        let mut commits = Vec::new();
+        let mut skipped = 0;
+
+        for oid_result in revwalk {
+            let oid = oid_result.map_err(|e| GitError::LogFailed(Box::new(e)))?;
+            let commit = repo
+                .find_commit(oid)
+                .map_err(|e| GitError::LogFailed(Box::new(e)))?;
+
+            if !matches_filter(&repo, &commit, filter) {
+                continue;
+            }
+
+            if skipped < skip {
+                skipped += 1;
+                continue;
+            }
+
+            let info = commit_to_info(&commit, &ref_map);
+            commits.push(info);
+
+            if commits.len() >= limit {
+                break;
+            }
+        }
+
+        let graph = build_graph(&commits);
+
+        Ok(CommitLogResult { commits, graph })
+    }
+
+    fn get_commit_detail(&self, oid: &str) -> GitResult<CommitDetail> {
+        let repo = self.repo.lock().unwrap();
+        let commit_oid = Oid::from_str(oid).map_err(|_| GitError::CommitNotFound {
+            oid: oid.to_string(),
+        })?;
+        let commit = repo
+            .find_commit(commit_oid)
+            .map_err(|_| GitError::CommitNotFound {
+                oid: oid.to_string(),
+            })?;
+
+        let ref_map = build_ref_map(&repo);
+        let info = commit_to_info(&commit, &ref_map);
+
+        let commit_tree = commit
+            .tree()
+            .map_err(|e| GitError::LogFailed(Box::new(e)))?;
+        let parent_tree = commit.parent(0).ok().and_then(|p| p.tree().ok());
+
+        let diff = repo
+            .diff_tree_to_tree(parent_tree.as_ref(), Some(&commit_tree), None)
+            .map_err(|e| GitError::LogFailed(Box::new(e)))?;
+
+        let diff_stats = diff.stats().map_err(|e| GitError::LogFailed(Box::new(e)))?;
+
+        let mut files = Vec::new();
+        for delta_idx in 0..diff.deltas().len() {
+            let delta = diff.get_delta(delta_idx).unwrap();
+            let path = delta
+                .new_file()
+                .path()
+                .or_else(|| delta.old_file().path())
+                .map(|p| p.to_string_lossy().into_owned())
+                .unwrap_or_default();
+
+            let status = match delta.status() {
+                git2::Delta::Added => CommitFileStatus::Added,
+                git2::Delta::Deleted => CommitFileStatus::Deleted,
+                git2::Delta::Renamed => CommitFileStatus::Renamed,
+                _ => CommitFileStatus::Modified,
+            };
+
+            files.push(CommitFileChange {
+                path,
+                status,
+                additions: 0,
+                deletions: 0,
+            });
+        }
+
+        // Count per-file stats via patch
+        let num_deltas = diff.deltas().len();
+        for idx in 0..num_deltas {
+            if let Ok(Some(patch)) = git2::Patch::from_diff(&diff, idx) {
+                let (_, adds, dels) = patch.line_stats().unwrap_or((0, 0, 0));
+                if let Some(file) = files.get_mut(idx) {
+                    file.additions = adds as u32;
+                    file.deletions = dels as u32;
+                }
+            }
+        }
+
+        let stats = CommitStats {
+            additions: diff_stats.insertions() as u32,
+            deletions: diff_stats.deletions() as u32,
+            files_changed: diff_stats.files_changed() as u32,
+        };
+
+        Ok(CommitDetail { info, files, stats })
+    }
+
+    fn get_commit_file_diff(&self, oid: &str, path: &str) -> GitResult<Vec<FileDiff>> {
+        let repo = self.repo.lock().unwrap();
+        let commit_oid = Oid::from_str(oid).map_err(|_| GitError::CommitNotFound {
+            oid: oid.to_string(),
+        })?;
+        let commit = repo
+            .find_commit(commit_oid)
+            .map_err(|_| GitError::CommitNotFound {
+                oid: oid.to_string(),
+            })?;
+
+        let commit_tree = commit
+            .tree()
+            .map_err(|e| GitError::DiffFailed(Box::new(e)))?;
+        let parent_tree = commit.parent(0).ok().and_then(|p| p.tree().ok());
+
+        let mut diff_opts = Git2DiffOptions::new();
+        diff_opts.pathspec(path);
+
+        let diff = repo
+            .diff_tree_to_tree(
+                parent_tree.as_ref(),
+                Some(&commit_tree),
+                Some(&mut diff_opts),
+            )
+            .map_err(|e| GitError::DiffFailed(Box::new(e)))?;
+
+        let mut file_diffs: Vec<FileDiff> = Vec::new();
+        diff.print(DiffFormat::Patch, |delta, hunk, line| {
+            let old_path = delta
+                .old_file()
+                .path()
+                .map(|p| p.to_string_lossy().into_owned());
+            let new_path = delta
+                .new_file()
+                .path()
+                .map(|p| p.to_string_lossy().into_owned());
+
+            let needs_new = file_diffs
+                .last()
+                .map(|fd| fd.old_path != old_path || fd.new_path != new_path)
+                .unwrap_or(true);
+
+            if needs_new {
+                file_diffs.push(FileDiff {
+                    old_path: old_path.clone(),
+                    new_path: new_path.clone(),
+                    hunks: Vec::new(),
+                });
+            }
+
+            let file_diff = file_diffs.last_mut().unwrap();
+
+            match line.origin() {
+                'H' | 'F' => {}
+                _ => {
+                    if let Some(h) = hunk {
+                        let header_str = String::from_utf8_lossy(h.header()).to_string();
+                        let needs_hunk = file_diff
+                            .hunks
+                            .last()
+                            .map(|dh| dh.header != header_str)
+                            .unwrap_or(true);
+
+                        if needs_hunk {
+                            file_diff.hunks.push(DiffHunk {
+                                header: header_str,
+                                lines: Vec::new(),
+                            });
+                        }
+                    }
+
+                    if let Some(current_hunk) = file_diff.hunks.last_mut() {
+                        let kind = match line.origin() {
+                            '+' | '>' => DiffLineKind::Addition,
+                            '-' | '<' => DiffLineKind::Deletion,
+                            _ => DiffLineKind::Context,
+                        };
+
+                        let content = String::from_utf8_lossy(line.content()).to_string();
+
+                        current_hunk.lines.push(DiffLine {
+                            kind,
+                            content,
+                            old_lineno: line.old_lineno(),
+                            new_lineno: line.new_lineno(),
+                        });
+                    }
+                }
+            }
+            true
+        })
+        .map_err(|e| GitError::DiffFailed(Box::new(e)))?;
+
+        Ok(file_diffs)
+    }
+
+    fn get_blame(&self, path: &str, commit_oid: Option<&str>) -> GitResult<BlameResult> {
+        let repo = self.repo.lock().unwrap();
+
+        let mut opts = git2::BlameOptions::new();
+        if let Some(oid_str) = commit_oid {
+            let oid = Oid::from_str(oid_str).map_err(|e| GitError::BlameFailed(Box::new(e)))?;
+            opts.newest_commit(oid);
+        }
+
+        let blame = repo
+            .blame_file(Path::new(path), Some(&mut opts))
+            .map_err(|e| GitError::BlameFailed(Box::new(e)))?;
+
+        let mut lines = Vec::new();
+        let mut last_oid: Option<Oid> = None;
+
+        // AR-002: Use the specified commit's tree, not always HEAD
+        let tree = if let Some(oid_str) = commit_oid {
+            let oid = Oid::from_str(oid_str).map_err(|e| GitError::BlameFailed(Box::new(e)))?;
+            let commit = repo
+                .find_commit(oid)
+                .map_err(|e| GitError::BlameFailed(Box::new(e)))?;
+            commit
+                .tree()
+                .map_err(|e| GitError::BlameFailed(Box::new(e)))?
+        } else {
+            let head = repo
+                .head()
+                .map_err(|e| GitError::BlameFailed(Box::new(e)))?;
+            head.peel_to_tree()
+                .map_err(|e| GitError::BlameFailed(Box::new(e)))?
+        };
+        let entry = tree
+            .get_path(Path::new(path))
+            .map_err(|e| GitError::BlameFailed(Box::new(e)))?;
+        let blob = repo
+            .find_blob(entry.id())
+            .map_err(|e| GitError::BlameFailed(Box::new(e)))?;
+        let content = String::from_utf8_lossy(blob.content());
+        let file_lines: Vec<&str> = content.lines().collect();
+
+        // AR-001: Expand each hunk into individual lines
+        for hunk in blame.iter() {
+            let start_line = hunk.final_start_line();
+            let num_lines = hunk.lines_in_hunk();
+            let hunk_oid = hunk.final_commit_id();
+            let is_new_block = last_oid != Some(hunk_oid);
+            last_oid = Some(hunk_oid);
+
+            let sig = hunk.final_signature();
+            let author_name = sig.name().unwrap_or("").to_string();
+            let author_date = sig.when().seconds();
+            let oid_str = hunk_oid.to_string();
+            let short_oid = oid_str[..7].to_string();
+
+            for j in 0..num_lines {
+                let line_num = start_line + j;
+                let line_content = file_lines.get(line_num - 1).unwrap_or(&"").to_string();
+
+                lines.push(BlameLine {
+                    line_number: line_num as u32,
+                    content: line_content,
+                    commit_oid: oid_str.clone(),
+                    commit_short_oid: short_oid.clone(),
+                    author_name: author_name.clone(),
+                    author_date,
+                    is_block_start: is_new_block && j == 0,
+                });
+            }
+        }
+
+        Ok(BlameResult {
+            path: path.to_string(),
+            lines,
+        })
+    }
+
+    fn get_file_history(
+        &self,
+        path: &str,
+        limit: usize,
+        skip: usize,
+    ) -> GitResult<Vec<CommitInfo>> {
+        let repo = self.repo.lock().unwrap();
+
+        let mut revwalk = repo
+            .revwalk()
+            .map_err(|e| GitError::LogFailed(Box::new(e)))?;
+        revwalk
+            .set_sorting(Sort::TIME | Sort::TOPOLOGICAL)
+            .map_err(|e| GitError::LogFailed(Box::new(e)))?;
+        revwalk
+            .push_head()
+            .map_err(|e| GitError::LogFailed(Box::new(e)))?;
+
+        let ref_map = build_ref_map(&repo);
+        let mut commits = Vec::new();
+        let mut skipped = 0;
+
+        for oid_result in revwalk {
+            let oid = oid_result.map_err(|e| GitError::LogFailed(Box::new(e)))?;
+            let commit = repo
+                .find_commit(oid)
+                .map_err(|e| GitError::LogFailed(Box::new(e)))?;
+
+            if !commit_touches_path(&repo, &commit, path) {
+                continue;
+            }
+
+            if skipped < skip {
+                skipped += 1;
+                continue;
+            }
+
+            commits.push(commit_to_info(&commit, &ref_map));
+
+            if commits.len() >= limit {
+                break;
+            }
+        }
+
+        Ok(commits)
+    }
 }
 
 impl Git2Backend {
@@ -807,4 +1153,235 @@ fn wt_status_to_kind(status: git2::Status) -> FileStatusKind {
     } else {
         FileStatusKind::Typechange
     }
+}
+
+type RefMap = std::collections::HashMap<Oid, Vec<CommitRef>>;
+
+fn build_ref_map(repo: &Repository) -> RefMap {
+    let mut map: RefMap = std::collections::HashMap::new();
+
+    let head_oid = repo.head().ok().and_then(|h| h.target());
+
+    if let Ok(branches) = repo.branches(None) {
+        for branch in branches.flatten() {
+            let (branch, branch_type) = branch;
+            if let Some(oid) = branch.get().target() {
+                let name = branch.name().ok().flatten().unwrap_or("").to_string();
+                let kind = if branch_type == BranchType::Remote {
+                    CommitRefKind::RemoteBranch
+                } else {
+                    CommitRefKind::LocalBranch
+                };
+                map.entry(oid).or_default().push(CommitRef { name, kind });
+            }
+        }
+    }
+
+    if let Ok(tags) = repo.tag_names(None) {
+        for tag_name in tags.iter().flatten() {
+            if let Ok(reference) = repo.find_reference(&format!("refs/tags/{tag_name}")) {
+                if let Some(oid) = reference.target() {
+                    // Resolve annotated tags
+                    let resolved = repo
+                        .find_tag(oid)
+                        .ok()
+                        .and_then(|t| t.target().ok())
+                        .map(|obj| obj.id())
+                        .unwrap_or(oid);
+                    map.entry(resolved).or_default().push(CommitRef {
+                        name: tag_name.to_string(),
+                        kind: CommitRefKind::Tag,
+                    });
+                }
+            }
+        }
+    }
+
+    if let Some(head_oid) = head_oid {
+        map.entry(head_oid).or_default().insert(
+            0,
+            CommitRef {
+                name: "HEAD".to_string(),
+                kind: CommitRefKind::Head,
+            },
+        );
+    }
+
+    map
+}
+
+fn commit_to_info(commit: &git2::Commit, ref_map: &RefMap) -> CommitInfo {
+    let oid = commit.id();
+    let oid_str = oid.to_string();
+    let short_oid = oid_str[..7].to_string();
+
+    let message_full = commit.message().unwrap_or("").to_string();
+    let mut parts = message_full.splitn(2, '\n');
+    let message = parts.next().unwrap_or("").to_string();
+    let body = parts.next().unwrap_or("").trim().to_string();
+
+    let author = commit.author();
+    let author_name = author.name().unwrap_or("").to_string();
+    let author_email = author.email().unwrap_or("").to_string();
+    let author_date = author.when().seconds();
+
+    let parent_oids: Vec<String> = (0..commit.parent_count())
+        .filter_map(|i| commit.parent_id(i).ok())
+        .map(|id| id.to_string())
+        .collect();
+
+    let refs = ref_map.get(&oid).cloned().unwrap_or_default();
+
+    CommitInfo {
+        oid: oid_str,
+        short_oid,
+        message,
+        body,
+        author_name,
+        author_email,
+        author_date,
+        parent_oids,
+        refs,
+    }
+}
+
+fn matches_filter(repo: &Repository, commit: &git2::Commit, filter: &LogFilter) -> bool {
+    if let Some(ref author) = filter.author {
+        let name = commit.author().name().unwrap_or("").to_lowercase();
+        if !name.contains(&author.to_lowercase()) {
+            return false;
+        }
+    }
+
+    if let Some(since) = filter.since {
+        if commit.time().seconds() < since {
+            return false;
+        }
+    }
+
+    if let Some(until) = filter.until {
+        if commit.time().seconds() > until {
+            return false;
+        }
+    }
+
+    if let Some(ref msg) = filter.message {
+        let commit_msg = commit.message().unwrap_or("").to_lowercase();
+        if !commit_msg.contains(&msg.to_lowercase()) {
+            return false;
+        }
+    }
+
+    if let Some(ref path) = filter.path {
+        if !commit_touches_path(repo, commit, path) {
+            return false;
+        }
+    }
+
+    true
+}
+
+fn commit_touches_path(repo: &Repository, commit: &git2::Commit, path: &str) -> bool {
+    let commit_tree = match commit.tree() {
+        Ok(t) => t,
+        Err(_) => return false,
+    };
+    let parent_tree = commit.parent(0).ok().and_then(|p| p.tree().ok());
+
+    let mut diff_opts = Git2DiffOptions::new();
+    diff_opts.pathspec(path);
+
+    let diff = match repo.diff_tree_to_tree(
+        parent_tree.as_ref(),
+        Some(&commit_tree),
+        Some(&mut diff_opts),
+    ) {
+        Ok(d) => d,
+        Err(_) => return false,
+    };
+
+    diff.deltas().len() > 0
+}
+
+fn build_graph(commits: &[CommitInfo]) -> Vec<CommitGraphRow> {
+    let mut lanes: Vec<Option<String>> = Vec::new();
+    let mut rows = Vec::new();
+
+    for commit in commits {
+        // Find the lane for this commit
+        let column = lanes
+            .iter()
+            .position(|lane| lane.as_deref() == Some(&commit.oid));
+
+        let column = match column {
+            Some(col) => {
+                lanes[col] = None;
+                col
+            }
+            None => {
+                let empty = lanes.iter().position(|l| l.is_none());
+                match empty {
+                    Some(col) => col,
+                    None => {
+                        lanes.push(None);
+                        lanes.len() - 1
+                    }
+                }
+            }
+        };
+
+        let node_type = if commit.parent_oids.len() > 1 {
+            GraphNodeType::Merge
+        } else {
+            GraphNodeType::Normal
+        };
+
+        let mut edges = Vec::new();
+
+        for (i, parent_oid) in commit.parent_oids.iter().enumerate() {
+            if i == 0 {
+                // First parent goes to same lane
+                lanes[column] = Some(parent_oid.clone());
+                edges.push(GraphEdge {
+                    from_column: column,
+                    to_column: column,
+                    color_index: column,
+                });
+            } else {
+                // Additional parents get new lanes
+                let existing = lanes.iter().position(|l| l.as_deref() == Some(parent_oid));
+                let to_col = match existing {
+                    Some(col) => col,
+                    None => {
+                        let empty = lanes.iter().position(|l| l.is_none());
+                        match empty {
+                            Some(col) => {
+                                lanes[col] = Some(parent_oid.clone());
+                                col
+                            }
+                            None => {
+                                lanes.push(Some(parent_oid.clone()));
+                                lanes.len() - 1
+                            }
+                        }
+                    }
+                };
+                edges.push(GraphEdge {
+                    from_column: column,
+                    to_column: to_col,
+                    color_index: to_col,
+                });
+            }
+        }
+
+        rows.push(CommitGraphRow {
+            oid: commit.oid.clone(),
+            column,
+            node_type,
+            edges,
+        });
+    }
+
+    // Trim empty trailing lanes from each row
+    rows
 }
