@@ -34,11 +34,15 @@ export function BranchDetailPanel({
           </div>
           <div className="branch-detail-info">
             <div className="branch-detail-name">{branch.name}</div>
-            <div className="branch-detail-tracking">Local only</div>
+            <div className="branch-detail-tracking">
+              {branch.is_remote
+                ? (branch.remote_name ?? "Remote")
+                : (branch.upstream ?? "Local only")}
+            </div>
           </div>
           {branch.is_head && <span className="current-badge">HEAD</span>}
           <div className="branch-detail-actions">
-            {!branch.is_head && (
+            {!branch.is_head && !branch.is_remote && (
               <button
                 type="button"
                 className="btn btn-secondary btn-sm"
@@ -47,7 +51,7 @@ export function BranchDetailPanel({
                 Switch
               </button>
             )}
-            {!branch.is_head && (
+            {!branch.is_head && !branch.is_remote && (
               <button
                 type="button"
                 className="btn btn-secondary btn-sm"

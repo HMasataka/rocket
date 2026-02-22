@@ -6,10 +6,21 @@ interface BranchRowProps {
   onSelect: (name: string) => void;
 }
 
+function trackingLabel(branch: BranchInfo): string {
+  if (branch.is_remote) {
+    return branch.remote_name ?? "Remote";
+  }
+  if (branch.upstream) {
+    return branch.upstream;
+  }
+  return "Local only";
+}
+
 export function BranchRow({ branch, isSelected, onSelect }: BranchRowProps) {
   const classNames = [
     "branch-row",
     branch.is_head ? "current" : "",
+    branch.is_remote ? "remote" : "",
     isSelected ? "selected" : "",
   ]
     .filter(Boolean)
@@ -28,7 +39,11 @@ export function BranchRow({ branch, isSelected, onSelect }: BranchRowProps) {
       </div>
       <div className="branch-details">
         <div className="branch-name">{branch.name}</div>
-        <div className="branch-tracking local-only">Local only</div>
+        <div
+          className={`branch-tracking${branch.upstream ? "" : " local-only"}`}
+        >
+          {trackingLabel(branch)}
+        </div>
       </div>
       {branch.is_head && <span className="current-badge">HEAD</span>}
     </button>
