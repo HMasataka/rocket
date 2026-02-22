@@ -239,6 +239,65 @@
   color: var(--text-muted);
 }
 
+/* ===== Stat Colors ===== */
+.stat-add {
+  color: var(--success);
+}
+.stat-del {
+  color: var(--danger);
+}
+
+/* ===== Search Input ===== */
+.search-input {
+  padding: 8px 12px 8px 32px;
+  background: var(--bg-secondary);
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  width: 220px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%236b7280'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: 10px center;
+  background-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.search-input::placeholder {
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+.search-input:hover {
+  background-color: var(--bg-tertiary);
+}
+.search-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-dim);
+}
+
+/* ===== Section Header ===== */
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.section-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.section-count {
+  font-size: 11px;
+  color: var(--text-muted);
+  background: var(--bg-tertiary);
+  padding: 1px 8px;
+  border-radius: 10px;
+}
+
 /* ===== Radio Group ===== */
 .radio-group {
   display: flex;
@@ -314,6 +373,44 @@
     transform: translateX(0);
     opacity: 1;
   }
+}
+
+/* ===== Operation Footer ===== */
+.operation-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-secondary);
+  flex-shrink: 0;
+}
+.operation-summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+}
+.summary-stat {
+  color: var(--text-secondary);
+}
+.summary-stat strong {
+  color: var(--text-primary);
+}
+.summary-stat.additions {
+  color: var(--success);
+  font-family: "JetBrains Mono", monospace;
+  font-weight: 600;
+}
+.summary-stat.deletions {
+  color: var(--danger);
+  font-family: "JetBrains Mono", monospace;
+  font-weight: 600;
+}
+.summary-divider {
+  width: 1px;
+  height: 16px;
+  background: var(--border);
 }
 
 /* ===== Scrollbar ===== */
