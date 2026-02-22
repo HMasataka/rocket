@@ -135,6 +135,20 @@
   flex-shrink: 0;
 }
 
+.branch-row.remote .branch-icon {
+  color: var(--text-muted);
+}
+
+/* ===== Branch Section Label ===== */
+.branch-section-label {
+  padding: 8px 16px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+}
+
 /* ===== Branch Detail Panel ===== */
 .branch-detail-panel {
   display: flex;
@@ -199,6 +213,170 @@
   font-size: 12px;
   color: var(--text-muted);
   font-family: "JetBrains Mono", monospace;
+}
+
+/* ===== Branch Sync Status ===== */
+.branch-sync-status {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding: 16px;
+  background: var(--bg-secondary);
+  border-radius: 10px;
+}
+
+.sync-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.sync-item svg {
+  width: 16px;
+  height: 16px;
+}
+
+.sync-item.active {
+  color: var(--text-primary);
+}
+
+.sync-item.active svg {
+  color: var(--accent);
+}
+
+/* ===== Branch Last Commit ===== */
+.branch-last-commit {
+  margin-bottom: 24px;
+}
+
+.last-commit-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.last-commit-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.last-commit-avatar {
+  width: 36px;
+  height: 36px;
+  background: var(--bg-tertiary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.last-commit-avatar svg {
+  width: 18px;
+  height: 18px;
+  color: var(--text-muted);
+}
+
+.last-commit-author-info {
+  flex: 1;
+}
+
+.last-commit-author {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.last-commit-email {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.last-commit-date {
+  text-align: right;
+}
+
+.last-commit-relative {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.last-commit-absolute {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.last-commit-body {
+  padding: 16px;
+}
+
+.last-commit-hash {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+
+.last-commit-message {
+  font-size: 13px;
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+
+/* ===== Branch Recent Commits ===== */
+.branch-recent-commits {
+  margin-bottom: 24px;
+}
+
+.branch-commits-list {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.branch-commit-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.branch-commit-row:last-child {
+  border-bottom: none;
+}
+
+.branch-commit-hash {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.branch-commit-message {
+  flex: 1;
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.branch-commit-meta {
+  display: flex;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.branch-detail-content .section-label {
+  font-size: 11px;
+  margin-bottom: 12px;
 }
 
 /* ===== Operation Footer ===== */
@@ -282,13 +460,4 @@
 .mode-desc {
   font-size: 11px;
   color: var(--text-muted);
-}
-
-/* ===== Modal Label ===== */
-.modal-label {
-  display: block;
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--text-secondary);
-  margin-bottom: 8px;
 }

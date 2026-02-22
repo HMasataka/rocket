@@ -213,28 +213,30 @@
 
 .modal-label {
   display: block;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
-  color: var(--text-secondary);
   margin-bottom: 8px;
 }
 
 .modal-input {
   width: 100%;
   padding: 10px 14px;
-  background: var(--bg-secondary);
+  background: var(--bg-tertiary);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 6px;
   color: var(--text-primary);
-  font-family: "JetBrains Mono", monospace;
+  font-family: inherit;
   font-size: 13px;
+  outline: none;
   transition: border-color 0.15s ease;
 }
 
 .modal-input:focus {
-  outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-dim);
+}
+
+.modal-input::placeholder {
+  color: var(--text-muted);
 }
 
 /* ===== Radio Group ===== */

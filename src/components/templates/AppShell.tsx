@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import type { RemoteInfo } from "../../services/git";
 import { Sidebar } from "../organisms/Sidebar";
 import { Statusbar } from "../organisms/Statusbar";
 import { Titlebar } from "../organisms/Titlebar";
@@ -8,6 +9,7 @@ interface AppShellProps {
   branch: string | null;
   changesCount: number;
   hasRemotes: boolean;
+  remotes: RemoteInfo[];
   onFetch: () => void;
   onPull: () => void;
   onPush: () => void;
@@ -19,16 +21,21 @@ export function AppShell({
   branch,
   changesCount,
   hasRemotes,
+  remotes,
   onFetch,
   onPull,
   onPush,
   onRemote,
   children,
 }: AppShellProps) {
+  const defaultRemoteName = remotes[0]?.name ?? null;
+
   return (
     <div className="app">
       <Titlebar />
       <Toolbar
+        branch={branch}
+        defaultRemoteName={defaultRemoteName}
         onFetch={onFetch}
         onPull={onPull}
         onPush={onPush}

@@ -95,6 +95,7 @@ export function App() {
         branch={currentBranch}
         changesCount={changesCount}
         hasRemotes={remotes.length > 0}
+        remotes={remotes}
         onFetch={handleFetch}
         onPull={() => openModal("pull")}
         onPush={handlePush}
