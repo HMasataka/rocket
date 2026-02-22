@@ -119,6 +119,11 @@
 }
 
 .nav-item {
+  width: 100%;
+  border: none;
+  background: none;
+  font: inherit;
+  text-align: left;
   padding: 8px 16px;
   font-size: 13px;
   color: var(--text-secondary);
