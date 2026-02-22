@@ -1,13 +1,13 @@
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 
-use git2::{DiffFormat, DiffOptions as Git2DiffOptions, Repository, StatusOptions};
+use git2::{BranchType, DiffFormat, DiffOptions as Git2DiffOptions, Repository, StatusOptions};
 
 use crate::git::backend::GitBackend;
 use crate::git::error::{GitError, GitResult};
 use crate::git::types::{
-    CommitResult, DiffHunk, DiffLine, DiffLineKind, DiffOptions, FileDiff, FileStatus,
-    FileStatusKind, RepoStatus, StagingState,
+    BranchInfo, CommitResult, DiffHunk, DiffLine, DiffLineKind, DiffOptions, FileDiff, FileStatus,
+    FileStatusKind, MergeKind, MergeOption, MergeResult, RepoStatus, StagingState,
 };
 
 pub struct Git2Backend {
@@ -339,6 +339,191 @@ impl GitBackend for Git2Backend {
 
         Ok(CommitResult {
             oid: oid.to_string(),
+        })
+    }
+
+    fn list_branches(&self) -> GitResult<Vec<BranchInfo>> {
+        let repo = self.repo.lock().unwrap();
+        let branches = repo
+            .branches(Some(BranchType::Local))
+            .map_err(|e| GitError::BranchListFailed(Box::new(e)))?;
+
+        let mut result = Vec::new();
+        for branch in branches {
+            let (branch, _) = branch.map_err(|e| GitError::BranchListFailed(Box::new(e)))?;
+            let name = branch
+                .name()
+                .map_err(|e| GitError::BranchListFailed(Box::new(e)))?
+                .unwrap_or("")
+                .to_string();
+            let is_head = branch.is_head();
+            result.push(BranchInfo { name, is_head });
+        }
+        Ok(result)
+    }
+
+    fn create_branch(&self, name: &str) -> GitResult<()> {
+        let repo = self.repo.lock().unwrap();
+        let head = repo
+            .head()
+            .map_err(|e| GitError::BranchCreateFailed(Box::new(e)))?;
+        let commit = head
+            .peel_to_commit()
+            .map_err(|e| GitError::BranchCreateFailed(Box::new(e)))?;
+        repo.branch(name, &commit, false)
+            .map_err(|e| GitError::BranchCreateFailed(Box::new(e)))?;
+        Ok(())
+    }
+
+    fn checkout_branch(&self, name: &str) -> GitResult<()> {
+        let repo = self.repo.lock().unwrap();
+        repo.set_head(&format!("refs/heads/{name}"))
+            .map_err(|e| GitError::CheckoutFailed(Box::new(e)))?;
+        repo.checkout_head(Some(git2::build::CheckoutBuilder::default().force()))
+            .map_err(|e| GitError::CheckoutFailed(Box::new(e)))?;
+        Ok(())
+    }
+
+    fn delete_branch(&self, name: &str) -> GitResult<()> {
+        let repo = self.repo.lock().unwrap();
+        let mut branch = repo
+            .find_branch(name, BranchType::Local)
+            .map_err(|e| GitError::BranchDeleteFailed(Box::new(e)))?;
+        branch
+            .delete()
+            .map_err(|e| GitError::BranchDeleteFailed(Box::new(e)))?;
+        Ok(())
+    }
+
+    fn rename_branch(&self, old_name: &str, new_name: &str) -> GitResult<()> {
+        let repo = self.repo.lock().unwrap();
+        let mut branch = repo
+            .find_branch(old_name, BranchType::Local)
+            .map_err(|e| GitError::BranchRenameFailed(Box::new(e)))?;
+        branch
+            .rename(new_name, false)
+            .map_err(|e| GitError::BranchRenameFailed(Box::new(e)))?;
+        Ok(())
+    }
+
+    fn merge_branch(&self, branch_name: &str, option: MergeOption) -> GitResult<MergeResult> {
+        let repo = self.repo.lock().unwrap();
+
+        let branch_ref = repo
+            .find_branch(branch_name, BranchType::Local)
+            .map_err(|e| GitError::MergeFailed(Box::new(e)))?;
+        let target_oid = branch_ref
+            .get()
+            .target()
+            .ok_or_else(|| GitError::MergeFailed("branch has no target".into()))?;
+        let annotated = repo
+            .find_annotated_commit(target_oid)
+            .map_err(|e| GitError::MergeFailed(Box::new(e)))?;
+
+        let (analysis, _) = repo
+            .merge_analysis(&[&annotated])
+            .map_err(|e| GitError::MergeFailed(Box::new(e)))?;
+
+        if analysis.is_up_to_date() {
+            return Ok(MergeResult {
+                kind: MergeKind::UpToDate,
+                oid: None,
+            });
+        }
+
+        if analysis.is_fast_forward() {
+            if option == MergeOption::NoFastForward {
+                return self.merge_normal_commit(&repo, branch_name, &annotated);
+            }
+            let head_ref = repo
+                .head()
+                .map_err(|e| GitError::MergeFailed(Box::new(e)))?;
+            let head_name = head_ref
+                .name()
+                .ok_or_else(|| GitError::MergeFailed("HEAD has no name".into()))?
+                .to_string();
+            drop(head_ref);
+
+            repo.reference(
+                &head_name,
+                target_oid,
+                true,
+                &format!("Fast-forward to {branch_name}"),
+            )
+            .map_err(|e| GitError::MergeFailed(Box::new(e)))?;
+            repo.checkout_head(Some(git2::build::CheckoutBuilder::default().force()))
+                .map_err(|e| GitError::MergeFailed(Box::new(e)))?;
+
+            return Ok(MergeResult {
+                kind: MergeKind::FastForward,
+                oid: Some(target_oid.to_string()),
+            });
+        }
+
+        if option == MergeOption::FastForwardOnly {
+            return Err(GitError::MergeFailed(
+                "fast-forward not possible".into(),
+            ));
+        }
+
+        self.merge_normal_commit(&repo, branch_name, &annotated)
+    }
+}
+
+impl Git2Backend {
+    fn merge_normal_commit(
+        &self,
+        repo: &Repository,
+        branch_name: &str,
+        annotated: &git2::AnnotatedCommit,
+    ) -> GitResult<MergeResult> {
+        repo.merge(&[annotated], None, None)
+            .map_err(|e| GitError::MergeFailed(Box::new(e)))?;
+
+        let mut index = repo
+            .index()
+            .map_err(|e| GitError::MergeFailed(Box::new(e)))?;
+
+        if index.has_conflicts() {
+            let _ = repo.cleanup_state();
+            return Err(GitError::MergeFailed("merge conflicts detected".into()));
+        }
+
+        let tree_oid = index
+            .write_tree()
+            .map_err(|e| GitError::MergeFailed(Box::new(e)))?;
+        let tree = repo
+            .find_tree(tree_oid)
+            .map_err(|e| GitError::MergeFailed(Box::new(e)))?;
+        let sig = repo
+            .signature()
+            .map_err(|e| GitError::MergeFailed(Box::new(e)))?;
+
+        let head_commit = repo
+            .head()
+            .and_then(|h| h.peel_to_commit())
+            .map_err(|e| GitError::MergeFailed(Box::new(e)))?;
+        let their_commit = repo
+            .find_commit(annotated.id())
+            .map_err(|e| GitError::MergeFailed(Box::new(e)))?;
+
+        let message = format!("Merge branch '{branch_name}'");
+        let oid = repo
+            .commit(
+                Some("HEAD"),
+                &sig,
+                &sig,
+                &message,
+                &tree,
+                &[&head_commit, &their_commit],
+            )
+            .map_err(|e| GitError::MergeFailed(Box::new(e)))?;
+
+        let _ = repo.cleanup_state();
+
+        Ok(MergeResult {
+            kind: MergeKind::Normal,
+            oid: Some(oid.to_string()),
         })
     }
 }
