@@ -4,7 +4,7 @@ use std::process::Command;
 
 use app_lib::git::backend::GitBackend;
 use app_lib::git::git2_backend::Git2Backend;
-use app_lib::git::types::{DiffOptions, MergeOption};
+use app_lib::git::types::{DiffOptions, MergeOption, PullOption};
 
 fn init_test_repo(dir: &Path) {
     Command::new("git")
@@ -310,6 +310,93 @@ fn delete_nonexistent_branch_fails() {
 }
 
 #[test]
+fn list_branches_includes_remote_fields() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+
+    let branches = backend.list_branches().unwrap();
+    let default = branches.iter().find(|b| b.is_head).unwrap();
+
+    assert!(!default.is_remote);
+    assert!(default.remote_name.is_none());
+}
+
+#[test]
+fn list_remotes_empty_by_default() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+
+    let remotes = backend.list_remotes().unwrap();
+    assert!(remotes.is_empty());
+}
+
+#[test]
+fn add_and_list_remote() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+
+    backend
+        .add_remote("origin", "https://example.com/repo.git")
+        .unwrap();
+
+    let remotes = backend.list_remotes().unwrap();
+    assert_eq!(remotes.len(), 1);
+    assert_eq!(remotes[0].name, "origin");
+    assert_eq!(remotes[0].url, "https://example.com/repo.git");
+}
+
+#[test]
+fn remove_remote() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+    backend
+        .add_remote("origin", "https://example.com/repo.git")
+        .unwrap();
+
+    backend.remove_remote("origin").unwrap();
+
+    let remotes = backend.list_remotes().unwrap();
+    assert!(remotes.is_empty());
+}
+
+#[test]
+fn edit_remote_url() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+    backend
+        .add_remote("origin", "https://example.com/old.git")
+        .unwrap();
+
+    backend
+        .edit_remote("origin", "https://example.com/new.git")
+        .unwrap();
+
+    let remotes = backend.list_remotes().unwrap();
+    assert_eq!(remotes[0].url, "https://example.com/new.git");
+}
+
+#[test]
+fn add_duplicate_remote_fails() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+    backend
+        .add_remote("origin", "https://example.com/repo.git")
+        .unwrap();
+
+    let result = backend.add_remote("origin", "https://example.com/other.git");
+    assert!(result.is_err());
+}
+
+#[test]
+fn remove_nonexistent_remote_fails() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+
+    let result = backend.remove_remote("nonexistent");
+    assert!(result.is_err());
+}
+
+#[test]
 fn merge_ff_only_fails_when_not_possible() {
     let tmp = tempfile::tempdir().unwrap();
     let backend = init_repo_with_commit(tmp.path());
@@ -327,5 +414,44 @@ fn merge_ff_only_fails_when_not_possible() {
     backend.commit("main commit").unwrap();
 
     let result = backend.merge_branch("feature", MergeOption::FastForwardOnly);
+    assert!(result.is_err());
+}
+
+#[test]
+fn fetch_nonexistent_remote_fails() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+
+    let result = backend.fetch("nonexistent");
+    assert!(result.is_err());
+}
+
+#[test]
+fn pull_nonexistent_remote_fails() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+
+    let result = backend.pull("nonexistent", PullOption::Merge);
+    assert!(result.is_err());
+}
+
+#[test]
+fn push_nonexistent_remote_fails() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+
+    let result = backend.push("nonexistent");
+    assert!(result.is_err());
+}
+
+#[test]
+fn fetch_invalid_url_remote_fails() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+    backend
+        .add_remote("bad", "file:///nonexistent/path/repo.git")
+        .unwrap();
+
+    let result = backend.fetch("bad");
     assert!(result.is_err());
 }
