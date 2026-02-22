@@ -17,6 +17,7 @@ describe("gitStore", () => {
       currentBranch: null,
       branches: [],
       diff: [],
+      remotes: [],
       loading: false,
       error: null,
     });
@@ -240,6 +241,168 @@ describe("gitStore", () => {
       ).rejects.toThrow();
 
       expect(useGitStore.getState().error).toContain("merge error");
+    });
+  });
+
+  describe("fetchRemote", () => {
+    it("returns fetch result on success", async () => {
+      const mockResult = { remote_name: "origin" };
+      mockedInvoke.mockResolvedValueOnce(mockResult);
+
+      const result = await useGitStore.getState().fetchRemote("origin");
+
+      expect(result).toEqual(mockResult);
+      expect(mockedInvoke).toHaveBeenCalledWith("fetch_remote", {
+        remoteName: "origin",
+      });
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("fetch error"));
+
+      await expect(
+        useGitStore.getState().fetchRemote("origin"),
+      ).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("fetch error");
+    });
+  });
+
+  describe("pullRemote", () => {
+    it("returns merge result on success", async () => {
+      const mockResult = { kind: "fast_forward", oid: "abc123" };
+      mockedInvoke.mockResolvedValueOnce(mockResult);
+
+      const result = await useGitStore.getState().pullRemote("origin", "merge");
+
+      expect(result).toEqual(mockResult);
+      expect(mockedInvoke).toHaveBeenCalledWith("pull_remote", {
+        remoteName: "origin",
+        option: "merge",
+      });
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("pull error"));
+
+      await expect(
+        useGitStore.getState().pullRemote("origin", "merge"),
+      ).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("pull error");
+    });
+  });
+
+  describe("pushRemote", () => {
+    it("returns push result on success", async () => {
+      const mockResult = { remote_name: "origin", branch: "main" };
+      mockedInvoke.mockResolvedValueOnce(mockResult);
+
+      const result = await useGitStore.getState().pushRemote("origin");
+
+      expect(result).toEqual(mockResult);
+      expect(mockedInvoke).toHaveBeenCalledWith("push_remote", {
+        remoteName: "origin",
+      });
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("push error"));
+
+      await expect(
+        useGitStore.getState().pushRemote("origin"),
+      ).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("push error");
+    });
+  });
+
+  describe("fetchRemotes", () => {
+    it("sets remotes on success", async () => {
+      const mockRemotes = [
+        { name: "origin", url: "https://example.com/repo.git" },
+      ];
+      mockedInvoke.mockResolvedValueOnce(mockRemotes);
+
+      await useGitStore.getState().fetchRemotes();
+
+      expect(useGitStore.getState().remotes).toEqual(mockRemotes);
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("remotes error"));
+
+      await expect(useGitStore.getState().fetchRemotes()).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("remotes error");
+    });
+  });
+
+  describe("addRemote", () => {
+    it("calls invoke on success", async () => {
+      mockedInvoke.mockResolvedValueOnce(undefined);
+
+      await useGitStore.getState().addRemote("upstream", "https://example.com");
+
+      expect(mockedInvoke).toHaveBeenCalledWith("add_remote", {
+        name: "upstream",
+        url: "https://example.com",
+      });
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("add error"));
+
+      await expect(
+        useGitStore.getState().addRemote("bad", "url"),
+      ).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("add error");
+    });
+  });
+
+  describe("removeRemote", () => {
+    it("calls invoke on success", async () => {
+      mockedInvoke.mockResolvedValueOnce(undefined);
+
+      await useGitStore.getState().removeRemote("origin");
+
+      expect(mockedInvoke).toHaveBeenCalledWith("remove_remote", {
+        name: "origin",
+      });
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("remove error"));
+
+      await expect(
+        useGitStore.getState().removeRemote("bad"),
+      ).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("remove error");
+    });
+  });
+
+  describe("editRemote", () => {
+    it("calls invoke on success", async () => {
+      mockedInvoke.mockResolvedValueOnce(undefined);
+
+      await useGitStore.getState().editRemote("origin", "https://new-url.com");
+
+      expect(mockedInvoke).toHaveBeenCalledWith("edit_remote", {
+        name: "origin",
+        newUrl: "https://new-url.com",
+      });
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("edit error"));
+
+      await expect(
+        useGitStore.getState().editRemote("bad", "url"),
+      ).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("edit error");
     });
   });
 
