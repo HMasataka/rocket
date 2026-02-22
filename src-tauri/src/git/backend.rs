@@ -2,7 +2,8 @@ use std::path::Path;
 
 use crate::git::error::GitResult;
 use crate::git::types::{
-    BranchInfo, CommitResult, DiffOptions, FileDiff, MergeOption, MergeResult, RepoStatus,
+    BranchInfo, CommitResult, DiffOptions, FetchResult, FileDiff, MergeOption, MergeResult,
+    PullOption, PushResult, RemoteInfo, RepoStatus,
 };
 
 pub trait GitBackend: Send + Sync {
@@ -20,4 +21,11 @@ pub trait GitBackend: Send + Sync {
     fn delete_branch(&self, name: &str) -> GitResult<()>;
     fn rename_branch(&self, old_name: &str, new_name: &str) -> GitResult<()>;
     fn merge_branch(&self, branch_name: &str, option: MergeOption) -> GitResult<MergeResult>;
+    fn fetch(&self, remote_name: &str) -> GitResult<FetchResult>;
+    fn pull(&self, remote_name: &str, option: PullOption) -> GitResult<MergeResult>;
+    fn push(&self, remote_name: &str) -> GitResult<PushResult>;
+    fn list_remotes(&self) -> GitResult<Vec<RemoteInfo>>;
+    fn add_remote(&self, name: &str, url: &str) -> GitResult<()>;
+    fn remove_remote(&self, name: &str) -> GitResult<()>;
+    fn edit_remote(&self, name: &str, new_url: &str) -> GitResult<()>;
 }
