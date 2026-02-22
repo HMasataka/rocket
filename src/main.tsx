@@ -5,6 +5,7 @@ import "./styles/variables.css";
 import "./styles/shell.css";
 import "./styles/components.css";
 import "./styles/changes-view.css";
+import "./styles/branches.css";
 
 const root = document.getElementById("root");
 if (!root) throw new Error("Root element not found");

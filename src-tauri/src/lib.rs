@@ -91,6 +91,12 @@ pub fn run() {
             commands::git::get_current_branch,
             commands::config::get_config,
             commands::config::save_config,
+            commands::branch::list_branches,
+            commands::branch::create_branch,
+            commands::branch::checkout_branch,
+            commands::branch::delete_branch,
+            commands::branch::rename_branch,
+            commands::branch::merge_branch,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

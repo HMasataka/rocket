@@ -4,7 +4,7 @@ use std::process::Command;
 
 use app_lib::git::backend::GitBackend;
 use app_lib::git::git2_backend::Git2Backend;
-use app_lib::git::types::DiffOptions;
+use app_lib::git::types::{DiffOptions, MergeOption};
 
 fn init_test_repo(dir: &Path) {
     Command::new("git")
@@ -24,6 +24,15 @@ fn init_test_repo(dir: &Path) {
         .current_dir(dir)
         .output()
         .expect("git config name failed");
+}
+
+fn init_repo_with_commit(dir: &Path) -> Git2Backend {
+    init_test_repo(dir);
+    fs::write(dir.join("init.txt"), "init").unwrap();
+    let backend = Git2Backend::open(dir).unwrap();
+    backend.stage(Path::new("init.txt")).unwrap();
+    backend.commit("initial commit").unwrap();
+    backend
 }
 
 #[test]
@@ -184,5 +193,139 @@ fn diff_staged_changes() {
 #[test]
 fn open_nonexistent_path_returns_error() {
     let result = Git2Backend::open("/nonexistent/path/to/repo");
+    assert!(result.is_err());
+}
+
+#[test]
+fn list_branches_returns_default_branch() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+
+    let branches = backend.list_branches().unwrap();
+
+    assert!(!branches.is_empty());
+    assert!(branches.iter().any(|b| b.is_head));
+}
+
+#[test]
+fn create_and_list_branch() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+
+    backend.create_branch("feature").unwrap();
+    let branches = backend.list_branches().unwrap();
+
+    assert!(branches.iter().any(|b| b.name == "feature"));
+}
+
+#[test]
+fn checkout_branch() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+    backend.create_branch("feature").unwrap();
+
+    backend.checkout_branch("feature").unwrap();
+    let current = backend.current_branch().unwrap();
+
+    assert_eq!(current, "feature");
+}
+
+#[test]
+fn delete_branch() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+    backend.create_branch("to-delete").unwrap();
+
+    backend.delete_branch("to-delete").unwrap();
+    let branches = backend.list_branches().unwrap();
+
+    assert!(!branches.iter().any(|b| b.name == "to-delete"));
+}
+
+#[test]
+fn rename_branch() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+    backend.create_branch("old-name").unwrap();
+
+    backend.rename_branch("old-name", "new-name").unwrap();
+    let branches = backend.list_branches().unwrap();
+
+    assert!(!branches.iter().any(|b| b.name == "old-name"));
+    assert!(branches.iter().any(|b| b.name == "new-name"));
+}
+
+#[test]
+fn merge_fast_forward() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+    let default_branch = backend.current_branch().unwrap();
+
+    backend.create_branch("feature").unwrap();
+    backend.checkout_branch("feature").unwrap();
+
+    fs::write(tmp.path().join("feature.txt"), "feature work").unwrap();
+    backend.stage(Path::new("feature.txt")).unwrap();
+    backend.commit("feature commit").unwrap();
+
+    backend.checkout_branch(&default_branch).unwrap();
+
+    let result = backend
+        .merge_branch("feature", MergeOption::Default)
+        .unwrap();
+    assert_eq!(result.kind, app_lib::git::types::MergeKind::FastForward);
+    assert!(result.oid.is_some());
+}
+
+#[test]
+fn merge_up_to_date() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+    backend.create_branch("feature").unwrap();
+
+    let result = backend
+        .merge_branch("feature", MergeOption::Default)
+        .unwrap();
+    assert_eq!(result.kind, app_lib::git::types::MergeKind::UpToDate);
+    assert!(result.oid.is_none());
+}
+
+#[test]
+fn create_duplicate_branch_fails() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+    backend.create_branch("dup").unwrap();
+
+    let result = backend.create_branch("dup");
+    assert!(result.is_err());
+}
+
+#[test]
+fn delete_nonexistent_branch_fails() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+
+    let result = backend.delete_branch("nonexistent");
+    assert!(result.is_err());
+}
+
+#[test]
+fn merge_ff_only_fails_when_not_possible() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+    let default_branch = backend.current_branch().unwrap();
+
+    backend.create_branch("feature").unwrap();
+    backend.checkout_branch("feature").unwrap();
+    fs::write(tmp.path().join("feature.txt"), "feature").unwrap();
+    backend.stage(Path::new("feature.txt")).unwrap();
+    backend.commit("feature commit").unwrap();
+
+    backend.checkout_branch(&default_branch).unwrap();
+    fs::write(tmp.path().join("main.txt"), "main work").unwrap();
+    backend.stage(Path::new("main.txt")).unwrap();
+    backend.commit("main commit").unwrap();
+
+    let result = backend.merge_branch("feature", MergeOption::FastForwardOnly);
     assert!(result.is_err());
 }

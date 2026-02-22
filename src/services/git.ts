@@ -82,3 +82,44 @@ export function commitChanges(message: string): Promise<CommitResult> {
 export function getCurrentBranch(): Promise<string> {
   return invoke<string>("get_current_branch");
 }
+
+export interface BranchInfo {
+  name: string;
+  is_head: boolean;
+}
+
+export type MergeKind = "fast_forward" | "normal" | "up_to_date";
+
+export interface MergeResult {
+  kind: MergeKind;
+  oid: string | null;
+}
+
+export type MergeOption = "default" | "fast_forward_only" | "no_fast_forward";
+
+export function listBranches(): Promise<BranchInfo[]> {
+  return invoke<BranchInfo[]>("list_branches");
+}
+
+export function createBranch(name: string): Promise<void> {
+  return invoke<void>("create_branch", { name });
+}
+
+export function checkoutBranch(name: string): Promise<void> {
+  return invoke<void>("checkout_branch", { name });
+}
+
+export function deleteBranch(name: string): Promise<void> {
+  return invoke<void>("delete_branch", { name });
+}
+
+export function renameBranch(oldName: string, newName: string): Promise<void> {
+  return invoke<void>("rename_branch", { oldName, newName });
+}
+
+export function mergeBranch(
+  branchName: string,
+  option: MergeOption,
+): Promise<MergeResult> {
+  return invoke<MergeResult>("merge_branch", { branchName, option });
+}

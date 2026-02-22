@@ -80,7 +80,28 @@
       "selector": ".branch-detail-actions .btn-secondary",
       "match": "text",
       "mapping": {
-        "Merge": "conflict"
+        "Merge": "branch-merge"
+      }
+    },
+    {
+      "selector": ".page-actions .btn-secondary",
+      "match": "text",
+      "mapping": {
+        "+ New Branch": "branch-create"
+      }
+    },
+    {
+      "selector": ".operation-buttons .btn-secondary",
+      "match": "text",
+      "mapping": {
+        "Rename": "branch-rename"
+      }
+    },
+    {
+      "selector": ".operation-buttons .btn-danger",
+      "match": "text",
+      "mapping": {
+        "Delete": "branch-delete"
       }
     },
     {
@@ -173,7 +194,11 @@
     "merge-viewer",
     "search",
     "discard-changes",
-    "hosting-create-pr"
+    "hosting-create-pr",
+    "branch-create",
+    "branch-rename",
+    "branch-delete",
+    "branch-merge"
   ],
   "close": [
     ".modal-close",
