@@ -514,9 +514,7 @@ impl GitBackend for Git2Backend {
 
         let (remote_ref_name, target_oid, analysis) = {
             let repo = self.repo.lock().unwrap();
-            let head = repo
-                .head()
-                .map_err(|e| GitError::PullFailed(Box::new(e)))?;
+            let head = repo.head().map_err(|e| GitError::PullFailed(Box::new(e)))?;
             let branch_name = head
                 .shorthand()
                 .ok_or_else(|| GitError::PullFailed("HEAD has no name".into()))?
@@ -549,9 +547,7 @@ impl GitBackend for Git2Backend {
         }
 
         match option {
-            PullOption::Merge => {
-                self.merge_after_fetch(&remote_ref_name, analysis, target_oid)
-            }
+            PullOption::Merge => self.merge_after_fetch(&remote_ref_name, analysis, target_oid),
             PullOption::Rebase => self.rebase_after_fetch(target_oid),
         }
     }
@@ -562,9 +558,7 @@ impl GitBackend for Git2Backend {
             .find_remote(remote_name)
             .map_err(|e| GitError::PushFailed(Box::new(e)))?;
 
-        let head = repo
-            .head()
-            .map_err(|e| GitError::PushFailed(Box::new(e)))?;
+        let head = repo.head().map_err(|e| GitError::PushFailed(Box::new(e)))?;
         let branch_name = head
             .shorthand()
             .ok_or_else(|| GitError::PushFailed("HEAD has no name".into()))?
@@ -648,9 +642,7 @@ impl Git2Backend {
         let repo = self.repo.lock().unwrap();
 
         if analysis.is_fast_forward() {
-            let head_ref = repo
-                .head()
-                .map_err(|e| GitError::PullFailed(Box::new(e)))?;
+            let head_ref = repo.head().map_err(|e| GitError::PullFailed(Box::new(e)))?;
             let head_name = head_ref
                 .name()
                 .ok_or_else(|| GitError::PullFailed("HEAD has no name".into()))?
@@ -687,9 +679,7 @@ impl Git2Backend {
     fn rebase_after_fetch(&self, target_oid: git2::Oid) -> GitResult<MergeResult> {
         let repo = self.repo.lock().unwrap();
 
-        let head = repo
-            .head()
-            .map_err(|e| GitError::PullFailed(Box::new(e)))?;
+        let head = repo.head().map_err(|e| GitError::PullFailed(Box::new(e)))?;
         let head_annotated = repo
             .find_annotated_commit(
                 head.target()
@@ -703,12 +693,7 @@ impl Git2Backend {
             .map_err(|e| GitError::PullFailed(Box::new(e)))?;
 
         let mut rebase = repo
-            .rebase(
-                Some(&head_annotated),
-                Some(&upstream_annotated),
-                None,
-                None,
-            )
+            .rebase(Some(&head_annotated), Some(&upstream_annotated), None, None)
             .map_err(|e| GitError::PullFailed(Box::new(e)))?;
 
         let sig = repo

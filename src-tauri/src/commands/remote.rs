@@ -4,7 +4,10 @@ use crate::git::types::{FetchResult, MergeResult, PullOption, PushResult, Remote
 use crate::state::AppState;
 
 #[tauri::command]
-pub fn fetch_remote(remote_name: String, state: State<'_, AppState>) -> Result<FetchResult, String> {
+pub fn fetch_remote(
+    remote_name: String,
+    state: State<'_, AppState>,
+) -> Result<FetchResult, String> {
     let repo_lock = state
         .repo
         .lock()
@@ -24,7 +27,9 @@ pub fn pull_remote(
         .lock()
         .map_err(|e| format!("Lock poisoned: {e}"))?;
     let backend = repo_lock.as_ref().ok_or("No repository opened")?;
-    backend.pull(&remote_name, option).map_err(|e| e.to_string())
+    backend
+        .pull(&remote_name, option)
+        .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
@@ -68,11 +73,17 @@ pub fn remove_remote(name: String, state: State<'_, AppState>) -> Result<(), Str
 }
 
 #[tauri::command]
-pub fn edit_remote(name: String, new_url: String, state: State<'_, AppState>) -> Result<(), String> {
+pub fn edit_remote(
+    name: String,
+    new_url: String,
+    state: State<'_, AppState>,
+) -> Result<(), String> {
     let repo_lock = state
         .repo
         .lock()
         .map_err(|e| format!("Lock poisoned: {e}"))?;
     let backend = repo_lock.as_ref().ok_or("No repository opened")?;
-    backend.edit_remote(&name, &new_url).map_err(|e| e.to_string())
+    backend
+        .edit_remote(&name, &new_url)
+        .map_err(|e| e.to_string())
 }

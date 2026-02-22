@@ -106,6 +106,8 @@ fn credential_helper(url: &str, username: &str) -> Result<Cred, git2::Error> {
 
     match password {
         Some(pw) => Cred::userpass_plaintext(username, &pw),
-        None => Err(git2::Error::from_str("credential helper returned no password")),
+        None => Err(git2::Error::from_str(
+            "credential helper returned no password",
+        )),
     }
 }
