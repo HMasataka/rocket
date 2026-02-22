@@ -86,9 +86,12 @@ export function getCurrentBranch(): Promise<string> {
 export interface BranchInfo {
   name: string;
   is_head: boolean;
+  is_remote: boolean;
+  remote_name: string | null;
+  upstream: string | null;
 }
 
-export type MergeKind = "fast_forward" | "normal" | "up_to_date";
+export type MergeKind = "fast_forward" | "normal" | "rebase" | "up_to_date";
 
 export interface MergeResult {
   kind: MergeKind;
@@ -122,4 +125,51 @@ export function mergeBranch(
   option: MergeOption,
 ): Promise<MergeResult> {
   return invoke<MergeResult>("merge_branch", { branchName, option });
+}
+
+export interface RemoteInfo {
+  name: string;
+  url: string;
+}
+
+export interface FetchResult {
+  remote_name: string;
+}
+
+export type PullOption = "merge" | "rebase";
+
+export interface PushResult {
+  remote_name: string;
+  branch: string;
+}
+
+export function fetchRemote(remoteName: string): Promise<FetchResult> {
+  return invoke<FetchResult>("fetch_remote", { remoteName });
+}
+
+export function pullRemote(
+  remoteName: string,
+  option: PullOption,
+): Promise<MergeResult> {
+  return invoke<MergeResult>("pull_remote", { remoteName, option });
+}
+
+export function pushRemote(remoteName: string): Promise<PushResult> {
+  return invoke<PushResult>("push_remote", { remoteName });
+}
+
+export function listRemotes(): Promise<RemoteInfo[]> {
+  return invoke<RemoteInfo[]>("list_remotes");
+}
+
+export function addRemote(name: string, url: string): Promise<void> {
+  return invoke<void>("add_remote", { name, url });
+}
+
+export function removeRemote(name: string): Promise<void> {
+  return invoke<void>("remove_remote", { name });
+}
+
+export function editRemote(name: string, newUrl: string): Promise<void> {
+  return invoke<void>("edit_remote", { name, newUrl });
 }
