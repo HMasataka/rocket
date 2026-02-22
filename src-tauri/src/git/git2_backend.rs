@@ -461,9 +461,7 @@ impl GitBackend for Git2Backend {
         }
 
         if option == MergeOption::FastForwardOnly {
-            return Err(GitError::MergeFailed(
-                "fast-forward not possible".into(),
-            ));
+            return Err(GitError::MergeFailed("fast-forward not possible".into()));
         }
 
         self.merge_normal_commit(&repo, branch_name, &annotated)

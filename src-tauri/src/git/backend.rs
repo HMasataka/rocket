@@ -1,7 +1,9 @@
 use std::path::Path;
 
 use crate::git::error::GitResult;
-use crate::git::types::{BranchInfo, CommitResult, DiffOptions, FileDiff, MergeOption, MergeResult, RepoStatus};
+use crate::git::types::{
+    BranchInfo, CommitResult, DiffOptions, FileDiff, MergeOption, MergeResult, RepoStatus,
+};
 
 pub trait GitBackend: Send + Sync {
     fn status(&self) -> GitResult<RepoStatus>;
