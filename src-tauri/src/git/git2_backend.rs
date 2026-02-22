@@ -3,11 +3,13 @@ use std::sync::Mutex;
 
 use git2::{BranchType, DiffFormat, DiffOptions as Git2DiffOptions, Repository, StatusOptions};
 
+use crate::git::auth::create_credentials_callback;
 use crate::git::backend::GitBackend;
 use crate::git::error::{GitError, GitResult};
 use crate::git::types::{
-    BranchInfo, CommitResult, DiffHunk, DiffLine, DiffLineKind, DiffOptions, FileDiff, FileStatus,
-    FileStatusKind, MergeKind, MergeOption, MergeResult, RepoStatus, StagingState,
+    BranchInfo, CommitResult, DiffHunk, DiffLine, DiffLineKind, DiffOptions, FetchResult, FileDiff,
+    FileStatus, FileStatusKind, MergeKind, MergeOption, MergeResult, PullOption, PushResult,
+    RemoteInfo, RepoStatus, StagingState,
 };
 
 pub struct Git2Backend {
@@ -345,19 +347,39 @@ impl GitBackend for Git2Backend {
     fn list_branches(&self) -> GitResult<Vec<BranchInfo>> {
         let repo = self.repo.lock().unwrap();
         let branches = repo
-            .branches(Some(BranchType::Local))
+            .branches(None)
             .map_err(|e| GitError::BranchListFailed(Box::new(e)))?;
 
         let mut result = Vec::new();
         for branch in branches {
-            let (branch, _) = branch.map_err(|e| GitError::BranchListFailed(Box::new(e)))?;
+            let (branch, branch_type) =
+                branch.map_err(|e| GitError::BranchListFailed(Box::new(e)))?;
             let name = branch
                 .name()
                 .map_err(|e| GitError::BranchListFailed(Box::new(e)))?
                 .unwrap_or("")
                 .to_string();
             let is_head = branch.is_head();
-            result.push(BranchInfo { name, is_head });
+            let is_remote = branch_type == BranchType::Remote;
+
+            let remote_name = if is_remote {
+                name.split('/').next().map(|s| s.to_string())
+            } else {
+                None
+            };
+
+            let upstream = branch
+                .upstream()
+                .ok()
+                .and_then(|u| u.name().ok().flatten().map(|s| s.to_string()));
+
+            result.push(BranchInfo {
+                name,
+                is_head,
+                is_remote,
+                remote_name,
+                upstream,
+            });
         }
         Ok(result)
     }
@@ -466,9 +488,257 @@ impl GitBackend for Git2Backend {
 
         self.merge_normal_commit(&repo, branch_name, &annotated)
     }
+
+    fn fetch(&self, remote_name: &str) -> GitResult<FetchResult> {
+        let repo = self.repo.lock().unwrap();
+        let mut remote = repo
+            .find_remote(remote_name)
+            .map_err(|e| GitError::FetchFailed(Box::new(e)))?;
+
+        let mut fetch_opts = git2::FetchOptions::new();
+        let mut callbacks = git2::RemoteCallbacks::new();
+        callbacks.credentials(create_credentials_callback());
+        fetch_opts.remote_callbacks(callbacks);
+
+        remote
+            .fetch(&[] as &[&str], Some(&mut fetch_opts), None)
+            .map_err(|e| GitError::FetchFailed(Box::new(e)))?;
+
+        Ok(FetchResult {
+            remote_name: remote_name.to_string(),
+        })
+    }
+
+    fn pull(&self, remote_name: &str, option: PullOption) -> GitResult<MergeResult> {
+        self.fetch(remote_name)?;
+
+        let (remote_ref_name, target_oid, analysis) = {
+            let repo = self.repo.lock().unwrap();
+            let head = repo
+                .head()
+                .map_err(|e| GitError::PullFailed(Box::new(e)))?;
+            let branch_name = head
+                .shorthand()
+                .ok_or_else(|| GitError::PullFailed("HEAD has no name".into()))?
+                .to_string();
+
+            let remote_ref_name = format!("{remote_name}/{branch_name}");
+            let remote_branch = repo
+                .find_branch(&remote_ref_name, BranchType::Remote)
+                .map_err(|e| GitError::PullFailed(Box::new(e)))?;
+            let target_oid = remote_branch
+                .get()
+                .target()
+                .ok_or_else(|| GitError::PullFailed("remote branch has no target".into()))?;
+            let annotated = repo
+                .find_annotated_commit(target_oid)
+                .map_err(|e| GitError::PullFailed(Box::new(e)))?;
+
+            let (analysis, _) = repo
+                .merge_analysis(&[&annotated])
+                .map_err(|e| GitError::PullFailed(Box::new(e)))?;
+
+            (remote_ref_name, target_oid, analysis)
+        };
+
+        if analysis.is_up_to_date() {
+            return Ok(MergeResult {
+                kind: MergeKind::UpToDate,
+                oid: None,
+            });
+        }
+
+        match option {
+            PullOption::Merge => {
+                self.merge_after_fetch(&remote_ref_name, analysis, target_oid)
+            }
+            PullOption::Rebase => self.rebase_after_fetch(target_oid),
+        }
+    }
+
+    fn push(&self, remote_name: &str) -> GitResult<PushResult> {
+        let repo = self.repo.lock().unwrap();
+        let mut remote = repo
+            .find_remote(remote_name)
+            .map_err(|e| GitError::PushFailed(Box::new(e)))?;
+
+        let head = repo
+            .head()
+            .map_err(|e| GitError::PushFailed(Box::new(e)))?;
+        let branch_name = head
+            .shorthand()
+            .ok_or_else(|| GitError::PushFailed("HEAD has no name".into()))?
+            .to_string();
+
+        let refspec = format!("refs/heads/{branch_name}:refs/heads/{branch_name}");
+
+        let mut push_opts = git2::PushOptions::new();
+        let mut callbacks = git2::RemoteCallbacks::new();
+        callbacks.credentials(create_credentials_callback());
+        push_opts.remote_callbacks(callbacks);
+
+        remote
+            .push(&[&refspec], Some(&mut push_opts))
+            .map_err(|e| GitError::PushFailed(Box::new(e)))?;
+
+        // upstream が未設定の場合は自動設定
+        drop(head);
+        if let Ok(mut local_branch) = repo.find_branch(&branch_name, BranchType::Local) {
+            if local_branch.upstream().is_err() {
+                let upstream_name = format!("{remote_name}/{branch_name}");
+                let _ = local_branch.set_upstream(Some(&upstream_name));
+            }
+        }
+
+        Ok(PushResult {
+            remote_name: remote_name.to_string(),
+            branch: branch_name,
+        })
+    }
+
+    fn list_remotes(&self) -> GitResult<Vec<RemoteInfo>> {
+        let repo = self.repo.lock().unwrap();
+        let remote_names = repo
+            .remotes()
+            .map_err(|e| GitError::RemoteFailed(Box::new(e)))?;
+
+        let mut remotes = Vec::new();
+        for name in remote_names.iter().flatten() {
+            let remote = repo
+                .find_remote(name)
+                .map_err(|e| GitError::RemoteFailed(Box::new(e)))?;
+            let url = remote.url().unwrap_or("").to_string();
+            remotes.push(RemoteInfo {
+                name: name.to_string(),
+                url,
+            });
+        }
+        Ok(remotes)
+    }
+
+    fn add_remote(&self, name: &str, url: &str) -> GitResult<()> {
+        let repo = self.repo.lock().unwrap();
+        repo.remote(name, url)
+            .map_err(|e| GitError::RemoteFailed(Box::new(e)))?;
+        Ok(())
+    }
+
+    fn remove_remote(&self, name: &str) -> GitResult<()> {
+        let repo = self.repo.lock().unwrap();
+        repo.remote_delete(name)
+            .map_err(|e| GitError::RemoteFailed(Box::new(e)))?;
+        Ok(())
+    }
+
+    fn edit_remote(&self, name: &str, new_url: &str) -> GitResult<()> {
+        let repo = self.repo.lock().unwrap();
+        repo.remote_set_url(name, new_url)
+            .map_err(|e| GitError::RemoteFailed(Box::new(e)))?;
+        Ok(())
+    }
 }
 
 impl Git2Backend {
+    fn merge_after_fetch(
+        &self,
+        remote_ref_name: &str,
+        analysis: git2::MergeAnalysis,
+        target_oid: git2::Oid,
+    ) -> GitResult<MergeResult> {
+        let repo = self.repo.lock().unwrap();
+
+        if analysis.is_fast_forward() {
+            let head_ref = repo
+                .head()
+                .map_err(|e| GitError::PullFailed(Box::new(e)))?;
+            let head_name = head_ref
+                .name()
+                .ok_or_else(|| GitError::PullFailed("HEAD has no name".into()))?
+                .to_string();
+            drop(head_ref);
+
+            repo.reference(
+                &head_name,
+                target_oid,
+                true,
+                &format!("Fast-forward to {remote_ref_name}"),
+            )
+            .map_err(|e| GitError::PullFailed(Box::new(e)))?;
+            repo.checkout_head(Some(git2::build::CheckoutBuilder::default().force()))
+                .map_err(|e| GitError::PullFailed(Box::new(e)))?;
+
+            return Ok(MergeResult {
+                kind: MergeKind::FastForward,
+                oid: Some(target_oid.to_string()),
+            });
+        }
+
+        let annotated = repo
+            .find_annotated_commit(target_oid)
+            .map_err(|e| GitError::PullFailed(Box::new(e)))?;
+
+        self.merge_normal_commit(&repo, remote_ref_name, &annotated)
+            .map_err(|e| match e {
+                GitError::MergeFailed(inner) => GitError::PullFailed(inner),
+                other => other,
+            })
+    }
+
+    fn rebase_after_fetch(&self, target_oid: git2::Oid) -> GitResult<MergeResult> {
+        let repo = self.repo.lock().unwrap();
+
+        let head = repo
+            .head()
+            .map_err(|e| GitError::PullFailed(Box::new(e)))?;
+        let head_annotated = repo
+            .find_annotated_commit(
+                head.target()
+                    .ok_or_else(|| GitError::PullFailed("HEAD has no target".into()))?,
+            )
+            .map_err(|e| GitError::PullFailed(Box::new(e)))?;
+        drop(head);
+
+        let upstream_annotated = repo
+            .find_annotated_commit(target_oid)
+            .map_err(|e| GitError::PullFailed(Box::new(e)))?;
+
+        let mut rebase = repo
+            .rebase(
+                Some(&head_annotated),
+                Some(&upstream_annotated),
+                None,
+                None,
+            )
+            .map_err(|e| GitError::PullFailed(Box::new(e)))?;
+
+        let sig = repo
+            .signature()
+            .map_err(|e| GitError::PullFailed(Box::new(e)))?;
+
+        let mut last_oid = target_oid;
+        while rebase.next().is_some() {
+            let index = repo
+                .index()
+                .map_err(|e| GitError::PullFailed(Box::new(e)))?;
+            if index.has_conflicts() {
+                let _ = rebase.abort();
+                return Err(GitError::PullFailed("rebase conflicts detected".into()));
+            }
+            last_oid = rebase
+                .commit(None, &sig, None)
+                .map_err(|e| GitError::PullFailed(Box::new(e)))?;
+        }
+
+        rebase
+            .finish(Some(&sig))
+            .map_err(|e| GitError::PullFailed(Box::new(e)))?;
+
+        Ok(MergeResult {
+            kind: MergeKind::Rebase,
+            oid: Some(last_oid.to_string()),
+        })
+    }
+
     fn merge_normal_commit(
         &self,
         repo: &Repository,
