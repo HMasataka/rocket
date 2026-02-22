@@ -79,3 +79,31 @@ impl Default for DiffOptions {
 pub struct CommitResult {
     pub oid: String,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct BranchInfo {
+    pub name: String,
+    pub is_head: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum MergeKind {
+    FastForward,
+    Normal,
+    UpToDate,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MergeResult {
+    pub kind: MergeKind,
+    pub oid: Option<String>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum MergeOption {
+    Default,
+    FastForwardOnly,
+    NoFastForward,
+}

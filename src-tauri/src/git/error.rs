@@ -31,6 +31,24 @@ pub enum GitError {
 
     #[error("failed to write config: {0}")]
     ConfigWriteFailed(#[source] Box<dyn std::error::Error + Send + Sync>),
+
+    #[error("failed to list branches: {0}")]
+    BranchListFailed(#[source] Box<dyn std::error::Error + Send + Sync>),
+
+    #[error("failed to create branch: {0}")]
+    BranchCreateFailed(#[source] Box<dyn std::error::Error + Send + Sync>),
+
+    #[error("failed to checkout branch: {0}")]
+    CheckoutFailed(#[source] Box<dyn std::error::Error + Send + Sync>),
+
+    #[error("failed to delete branch: {0}")]
+    BranchDeleteFailed(#[source] Box<dyn std::error::Error + Send + Sync>),
+
+    #[error("failed to rename branch: {0}")]
+    BranchRenameFailed(#[source] Box<dyn std::error::Error + Send + Sync>),
+
+    #[error("failed to merge branch: {0}")]
+    MergeFailed(#[source] Box<dyn std::error::Error + Send + Sync>),
 }
 
 pub type GitResult<T> = Result<T, GitError>;
