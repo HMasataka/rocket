@@ -1,6 +1,6 @@
 import { getCurrentWindow } from "@tauri-apps/api/window";
 
-const iconColor = "rgba(77,18,10,0.6)";
+const iconColor = "rgba(77,18,10,0.85)";
 
 function CloseIcon() {
   return (
