@@ -15,6 +15,7 @@ describe("gitStore", () => {
     useGitStore.setState({
       status: null,
       currentBranch: null,
+      branches: [],
       diff: [],
       loading: false,
       error: null,
@@ -101,6 +102,144 @@ describe("gitStore", () => {
       await expect(useGitStore.getState().commit("test")).rejects.toThrow();
 
       expect(useGitStore.getState().error).toContain("commit error");
+    });
+  });
+
+  describe("fetchBranches", () => {
+    it("sets branches on success", async () => {
+      const mockBranches = [
+        { name: "main", is_head: true },
+        { name: "feature", is_head: false },
+      ];
+      mockedInvoke.mockResolvedValueOnce(mockBranches);
+
+      await useGitStore.getState().fetchBranches();
+
+      expect(useGitStore.getState().branches).toEqual(mockBranches);
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("list error"));
+
+      await expect(useGitStore.getState().fetchBranches()).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("list error");
+    });
+  });
+
+  describe("createBranch", () => {
+    it("calls invoke on success", async () => {
+      mockedInvoke.mockResolvedValueOnce(undefined);
+
+      await useGitStore.getState().createBranch("new-branch");
+
+      expect(mockedInvoke).toHaveBeenCalledWith("create_branch", {
+        name: "new-branch",
+      });
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("create error"));
+
+      await expect(
+        useGitStore.getState().createBranch("bad"),
+      ).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("create error");
+    });
+  });
+
+  describe("checkoutBranch", () => {
+    it("calls invoke on success", async () => {
+      mockedInvoke.mockResolvedValueOnce(undefined);
+
+      await useGitStore.getState().checkoutBranch("feature");
+
+      expect(mockedInvoke).toHaveBeenCalledWith("checkout_branch", {
+        name: "feature",
+      });
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("checkout error"));
+
+      await expect(
+        useGitStore.getState().checkoutBranch("bad"),
+      ).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("checkout error");
+    });
+  });
+
+  describe("deleteBranch", () => {
+    it("calls invoke on success", async () => {
+      mockedInvoke.mockResolvedValueOnce(undefined);
+
+      await useGitStore.getState().deleteBranch("old-branch");
+
+      expect(mockedInvoke).toHaveBeenCalledWith("delete_branch", {
+        name: "old-branch",
+      });
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("delete error"));
+
+      await expect(
+        useGitStore.getState().deleteBranch("bad"),
+      ).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("delete error");
+    });
+  });
+
+  describe("renameBranch", () => {
+    it("calls invoke on success", async () => {
+      mockedInvoke.mockResolvedValueOnce(undefined);
+
+      await useGitStore.getState().renameBranch("old", "new");
+
+      expect(mockedInvoke).toHaveBeenCalledWith("rename_branch", {
+        oldName: "old",
+        newName: "new",
+      });
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("rename error"));
+
+      await expect(
+        useGitStore.getState().renameBranch("old", "bad"),
+      ).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("rename error");
+    });
+  });
+
+  describe("mergeBranch", () => {
+    it("returns merge result on success", async () => {
+      const mockResult = { kind: "fast_forward", oid: "abc123" };
+      mockedInvoke.mockResolvedValueOnce(mockResult);
+
+      const result = await useGitStore
+        .getState()
+        .mergeBranch("feature", "default");
+
+      expect(result).toEqual(mockResult);
+      expect(mockedInvoke).toHaveBeenCalledWith("merge_branch", {
+        branchName: "feature",
+        option: "default",
+      });
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("merge error"));
+
+      await expect(
+        useGitStore.getState().mergeBranch("feature", "default"),
+      ).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("merge error");
     });
   });
 

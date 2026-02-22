@@ -2,6 +2,7 @@ import { useCallback, useEffect } from "react";
 import { ToastContainer } from "./components/organisms/ToastContainer";
 import { AppShell } from "./components/templates/AppShell";
 import { useFileWatcher } from "./hooks/useFileWatcher";
+import { BranchesPage } from "./pages/branches";
 import { ChangesPage } from "./pages/changes";
 import { useGitStore } from "./stores/gitStore";
 import { useUIStore } from "./stores/uiStore";
@@ -12,6 +13,7 @@ export function App() {
   const fetchStatus = useGitStore((s) => s.fetchStatus);
   const fetchBranch = useGitStore((s) => s.fetchBranch);
   const addToast = useUIStore((s) => s.addToast);
+  const activePage = useUIStore((s) => s.activePage);
 
   useEffect(() => {
     fetchBranch().catch((e: unknown) => {
@@ -35,7 +37,8 @@ export function App() {
   return (
     <>
       <AppShell branch={currentBranch} changesCount={changesCount}>
-        <ChangesPage />
+        {activePage === "changes" && <ChangesPage />}
+        {activePage === "branches" && <BranchesPage />}
       </AppShell>
       <ToastContainer />
     </>
