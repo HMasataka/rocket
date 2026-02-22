@@ -33,7 +33,11 @@
 
 body {
   font-family: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, sans-serif;
-  background: #0a0c0f;
+  background: transparent;
   color: var(--text-primary);
   overflow: hidden;
+}
+
+html {
+  background: transparent;
 }

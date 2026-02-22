@@ -4,6 +4,8 @@
   display: flex;
   flex-direction: column;
   background: var(--bg-primary);
+  border-radius: 10px;
+  overflow: hidden;
 }
 
 /* ===== Title Bar ===== */
