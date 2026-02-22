@@ -182,6 +182,21 @@
   color: var(--text-primary);
 }
 
+/* Syntax highlighting */
+.blame-code .code-keyword {
+  color: var(--danger);
+}
+.blame-code .code-string {
+  color: var(--success);
+}
+.blame-code .code-comment {
+  color: var(--text-muted);
+  font-style: italic;
+}
+.blame-code .code-func {
+  color: var(--accent);
+}
+
 /* ===== Responsive ===== */
 @media (max-width: 1023px) {
   .blame-gutter {
