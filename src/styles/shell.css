@@ -36,27 +36,19 @@
   padding: 0;
   margin: 0;
   outline: none;
-  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: filter 0.15s ease;
 }
 
 .window-dot svg {
-  position: absolute;
   width: 8px;
   height: 8px;
   opacity: 0;
-  transition: opacity 0.15s ease;
 }
 
 .window-controls:hover .window-dot svg {
   opacity: 1;
-}
-
-.window-controls:hover .window-dot:hover {
-  filter: brightness(0.9);
 }
 
 .window-dot.close {
