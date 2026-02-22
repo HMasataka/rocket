@@ -104,6 +104,11 @@ pub fn run() {
             commands::remote::add_remote,
             commands::remote::remove_remote,
             commands::remote::edit_remote,
+            commands::history::get_commit_log,
+            commands::history::get_commit_detail,
+            commands::history::get_commit_file_diff,
+            commands::history::get_blame,
+            commands::history::get_file_history,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
