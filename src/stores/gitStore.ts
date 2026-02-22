@@ -1,21 +1,32 @@
 import { create } from "zustand";
 import type {
   BranchInfo,
+  FetchResult,
   FileDiff,
   MergeOption,
   MergeResult,
+  PullOption,
+  PushResult,
+  RemoteInfo,
   RepoStatus,
 } from "../services/git";
 import {
+  addRemote as addRemoteService,
   checkoutBranch as checkoutBranchService,
   commitChanges,
   createBranch as createBranchService,
   deleteBranch as deleteBranchService,
+  editRemote as editRemoteService,
+  fetchRemote as fetchRemoteService,
   getCurrentBranch,
   getDiff,
   getStatus,
   listBranches,
+  listRemotes,
   mergeBranch as mergeBranchService,
+  pullRemote as pullRemoteService,
+  pushRemote as pushRemoteService,
+  removeRemote as removeRemoteService,
   renameBranch as renameBranchService,
   stageAll as stageAllService,
   stageFile as stageFileService,
@@ -28,6 +39,7 @@ interface GitState {
   currentBranch: string | null;
   branches: BranchInfo[];
   diff: FileDiff[];
+  remotes: RemoteInfo[];
   loading: boolean;
   error: string | null;
 }
@@ -50,6 +62,13 @@ interface GitActions {
     branchName: string,
     option: MergeOption,
   ) => Promise<MergeResult>;
+  fetchRemote: (remoteName: string) => Promise<FetchResult>;
+  pullRemote: (remoteName: string, option: PullOption) => Promise<MergeResult>;
+  pushRemote: (remoteName: string) => Promise<PushResult>;
+  fetchRemotes: () => Promise<void>;
+  addRemote: (name: string, url: string) => Promise<void>;
+  removeRemote: (name: string) => Promise<void>;
+  editRemote: (name: string, newUrl: string) => Promise<void>;
   clearError: () => void;
 }
 
@@ -58,6 +77,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
   currentBranch: null,
   branches: [],
   diff: [],
+  remotes: [],
   loading: false,
   error: null,
 
@@ -187,6 +207,70 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
   mergeBranch: async (branchName: string, option: MergeOption) => {
     try {
       return await mergeBranchService(branchName, option);
+    } catch (e) {
+      set({ error: String(e) });
+      throw e;
+    }
+  },
+
+  fetchRemote: async (remoteName: string) => {
+    try {
+      return await fetchRemoteService(remoteName);
+    } catch (e) {
+      set({ error: String(e) });
+      throw e;
+    }
+  },
+
+  pullRemote: async (remoteName: string, option: PullOption) => {
+    try {
+      return await pullRemoteService(remoteName, option);
+    } catch (e) {
+      set({ error: String(e) });
+      throw e;
+    }
+  },
+
+  pushRemote: async (remoteName: string) => {
+    try {
+      return await pushRemoteService(remoteName);
+    } catch (e) {
+      set({ error: String(e) });
+      throw e;
+    }
+  },
+
+  fetchRemotes: async () => {
+    try {
+      const remotes = await listRemotes();
+      set({ remotes });
+    } catch (e) {
+      set({ error: String(e) });
+      throw e;
+    }
+  },
+
+  addRemote: async (name: string, url: string) => {
+    try {
+      await addRemoteService(name, url);
+    } catch (e) {
+      set({ error: String(e) });
+      throw e;
+    }
+  },
+
+  removeRemote: async (name: string) => {
+    try {
+      await removeRemoteService(name);
+    } catch (e) {
+      set({ error: String(e) });
+      throw e;
+    }
+  },
+
+  editRemote: async (name: string, newUrl: string) => {
+    try {
+      await editRemoteService(name, newUrl);
     } catch (e) {
       set({ error: String(e) });
       throw e;

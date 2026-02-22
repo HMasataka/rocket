@@ -25,15 +25,21 @@ export function BranchFooter({
         </span>
       </div>
       <div className="operation-buttons">
-        <button type="button" className="btn btn-secondary" onClick={onRename}>
-          Rename
-        </button>
-        {!branch.is_head && (
+        {!branch.is_remote && (
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={onRename}
+          >
+            Rename
+          </button>
+        )}
+        {!branch.is_head && !branch.is_remote && (
           <button type="button" className="btn btn-danger" onClick={onDelete}>
             Delete
           </button>
         )}
-        {!branch.is_head && (
+        {!branch.is_head && !branch.is_remote && (
           <button type="button" className="btn btn-primary" onClick={onSwitch}>
             Switch
           </button>

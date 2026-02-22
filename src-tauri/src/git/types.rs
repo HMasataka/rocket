@@ -84,6 +84,33 @@ pub struct CommitResult {
 pub struct BranchInfo {
     pub name: String,
     pub is_head: bool,
+    pub is_remote: bool,
+    pub remote_name: Option<String>,
+    pub upstream: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct RemoteInfo {
+    pub name: String,
+    pub url: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FetchResult {
+    pub remote_name: String,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum PullOption {
+    Merge,
+    Rebase,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PushResult {
+    pub remote_name: String,
+    pub branch: String,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -91,6 +118,7 @@ pub struct BranchInfo {
 pub enum MergeKind {
     FastForward,
     Normal,
+    Rebase,
     UpToDate,
 }
 

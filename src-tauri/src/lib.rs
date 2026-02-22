@@ -97,6 +97,13 @@ pub fn run() {
             commands::branch::delete_branch,
             commands::branch::rename_branch,
             commands::branch::merge_branch,
+            commands::remote::fetch_remote,
+            commands::remote::pull_remote,
+            commands::remote::push_remote,
+            commands::remote::list_remotes,
+            commands::remote::add_remote,
+            commands::remote::remove_remote,
+            commands::remote::edit_remote,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -113,7 +113,7 @@ export function BranchesPage() {
       <div className="page-header">
         <div className="page-info">
           <h2 className="page-title">Branches</h2>
-          <span className="page-desc">Manage local branches</span>
+          <span className="page-desc">Manage local and remote branches</span>
         </div>
         <div className="page-actions">
           <button

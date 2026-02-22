@@ -49,6 +49,21 @@ pub enum GitError {
 
     #[error("failed to merge branch: {0}")]
     MergeFailed(#[source] Box<dyn std::error::Error + Send + Sync>),
+
+    #[error("failed to fetch: {0}")]
+    FetchFailed(#[source] Box<dyn std::error::Error + Send + Sync>),
+
+    #[error("failed to pull: {0}")]
+    PullFailed(#[source] Box<dyn std::error::Error + Send + Sync>),
+
+    #[error("failed to push: {0}")]
+    PushFailed(#[source] Box<dyn std::error::Error + Send + Sync>),
+
+    #[error("failed to manage remote: {0}")]
+    RemoteFailed(#[source] Box<dyn std::error::Error + Send + Sync>),
+
+    #[error("authentication failed: {0}")]
+    AuthFailed(#[source] Box<dyn std::error::Error + Send + Sync>),
 }
 
 pub type GitResult<T> = Result<T, GitError>;
