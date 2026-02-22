@@ -30,14 +30,44 @@
   height: 12px;
   border-radius: 50%;
   cursor: pointer;
+  border: none;
+  padding: 0;
+  margin: 0;
+  outline: none;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: filter 0.15s ease;
+}
+
+.window-dot svg {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  opacity: 0;
   transition: opacity 0.15s ease;
 }
 
-.window-dot:hover { opacity: 0.8; }
+.window-controls:hover .window-dot svg {
+  opacity: 1;
+}
 
-.window-dot.close { background: #ff5f57; }
-.window-dot.minimize { background: #febc2e; }
-.window-dot.maximize { background: #28c840; }
+.window-controls:hover .window-dot:hover {
+  filter: brightness(0.9);
+}
+
+.window-dot.close {
+  background: #ff5f57;
+}
+
+.window-dot.minimize {
+  background: #febc2e;
+}
+
+.window-dot.maximize {
+  background: #28c840;
+}
 
 .titlebar-tabs {
   display: flex;
@@ -57,9 +87,14 @@
   transition: all 0.15s ease;
 }
 
-.tab:hover { color: var(--text-secondary); }
+.tab:hover {
+  color: var(--text-secondary);
+}
 
-.tab.active { background: var(--bg-tertiary); color: var(--text-primary); }
+.tab.active {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
 
 .tab-add {
   padding: 4px 6px;
@@ -72,8 +107,15 @@
   transition: all 0.15s ease;
 }
 
-.tab-add:hover { border-color: var(--text-secondary); color: var(--text-secondary); background: var(--bg-tertiary); }
-.tab-add svg { width: 14px; height: 14px; }
+.tab-add:hover {
+  border-color: var(--text-secondary);
+  color: var(--text-secondary);
+  background: var(--bg-tertiary);
+}
+.tab-add svg {
+  width: 14px;
+  height: 14px;
+}
 
 .titlebar-actions {
   margin-left: auto;
@@ -94,8 +136,14 @@
   transition: all 0.15s ease;
 }
 
-.titlebar-btn:hover { background: var(--bg-tertiary); color: var(--text-primary); }
-.titlebar-btn svg { width: 16px; height: 16px; }
+.titlebar-btn:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+.titlebar-btn svg {
+  width: 16px;
+  height: 16px;
+}
 
 /* ===== Toolbar ===== */
 .toolbar {
@@ -115,7 +163,9 @@
   gap: 4px;
 }
 
-.toolbar-spacer { flex: 1; }
+.toolbar-spacer {
+  flex: 1;
+}
 
 .branch-selector {
   display: flex;
@@ -130,9 +180,19 @@
   transition: border-color 0.15s ease;
 }
 
-.branch-selector:hover { border-color: var(--accent); }
-.branch-selector svg { width: 16px; height: 16px; color: var(--accent); }
-.branch-selector .chevron { width: 12px; height: 12px; color: var(--text-muted); }
+.branch-selector:hover {
+  border-color: var(--accent);
+}
+.branch-selector svg {
+  width: 16px;
+  height: 16px;
+  color: var(--accent);
+}
+.branch-selector .chevron {
+  width: 12px;
+  height: 12px;
+  color: var(--text-muted);
+}
 
 .toolbar-btn {
   display: flex;
@@ -149,8 +209,15 @@
   transition: all 0.15s ease;
 }
 
-.toolbar-btn:hover { background: var(--bg-tertiary); color: var(--text-primary); border-color: var(--accent); }
-.toolbar-btn svg { width: 14px; height: 14px; }
+.toolbar-btn:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border-color: var(--accent);
+}
+.toolbar-btn svg {
+  width: 14px;
+  height: 14px;
+}
 
 .toolbar-btn .badge {
   padding: 2px 6px;
@@ -167,10 +234,20 @@
   color: var(--purple);
 }
 
-.toolbar-btn.ai-btn:hover { background: var(--purple); color: #fff; }
+.toolbar-btn.ai-btn:hover {
+  background: var(--purple);
+  color: #fff;
+}
 
-.toolbar-btn.remote-btn { gap: 8px; }
-.toolbar-btn.remote-btn .dropdown-arrow { width: 12px; height: 12px; color: var(--text-muted); margin-left: 2px; }
+.toolbar-btn.remote-btn {
+  gap: 8px;
+}
+.toolbar-btn.remote-btn .dropdown-arrow {
+  width: 12px;
+  height: 12px;
+  color: var(--text-muted);
+  margin-left: 2px;
+}
 
 /* ===== Main Layout ===== */
 .main-layout {
@@ -189,7 +266,9 @@
   border-right: 1px solid var(--border);
   overflow-y: auto;
   flex-shrink: 0;
-  transition: width 0.2s, transform 0.2s;
+  transition:
+    width 0.2s,
+    transform 0.2s;
 }
 
 .sidebar-section {
@@ -197,7 +276,9 @@
   border-bottom: 1px solid var(--border);
 }
 
-.sidebar-section:last-child { border-bottom: none; }
+.sidebar-section:last-child {
+  border-bottom: none;
+}
 
 .section-label {
   padding: 8px 16px;
@@ -219,11 +300,24 @@
   transition: all 0.15s ease;
 }
 
-.nav-item:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+.nav-item:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
 
-.nav-item.active { background: var(--accent-dim); color: var(--accent); border-left: 2px solid var(--accent); }
-.nav-item.active:hover { background: var(--accent-dim); }
-.nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+.nav-item.active {
+  background: var(--accent-dim);
+  color: var(--accent);
+  border-left: 2px solid var(--accent);
+}
+.nav-item.active:hover {
+  background: var(--accent-dim);
+}
+.nav-item svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
 
 .nav-badge {
   margin-left: auto;
@@ -255,7 +349,13 @@
   overflow: hidden;
 }
 
-.view.active { display: flex; flex-direction: column; width: 100%; height: 100%; min-height: 0; }
+.view.active {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
 
 /* ===== Changes Layout ===== */
 .changes-layout {
@@ -265,9 +365,28 @@
   overflow: hidden;
 }
 
-.changes-layout .file-panel { width: 250px; flex: 0 0 250px; border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
-.changes-layout .diff-panel { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; overflow: hidden; }
-.changes-layout .commit-panel { width: 300px; flex: 0 0 300px; border-left: 1px solid var(--border); display: flex; flex-direction: column; }
+.changes-layout .file-panel {
+  width: 250px;
+  flex: 0 0 250px;
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.changes-layout .diff-panel {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.changes-layout .commit-panel {
+  width: 300px;
+  flex: 0 0 300px;
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+}
 
 /* ===== Status Bar ===== */
 .statusbar {
@@ -282,7 +401,8 @@
   font-size: 11px;
 }
 
-.status-left, .status-right {
+.status-left,
+.status-right {
   display: flex;
   align-items: center;
   gap: 16px;
@@ -295,9 +415,16 @@
   color: var(--text-muted);
 }
 
-.status-item svg { width: 12px; height: 12px; }
-.status-item.sync { color: var(--success); }
-.status-item.warning { color: var(--warning); }
+.status-item svg {
+  width: 12px;
+  height: 12px;
+}
+.status-item.sync {
+  color: var(--success);
+}
+.status-item.warning {
+  color: var(--warning);
+}
 
 /* ===== Sidebar Toggle ===== */
 .sidebar-toggle {
@@ -320,7 +447,10 @@
   color: var(--accent);
 }
 
-.sidebar-toggle svg { width: 18px; height: 18px; }
+.sidebar-toggle svg {
+  width: 18px;
+  height: 18px;
+}
 
 /* ===== Sidebar Overlay (mobile) ===== */
 .sidebar-overlay {
@@ -331,50 +461,124 @@
   z-index: 49;
 }
 
-.sidebar-overlay.active { display: block; }
+.sidebar-overlay.active {
+  display: block;
+}
 
 /* ===== Responsive Shell ===== */
 @media (min-width: 1400px) {
-  .sidebar { width: 220px; }
-  .changes-layout .file-panel { flex: 0 0 280px; }
-  .changes-layout .commit-panel { flex: 0 0 340px; }
+  .sidebar {
+    width: 220px;
+  }
+  .changes-layout .file-panel {
+    flex: 0 0 280px;
+  }
+  .changes-layout .commit-panel {
+    flex: 0 0 340px;
+  }
 }
 
 @media (max-width: 1199px) {
-  .sidebar { width: 180px; }
-  .toolbar-btn span { display: none; }
-  .toolbar-btn .badge { display: none; }
-  .toolbar-btn { padding: 8px; }
-  .changes-layout .file-panel { flex: 0 0 220px; }
-  .changes-layout .commit-panel { flex: 0 0 260px; }
+  .sidebar {
+    width: 180px;
+  }
+  .toolbar-btn span {
+    display: none;
+  }
+  .toolbar-btn .badge {
+    display: none;
+  }
+  .toolbar-btn {
+    padding: 8px;
+  }
+  .changes-layout .file-panel {
+    flex: 0 0 220px;
+  }
+  .changes-layout .commit-panel {
+    flex: 0 0 260px;
+  }
 }
 
 @media (max-width: 1023px) {
-  .sidebar { width: 160px; min-width: 160px; }
-  .section-label { padding: 8px 12px; font-size: 9px; }
-  .nav-item { padding: 8px 12px; font-size: 12px; gap: 8px; }
+  .sidebar {
+    width: 160px;
+    min-width: 160px;
+  }
+  .section-label {
+    padding: 8px 12px;
+    font-size: 9px;
+  }
+  .nav-item {
+    padding: 8px 12px;
+    font-size: 12px;
+    gap: 8px;
+  }
   .branch-selector span {
     max-width: 100px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-  .changes-layout { flex-direction: column; }
-  .changes-layout .file-panel { flex: 0 0 auto; width: 100%; max-height: 180px; border-right: none; border-bottom: 1px solid var(--border); }
-  .changes-layout .diff-panel { flex: 1 1 auto; }
-  .changes-layout .commit-panel { flex: 0 0 auto; width: 100%; max-height: 180px; border-left: none; border-top: 1px solid var(--border); }
+  .changes-layout {
+    flex-direction: column;
+  }
+  .changes-layout .file-panel {
+    flex: 0 0 auto;
+    width: 100%;
+    max-height: 180px;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+  .changes-layout .diff-panel {
+    flex: 1 1 auto;
+  }
+  .changes-layout .commit-panel {
+    flex: 0 0 auto;
+    width: 100%;
+    max-height: 180px;
+    border-left: none;
+    border-top: 1px solid var(--border);
+  }
 }
 
 @media (max-width: 767px) {
-  .sidebar { display: none; }
-  .sidebar-toggle { display: flex; }
-  .toolbar { padding: 0 8px; gap: 4px; overflow-x: auto; }
-  .toolbar-group { flex-shrink: 0; }
-  .toolbar-btn { padding: 6px; }
-  .toolbar-btn span { display: none; }
-  .branch-selector { padding: 6px 8px; }
-  .branch-selector span { max-width: 80px; }
-  .changes-layout { flex-direction: column; }
-  .changes-layout .file-panel { flex: 0 0 auto; width: 100%; max-height: 150px; }
-  .changes-layout .commit-panel { flex: 0 0 auto; width: 100%; max-height: 160px; }
+  .sidebar {
+    display: none;
+  }
+  .sidebar-toggle {
+    display: flex;
+  }
+  .toolbar {
+    padding: 0 8px;
+    gap: 4px;
+    overflow-x: auto;
+  }
+  .toolbar-group {
+    flex-shrink: 0;
+  }
+  .toolbar-btn {
+    padding: 6px;
+  }
+  .toolbar-btn span {
+    display: none;
+  }
+  .branch-selector {
+    padding: 6px 8px;
+  }
+  .branch-selector span {
+    max-width: 80px;
+  }
+  .changes-layout {
+    flex-direction: column;
+  }
+  .changes-layout .file-panel {
+    flex: 0 0 auto;
+    width: 100%;
+    max-height: 150px;
+  }
+  .changes-layout .commit-panel {
+    flex: 0 0 auto;
+    width: 100%;
+    max-height: 160px;
+  }
 }

@@ -4,6 +4,8 @@
   display: flex;
   flex-direction: column;
   background: var(--bg-primary);
+  border-radius: 10px;
+  overflow: hidden;
 }
 
 /* ===== Title Bar ===== */
@@ -30,19 +32,33 @@
   height: 12px;
   border-radius: 50%;
   cursor: pointer;
-  transition: opacity 0.15s ease;
+  border: none;
+  padding: 0;
+  margin: 0;
+  outline: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.window-dot:hover {
-  opacity: 0.8;
+.window-dot svg {
+  width: 8px;
+  height: 8px;
+  opacity: 0;
+}
+
+.window-controls:hover .window-dot svg {
+  opacity: 1;
 }
 
 .window-dot.close {
   background: #ff5f57;
 }
+
 .window-dot.minimize {
   background: #febc2e;
 }
+
 .window-dot.maximize {
   background: #28c840;
 }
