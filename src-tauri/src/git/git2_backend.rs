@@ -1183,21 +1183,7 @@ impl GitBackend for Git2Backend {
             .index()
             .map_err(|e| GitError::ConflictFailed(Box::new(e)))?;
 
-        let mut paths: Vec<String> = Vec::new();
-        if let Ok(conflicts) = index.conflicts() {
-            for conflict in conflicts.flatten() {
-                let path = conflict
-                    .our
-                    .as_ref()
-                    .or(conflict.their.as_ref())
-                    .and_then(|e| String::from_utf8(e.path.clone()).ok());
-                if let Some(p) = path {
-                    if !paths.contains(&p) {
-                        paths.push(p);
-                    }
-                }
-            }
-        }
+        let paths = collect_conflict_paths(&index);
 
         let mut result = Vec::new();
         for path in paths {
@@ -1324,12 +1310,21 @@ impl GitBackend for Git2Backend {
             .find_commit(merge_head_oid)
             .map_err(|e| GitError::ConflictFailed(Box::new(e)))?;
 
+        let commit_message = if message.is_empty() {
+            let merge_msg_path = repo.path().join("MERGE_MSG");
+            std::fs::read_to_string(&merge_msg_path)
+                .map(|s| s.trim().to_string())
+                .unwrap_or_else(|_| "Merge commit".to_string())
+        } else {
+            message.to_string()
+        };
+
         let oid = repo
             .commit(
                 Some("HEAD"),
                 &sig,
                 &sig,
-                message,
+                &commit_message,
                 &tree,
                 &[&head_commit, &their_commit],
             )
@@ -1605,24 +1600,10 @@ impl Git2Backend {
             .map_err(|e| GitError::MergeFailed(Box::new(e)))?;
 
         if index.has_conflicts() {
-            let mut conflict_paths = Vec::new();
-            if let Ok(conflicts) = index.conflicts() {
-                for conflict in conflicts.flatten() {
-                    let path = conflict
-                        .our
-                        .as_ref()
-                        .or(conflict.their.as_ref())
-                        .and_then(|e| String::from_utf8(e.path.clone()).ok());
-                    if let Some(p) = path {
-                        conflict_paths.push(p);
-                    }
-                }
-            }
-
             return Ok(MergeResult {
                 kind: MergeKind::Conflict,
                 oid: None,
-                conflicts: conflict_paths,
+                conflicts: collect_conflict_paths(&index),
             });
         }
 
@@ -2170,6 +2151,44 @@ fn parse_diff_to_file_diffs(diff: &git2::Diff) -> Result<Vec<FileDiff>, git2::Er
     Ok(file_diffs)
 }
 
+fn collect_conflict_paths(index: &git2::Index) -> Vec<String> {
+    let mut paths = Vec::new();
+    if let Ok(conflicts) = index.conflicts() {
+        for conflict in conflicts.flatten() {
+            let path = conflict
+                .our
+                .as_ref()
+                .or(conflict.their.as_ref())
+                .and_then(|e| String::from_utf8(e.path.clone()).ok());
+            if let Some(p) = path {
+                if !paths.contains(&p) {
+                    paths.push(p);
+                }
+            }
+        }
+    }
+    paths
+}
+
+fn parse_one_block(lines: &[&str], start: usize) -> (String, String, usize) {
+    let mut i = start + 1; // skip <<<<<<<
+    let mut ours = String::new();
+    while i < lines.len() && !lines[i].starts_with("=======") {
+        ours.push_str(lines[i]);
+        ours.push('\n');
+        i += 1;
+    }
+    i += 1; // skip =======
+    let mut theirs = String::new();
+    while i < lines.len() && !lines[i].starts_with(">>>>>>>") {
+        theirs.push_str(lines[i]);
+        theirs.push('\n');
+        i += 1;
+    }
+    i += 1; // skip >>>>>>>
+    (ours, theirs, i)
+}
+
 fn parse_conflict_markers(content: &str) -> Vec<ConflictBlock> {
     let mut blocks = Vec::new();
     let lines: Vec<&str> = content.lines().collect();
@@ -2178,33 +2197,15 @@ fn parse_conflict_markers(content: &str) -> Vec<ConflictBlock> {
     while i < lines.len() {
         if lines[i].starts_with("<<<<<<<") {
             let start_line = (i + 1) as u32;
-            let mut ours = String::new();
-            i += 1;
-
-            while i < lines.len() && !lines[i].starts_with("=======") {
-                ours.push_str(lines[i]);
-                ours.push('\n');
-                i += 1;
-            }
-
-            i += 1; // skip =======
-
-            let mut theirs = String::new();
-            while i < lines.len() && !lines[i].starts_with(">>>>>>>") {
-                theirs.push_str(lines[i]);
-                theirs.push('\n');
-                i += 1;
-            }
-
-            let end_line = (i + 1) as u32;
+            let (ours, theirs, next) = parse_one_block(&lines, i);
+            let end_line = next as u32;
             blocks.push(ConflictBlock {
                 ours,
                 theirs,
                 start_line,
                 end_line,
             });
-
-            i += 1; // skip >>>>>>>
+            i = next;
         } else {
             i += 1;
         }
@@ -2242,6 +2243,19 @@ fn resolve_single_block(
     block_index: usize,
     resolution: &ConflictResolution,
 ) -> GitResult<String> {
+    let total_blocks = content
+        .lines()
+        .filter(|line| line.starts_with("<<<<<<<"))
+        .count();
+    if block_index >= total_blocks {
+        return Err(GitError::ConflictFailed(
+            format!(
+                "block_index {block_index} out of range (total: {total_blocks})"
+            )
+            .into(),
+        ));
+    }
+
     let mut result = String::new();
     let lines: Vec<&str> = content.lines().collect();
     let mut current_block = 0;
@@ -2250,23 +2264,7 @@ fn resolve_single_block(
     while i < lines.len() {
         if lines[i].starts_with("<<<<<<<") {
             if current_block == block_index {
-                // Parse this block
-                i += 1;
-                let mut ours = String::new();
-                while i < lines.len() && !lines[i].starts_with("=======") {
-                    ours.push_str(lines[i]);
-                    ours.push('\n');
-                    i += 1;
-                }
-                i += 1; // skip =======
-                let mut theirs = String::new();
-                while i < lines.len() && !lines[i].starts_with(">>>>>>>") {
-                    theirs.push_str(lines[i]);
-                    theirs.push('\n');
-                    i += 1;
-                }
-                i += 1; // skip >>>>>>>
-
+                let (ours, theirs, next) = parse_one_block(&lines, i);
                 match resolution {
                     ConflictResolution::Ours => result.push_str(&ours),
                     ConflictResolution::Theirs => result.push_str(&theirs),
@@ -2281,8 +2279,8 @@ fn resolve_single_block(
                         }
                     }
                 }
+                i = next;
             } else {
-                // Keep this conflict block as-is
                 result.push_str(lines[i]);
                 result.push('\n');
                 i += 1;
