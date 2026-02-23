@@ -45,11 +45,7 @@ export function CommitPanel({
       <div className="panel-header">
         <span className="panel-title">Commit</span>
         <label className="amend-toggle">
-          <input
-            type="checkbox"
-            checked={amend}
-            onChange={handleAmendToggle}
-          />
+          <input type="checkbox" checked={amend} onChange={handleAmendToggle} />
           <span>Amend</span>
         </label>
       </div>

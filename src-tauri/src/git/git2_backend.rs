@@ -344,7 +344,14 @@ impl GitBackend for Git2Backend {
                 .map_err(|e| GitError::AmendFailed(Box::new(e)))?;
 
             let oid = head_commit
-                .amend(Some("HEAD"), Some(&sig), Some(&sig), None, Some(message), Some(&tree))
+                .amend(
+                    Some("HEAD"),
+                    Some(&sig),
+                    Some(&sig),
+                    None,
+                    Some(message),
+                    Some(&tree),
+                )
                 .map_err(|e| GitError::AmendFailed(Box::new(e)))?;
 
             return Ok(CommitResult {
@@ -1099,9 +1106,7 @@ impl GitBackend for Git2Backend {
 
     fn get_head_commit_message(&self) -> GitResult<String> {
         let repo = self.repo.lock().unwrap();
-        let head = repo
-            .head()
-            .map_err(|e| GitError::LogFailed(Box::new(e)))?;
+        let head = repo.head().map_err(|e| GitError::LogFailed(Box::new(e)))?;
         let commit = head
             .peel_to_commit()
             .map_err(|e| GitError::LogFailed(Box::new(e)))?;

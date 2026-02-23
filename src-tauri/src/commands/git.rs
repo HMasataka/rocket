@@ -2,7 +2,9 @@ use std::path::Path;
 
 use tauri::State;
 
-use crate::git::types::{CommitResult, DiffOptions, FileDiff, HunkIdentifier, LineRange, RepoStatus};
+use crate::git::types::{
+    CommitResult, DiffOptions, FileDiff, HunkIdentifier, LineRange, RepoStatus,
+};
 use crate::state::AppState;
 
 #[tauri::command]

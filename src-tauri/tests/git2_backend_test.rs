@@ -4,7 +4,9 @@ use std::process::Command;
 
 use app_lib::git::backend::GitBackend;
 use app_lib::git::git2_backend::Git2Backend;
-use app_lib::git::types::{DiffLineKind, DiffOptions, HunkIdentifier, LineRange, LogFilter, MergeOption, PullOption};
+use app_lib::git::types::{
+    DiffLineKind, DiffOptions, HunkIdentifier, LineRange, LogFilter, MergeOption, PullOption,
+};
 
 fn init_test_repo(dir: &Path) {
     Command::new("git")
@@ -939,10 +941,7 @@ fn stage_lines_stages_only_selected_lines() {
     let unstaged = backend
         .diff(Some(Path::new("lines.txt")), &options)
         .unwrap();
-    assert!(
-        !unstaged.is_empty(),
-        "Should still have unstaged changes"
-    );
+    assert!(!unstaged.is_empty(), "Should still have unstaged changes");
 }
 
 #[test]
