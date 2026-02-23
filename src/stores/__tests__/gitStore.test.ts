@@ -870,11 +870,13 @@ describe("gitStore", () => {
     it("calls invoke on success", async () => {
       mockedInvoke.mockResolvedValueOnce(undefined);
 
-      await useGitStore.getState().resolveConflict("file.txt", "ours");
+      await useGitStore
+        .getState()
+        .resolveConflict("file.txt", { type: "Ours" });
 
       expect(mockedInvoke).toHaveBeenCalledWith("resolve_conflict", {
         path: "file.txt",
-        resolution: "ours",
+        resolution: { type: "Ours" },
       });
     });
 
@@ -882,7 +884,7 @@ describe("gitStore", () => {
       mockedInvoke.mockRejectedValueOnce(new Error("resolve error"));
 
       await expect(
-        useGitStore.getState().resolveConflict("file.txt", "ours"),
+        useGitStore.getState().resolveConflict("file.txt", { type: "Ours" }),
       ).rejects.toThrow();
 
       expect(useGitStore.getState().error).toContain("resolve error");
@@ -893,12 +895,14 @@ describe("gitStore", () => {
     it("calls invoke on success", async () => {
       mockedInvoke.mockResolvedValueOnce(undefined);
 
-      await useGitStore.getState().resolveConflictBlock("file.txt", 0, "ours");
+      await useGitStore
+        .getState()
+        .resolveConflictBlock("file.txt", 0, { type: "Ours" });
 
       expect(mockedInvoke).toHaveBeenCalledWith("resolve_conflict_block", {
         path: "file.txt",
         blockIndex: 0,
-        resolution: "ours",
+        resolution: { type: "Ours" },
       });
     });
 
@@ -906,7 +910,9 @@ describe("gitStore", () => {
       mockedInvoke.mockRejectedValueOnce(new Error("block resolve error"));
 
       await expect(
-        useGitStore.getState().resolveConflictBlock("file.txt", 0, "ours"),
+        useGitStore
+          .getState()
+          .resolveConflictBlock("file.txt", 0, { type: "Ours" }),
       ).rejects.toThrow();
 
       expect(useGitStore.getState().error).toContain("block resolve error");
