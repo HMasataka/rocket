@@ -49,23 +49,22 @@ export function DiffLineRow({
   selected,
   onToggleLine,
 }: DiffLineProps) {
-  const showCheckbox =
+  const isChangedLine =
     onToggleLine &&
     lineKey &&
     (line.kind === "addition" || line.kind === "deletion");
 
   return (
     <div className={lineClass(line.kind)}>
-      {showCheckbox ? (
-        <input
-          type="checkbox"
-          className="line-checkbox"
-          checked={selected ?? false}
-          onChange={() => onToggleLine(lineKey)}
-        />
-      ) : (
-        <span className="line-checkbox-placeholder" />
-      )}
+      <div className="line-checkbox">
+        {isChangedLine && (
+          <input
+            type="checkbox"
+            checked={selected ?? false}
+            onChange={() => onToggleLine(lineKey)}
+          />
+        )}
+      </div>
       <span className="line-num">{line.old_lineno ?? ""}</span>
       <span className="line-num">{line.new_lineno ?? ""}</span>
       {renderContent(line)}

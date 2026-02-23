@@ -139,22 +139,25 @@ function renderCheckbox(
   selectedLines: Set<string> | undefined,
   onToggleLine: ((lineKey: string) => void) | undefined,
 ) {
-  if (
-    !line ||
-    !onToggleLine ||
-    lineIndex === null ||
-    (line.kind !== "addition" && line.kind !== "deletion")
-  ) {
-    return <span className="line-checkbox-placeholder" />;
+  const isChangedLine =
+    line &&
+    onToggleLine &&
+    lineIndex !== null &&
+    (line.kind === "addition" || line.kind === "deletion");
+
+  if (!isChangedLine) {
+    return <div className="line-checkbox" />;
   }
+
   const lineKey = `${hunkIndex}-${lineIndex}`;
   return (
-    <input
-      type="checkbox"
-      className="line-checkbox"
-      checked={selectedLines?.has(lineKey) ?? false}
-      onChange={() => onToggleLine(lineKey)}
-    />
+    <div className="line-checkbox">
+      <input
+        type="checkbox"
+        checked={selectedLines?.has(lineKey) ?? false}
+        onChange={() => onToggleLine(lineKey)}
+      />
+    </div>
   );
 }
 
