@@ -513,6 +513,120 @@ describe("gitStore", () => {
     });
   });
 
+  describe("stageLines", () => {
+    it("calls invoke on success", async () => {
+      mockedInvoke.mockResolvedValueOnce(undefined);
+      const lineRange = {
+        hunk: { old_start: 1, old_lines: 3, new_start: 1, new_lines: 3 },
+        line_indices: [1, 2],
+      };
+
+      await useGitStore.getState().stageLines("file.txt", lineRange);
+
+      expect(mockedInvoke).toHaveBeenCalledWith("stage_lines", {
+        path: "file.txt",
+        lineRange,
+      });
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("stage lines error"));
+      const lineRange = {
+        hunk: { old_start: 1, old_lines: 3, new_start: 1, new_lines: 3 },
+        line_indices: [1],
+      };
+
+      await expect(
+        useGitStore.getState().stageLines("file.txt", lineRange),
+      ).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("stage lines error");
+    });
+  });
+
+  describe("unstageLines", () => {
+    it("calls invoke on success", async () => {
+      mockedInvoke.mockResolvedValueOnce(undefined);
+      const lineRange = {
+        hunk: { old_start: 1, old_lines: 3, new_start: 1, new_lines: 3 },
+        line_indices: [1, 2],
+      };
+
+      await useGitStore.getState().unstageLines("file.txt", lineRange);
+
+      expect(mockedInvoke).toHaveBeenCalledWith("unstage_lines", {
+        path: "file.txt",
+        lineRange,
+      });
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("unstage lines error"));
+      const lineRange = {
+        hunk: { old_start: 1, old_lines: 3, new_start: 1, new_lines: 3 },
+        line_indices: [1],
+      };
+
+      await expect(
+        useGitStore.getState().unstageLines("file.txt", lineRange),
+      ).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("unstage lines error");
+    });
+  });
+
+  describe("discardLines", () => {
+    it("calls invoke on success", async () => {
+      mockedInvoke.mockResolvedValueOnce(undefined);
+      const lineRange = {
+        hunk: { old_start: 1, old_lines: 3, new_start: 1, new_lines: 3 },
+        line_indices: [1, 2],
+      };
+
+      await useGitStore.getState().discardLines("file.txt", lineRange);
+
+      expect(mockedInvoke).toHaveBeenCalledWith("discard_lines", {
+        path: "file.txt",
+        lineRange,
+      });
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("discard lines error"));
+      const lineRange = {
+        hunk: { old_start: 1, old_lines: 3, new_start: 1, new_lines: 3 },
+        line_indices: [1],
+      };
+
+      await expect(
+        useGitStore.getState().discardLines("file.txt", lineRange),
+      ).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("discard lines error");
+    });
+  });
+
+  describe("getHeadCommitMessage", () => {
+    it("returns message on success", async () => {
+      mockedInvoke.mockResolvedValueOnce("commit message");
+
+      const message = await useGitStore.getState().getHeadCommitMessage();
+
+      expect(message).toBe("commit message");
+      expect(mockedInvoke).toHaveBeenCalledWith("get_head_commit_message");
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("message error"));
+
+      await expect(
+        useGitStore.getState().getHeadCommitMessage(),
+      ).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("message error");
+    });
+  });
+
   describe("clearError", () => {
     it("clears the error state", async () => {
       mockedInvoke.mockRejectedValueOnce(new Error("some error"));

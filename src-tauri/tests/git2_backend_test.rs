@@ -4,7 +4,7 @@ use std::process::Command;
 
 use app_lib::git::backend::GitBackend;
 use app_lib::git::git2_backend::Git2Backend;
-use app_lib::git::types::{DiffOptions, LogFilter, MergeOption, PullOption};
+use app_lib::git::types::{DiffLineKind, DiffOptions, HunkIdentifier, LineRange, LogFilter, MergeOption, PullOption};
 
 fn init_test_repo(dir: &Path) {
     Command::new("git")
@@ -24,6 +24,38 @@ fn init_test_repo(dir: &Path) {
         .current_dir(dir)
         .output()
         .expect("git config name failed");
+}
+
+fn create_file_with_multiple_changed_lines(dir: &Path, backend: &Git2Backend) {
+    fs::write(dir.join("lines.txt"), "line1\nline2\nline3\nline4\nline5\n").unwrap();
+    backend.stage(Path::new("lines.txt")).unwrap();
+    backend.commit("add lines", false).unwrap();
+    fs::write(
+        dir.join("lines.txt"),
+        "line1\nchanged2\nline3\nchanged4\nline5\nnew6\n",
+    )
+    .unwrap();
+}
+
+fn create_file_with_two_hunks(dir: &Path, backend: &Git2Backend) {
+    let mut content = String::new();
+    for i in 1..=20 {
+        content.push_str(&format!("line{i}\n"));
+    }
+    fs::write(dir.join("twohunk.txt"), &content).unwrap();
+    backend.stage(Path::new("twohunk.txt")).unwrap();
+    backend.commit("add twohunk", false).unwrap();
+    let mut modified = String::new();
+    for i in 1..=20 {
+        if i == 2 {
+            modified.push_str("modified2\n");
+        } else if i == 18 {
+            modified.push_str("modified18\n");
+        } else {
+            modified.push_str(&format!("line{i}\n"));
+        }
+    }
+    fs::write(dir.join("twohunk.txt"), &modified).unwrap();
 }
 
 fn init_repo_with_commit(dir: &Path) -> Git2Backend {
@@ -850,4 +882,224 @@ fn discard_hunk_discards_only_specified_hunk() {
         1,
         "One hunk should remain after discard"
     );
+}
+
+// --- Line staging tests ---
+
+#[test]
+fn stage_lines_stages_only_selected_lines() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+    create_file_with_multiple_changed_lines(tmp.path(), &backend);
+
+    let options = DiffOptions {
+        staged: false,
+        ..Default::default()
+    };
+    let diffs = backend
+        .diff(Some(Path::new("lines.txt")), &options)
+        .unwrap();
+    assert!(!diffs.is_empty());
+
+    let hunk = &diffs[0].hunks[0];
+    let hunk_id = HunkIdentifier {
+        old_start: hunk.old_start,
+        old_lines: hunk.old_lines,
+        new_start: hunk.new_start,
+        new_lines: hunk.new_lines,
+    };
+
+    let first_add = hunk
+        .lines
+        .iter()
+        .enumerate()
+        .find(|(_, l)| l.kind == DiffLineKind::Addition)
+        .map(|(i, _)| i)
+        .unwrap();
+
+    let line_range = LineRange {
+        hunk: hunk_id,
+        line_indices: vec![first_add],
+    };
+    backend
+        .stage_lines(Path::new("lines.txt"), &line_range)
+        .unwrap();
+
+    let staged = backend
+        .diff(
+            Some(Path::new("lines.txt")),
+            &DiffOptions {
+                staged: true,
+                ..Default::default()
+            },
+        )
+        .unwrap();
+    assert!(!staged.is_empty(), "Should have staged changes");
+
+    let unstaged = backend
+        .diff(Some(Path::new("lines.txt")), &options)
+        .unwrap();
+    assert!(
+        !unstaged.is_empty(),
+        "Should still have unstaged changes"
+    );
+}
+
+#[test]
+fn unstage_lines_unstages_only_selected_lines() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+    create_file_with_two_hunks(tmp.path(), &backend);
+
+    backend.stage(Path::new("twohunk.txt")).unwrap();
+
+    let staged_diffs = backend
+        .diff(
+            Some(Path::new("twohunk.txt")),
+            &DiffOptions {
+                staged: true,
+                ..Default::default()
+            },
+        )
+        .unwrap();
+    assert!(!staged_diffs.is_empty());
+    assert!(
+        staged_diffs[0].hunks.len() >= 2,
+        "Should have at least 2 hunks"
+    );
+
+    let hunk = &staged_diffs[0].hunks[0];
+    let hunk_id = HunkIdentifier {
+        old_start: hunk.old_start,
+        old_lines: hunk.old_lines,
+        new_start: hunk.new_start,
+        new_lines: hunk.new_lines,
+    };
+
+    let del_idx = hunk
+        .lines
+        .iter()
+        .enumerate()
+        .find(|(_, l)| l.kind == DiffLineKind::Deletion)
+        .map(|(i, _)| i);
+    let add_idx = hunk
+        .lines
+        .iter()
+        .enumerate()
+        .find(|(_, l)| l.kind == DiffLineKind::Addition)
+        .map(|(i, _)| i);
+
+    let mut selected = Vec::new();
+    if let Some(idx) = del_idx {
+        selected.push(idx);
+    }
+    if let Some(idx) = add_idx {
+        selected.push(idx);
+    }
+
+    let line_range = LineRange {
+        hunk: hunk_id,
+        line_indices: selected,
+    };
+    backend
+        .unstage_lines(Path::new("twohunk.txt"), &line_range)
+        .unwrap();
+
+    let unstaged_after = backend
+        .diff(
+            Some(Path::new("twohunk.txt")),
+            &DiffOptions {
+                staged: false,
+                ..Default::default()
+            },
+        )
+        .unwrap();
+    assert!(
+        !unstaged_after.is_empty(),
+        "Should have unstaged changes after unstage_lines"
+    );
+}
+
+#[test]
+fn discard_lines_discards_only_selected_lines() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+    create_file_with_multiple_changed_lines(tmp.path(), &backend);
+
+    let options = DiffOptions {
+        staged: false,
+        ..Default::default()
+    };
+    let diffs = backend
+        .diff(Some(Path::new("lines.txt")), &options)
+        .unwrap();
+    let hunk = &diffs[0].hunks[0];
+    let hunk_id = HunkIdentifier {
+        old_start: hunk.old_start,
+        old_lines: hunk.old_lines,
+        new_start: hunk.new_start,
+        new_lines: hunk.new_lines,
+    };
+
+    let mut all_indices = Vec::new();
+    for (i, line) in hunk.lines.iter().enumerate() {
+        if line.kind == DiffLineKind::Addition || line.kind == DiffLineKind::Deletion {
+            all_indices.push(i);
+        }
+    }
+
+    let line_range = LineRange {
+        hunk: hunk_id,
+        line_indices: all_indices,
+    };
+    backend
+        .discard_lines(Path::new("lines.txt"), &line_range)
+        .unwrap();
+
+    let diffs_after = backend
+        .diff(Some(Path::new("lines.txt")), &options)
+        .unwrap();
+    assert!(
+        diffs_after.is_empty() || diffs_after[0].hunks.is_empty(),
+        "All changes should be discarded"
+    );
+}
+
+// --- Amend tests ---
+
+#[test]
+fn commit_amend_changes_message() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+
+    let msg = backend.get_head_commit_message().unwrap();
+    assert_eq!(msg.trim(), "initial commit");
+
+    backend.commit("amended message", true).unwrap();
+
+    let msg_after = backend.get_head_commit_message().unwrap();
+    assert_eq!(msg_after.trim(), "amended message");
+}
+
+#[test]
+fn commit_amend_includes_new_staged_changes() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+
+    fs::write(tmp.path().join("new.txt"), "new content").unwrap();
+    backend.stage(Path::new("new.txt")).unwrap();
+
+    backend.commit("amend with new file", true).unwrap();
+
+    let detail = backend.get_head_commit_message().unwrap();
+    assert_eq!(detail.trim(), "amend with new file");
+}
+
+#[test]
+fn get_head_commit_message_returns_message() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+
+    let msg = backend.get_head_commit_message().unwrap();
+    assert_eq!(msg.trim(), "initial commit");
 }
