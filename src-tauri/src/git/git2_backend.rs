@@ -1051,20 +1051,17 @@ impl GitBackend for Git2Backend {
 
     fn stage_hunk(&self, path: &Path, hunk: &HunkIdentifier) -> GitResult<()> {
         let patch = self.generate_hunk_patch(path, hunk, false)?;
-        run_git_apply(&self.workdir, &patch, &["--cached"])
-            .map_err(GitError::StageFailed)
+        run_git_apply(&self.workdir, &patch, &["--cached"]).map_err(GitError::StageFailed)
     }
 
     fn unstage_hunk(&self, path: &Path, hunk: &HunkIdentifier) -> GitResult<()> {
         let patch = self.generate_hunk_patch(path, hunk, true)?;
-        run_git_apply(&self.workdir, &patch, &["--cached", "-R"])
-            .map_err(GitError::UnstageFailed)
+        run_git_apply(&self.workdir, &patch, &["--cached", "-R"]).map_err(GitError::UnstageFailed)
     }
 
     fn discard_hunk(&self, path: &Path, hunk: &HunkIdentifier) -> GitResult<()> {
         let patch = self.generate_hunk_patch(path, hunk, false)?;
-        run_git_apply(&self.workdir, &patch, &["-R"])
-            .map_err(GitError::DiscardFailed)
+        run_git_apply(&self.workdir, &patch, &["-R"]).map_err(GitError::DiscardFailed)
     }
 }
 
@@ -1598,7 +1595,10 @@ fn lcs_length(a: &[&str], b: &[&str]) -> Vec<Vec<usize>> {
     dp
 }
 
-fn compute_word_diff_pair(del_content: &str, add_content: &str) -> (Vec<WordSegment>, Vec<WordSegment>) {
+fn compute_word_diff_pair(
+    del_content: &str,
+    add_content: &str,
+) -> (Vec<WordSegment>, Vec<WordSegment>) {
     let del_tokens = tokenize_words(del_content);
     let add_tokens = tokenize_words(add_content);
     let dp = lcs_length(&del_tokens, &add_tokens);

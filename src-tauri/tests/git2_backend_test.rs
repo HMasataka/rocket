@@ -720,7 +720,9 @@ fn stage_hunk_stages_only_specified_hunk() {
         staged: false,
         ..Default::default()
     };
-    let diffs = backend.diff(Some(Path::new("multi.txt")), &options).unwrap();
+    let diffs = backend
+        .diff(Some(Path::new("multi.txt")), &options)
+        .unwrap();
     assert!(diffs[0].hunks.len() >= 2, "Expected at least 2 hunks");
 
     let first_hunk = &diffs[0].hunks[0];
@@ -731,7 +733,9 @@ fn stage_hunk_stages_only_specified_hunk() {
         new_lines: first_hunk.new_lines,
     };
 
-    backend.stage_hunk(Path::new("multi.txt"), &hunk_id).unwrap();
+    backend
+        .stage_hunk(Path::new("multi.txt"), &hunk_id)
+        .unwrap();
 
     let staged_diffs = backend
         .diff(
@@ -742,7 +746,11 @@ fn stage_hunk_stages_only_specified_hunk() {
             },
         )
         .unwrap();
-    assert_eq!(staged_diffs[0].hunks.len(), 1, "Only one hunk should be staged");
+    assert_eq!(
+        staged_diffs[0].hunks.len(),
+        1,
+        "Only one hunk should be staged"
+    );
 
     let unstaged_diffs = backend
         .diff(
@@ -817,7 +825,9 @@ fn discard_hunk_discards_only_specified_hunk() {
         staged: false,
         ..Default::default()
     };
-    let diffs = backend.diff(Some(Path::new("multi.txt")), &options).unwrap();
+    let diffs = backend
+        .diff(Some(Path::new("multi.txt")), &options)
+        .unwrap();
     assert!(diffs[0].hunks.len() >= 2);
 
     let first_hunk = &diffs[0].hunks[0];

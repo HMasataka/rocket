@@ -147,7 +147,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-width: fit-content;
+  width: max-content;
+  min-width: 100%;
 }
 
 .hunk-actions {
@@ -177,7 +178,8 @@
   display: flex;
   padding: 0 12px 0 0;
   min-height: 22px;
-  min-width: fit-content;
+  width: max-content;
+  min-width: 100%;
   transition: background-color 0.1s ease;
 }
 
@@ -358,13 +360,21 @@
   line-height: 1.6;
 }
 
+.split-code-inner {
+  display: inline-block;
+  min-width: 100%;
+}
+
 .split-hunk-header {
   padding: 6px 16px;
   background: var(--bg-tertiary);
   color: var(--text-muted);
   font-size: 11px;
   border-bottom: 1px solid var(--border);
-  min-width: fit-content;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
   user-select: none;
 }
 
@@ -372,7 +382,8 @@
   display: flex;
   padding: 0 16px;
   min-height: 22px;
-  min-width: fit-content;
+  width: max-content;
+  min-width: 100%;
   align-items: stretch;
   transition: background-color 0.1s ease;
 }
@@ -393,7 +404,6 @@
 .split-line .line-content {
   flex: 1;
   white-space: pre;
-  min-width: 0;
   color: var(--text-primary);
 }
 

@@ -114,94 +114,93 @@ export function SplitDiffView({
           <span className="split-label">Old</span>
         </div>
         <div className="split-code">
-          {diffs.map((fileDiff) =>
-            fileDiff.hunks.map((hunk) => {
-              const rows = buildSplitRows(hunk);
-              return (
-                <div key={hunk.header}>
-                  <div className="split-hunk-header">
-                    <span>{hunk.header}</span>
-                  </div>
-                  {rows.map((row, idx) => (
-                    <div
-                      key={rowKey(row, idx)}
-                      className={splitLineClass(row.left)}
-                    >
-                      <span className="line-num">
-                        {row.left?.old_lineno ?? ""}
-                      </span>
-                      {renderLineContent(row.left)}
+          <div className="split-code-inner">
+            {diffs.map((fileDiff) =>
+              fileDiff.hunks.map((hunk) => {
+                const rows = buildSplitRows(hunk);
+                return (
+                  <div key={hunk.header}>
+                    <div className="split-hunk-header">
+                      <span>{hunk.header}</span>
                     </div>
-                  ))}
-                </div>
-              );
-            }),
-          )}
+                    {rows.map((row, idx) => (
+                      <div
+                        key={rowKey(row, idx)}
+                        className={splitLineClass(row.left)}
+                      >
+                        <span className="line-num">
+                          {row.left?.old_lineno ?? ""}
+                        </span>
+                        {renderLineContent(row.left)}
+                      </div>
+                    ))}
+                  </div>
+                );
+              }),
+            )}
+          </div>
         </div>
       </div>
       <div className="split-divider" />
       <div className="split-pane split-right">
         <div className="split-header">
           <span className="split-label">New</span>
-          <div className="hunk-actions">
+        </div>
+        <div className="split-code">
+          <div className="split-code-inner">
             {diffs.map((fileDiff) =>
               fileDiff.hunks.map((hunk) => {
+                const rows = buildSplitRows(hunk);
                 const hunkId = toHunkIdentifier(hunk);
-                return staged ? (
-                  <button
-                    key={hunk.header}
-                    type="button"
-                    className="hunk-btn"
-                    onClick={() => onStageHunk?.(hunkId)}
-                  >
-                    Unstage Hunk
-                  </button>
-                ) : (
-                  <span key={hunk.header}>
-                    <button
-                      type="button"
-                      className="hunk-btn"
-                      onClick={() => onStageHunk?.(hunkId)}
-                    >
-                      Stage Hunk
-                    </button>
-                    <button
-                      type="button"
-                      className="hunk-btn"
-                      onClick={() => onDiscardHunk?.(hunkId)}
-                    >
-                      Discard
-                    </button>
-                  </span>
+                return (
+                  <div key={hunk.header}>
+                    <div className="split-hunk-header">
+                      <span>{hunk.header}</span>
+                      <div className="hunk-actions">
+                        {staged ? (
+                          <button
+                            type="button"
+                            className="hunk-btn"
+                            onClick={() => onStageHunk?.(hunkId)}
+                          >
+                            Unstage Hunk
+                          </button>
+                        ) : (
+                          <>
+                            <button
+                              type="button"
+                              className="hunk-btn"
+                              onClick={() => onStageHunk?.(hunkId)}
+                            >
+                              Stage Hunk
+                            </button>
+                            <button
+                              type="button"
+                              className="hunk-btn"
+                              onClick={() => onDiscardHunk?.(hunkId)}
+                            >
+                              Discard
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    {rows.map((row, idx) => (
+                      <div
+                        key={rowKey(row, idx)}
+                        className={splitLineClass(row.right)}
+                      >
+                        <span className="line-num">
+                          {row.right?.new_lineno ?? ""}
+                        </span>
+                        {renderLineContent(row.right)}
+                      </div>
+                    ))}
+                  </div>
                 );
               }),
             )}
           </div>
-        </div>
-        <div className="split-code">
-          {diffs.map((fileDiff) =>
-            fileDiff.hunks.map((hunk) => {
-              const rows = buildSplitRows(hunk);
-              return (
-                <div key={hunk.header}>
-                  <div className="split-hunk-header">
-                    <span>{hunk.header}</span>
-                  </div>
-                  {rows.map((row, idx) => (
-                    <div
-                      key={rowKey(row, idx)}
-                      className={splitLineClass(row.right)}
-                    >
-                      <span className="line-num">
-                        {row.right?.new_lineno ?? ""}
-                      </span>
-                      {renderLineContent(row.right)}
-                    </div>
-                  ))}
-                </div>
-              );
-            }),
-          )}
         </div>
       </div>
     </div>
