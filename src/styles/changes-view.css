@@ -146,6 +146,30 @@
   font-size: 11px;
   display: flex;
   align-items: center;
+  justify-content: space-between;
+}
+
+.hunk-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.hunk-btn {
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.hunk-btn:hover {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
 }
 
 .diff-line {
@@ -239,4 +263,175 @@
   display: flex;
   justify-content: flex-end;
   gap: 8px;
+}
+
+/* ===== View Toggle ===== */
+.view-toggle {
+  display: flex;
+  background: var(--bg-tertiary);
+  border-radius: 6px;
+  padding: 2px;
+}
+
+.toggle-btn {
+  padding: 4px 10px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.toggle-btn:hover {
+  color: var(--text-secondary);
+}
+
+.toggle-btn.active {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* ===== Word-level Diff Highlights ===== */
+.word-add {
+  background: rgba(63, 185, 80, 0.25);
+  padding: 1px 2px;
+  border-radius: 2px;
+}
+
+.word-del {
+  background: rgba(248, 81, 73, 0.25);
+  padding: 1px 2px;
+  border-radius: 2px;
+}
+
+/* ===== Split Diff View ===== */
+.diff-split {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.split-pane {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.split-header {
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-secondary);
+  flex-shrink: 0;
+}
+
+.split-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.split-left .split-label {
+  color: var(--danger);
+}
+
+.split-right .split-label {
+  color: var(--success);
+}
+
+.split-code {
+  flex: 1;
+  overflow-y: auto;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.split-hunk-header {
+  padding: 6px 16px;
+  background: var(--bg-tertiary);
+  color: var(--text-muted);
+  font-size: 11px;
+  border-bottom: 1px solid var(--border);
+  user-select: none;
+}
+
+.split-line {
+  display: flex;
+  padding: 0 16px;
+  min-height: 22px;
+  align-items: stretch;
+  transition: background-color 0.1s ease;
+}
+
+.split-line:hover {
+  background: var(--bg-hover);
+}
+
+.split-line .line-num {
+  width: 40px;
+  text-align: right;
+  padding-right: 12px;
+  color: var(--text-muted);
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.split-line .line-content {
+  flex: 1;
+  white-space: pre;
+  min-width: 0;
+  color: var(--text-primary);
+}
+
+.split-line.unchanged {
+  background: transparent;
+}
+
+.split-line.unchanged .line-content {
+  color: var(--text-secondary);
+}
+
+.split-line.add {
+  background: rgba(63, 185, 80, 0.1);
+}
+
+.split-line.add .line-content {
+  color: var(--success);
+}
+
+.split-line.del {
+  background: rgba(248, 81, 73, 0.1);
+}
+
+.split-line.del .line-content {
+  color: var(--danger);
+}
+
+.split-line.empty {
+  background: var(--bg-secondary);
+}
+
+.split-line.empty .line-num {
+  color: transparent;
+}
+
+.split-line.empty .line-content {
+  color: transparent;
+}
+
+/* ===== Split Divider ===== */
+.split-divider {
+  width: 1px;
+  flex-shrink: 0;
+  background: var(--border);
 }
