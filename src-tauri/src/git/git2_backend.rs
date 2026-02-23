@@ -1462,6 +1462,7 @@ impl GitBackend for Git2Backend {
     fn continue_rebase(&self) -> GitResult<RebaseResult> {
         let output = std::process::Command::new("git")
             .args(["rebase", "--continue"])
+            .env("GIT_EDITOR", "true")
             .current_dir(&self.workdir)
             .output()
             .map_err(|e| GitError::RebaseFailed(Box::new(e)))?;
