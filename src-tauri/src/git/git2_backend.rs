@@ -492,6 +492,7 @@ impl GitBackend for Git2Backend {
         let mut callbacks = git2::RemoteCallbacks::new();
         callbacks.credentials(create_credentials_callback());
         fetch_opts.remote_callbacks(callbacks);
+        fetch_opts.prune(git2::FetchPrune::On);
 
         remote
             .fetch(&[] as &[&str], Some(&mut fetch_opts), None)
