@@ -20,6 +20,8 @@ describe("gitStore", () => {
       remotes: [],
       stashes: [],
       tags: [],
+      merging: false,
+      conflictFiles: [],
       loading: false,
       error: null,
     });
@@ -818,6 +820,165 @@ describe("gitStore", () => {
       await expect(useGitStore.getState().checkoutTag("bad")).rejects.toThrow();
 
       expect(useGitStore.getState().error).toContain("checkout tag error");
+    });
+  });
+
+  describe("fetchMergeState", () => {
+    it("sets merging on success", async () => {
+      mockedInvoke.mockResolvedValueOnce(true);
+
+      await useGitStore.getState().fetchMergeState();
+
+      expect(mockedInvoke).toHaveBeenCalledWith("is_merging");
+      expect(useGitStore.getState().merging).toBe(true);
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("merge state error"));
+
+      await expect(useGitStore.getState().fetchMergeState()).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("merge state error");
+    });
+  });
+
+  describe("fetchConflictFiles", () => {
+    it("sets conflictFiles on success", async () => {
+      const mockFiles = [
+        { path: "file.txt", conflict_count: 1, conflicts: [] },
+      ];
+      mockedInvoke.mockResolvedValueOnce(mockFiles);
+
+      await useGitStore.getState().fetchConflictFiles();
+
+      expect(mockedInvoke).toHaveBeenCalledWith("get_conflict_files");
+      expect(useGitStore.getState().conflictFiles).toEqual(mockFiles);
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("conflict files error"));
+
+      await expect(
+        useGitStore.getState().fetchConflictFiles(),
+      ).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("conflict files error");
+    });
+  });
+
+  describe("resolveConflict", () => {
+    it("calls invoke on success", async () => {
+      mockedInvoke.mockResolvedValueOnce(undefined);
+
+      await useGitStore.getState().resolveConflict("file.txt", "ours");
+
+      expect(mockedInvoke).toHaveBeenCalledWith("resolve_conflict", {
+        path: "file.txt",
+        resolution: "ours",
+      });
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("resolve error"));
+
+      await expect(
+        useGitStore.getState().resolveConflict("file.txt", "ours"),
+      ).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("resolve error");
+    });
+  });
+
+  describe("resolveConflictBlock", () => {
+    it("calls invoke on success", async () => {
+      mockedInvoke.mockResolvedValueOnce(undefined);
+
+      await useGitStore.getState().resolveConflictBlock("file.txt", 0, "ours");
+
+      expect(mockedInvoke).toHaveBeenCalledWith("resolve_conflict_block", {
+        path: "file.txt",
+        blockIndex: 0,
+        resolution: "ours",
+      });
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("block resolve error"));
+
+      await expect(
+        useGitStore.getState().resolveConflictBlock("file.txt", 0, "ours"),
+      ).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("block resolve error");
+    });
+  });
+
+  describe("markResolved", () => {
+    it("calls invoke on success", async () => {
+      mockedInvoke.mockResolvedValueOnce(undefined);
+
+      await useGitStore.getState().markResolved("file.txt");
+
+      expect(mockedInvoke).toHaveBeenCalledWith("mark_resolved", {
+        path: "file.txt",
+      });
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("mark resolved error"));
+
+      await expect(
+        useGitStore.getState().markResolved("file.txt"),
+      ).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("mark resolved error");
+    });
+  });
+
+  describe("abortMerge", () => {
+    it("resets merging state on success", async () => {
+      useGitStore.setState({ merging: true });
+      mockedInvoke.mockResolvedValueOnce(undefined);
+
+      await useGitStore.getState().abortMerge();
+
+      expect(mockedInvoke).toHaveBeenCalledWith("abort_merge");
+      expect(useGitStore.getState().merging).toBe(false);
+      expect(useGitStore.getState().conflictFiles).toEqual([]);
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("abort error"));
+
+      await expect(useGitStore.getState().abortMerge()).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("abort error");
+    });
+  });
+
+  describe("continueMerge", () => {
+    it("resets merging state on success", async () => {
+      useGitStore.setState({ merging: true });
+      mockedInvoke.mockResolvedValueOnce({ oid: "abc123" });
+
+      const oid = await useGitStore.getState().continueMerge("msg");
+
+      expect(mockedInvoke).toHaveBeenCalledWith("continue_merge", {
+        message: "msg",
+      });
+      expect(oid).toBe("abc123");
+      expect(useGitStore.getState().merging).toBe(false);
+      expect(useGitStore.getState().conflictFiles).toEqual([]);
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("continue error"));
+
+      await expect(
+        useGitStore.getState().continueMerge("msg"),
+      ).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("continue error");
     });
   });
 
