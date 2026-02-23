@@ -56,6 +56,11 @@ export interface HunkIdentifier {
   new_lines: number;
 }
 
+export interface LineRange {
+  hunk: HunkIdentifier;
+  line_indices: number[];
+}
+
 export interface FileDiff {
   old_path: string | null;
   new_path: string | null;
@@ -93,8 +98,11 @@ export function unstageAll(): Promise<void> {
   return invoke<void>("unstage_all");
 }
 
-export function commitChanges(message: string): Promise<CommitResult> {
-  return invoke<CommitResult>("commit", { message });
+export function commitChanges(
+  message: string,
+  amend: boolean,
+): Promise<CommitResult> {
+  return invoke<CommitResult>("commit", { message, amend });
 }
 
 export function getCurrentBranch(): Promise<string> {
@@ -204,6 +212,28 @@ export function unstageHunk(path: string, hunk: HunkIdentifier): Promise<void> {
 
 export function discardHunk(path: string, hunk: HunkIdentifier): Promise<void> {
   return invoke<void>("discard_hunk", { path, hunk });
+}
+
+export function stageLines(path: string, lineRange: LineRange): Promise<void> {
+  return invoke<void>("stage_lines", { path, lineRange });
+}
+
+export function unstageLines(
+  path: string,
+  lineRange: LineRange,
+): Promise<void> {
+  return invoke<void>("unstage_lines", { path, lineRange });
+}
+
+export function discardLines(
+  path: string,
+  lineRange: LineRange,
+): Promise<void> {
+  return invoke<void>("discard_lines", { path, lineRange });
+}
+
+export function getHeadCommitMessage(): Promise<string> {
+  return invoke<string>("get_head_commit_message");
 }
 
 export function getBranchCommits(

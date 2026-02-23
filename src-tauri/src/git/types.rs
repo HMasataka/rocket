@@ -73,6 +73,12 @@ pub struct HunkIdentifier {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct LineRange {
+    pub hunk: HunkIdentifier,
+    pub line_indices: Vec<usize>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct FileDiff {
     pub old_path: Option<String>,
     pub new_path: Option<String>,

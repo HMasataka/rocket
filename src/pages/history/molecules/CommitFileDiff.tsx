@@ -15,8 +15,8 @@ export function CommitFileDiff({ path, diffs }: CommitFileDiffProps) {
       <div className="diff-preview-content">
         <div className="diff-content-inner">
           {diffs.map((diff) =>
-            diff.hunks.map((hunk) => (
-              <DiffHunkView key={hunk.header} hunk={hunk} />
+            diff.hunks.map((hunk, hunkIdx) => (
+              <DiffHunkView key={hunk.header} hunk={hunk} hunkIndex={hunkIdx} />
             )),
           )}
         </div>
