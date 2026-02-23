@@ -648,7 +648,8 @@ fn get_branch_commits_respects_limit() {
         backend.commit(&format!("commit {i}")).unwrap();
     }
 
-    let commits = backend.get_branch_commits("main", 3).unwrap();
+    let branch_name = backend.current_branch().unwrap();
+    let commits = backend.get_branch_commits(&branch_name, 3).unwrap();
 
     assert_eq!(commits.len(), 3);
 }
