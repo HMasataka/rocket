@@ -32,6 +32,9 @@ export function CommitPanel({
       const [subjectPart, ...rest] = msg.split("\n\n");
       setSubject(subjectPart.trim());
       setBody(rest.join("\n\n").trim());
+    } else if (!next) {
+      setSubject("");
+      setBody("");
     }
   }, [amend, onLoadHeadMessage]);
 
