@@ -73,6 +73,9 @@ pub enum GitError {
 
     #[error("failed to get blame: {0}")]
     BlameFailed(#[source] Box<dyn std::error::Error + Send + Sync>),
+
+    #[error("failed to discard changes: {0}")]
+    DiscardFailed(#[source] Box<dyn std::error::Error + Send + Sync>),
 }
 
 pub type GitResult<T> = Result<T, GitError>;

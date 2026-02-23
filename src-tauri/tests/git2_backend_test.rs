@@ -662,3 +662,192 @@ fn get_branch_commits_nonexistent_branch_fails() {
     let result = backend.get_branch_commits("nonexistent", 10);
     assert!(result.is_err());
 }
+
+#[test]
+fn diff_includes_hunk_range_fields() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+
+    fs::write(tmp.path().join("file.txt"), "line1\nline2\nline3\n").unwrap();
+    backend.stage(Path::new("file.txt")).unwrap();
+    backend.commit("add file").unwrap();
+
+    fs::write(tmp.path().join("file.txt"), "line1\nmodified\nline3\n").unwrap();
+
+    let options = DiffOptions {
+        staged: false,
+        ..Default::default()
+    };
+    let diffs = backend.diff(Some(Path::new("file.txt")), &options).unwrap();
+
+    assert!(!diffs.is_empty());
+    let hunk = &diffs[0].hunks[0];
+    assert!(hunk.old_start > 0);
+    assert!(hunk.new_start > 0);
+    assert!(hunk.old_lines > 0);
+    assert!(hunk.new_lines > 0);
+}
+
+fn create_two_hunk_file(dir: &Path, backend: &Git2Backend) {
+    let mut content = String::new();
+    for i in 1..=20 {
+        content.push_str(&format!("line{i}\n"));
+    }
+    fs::write(dir.join("multi.txt"), &content).unwrap();
+    backend.stage(Path::new("multi.txt")).unwrap();
+    backend.commit("add multi").unwrap();
+
+    let mut modified = String::new();
+    for i in 1..=20 {
+        if i == 2 {
+            modified.push_str("modified_top\n");
+        } else if i == 19 {
+            modified.push_str("modified_bottom\n");
+        } else {
+            modified.push_str(&format!("line{i}\n"));
+        }
+    }
+    fs::write(dir.join("multi.txt"), &modified).unwrap();
+}
+
+#[test]
+fn stage_hunk_stages_only_specified_hunk() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+    create_two_hunk_file(tmp.path(), &backend);
+
+    let options = DiffOptions {
+        staged: false,
+        ..Default::default()
+    };
+    let diffs = backend
+        .diff(Some(Path::new("multi.txt")), &options)
+        .unwrap();
+    assert!(diffs[0].hunks.len() >= 2, "Expected at least 2 hunks");
+
+    let first_hunk = &diffs[0].hunks[0];
+    let hunk_id = app_lib::git::types::HunkIdentifier {
+        old_start: first_hunk.old_start,
+        old_lines: first_hunk.old_lines,
+        new_start: first_hunk.new_start,
+        new_lines: first_hunk.new_lines,
+    };
+
+    backend
+        .stage_hunk(Path::new("multi.txt"), &hunk_id)
+        .unwrap();
+
+    let staged_diffs = backend
+        .diff(
+            Some(Path::new("multi.txt")),
+            &DiffOptions {
+                staged: true,
+                ..Default::default()
+            },
+        )
+        .unwrap();
+    assert_eq!(
+        staged_diffs[0].hunks.len(),
+        1,
+        "Only one hunk should be staged"
+    );
+
+    let unstaged_diffs = backend
+        .diff(
+            Some(Path::new("multi.txt")),
+            &DiffOptions {
+                staged: false,
+                ..Default::default()
+            },
+        )
+        .unwrap();
+    assert_eq!(
+        unstaged_diffs[0].hunks.len(),
+        1,
+        "One hunk should remain unstaged"
+    );
+}
+
+#[test]
+fn unstage_hunk_unstages_only_specified_hunk() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+    create_two_hunk_file(tmp.path(), &backend);
+
+    backend.stage(Path::new("multi.txt")).unwrap();
+
+    let staged_diffs = backend
+        .diff(
+            Some(Path::new("multi.txt")),
+            &DiffOptions {
+                staged: true,
+                ..Default::default()
+            },
+        )
+        .unwrap();
+    assert!(staged_diffs[0].hunks.len() >= 2);
+
+    let first_hunk = &staged_diffs[0].hunks[0];
+    let hunk_id = app_lib::git::types::HunkIdentifier {
+        old_start: first_hunk.old_start,
+        old_lines: first_hunk.old_lines,
+        new_start: first_hunk.new_start,
+        new_lines: first_hunk.new_lines,
+    };
+
+    backend
+        .unstage_hunk(Path::new("multi.txt"), &hunk_id)
+        .unwrap();
+
+    let staged_after = backend
+        .diff(
+            Some(Path::new("multi.txt")),
+            &DiffOptions {
+                staged: true,
+                ..Default::default()
+            },
+        )
+        .unwrap();
+    assert_eq!(
+        staged_after[0].hunks.len(),
+        1,
+        "One hunk should remain staged"
+    );
+}
+
+#[test]
+fn discard_hunk_discards_only_specified_hunk() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+    create_two_hunk_file(tmp.path(), &backend);
+
+    let options = DiffOptions {
+        staged: false,
+        ..Default::default()
+    };
+    let diffs = backend
+        .diff(Some(Path::new("multi.txt")), &options)
+        .unwrap();
+    assert!(diffs[0].hunks.len() >= 2);
+
+    let first_hunk = &diffs[0].hunks[0];
+    let hunk_id = app_lib::git::types::HunkIdentifier {
+        old_start: first_hunk.old_start,
+        old_lines: first_hunk.old_lines,
+        new_start: first_hunk.new_start,
+        new_lines: first_hunk.new_lines,
+    };
+
+    backend
+        .discard_hunk(Path::new("multi.txt"), &hunk_id)
+        .unwrap();
+
+    let diffs_after = backend
+        .diff(Some(Path::new("multi.txt")), &options)
+        .unwrap();
+    assert_eq!(
+        diffs_after[0].hunks.len(),
+        1,
+        "One hunk should remain after discard"
+    );
+}

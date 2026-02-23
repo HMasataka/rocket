@@ -3,6 +3,7 @@ import type {
   BranchInfo,
   FetchResult,
   FileDiff,
+  HunkIdentifier,
   MergeOption,
   MergeResult,
   PullOption,
@@ -16,6 +17,7 @@ import {
   commitChanges,
   createBranch as createBranchService,
   deleteBranch as deleteBranchService,
+  discardHunk as discardHunkService,
   editRemote as editRemoteService,
   fetchRemote as fetchRemoteService,
   getCurrentBranch,
@@ -30,8 +32,10 @@ import {
   renameBranch as renameBranchService,
   stageAll as stageAllService,
   stageFile as stageFileService,
+  stageHunk as stageHunkService,
   unstageAll as unstageAllService,
   unstageFile as unstageFileService,
+  unstageHunk as unstageHunkService,
 } from "../services/git";
 
 interface GitState {
@@ -69,6 +73,9 @@ interface GitActions {
   addRemote: (name: string, url: string) => Promise<void>;
   removeRemote: (name: string) => Promise<void>;
   editRemote: (name: string, newUrl: string) => Promise<void>;
+  stageHunk: (path: string, hunk: HunkIdentifier) => Promise<void>;
+  unstageHunk: (path: string, hunk: HunkIdentifier) => Promise<void>;
+  discardHunk: (path: string, hunk: HunkIdentifier) => Promise<void>;
   clearError: () => void;
 }
 
@@ -271,6 +278,33 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
   editRemote: async (name: string, newUrl: string) => {
     try {
       await editRemoteService(name, newUrl);
+    } catch (e) {
+      set({ error: String(e) });
+      throw e;
+    }
+  },
+
+  stageHunk: async (path: string, hunk: HunkIdentifier) => {
+    try {
+      await stageHunkService(path, hunk);
+    } catch (e) {
+      set({ error: String(e) });
+      throw e;
+    }
+  },
+
+  unstageHunk: async (path: string, hunk: HunkIdentifier) => {
+    try {
+      await unstageHunkService(path, hunk);
+    } catch (e) {
+      set({ error: String(e) });
+      throw e;
+    }
+  },
+
+  discardHunk: async (path: string, hunk: HunkIdentifier) => {
+    try {
+      await discardHunkService(path, hunk);
     } catch (e) {
       set({ error: String(e) });
       throw e;

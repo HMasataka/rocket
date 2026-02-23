@@ -27,16 +27,33 @@ export type DiffLineKind =
   | "fileheader"
   | "hunkheader";
 
+export interface WordSegment {
+  text: string;
+  highlighted: boolean;
+}
+
 export interface DiffLine {
   kind: DiffLineKind;
   content: string;
   old_lineno: number | null;
   new_lineno: number | null;
+  word_diff: WordSegment[] | null;
 }
 
 export interface DiffHunk {
   header: string;
+  old_start: number;
+  old_lines: number;
+  new_start: number;
+  new_lines: number;
   lines: DiffLine[];
+}
+
+export interface HunkIdentifier {
+  old_start: number;
+  old_lines: number;
+  new_start: number;
+  new_lines: number;
 }
 
 export interface FileDiff {
@@ -175,6 +192,18 @@ export function removeRemote(name: string): Promise<void> {
 
 export function editRemote(name: string, newUrl: string): Promise<void> {
   return invoke<void>("edit_remote", { name, newUrl });
+}
+
+export function stageHunk(path: string, hunk: HunkIdentifier): Promise<void> {
+  return invoke<void>("stage_hunk", { path, hunk });
+}
+
+export function unstageHunk(path: string, hunk: HunkIdentifier): Promise<void> {
+  return invoke<void>("unstage_hunk", { path, hunk });
+}
+
+export function discardHunk(path: string, hunk: HunkIdentifier): Promise<void> {
+  return invoke<void>("discard_hunk", { path, hunk });
 }
 
 export function getBranchCommits(

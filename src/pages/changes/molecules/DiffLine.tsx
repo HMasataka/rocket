@@ -1,4 +1,8 @@
-import type { DiffLine as DiffLineType } from "../../../services/git";
+import type {
+  DiffLine as DiffLineType,
+  WordSegment,
+} from "../../../services/git";
+import { segmentKey, wordHighlightClass } from "../utils/diffUtils";
 
 interface DiffLineProps {
   line: DiffLineType;
@@ -15,12 +19,33 @@ function lineClass(kind: DiffLineType["kind"]): string {
   }
 }
 
+function renderContent(line: DiffLineType) {
+  if (!line.word_diff) {
+    return <span className="line-content">{line.content}</span>;
+  }
+  return (
+    <span className="line-content">
+      {line.word_diff.map((seg: WordSegment, i: number) => {
+        const cls = wordHighlightClass(line.kind, seg.highlighted);
+        const key = segmentKey(seg, i);
+        return cls ? (
+          <span key={key} className={cls}>
+            {seg.text}
+          </span>
+        ) : (
+          <span key={key}>{seg.text}</span>
+        );
+      })}
+    </span>
+  );
+}
+
 export function DiffLineRow({ line }: DiffLineProps) {
   return (
     <div className={lineClass(line.kind)}>
       <span className="line-num">{line.old_lineno ?? ""}</span>
       <span className="line-num">{line.new_lineno ?? ""}</span>
-      <span className="line-content">{line.content}</span>
+      {renderContent(line)}
     </div>
   );
 }

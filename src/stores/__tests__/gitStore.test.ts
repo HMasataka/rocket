@@ -406,6 +406,111 @@ describe("gitStore", () => {
     });
   });
 
+  describe("stageHunk", () => {
+    it("calls invoke on success", async () => {
+      mockedInvoke.mockResolvedValueOnce(undefined);
+      const hunk = {
+        old_start: 1,
+        old_lines: 3,
+        new_start: 1,
+        new_lines: 3,
+      };
+
+      await useGitStore.getState().stageHunk("file.txt", hunk);
+
+      expect(mockedInvoke).toHaveBeenCalledWith("stage_hunk", {
+        path: "file.txt",
+        hunk,
+      });
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("stage hunk error"));
+      const hunk = {
+        old_start: 1,
+        old_lines: 3,
+        new_start: 1,
+        new_lines: 3,
+      };
+
+      await expect(
+        useGitStore.getState().stageHunk("file.txt", hunk),
+      ).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("stage hunk error");
+    });
+  });
+
+  describe("unstageHunk", () => {
+    it("calls invoke on success", async () => {
+      mockedInvoke.mockResolvedValueOnce(undefined);
+      const hunk = {
+        old_start: 1,
+        old_lines: 3,
+        new_start: 1,
+        new_lines: 3,
+      };
+
+      await useGitStore.getState().unstageHunk("file.txt", hunk);
+
+      expect(mockedInvoke).toHaveBeenCalledWith("unstage_hunk", {
+        path: "file.txt",
+        hunk,
+      });
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("unstage hunk error"));
+      const hunk = {
+        old_start: 1,
+        old_lines: 3,
+        new_start: 1,
+        new_lines: 3,
+      };
+
+      await expect(
+        useGitStore.getState().unstageHunk("file.txt", hunk),
+      ).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("unstage hunk error");
+    });
+  });
+
+  describe("discardHunk", () => {
+    it("calls invoke on success", async () => {
+      mockedInvoke.mockResolvedValueOnce(undefined);
+      const hunk = {
+        old_start: 1,
+        old_lines: 3,
+        new_start: 1,
+        new_lines: 3,
+      };
+
+      await useGitStore.getState().discardHunk("file.txt", hunk);
+
+      expect(mockedInvoke).toHaveBeenCalledWith("discard_hunk", {
+        path: "file.txt",
+        hunk,
+      });
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("discard hunk error"));
+      const hunk = {
+        old_start: 1,
+        old_lines: 3,
+        new_start: 1,
+        new_lines: 3,
+      };
+
+      await expect(
+        useGitStore.getState().discardHunk("file.txt", hunk),
+      ).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("discard hunk error");
+    });
+  });
+
   describe("clearError", () => {
     it("clears the error state", async () => {
       mockedInvoke.mockRejectedValueOnce(new Error("some error"));
