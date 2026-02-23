@@ -2,6 +2,7 @@ import type {
   DiffLine as DiffLineType,
   WordSegment,
 } from "../../../services/git";
+import { segmentKey, wordHighlightClass } from "../utils/diffUtils";
 
 interface DiffLineProps {
   line: DiffLineType;
@@ -16,20 +17,6 @@ function lineClass(kind: DiffLineType["kind"]): string {
     default:
       return "diff-line";
   }
-}
-
-function wordHighlightClass(
-  kind: DiffLineType["kind"],
-  highlighted: boolean,
-): string | undefined {
-  if (!highlighted) return undefined;
-  if (kind === "addition") return "word-add";
-  if (kind === "deletion") return "word-del";
-  return undefined;
-}
-
-function segmentKey(seg: WordSegment, index: number): string {
-  return `${index}-${seg.highlighted ? "h" : "n"}-${seg.text.length}`;
 }
 
 function renderContent(line: DiffLineType) {
