@@ -7,6 +7,12 @@
   padding: 0;
 }
 
+.merge-viewer-modal .error-message {
+  padding: 16px;
+  color: var(--danger);
+  font-size: 13px;
+}
+
 .merge-panels {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
