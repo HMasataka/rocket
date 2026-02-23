@@ -97,7 +97,7 @@ export function ConflictModal() {
 
   const handleContinue = useCallback(async () => {
     try {
-      await continueMerge("Merge commit");
+      await continueMerge("");
       await fetchStatus();
       addToast("Merge completed", "success");
       closeModal();
