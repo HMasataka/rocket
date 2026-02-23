@@ -5,6 +5,7 @@ import { useUIStore } from "../../stores/uiStore";
 import { CommitPanel } from "./organisms/CommitPanel";
 import { DiffPanel } from "./organisms/DiffPanel";
 import { FilePanel } from "./organisms/FilePanel";
+import { toHunkIdentifier } from "./utils/diffUtils";
 
 export function ChangesPage() {
   const status = useGitStore((s) => s.status);
@@ -19,6 +20,10 @@ export function ChangesPage() {
   const stageHunkAction = useGitStore((s) => s.stageHunk);
   const unstageHunkAction = useGitStore((s) => s.unstageHunk);
   const discardHunkAction = useGitStore((s) => s.discardHunk);
+  const stageLinesAction = useGitStore((s) => s.stageLines);
+  const unstageLinesAction = useGitStore((s) => s.unstageLines);
+  const discardLinesAction = useGitStore((s) => s.discardLines);
+  const getHeadCommitMessage = useGitStore((s) => s.getHeadCommitMessage);
 
   const selectedFile = useUIStore((s) => s.selectedFile);
   const selectedFileStaged = useUIStore((s) => s.selectedFileStaged);
@@ -74,7 +79,10 @@ export function ChangesPage() {
     async (message: string, amend: boolean) => {
       try {
         await commitAction(message, amend);
-        addToast("Commit created successfully", "success");
+        addToast(
+          amend ? "Commit amended successfully" : "Commit created successfully",
+          "success",
+        );
         await fetchStatus();
       } catch (e: unknown) {
         addToast(`Commit failed: ${String(e)}`, "error");
@@ -120,6 +128,67 @@ export function ChangesPage() {
     ],
   );
 
+  const findHunkByGlobalIndex = useCallback(
+    (hunkIndex: number) => {
+      let idx = 0;
+      for (const fileDiff of diff) {
+        for (const hunk of fileDiff.hunks) {
+          if (idx === hunkIndex) {
+            return toHunkIdentifier(hunk);
+          }
+          idx++;
+        }
+      }
+      return null;
+    },
+    [diff],
+  );
+
+  const handleStageLines = useCallback(
+    async (hunkIndex: number, lineIndices: number[]) => {
+      if (!selectedFile) return;
+      const hunkId = findHunkByGlobalIndex(hunkIndex);
+      if (!hunkId) return;
+      const lineRange = { hunk: hunkId, line_indices: lineIndices };
+      if (selectedFileStaged) {
+        await unstageLinesAction(selectedFile, lineRange);
+      } else {
+        await stageLinesAction(selectedFile, lineRange);
+      }
+      await fetchStatus();
+      await fetchDiff(selectedFile, selectedFileStaged);
+    },
+    [
+      selectedFile,
+      selectedFileStaged,
+      findHunkByGlobalIndex,
+      stageLinesAction,
+      unstageLinesAction,
+      fetchStatus,
+      fetchDiff,
+    ],
+  );
+
+  const handleDiscardLines = useCallback(
+    async (hunkIndex: number, lineIndices: number[]) => {
+      if (!selectedFile) return;
+      const hunkId = findHunkByGlobalIndex(hunkIndex);
+      if (!hunkId) return;
+      const lineRange = { hunk: hunkId, line_indices: lineIndices };
+      await discardLinesAction(selectedFile, lineRange);
+      await fetchStatus();
+      await fetchDiff(selectedFile, selectedFileStaged);
+    },
+    [
+      selectedFile,
+      selectedFileStaged,
+      findHunkByGlobalIndex,
+      discardLinesAction,
+      fetchStatus,
+      fetchDiff,
+    ],
+  );
+
   const files = status?.files ?? [];
   const hasStagedFiles = files.some((f) => f.staging === "staged");
 
@@ -142,8 +211,14 @@ export function ChangesPage() {
         onSetDiffViewMode={setDiffViewMode}
         onStageHunk={handleStageHunk}
         onDiscardHunk={handleDiscardHunk}
+        onStageLines={handleStageLines}
+        onDiscardLines={handleDiscardLines}
       />
-      <CommitPanel onCommit={handleCommit} hasStagedFiles={hasStagedFiles} />
+      <CommitPanel
+        onCommit={handleCommit}
+        hasStagedFiles={hasStagedFiles}
+        onLoadHeadMessage={getHeadCommitMessage}
+      />
     </div>
   );
 }
