@@ -19,12 +19,19 @@ export function ConflictModal() {
 
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
   const [resolvedPaths, setResolvedPaths] = useState<Set<string>>(new Set());
+  const [initialPaths, setInitialPaths] = useState<string[]>([]);
 
   useEffect(() => {
     fetchConflictFiles().catch((e: unknown) => {
       addToast(String(e), "error");
     });
   }, [fetchConflictFiles, addToast]);
+
+  useEffect(() => {
+    if (initialPaths.length === 0 && conflictFiles.length > 0) {
+      setInitialPaths(conflictFiles.map((f) => f.path));
+    }
+  }, [conflictFiles, initialPaths.length]);
 
   useEffect(() => {
     if (selectedPath) return;
@@ -37,7 +44,7 @@ export function ConflictModal() {
   const selectedFile =
     conflictFiles.find((f) => f.path === selectedPath) ?? null;
   const resolvedCount = resolvedPaths.size;
-  const totalCount = conflictFiles.length;
+  const totalCount = initialPaths.length;
   const allResolved = totalCount > 0 && resolvedCount === totalCount;
 
   const refreshConflicts = useCallback(async () => {
