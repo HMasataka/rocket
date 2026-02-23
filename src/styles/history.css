@@ -509,6 +509,13 @@
   color: var(--text-muted);
 }
 
+.diff-preview-content {
+  overflow: auto;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
 .diff-preview-actions {
   display: flex;
   gap: 4px;

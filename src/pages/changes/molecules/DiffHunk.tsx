@@ -24,34 +24,40 @@ export function DiffHunkView({
     <div className="diff-hunk">
       <div className="diff-hunk-header">
         <span>{hunk.header}</span>
-        <div className="hunk-actions">
-          {staged ? (
-            <button
-              type="button"
-              className="hunk-btn"
-              onClick={() => onStageHunk?.(hunkId)}
-            >
-              Unstage Hunk
-            </button>
-          ) : (
-            <>
+        {(onStageHunk || onDiscardHunk) && (
+          <div className="hunk-actions">
+            {staged ? (
               <button
                 type="button"
                 className="hunk-btn"
                 onClick={() => onStageHunk?.(hunkId)}
               >
-                Stage Hunk
+                Unstage Hunk
               </button>
-              <button
-                type="button"
-                className="hunk-btn"
-                onClick={() => onDiscardHunk?.(hunkId)}
-              >
-                Discard
-              </button>
-            </>
-          )}
-        </div>
+            ) : (
+              <>
+                {onStageHunk && (
+                  <button
+                    type="button"
+                    className="hunk-btn"
+                    onClick={() => onStageHunk(hunkId)}
+                  >
+                    Stage Hunk
+                  </button>
+                )}
+                {onDiscardHunk && (
+                  <button
+                    type="button"
+                    className="hunk-btn"
+                    onClick={() => onDiscardHunk(hunkId)}
+                  >
+                    Discard
+                  </button>
+                )}
+              </>
+            )}
+          </div>
+        )}
       </div>
       {hunk.lines.map((line) => (
         <DiffLineRow

@@ -13,11 +13,13 @@ export function CommitFileDiff({ path, diffs }: CommitFileDiffProps) {
         <span className="diff-preview-path">{path}</span>
       </div>
       <div className="diff-preview-content">
-        {diffs.map((diff) =>
-          diff.hunks.map((hunk) => (
-            <DiffHunkView key={hunk.header} hunk={hunk} />
-          )),
-        )}
+        <div className="diff-content-inner">
+          {diffs.map((diff) =>
+            diff.hunks.map((hunk) => (
+              <DiffHunkView key={hunk.header} hunk={hunk} />
+            )),
+          )}
+        </div>
       </div>
     </div>
   );
