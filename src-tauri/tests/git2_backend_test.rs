@@ -1209,8 +1209,9 @@ fn stash_branch_name_parsed_from_message() {
 
     let stashes = backend.stash_list().unwrap();
     assert_eq!(stashes.len(), 1);
-    // Default stash message is "WIP on main: ..." so branch_name should be "main"
-    assert_eq!(stashes[0].branch_name, "main");
+    // Default stash message is "WIP on <branch>: ..." so branch_name should match current branch
+    let current = backend.current_branch().unwrap();
+    assert_eq!(stashes[0].branch_name, current);
 }
 
 // === Tag tests ===
