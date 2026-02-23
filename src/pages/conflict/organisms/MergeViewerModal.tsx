@@ -1,16 +1,19 @@
 import { useCallback, useEffect, useState } from "react";
 import type { MergeBaseContent } from "../../../services/conflict";
 import { getMergeBaseContent } from "../../../services/conflict";
-import { useUIStore } from "../../../stores/uiStore";
 import "../../../styles/merge-viewer.css";
 
 interface MergeViewerModalProps {
   path: string;
   onApply: (content: string) => void;
+  onCancel: () => void;
 }
 
-export function MergeViewerModal({ path, onApply }: MergeViewerModalProps) {
-  const closeModal = useUIStore((s) => s.closeModal);
+export function MergeViewerModal({
+  path,
+  onApply,
+  onCancel,
+}: MergeViewerModalProps) {
   const [content, setContent] = useState<MergeBaseContent | null>(null);
   const [result, setResult] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -28,23 +31,22 @@ export function MergeViewerModal({ path, onApply }: MergeViewerModalProps) {
 
   const handleApply = useCallback(() => {
     onApply(result);
-    closeModal();
-  }, [result, onApply, closeModal]);
+  }, [result, onApply]);
 
   return (
     <>
       {/* biome-ignore lint/a11y/noStaticElementInteractions: overlay dismiss */}
       <div
         className="modal-overlay active"
-        onClick={closeModal}
+        onClick={onCancel}
         onKeyDown={(e) => {
-          if (e.key === "Escape") closeModal();
+          if (e.key === "Escape") onCancel();
         }}
       />
       <div className="modal merge-viewer-modal active">
         <div className="modal-header">
           <span className="modal-title">3-way Merge Viewer</span>
-          <button type="button" className="modal-close" onClick={closeModal}>
+          <button type="button" className="modal-close" onClick={onCancel}>
             <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
               <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z" />
             </svg>
@@ -89,7 +91,7 @@ export function MergeViewerModal({ path, onApply }: MergeViewerModalProps) {
           <button
             type="button"
             className="btn btn-secondary"
-            onClick={closeModal}
+            onClick={onCancel}
           >
             Cancel
           </button>

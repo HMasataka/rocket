@@ -244,6 +244,7 @@ export function ConflictModal() {
         <MergeViewerModal
           path={mergeViewerPath}
           onApply={handleMergeViewerApply}
+          onCancel={() => setMergeViewerPath(null)}
         />
       )}
     </>
