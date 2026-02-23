@@ -73,9 +73,7 @@ pub fn continue_merge(message: String, state: State<'_, AppState>) -> Result<Com
         .lock()
         .map_err(|e| format!("Lock poisoned: {e}"))?;
     let backend = repo_lock.as_ref().ok_or("No repository opened")?;
-    backend
-        .continue_merge(&message)
-        .map_err(|e| e.to_string())
+    backend.continue_merge(&message).map_err(|e| e.to_string())
 }
 
 #[tauri::command]

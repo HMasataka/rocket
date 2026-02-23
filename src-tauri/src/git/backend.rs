@@ -2,10 +2,9 @@ use std::path::Path;
 
 use crate::git::error::GitResult;
 use crate::git::types::{
-    BlameResult, BranchInfo, CommitDetail, CommitInfo, CommitLogResult, CommitResult,
-    ConflictFile, ConflictResolution, DiffOptions, FetchResult, FileDiff, HunkIdentifier,
-    LineRange, LogFilter, MergeOption, MergeResult, PullOption, PushResult, RemoteInfo, RepoStatus,
-    StashEntry, TagInfo,
+    BlameResult, BranchInfo, CommitDetail, CommitInfo, CommitLogResult, CommitResult, ConflictFile,
+    ConflictResolution, DiffOptions, FetchResult, FileDiff, HunkIdentifier, LineRange, LogFilter,
+    MergeOption, MergeResult, PullOption, PushResult, RemoteInfo, RepoStatus, StashEntry, TagInfo,
 };
 
 pub trait GitBackend: Send + Sync {

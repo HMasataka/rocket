@@ -1206,12 +1206,8 @@ impl GitBackend for Git2Backend {
         let full_path = self.workdir.join(path);
 
         let resolved_content = match resolution {
-            ConflictResolution::Ours => {
-                get_stage_blob_content(&repo, path, 2)?
-            }
-            ConflictResolution::Theirs => {
-                get_stage_blob_content(&repo, path, 3)?
-            }
+            ConflictResolution::Ours => get_stage_blob_content(&repo, path, 2)?,
+            ConflictResolution::Theirs => get_stage_blob_content(&repo, path, 3)?,
             ConflictResolution::Both => {
                 let ours = get_stage_blob_content(&repo, path, 2)?;
                 let theirs = get_stage_blob_content(&repo, path, 3)?;
@@ -1238,8 +1234,7 @@ impl GitBackend for Git2Backend {
 
         let resolved = resolve_single_block(&content, block_index, &resolution)?;
 
-        std::fs::write(&full_path, resolved)
-            .map_err(|e| GitError::ConflictFailed(Box::new(e)))?;
+        std::fs::write(&full_path, resolved).map_err(|e| GitError::ConflictFailed(Box::new(e)))?;
 
         Ok(())
     }
@@ -2214,11 +2209,7 @@ fn parse_conflict_markers(content: &str) -> Vec<ConflictBlock> {
     blocks
 }
 
-fn get_stage_blob_content(
-    repo: &Repository,
-    path: &str,
-    stage: i32,
-) -> GitResult<String> {
+fn get_stage_blob_content(repo: &Repository, path: &str, stage: i32) -> GitResult<String> {
     let index = repo
         .index()
         .map_err(|e| GitError::ConflictFailed(Box::new(e)))?;
@@ -2249,10 +2240,7 @@ fn resolve_single_block(
         .count();
     if block_index >= total_blocks {
         return Err(GitError::ConflictFailed(
-            format!(
-                "block_index {block_index} out of range (total: {total_blocks})"
-            )
-            .into(),
+            format!("block_index {block_index} out of range (total: {total_blocks})").into(),
         ));
     }
 
