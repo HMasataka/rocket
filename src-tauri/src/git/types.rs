@@ -40,17 +40,36 @@ pub enum DiffLineKind {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct WordSegment {
+    pub text: String,
+    pub highlighted: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DiffLine {
     pub kind: DiffLineKind,
     pub content: String,
     pub old_lineno: Option<u32>,
     pub new_lineno: Option<u32>,
+    pub word_diff: Option<Vec<WordSegment>>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DiffHunk {
     pub header: String,
+    pub old_start: u32,
+    pub old_lines: u32,
+    pub new_start: u32,
+    pub new_lines: u32,
     pub lines: Vec<DiffLine>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct HunkIdentifier {
+    pub old_start: u32,
+    pub old_lines: u32,
+    pub new_start: u32,
+    pub new_lines: u32,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
