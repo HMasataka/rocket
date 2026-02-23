@@ -1364,11 +1364,7 @@ impl GitBackend for Git2Backend {
         Err(GitError::RebaseFailed(stderr.to_string().into()))
     }
 
-    fn interactive_rebase(
-        &self,
-        onto: &str,
-        todo: &[RebaseTodoEntry],
-    ) -> GitResult<RebaseResult> {
+    fn interactive_rebase(&self, onto: &str, todo: &[RebaseTodoEntry]) -> GitResult<RebaseResult> {
         let todo_content = todo
             .iter()
             .map(|entry| {
@@ -1409,8 +1405,7 @@ impl GitBackend for Git2Backend {
             "#!/bin/sh\ntrue\n".to_string()
         } else {
             let counter_file = git_dir.join("rocket-reword-counter");
-            std::fs::write(&counter_file, "0")
-                .map_err(|e| GitError::RebaseFailed(Box::new(e)))?;
+            std::fs::write(&counter_file, "0").map_err(|e| GitError::RebaseFailed(Box::new(e)))?;
 
             let msgs_file = git_dir.join("rocket-reword-msgs");
             std::fs::write(&msgs_file, reword_messages.join("\n---ROCKET_MSG_SEP---\n"))
@@ -1461,7 +1456,10 @@ impl GitBackend for Git2Backend {
         }
 
         let stderr = String::from_utf8_lossy(&output.stderr);
-        if stderr.contains("CONFLICT") || stderr.contains("conflict") || stderr.contains("Stopped at") {
+        if stderr.contains("CONFLICT")
+            || stderr.contains("conflict")
+            || stderr.contains("Stopped at")
+        {
             let conflicts = collect_conflict_paths_from_workdir(&self.workdir);
             return Ok(RebaseResult {
                 completed: false,
@@ -1598,11 +1596,14 @@ impl GitBackend for Git2Backend {
         let mut revwalk = repo
             .revwalk()
             .map_err(|e| GitError::RebaseFailed(Box::new(e)))?;
-        revwalk.set_sorting(Sort::TOPOLOGICAL | Sort::REVERSE)
+        revwalk
+            .set_sorting(Sort::TOPOLOGICAL | Sort::REVERSE)
             .map_err(|e| GitError::RebaseFailed(Box::new(e)))?;
-        revwalk.push(head_commit.id())
+        revwalk
+            .push(head_commit.id())
             .map_err(|e| GitError::RebaseFailed(Box::new(e)))?;
-        revwalk.hide(merge_base)
+        revwalk
+            .hide(merge_base)
             .map_err(|e| GitError::RebaseFailed(Box::new(e)))?;
 
         let mut entries = Vec::new();
@@ -1617,10 +1618,7 @@ impl GitBackend for Git2Backend {
 
             let oid_str = oid.to_string();
             let short_oid = oid_str[..7.min(oid_str.len())].to_string();
-            let message = commit
-                .summary()
-                .unwrap_or("")
-                .to_string();
+            let message = commit.summary().unwrap_or("").to_string();
             let author_name = commit.author().name().unwrap_or("").to_string();
 
             entries.push(RebaseTodoEntry {
@@ -2466,13 +2464,11 @@ fn collect_conflict_paths_from_workdir(workdir: &Path) -> Vec<String> {
         .output();
 
     match output {
-        Ok(out) if out.status.success() => {
-            String::from_utf8_lossy(&out.stdout)
-                .lines()
-                .filter(|l| !l.is_empty())
-                .map(|l| l.to_string())
-                .collect()
-        }
+        Ok(out) if out.status.success() => String::from_utf8_lossy(&out.stdout)
+            .lines()
+            .filter(|l| !l.is_empty())
+            .map(|l| l.to_string())
+            .collect(),
         _ => Vec::new(),
     }
 }

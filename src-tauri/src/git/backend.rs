@@ -80,11 +80,7 @@ pub trait GitBackend: Send + Sync {
 
     // Rebase operations
     fn rebase(&self, onto: &str) -> GitResult<RebaseResult>;
-    fn interactive_rebase(
-        &self,
-        onto: &str,
-        todo: &[RebaseTodoEntry],
-    ) -> GitResult<RebaseResult>;
+    fn interactive_rebase(&self, onto: &str, todo: &[RebaseTodoEntry]) -> GitResult<RebaseResult>;
     fn is_rebasing(&self) -> GitResult<bool>;
     fn abort_rebase(&self) -> GitResult<()>;
     fn continue_rebase(&self) -> GitResult<RebaseResult>;
