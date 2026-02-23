@@ -36,6 +36,14 @@ export function BranchesPage() {
   }, [fetchBranches, addToast]);
 
   useEffect(() => {
+    if (selectedBranch) return;
+    const head = branches.find((b) => b.is_head);
+    if (head) {
+      setSelectedBranch(head.name);
+    }
+  }, [branches, selectedBranch]);
+
+  useEffect(() => {
     if (!selectedBranch) {
       setBranchCommits([]);
       return;
