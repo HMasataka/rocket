@@ -997,11 +997,7 @@ impl GitBackend for Git2Backend {
         Ok(commits)
     }
 
-    fn get_branch_commits(
-        &self,
-        branch_name: &str,
-        limit: usize,
-    ) -> GitResult<Vec<CommitInfo>> {
+    fn get_branch_commits(&self, branch_name: &str, limit: usize) -> GitResult<Vec<CommitInfo>> {
         let repo = self.repo.lock().unwrap();
 
         let branch = repo
