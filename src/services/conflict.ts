@@ -3,9 +3,17 @@ import type { CommitResult } from "./git";
 
 export interface ConflictBlock {
   ours: string;
+  base: string | null;
   theirs: string;
   start_line: number;
   end_line: number;
+}
+
+export interface MergeBaseContent {
+  path: string;
+  base_content: string | null;
+  ours_content: string;
+  theirs_content: string;
 }
 
 export interface ConflictFile {
@@ -57,4 +65,8 @@ export function continueMerge(message: string): Promise<CommitResult> {
 
 export function isMerging(): Promise<boolean> {
   return invoke<boolean>("is_merging");
+}
+
+export function getMergeBaseContent(path: string): Promise<MergeBaseContent> {
+  return invoke<MergeBaseContent>("get_merge_base_content", { path });
 }

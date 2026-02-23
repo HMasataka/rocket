@@ -10,6 +10,7 @@ interface ConflictDetailProps {
   onResolveBlock: (blockIndex: number, resolution: ConflictResolution) => void;
   onResolveFile: (resolution: ConflictResolution) => void;
   onMarkResolved: () => void;
+  onOpenMergeViewer: () => void;
 }
 
 export function ConflictDetail({
@@ -18,6 +19,7 @@ export function ConflictDetail({
   onResolveBlock,
   onResolveFile,
   onMarkResolved,
+  onOpenMergeViewer,
 }: ConflictDetailProps) {
   return (
     <div className="conflict-detail">
@@ -41,6 +43,13 @@ export function ConflictDetail({
       </div>
 
       <div className="conflict-detail-actions">
+        <button
+          type="button"
+          className="btn btn-secondary btn-sm"
+          onClick={onOpenMergeViewer}
+        >
+          3-way Merge Viewer
+        </button>
         <button
           type="button"
           className="btn btn-secondary btn-sm"
