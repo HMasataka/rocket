@@ -277,3 +277,26 @@ pub struct CommitLogResult {
     pub commits: Vec<CommitInfo>,
     pub graph: Vec<CommitGraphRow>,
 }
+
+// === Stash types ===
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct StashEntry {
+    pub index: usize,
+    pub message: String,
+    pub branch_name: String,
+    pub author_date: i64,
+}
+
+// === Tag types ===
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TagInfo {
+    pub name: String,
+    pub target_oid: String,
+    pub target_short_oid: String,
+    pub is_annotated: bool,
+    pub tagger_name: Option<String>,
+    pub tagger_date: Option<i64>,
+    pub message: Option<String>,
+}

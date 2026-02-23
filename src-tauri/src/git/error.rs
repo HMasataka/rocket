@@ -79,6 +79,12 @@ pub enum GitError {
 
     #[error("failed to amend commit: {0}")]
     AmendFailed(#[source] Box<dyn std::error::Error + Send + Sync>),
+
+    #[error("failed to manage stash: {0}")]
+    StashFailed(#[source] Box<dyn std::error::Error + Send + Sync>),
+
+    #[error("failed to manage tag: {0}")]
+    TagFailed(#[source] Box<dyn std::error::Error + Send + Sync>),
 }
 
 pub type GitResult<T> = Result<T, GitError>;
