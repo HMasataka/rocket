@@ -21,6 +21,8 @@ describe("gitStore", () => {
       stashes: [],
       tags: [],
       merging: false,
+      rebasing: false,
+      rebaseState: null,
       conflictFiles: [],
       loading: false,
       error: null,
@@ -985,6 +987,179 @@ describe("gitStore", () => {
       ).rejects.toThrow();
 
       expect(useGitStore.getState().error).toContain("continue error");
+    });
+  });
+
+  describe("fetchRebaseState", () => {
+    it("sets rebasing and rebaseState on success", async () => {
+      const mockState = {
+        onto_branch: "main",
+        onto_oid: "abc123",
+        current_step: 1,
+        total_steps: 3,
+        has_conflicts: false,
+      };
+      mockedInvoke.mockResolvedValueOnce(true);
+      mockedInvoke.mockResolvedValueOnce(mockState);
+
+      await useGitStore.getState().fetchRebaseState();
+
+      expect(useGitStore.getState().rebasing).toBe(true);
+      expect(useGitStore.getState().rebaseState).toEqual(mockState);
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("rebase state error"));
+
+      await expect(useGitStore.getState().fetchRebaseState()).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("rebase state error");
+    });
+  });
+
+  describe("rebase", () => {
+    it("returns rebase result on success", async () => {
+      const mockResult = { completed: true, conflicts: [] };
+      mockedInvoke.mockResolvedValueOnce(mockResult);
+
+      const result = await useGitStore.getState().rebase("main");
+
+      expect(result).toEqual(mockResult);
+      expect(mockedInvoke).toHaveBeenCalledWith("rebase", { onto: "main" });
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("rebase error"));
+
+      await expect(useGitStore.getState().rebase("main")).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("rebase error");
+    });
+  });
+
+  describe("interactiveRebase", () => {
+    it("returns rebase result on success", async () => {
+      const mockResult = { completed: true, conflicts: [] };
+      const todo = [
+        {
+          action: "pick" as const,
+          oid: "abc123",
+          short_oid: "abc123",
+          message: "test",
+          author_name: "Author",
+        },
+      ];
+      mockedInvoke.mockResolvedValueOnce(mockResult);
+
+      const result = await useGitStore
+        .getState()
+        .interactiveRebase("main", todo);
+
+      expect(result).toEqual(mockResult);
+      expect(mockedInvoke).toHaveBeenCalledWith("interactive_rebase", {
+        onto: "main",
+        todo,
+      });
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("interactive error"));
+
+      await expect(
+        useGitStore.getState().interactiveRebase("main", []),
+      ).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("interactive error");
+    });
+  });
+
+  describe("abortRebase", () => {
+    it("resets rebase state on success", async () => {
+      useGitStore.setState({ rebasing: true });
+      mockedInvoke.mockResolvedValueOnce(undefined);
+
+      await useGitStore.getState().abortRebase();
+
+      expect(mockedInvoke).toHaveBeenCalledWith("abort_rebase");
+      expect(useGitStore.getState().rebasing).toBe(false);
+      expect(useGitStore.getState().rebaseState).toBeNull();
+      expect(useGitStore.getState().conflictFiles).toEqual([]);
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("abort rebase error"));
+
+      await expect(useGitStore.getState().abortRebase()).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("abort rebase error");
+    });
+  });
+
+  describe("continueRebase", () => {
+    it("resets state when completed", async () => {
+      useGitStore.setState({ rebasing: true });
+      mockedInvoke.mockResolvedValueOnce({ completed: true, conflicts: [] });
+
+      const result = await useGitStore.getState().continueRebase();
+
+      expect(mockedInvoke).toHaveBeenCalledWith("continue_rebase");
+      expect(result.completed).toBe(true);
+      expect(useGitStore.getState().rebasing).toBe(false);
+      expect(useGitStore.getState().rebaseState).toBeNull();
+    });
+
+    it("keeps rebasing state when not completed", async () => {
+      useGitStore.setState({ rebasing: true });
+      mockedInvoke.mockResolvedValueOnce({
+        completed: false,
+        conflicts: ["file.txt"],
+      });
+
+      const result = await useGitStore.getState().continueRebase();
+
+      expect(result.completed).toBe(false);
+      expect(useGitStore.getState().rebasing).toBe(true);
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("continue rebase error"));
+
+      await expect(useGitStore.getState().continueRebase()).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("continue rebase error");
+    });
+  });
+
+  describe("getRebaseTodo", () => {
+    it("returns todo entries on success", async () => {
+      const mockTodo = [
+        {
+          action: "pick",
+          oid: "abc123",
+          short_oid: "abc123",
+          message: "test",
+          author_name: "Author",
+        },
+      ];
+      mockedInvoke.mockResolvedValueOnce(mockTodo);
+
+      const result = await useGitStore.getState().getRebaseTodo("main");
+
+      expect(result).toEqual(mockTodo);
+      expect(mockedInvoke).toHaveBeenCalledWith("get_rebase_todo", {
+        onto: "main",
+        limit: 100,
+      });
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("todo error"));
+
+      await expect(
+        useGitStore.getState().getRebaseTodo("main"),
+      ).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("todo error");
     });
   });
 
