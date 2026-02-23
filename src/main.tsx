@@ -13,6 +13,7 @@ import "./styles/blame.css";
 import "./styles/file-history.css";
 import "./styles/stash.css";
 import "./styles/tags.css";
+import "./styles/conflict.css";
 
 const root = document.getElementById("root");
 if (!root) throw new Error("Root element not found");
