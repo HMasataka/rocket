@@ -12,8 +12,8 @@ use crate::git::types::{
     BlameLine, BlameResult, BranchInfo, CommitDetail, CommitFileChange, CommitFileStatus,
     CommitGraphRow, CommitInfo, CommitLogResult, CommitRef, CommitRefKind, CommitResult,
     CommitStats, DiffHunk, DiffLine, DiffLineKind, DiffOptions, FetchResult, FileDiff, FileStatus,
-    FileStatusKind, GraphEdge, GraphNodeType, LogFilter, MergeKind, MergeOption, MergeResult,
-    PullOption, PushResult, RemoteInfo, RepoStatus, StagingState,
+    FileStatusKind, GraphEdge, GraphNodeType, HunkIdentifier, LogFilter, MergeKind, MergeOption,
+    MergeResult, PullOption, PushResult, RemoteInfo, RepoStatus, StagingState, WordSegment,
 };
 
 pub struct Git2Backend {
@@ -168,6 +168,10 @@ impl GitBackend for Git2Backend {
                         if needs_hunk {
                             file_diff.hunks.push(DiffHunk {
                                 header: header_str,
+                                old_start: h.old_start(),
+                                old_lines: h.old_lines(),
+                                new_start: h.new_start(),
+                                new_lines: h.new_lines(),
                                 lines: Vec::new(),
                             });
                         }
@@ -187,6 +191,7 @@ impl GitBackend for Git2Backend {
                             content,
                             old_lineno: line.old_lineno(),
                             new_lineno: line.new_lineno(),
+                            word_diff: None,
                         });
                     }
                 }
@@ -195,6 +200,8 @@ impl GitBackend for Git2Backend {
             true
         })
         .map_err(|e| GitError::DiffFailed(Box::new(e)))?;
+
+        compute_word_diffs(&mut file_diffs);
 
         Ok(file_diffs)
     }
@@ -843,6 +850,10 @@ impl GitBackend for Git2Backend {
                         if needs_hunk {
                             file_diff.hunks.push(DiffHunk {
                                 header: header_str,
+                                old_start: h.old_start(),
+                                old_lines: h.old_lines(),
+                                new_start: h.new_start(),
+                                new_lines: h.new_lines(),
                                 lines: Vec::new(),
                             });
                         }
@@ -862,6 +873,7 @@ impl GitBackend for Git2Backend {
                             content,
                             old_lineno: line.old_lineno(),
                             new_lineno: line.new_lineno(),
+                            word_diff: None,
                         });
                     }
                 }
@@ -1036,9 +1048,83 @@ impl GitBackend for Git2Backend {
 
         Ok(commits)
     }
+
+    fn stage_hunk(&self, path: &Path, hunk: &HunkIdentifier) -> GitResult<()> {
+        let patch = self.generate_hunk_patch(path, hunk, false)?;
+        run_git_apply(&self.workdir, &patch, &["--cached"])
+            .map_err(GitError::StageFailed)
+    }
+
+    fn unstage_hunk(&self, path: &Path, hunk: &HunkIdentifier) -> GitResult<()> {
+        let patch = self.generate_hunk_patch(path, hunk, true)?;
+        run_git_apply(&self.workdir, &patch, &["--cached", "-R"])
+            .map_err(GitError::UnstageFailed)
+    }
+
+    fn discard_hunk(&self, path: &Path, hunk: &HunkIdentifier) -> GitResult<()> {
+        let patch = self.generate_hunk_patch(path, hunk, false)?;
+        run_git_apply(&self.workdir, &patch, &["-R"])
+            .map_err(GitError::DiscardFailed)
+    }
 }
 
 impl Git2Backend {
+    fn generate_hunk_patch(
+        &self,
+        path: &Path,
+        hunk: &HunkIdentifier,
+        staged: bool,
+    ) -> GitResult<String> {
+        let options = DiffOptions {
+            staged,
+            ..Default::default()
+        };
+        let diffs = self.diff(Some(path), &options)?;
+
+        let file_diff = diffs
+            .first()
+            .ok_or_else(|| GitError::DiffFailed("no diff found for path".into()))?;
+
+        let matched_hunk = file_diff
+            .hunks
+            .iter()
+            .find(|h| {
+                h.old_start == hunk.old_start
+                    && h.old_lines == hunk.old_lines
+                    && h.new_start == hunk.new_start
+                    && h.new_lines == hunk.new_lines
+            })
+            .ok_or_else(|| GitError::DiffFailed("hunk not found".into()))?;
+
+        let path_str = path.to_string_lossy();
+        let mut patch = String::new();
+        patch.push_str(&format!("diff --git a/{path_str} b/{path_str}\n"));
+        patch.push_str(&format!("--- a/{path_str}\n"));
+        patch.push_str(&format!("+++ b/{path_str}\n"));
+        patch.push_str(&format!(
+            "@@ -{},{} +{},{} @@\n",
+            hunk.old_start, hunk.old_lines, hunk.new_start, hunk.new_lines
+        ));
+
+        for line in &matched_hunk.lines {
+            let prefix = match line.kind {
+                DiffLineKind::Addition => "+",
+                DiffLineKind::Deletion => "-",
+                DiffLineKind::Context => " ",
+                _ => continue,
+            };
+            let content = &line.content;
+            if content.ends_with('\n') {
+                patch.push_str(&format!("{prefix}{content}"));
+            } else {
+                patch.push_str(&format!("{prefix}{content}\n"));
+                patch.push_str("\\ No newline at end of file\n");
+            }
+        }
+
+        Ok(patch)
+    }
+
     fn merge_after_fetch(
         &self,
         remote_ref_name: &str,
@@ -1444,4 +1530,188 @@ fn build_graph(commits: &[CommitInfo]) -> Vec<CommitGraphRow> {
 
     // Trim empty trailing lanes from each row
     rows
+}
+
+fn run_git_apply(
+    workdir: &Path,
+    patch: &str,
+    extra_args: &[&str],
+) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    use std::io::Write;
+
+    let mut cmd = std::process::Command::new("git");
+    cmd.arg("-C")
+        .arg(workdir)
+        .arg("apply")
+        .args(extra_args)
+        .stdin(std::process::Stdio::piped())
+        .stdout(std::process::Stdio::piped())
+        .stderr(std::process::Stdio::piped());
+
+    let mut child = cmd.spawn()?;
+    if let Some(ref mut stdin) = child.stdin {
+        stdin.write_all(patch.as_bytes())?;
+    }
+    let output = child.wait_with_output()?;
+
+    if !output.status.success() {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        return Err(stderr.to_string().into());
+    }
+    Ok(())
+}
+
+fn tokenize_words(s: &str) -> Vec<&str> {
+    let mut tokens = Vec::new();
+    let mut start = 0;
+    let bytes = s.as_bytes();
+
+    for (i, &b) in bytes.iter().enumerate() {
+        let is_sep = b.is_ascii_whitespace() || b.is_ascii_punctuation();
+        if is_sep {
+            if start < i {
+                tokens.push(&s[start..i]);
+            }
+            tokens.push(&s[i..i + 1]);
+            start = i + 1;
+        }
+    }
+    if start < s.len() {
+        tokens.push(&s[start..]);
+    }
+    tokens
+}
+
+fn lcs_length(a: &[&str], b: &[&str]) -> Vec<Vec<usize>> {
+    let m = a.len();
+    let n = b.len();
+    let mut dp = vec![vec![0usize; n + 1]; m + 1];
+    for i in 1..=m {
+        for j in 1..=n {
+            if a[i - 1] == b[j - 1] {
+                dp[i][j] = dp[i - 1][j - 1] + 1;
+            } else {
+                dp[i][j] = dp[i - 1][j].max(dp[i][j - 1]);
+            }
+        }
+    }
+    dp
+}
+
+fn compute_word_diff_pair(del_content: &str, add_content: &str) -> (Vec<WordSegment>, Vec<WordSegment>) {
+    let del_tokens = tokenize_words(del_content);
+    let add_tokens = tokenize_words(add_content);
+    let dp = lcs_length(&del_tokens, &add_tokens);
+
+    let mut del_segments = Vec::new();
+    let mut add_segments = Vec::new();
+
+    let mut i = del_tokens.len();
+    let mut j = add_tokens.len();
+    let mut del_marked: Vec<bool> = vec![false; del_tokens.len()];
+    let mut add_marked: Vec<bool> = vec![false; add_tokens.len()];
+
+    while i > 0 && j > 0 {
+        if del_tokens[i - 1] == add_tokens[j - 1] {
+            i -= 1;
+            j -= 1;
+        } else if dp[i - 1][j] >= dp[i][j - 1] {
+            del_marked[i - 1] = true;
+            i -= 1;
+        } else {
+            add_marked[j - 1] = true;
+            j -= 1;
+        }
+    }
+    while i > 0 {
+        del_marked[i - 1] = true;
+        i -= 1;
+    }
+    while j > 0 {
+        add_marked[j - 1] = true;
+        j -= 1;
+    }
+
+    let mut cur_text = String::new();
+    let mut cur_highlighted = false;
+    for (idx, token) in del_tokens.iter().enumerate() {
+        let highlighted = del_marked[idx];
+        if idx > 0 && highlighted != cur_highlighted {
+            del_segments.push(WordSegment {
+                text: cur_text.clone(),
+                highlighted: cur_highlighted,
+            });
+            cur_text.clear();
+        }
+        cur_highlighted = highlighted;
+        cur_text.push_str(token);
+    }
+    if !cur_text.is_empty() {
+        del_segments.push(WordSegment {
+            text: cur_text,
+            highlighted: cur_highlighted,
+        });
+    }
+
+    cur_text = String::new();
+    cur_highlighted = false;
+    for (idx, token) in add_tokens.iter().enumerate() {
+        let highlighted = add_marked[idx];
+        if idx > 0 && highlighted != cur_highlighted {
+            add_segments.push(WordSegment {
+                text: cur_text.clone(),
+                highlighted: cur_highlighted,
+            });
+            cur_text.clear();
+        }
+        cur_highlighted = highlighted;
+        cur_text.push_str(token);
+    }
+    if !cur_text.is_empty() {
+        add_segments.push(WordSegment {
+            text: cur_text,
+            highlighted: cur_highlighted,
+        });
+    }
+
+    (del_segments, add_segments)
+}
+
+fn compute_word_diffs(file_diffs: &mut [FileDiff]) {
+    for file_diff in file_diffs.iter_mut() {
+        for hunk in file_diff.hunks.iter_mut() {
+            let mut i = 0;
+            let lines_len = hunk.lines.len();
+            while i < lines_len {
+                if hunk.lines[i].kind != DiffLineKind::Deletion {
+                    i += 1;
+                    continue;
+                }
+                let del_start = i;
+                while i < lines_len && hunk.lines[i].kind == DiffLineKind::Deletion {
+                    i += 1;
+                }
+                let del_end = i;
+
+                let add_start = i;
+                while i < lines_len && hunk.lines[i].kind == DiffLineKind::Addition {
+                    i += 1;
+                }
+                let add_end = i;
+
+                let del_count = del_end - del_start;
+                let add_count = add_end - add_start;
+                let pairs = del_count.min(add_count);
+
+                for p in 0..pairs {
+                    let (del_segs, add_segs) = compute_word_diff_pair(
+                        &hunk.lines[del_start + p].content,
+                        &hunk.lines[add_start + p].content,
+                    );
+                    hunk.lines[del_start + p].word_diff = Some(del_segs);
+                    hunk.lines[add_start + p].word_diff = Some(add_segs);
+                }
+            }
+        }
+    }
 }
