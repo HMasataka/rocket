@@ -46,20 +46,22 @@ export function DiffPanel({
         </div>
       </div>
       {diffViewMode === "inline" ? (
-        <div className="diff-content" style={{ display: "block" }}>
-          {diffs.map((fileDiff) => (
-            <div key={fileDiff.new_path ?? fileDiff.old_path}>
-              {fileDiff.hunks.map((hunk) => (
-                <DiffHunkView
-                  key={hunk.header}
-                  hunk={hunk}
-                  staged={staged}
-                  onStageHunk={onStageHunk}
-                  onDiscardHunk={onDiscardHunk}
-                />
-              ))}
-            </div>
-          ))}
+        <div className="diff-content">
+          <div className="diff-content-inner">
+            {diffs.map((fileDiff) => (
+              <div key={fileDiff.new_path ?? fileDiff.old_path}>
+                {fileDiff.hunks.map((hunk) => (
+                  <DiffHunkView
+                    key={hunk.header}
+                    hunk={hunk}
+                    staged={staged}
+                    onStageHunk={onStageHunk}
+                    onDiscardHunk={onDiscardHunk}
+                  />
+                ))}
+              </div>
+            ))}
+          </div>
         </div>
       ) : (
         <SplitDiffView
