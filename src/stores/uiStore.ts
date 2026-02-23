@@ -6,7 +6,8 @@ export type PageId =
   | "branches"
   | "history"
   | "blame"
-  | "file-history";
+  | "file-history"
+  | "stash";
 
 interface BlameTarget {
   path: string;
