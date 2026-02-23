@@ -1,4 +1,14 @@
 import { create } from "zustand";
+import type { ConflictFile, ConflictResolution } from "../services/conflict";
+import {
+  abortMerge as abortMergeService,
+  continueMerge as continueMergeService,
+  getConflictFiles,
+  isMerging as isMergingService,
+  markResolved as markResolvedService,
+  resolveConflictBlock as resolveConflictBlockService,
+  resolveConflict as resolveConflictService,
+} from "../services/conflict";
 import type {
   BranchInfo,
   FetchResult,
@@ -66,6 +76,8 @@ interface GitState {
   remotes: RemoteInfo[];
   stashes: StashEntry[];
   tags: TagInfo[];
+  merging: boolean;
+  conflictFiles: ConflictFile[];
   loading: boolean;
   error: string | null;
 }
@@ -111,6 +123,20 @@ interface GitActions {
   createTag: (name: string, message: string | null) => Promise<void>;
   deleteTag: (name: string) => Promise<void>;
   checkoutTag: (name: string) => Promise<void>;
+  fetchMergeState: () => Promise<void>;
+  fetchConflictFiles: () => Promise<void>;
+  resolveConflict: (
+    path: string,
+    resolution: ConflictResolution,
+  ) => Promise<void>;
+  resolveConflictBlock: (
+    path: string,
+    blockIndex: number,
+    resolution: ConflictResolution,
+  ) => Promise<void>;
+  markResolved: (path: string) => Promise<void>;
+  abortMerge: () => Promise<void>;
+  continueMerge: (message: string) => Promise<string>;
   clearError: () => void;
 }
 
@@ -122,6 +148,8 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
   remotes: [],
   stashes: [],
   tags: [],
+  merging: false,
+  conflictFiles: [],
   loading: false,
   error: null,
 
@@ -461,6 +489,78 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
   checkoutTag: async (name: string) => {
     try {
       await checkoutTagService(name);
+    } catch (e) {
+      set({ error: String(e) });
+      throw e;
+    }
+  },
+
+  fetchMergeState: async () => {
+    try {
+      const merging = await isMergingService();
+      set({ merging });
+    } catch (e) {
+      set({ error: String(e) });
+      throw e;
+    }
+  },
+
+  fetchConflictFiles: async () => {
+    try {
+      const conflictFiles = await getConflictFiles();
+      set({ conflictFiles });
+    } catch (e) {
+      set({ error: String(e) });
+      throw e;
+    }
+  },
+
+  resolveConflict: async (path: string, resolution: ConflictResolution) => {
+    try {
+      await resolveConflictService(path, resolution);
+    } catch (e) {
+      set({ error: String(e) });
+      throw e;
+    }
+  },
+
+  resolveConflictBlock: async (
+    path: string,
+    blockIndex: number,
+    resolution: ConflictResolution,
+  ) => {
+    try {
+      await resolveConflictBlockService(path, blockIndex, resolution);
+    } catch (e) {
+      set({ error: String(e) });
+      throw e;
+    }
+  },
+
+  markResolved: async (path: string) => {
+    try {
+      await markResolvedService(path);
+    } catch (e) {
+      set({ error: String(e) });
+      throw e;
+    }
+  },
+
+  abortMerge: async () => {
+    try {
+      await abortMergeService();
+      set({ merging: false, conflictFiles: [] });
+    } catch (e) {
+      set({ error: String(e) });
+      throw e;
+    }
+  },
+
+  continueMerge: async (message: string) => {
+    try {
+      const result = await continueMergeService(message);
+      set({ merging: false, conflictFiles: [] });
+      return result.oid;
     } catch (e) {
       set({ error: String(e) });
       throw e;
