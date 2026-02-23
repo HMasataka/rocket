@@ -1,6 +1,7 @@
 import { useCallback, useEffect } from "react";
 import { PullDialog } from "./components/organisms/PullDialog";
 import { RemoteModal } from "./components/organisms/RemoteModal";
+import { TagsModal } from "./components/organisms/TagsModal";
 import { ToastContainer } from "./components/organisms/ToastContainer";
 import { AppShell } from "./components/templates/AppShell";
 import { useFileWatcher } from "./hooks/useFileWatcher";
@@ -9,6 +10,7 @@ import { BranchesPage } from "./pages/branches";
 import { ChangesPage } from "./pages/changes";
 import { FileHistoryPage } from "./pages/file-history";
 import { HistoryPage } from "./pages/history";
+import { StashPage } from "./pages/stash";
 import type { PullOption } from "./services/git";
 import { useGitStore } from "./stores/gitStore";
 import { useUIStore } from "./stores/uiStore";
@@ -23,6 +25,7 @@ export function App() {
   const fetchRemote = useGitStore((s) => s.fetchRemote);
   const pullRemote = useGitStore((s) => s.pullRemote);
   const pushRemote = useGitStore((s) => s.pushRemote);
+  const fetchStashes = useGitStore((s) => s.fetchStashes);
   const addToast = useUIStore((s) => s.addToast);
   const activePage = useUIStore((s) => s.activePage);
   const activeModal = useUIStore((s) => s.activeModal);
@@ -36,7 +39,10 @@ export function App() {
     fetchRemotes().catch((e: unknown) => {
       addToast(String(e), "error");
     });
-  }, [fetchBranch, fetchRemotes, addToast]);
+    fetchStashes().catch((e: unknown) => {
+      addToast(String(e), "error");
+    });
+  }, [fetchBranch, fetchRemotes, fetchStashes, addToast]);
 
   const handleRepoChanged = useCallback(() => {
     fetchStatus().catch((e: unknown) => {
@@ -102,6 +108,7 @@ export function App() {
         onFetch={handleFetch}
         onPull={() => openModal("pull")}
         onPush={handlePush}
+        onTags={() => openModal("tags")}
         onRemote={() => openModal("remotes")}
       >
         {activePage === "changes" && <ChangesPage />}
@@ -109,9 +116,11 @@ export function App() {
         {activePage === "history" && <HistoryPage />}
         {activePage === "blame" && <BlamePage />}
         {activePage === "file-history" && <FileHistoryPage />}
+        {activePage === "stash" && <StashPage />}
       </AppShell>
       <ToastContainer />
       {activeModal === "remotes" && <RemoteModal onClose={closeModal} />}
+      {activeModal === "tags" && <TagsModal onClose={closeModal} />}
       {activeModal === "pull" && defaultRemote && (
         <PullDialog
           remoteName={defaultRemote}

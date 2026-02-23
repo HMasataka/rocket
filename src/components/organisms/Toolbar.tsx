@@ -4,7 +4,7 @@ interface ToolbarProps {
   onFetch: () => void;
   onPull: () => void;
   onPush: () => void;
-  onTags?: () => void;
+  onTags: () => void;
   onRemote: () => void;
   disabled: boolean;
 }

@@ -42,6 +42,21 @@ import {
   unstageHunk as unstageHunkService,
   unstageLines as unstageLinesService,
 } from "../services/git";
+import type { StashEntry } from "../services/stash";
+import {
+  applyStash as applyStashService,
+  dropStash as dropStashService,
+  listStashes,
+  popStash as popStashService,
+  stashSave as stashSaveService,
+} from "../services/stash";
+import type { TagInfo } from "../services/tag";
+import {
+  checkoutTag as checkoutTagService,
+  createTag as createTagService,
+  deleteTag as deleteTagService,
+  listTags,
+} from "../services/tag";
 
 interface GitState {
   status: RepoStatus | null;
@@ -49,6 +64,8 @@ interface GitState {
   branches: BranchInfo[];
   diff: FileDiff[];
   remotes: RemoteInfo[];
+  stashes: StashEntry[];
+  tags: TagInfo[];
   loading: boolean;
   error: string | null;
 }
@@ -85,6 +102,15 @@ interface GitActions {
   unstageLines: (path: string, lineRange: LineRange) => Promise<void>;
   discardLines: (path: string, lineRange: LineRange) => Promise<void>;
   getHeadCommitMessage: () => Promise<string>;
+  fetchStashes: () => Promise<void>;
+  stashSave: (message: string | null) => Promise<void>;
+  applyStash: (index: number) => Promise<void>;
+  popStash: (index: number) => Promise<void>;
+  dropStash: (index: number) => Promise<void>;
+  fetchTags: () => Promise<void>;
+  createTag: (name: string, message: string | null) => Promise<void>;
+  deleteTag: (name: string) => Promise<void>;
+  checkoutTag: (name: string) => Promise<void>;
   clearError: () => void;
 }
 
@@ -94,6 +120,8 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
   branches: [],
   diff: [],
   remotes: [],
+  stashes: [],
+  tags: [],
   loading: false,
   error: null,
 
@@ -350,6 +378,89 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
   getHeadCommitMessage: async () => {
     try {
       return await getHeadCommitMessage();
+    } catch (e) {
+      set({ error: String(e) });
+      throw e;
+    }
+  },
+
+  fetchStashes: async () => {
+    try {
+      const stashes = await listStashes();
+      set({ stashes });
+    } catch (e) {
+      set({ error: String(e) });
+      throw e;
+    }
+  },
+
+  stashSave: async (message: string | null) => {
+    try {
+      await stashSaveService(message);
+    } catch (e) {
+      set({ error: String(e) });
+      throw e;
+    }
+  },
+
+  applyStash: async (index: number) => {
+    try {
+      await applyStashService(index);
+    } catch (e) {
+      set({ error: String(e) });
+      throw e;
+    }
+  },
+
+  popStash: async (index: number) => {
+    try {
+      await popStashService(index);
+    } catch (e) {
+      set({ error: String(e) });
+      throw e;
+    }
+  },
+
+  dropStash: async (index: number) => {
+    try {
+      await dropStashService(index);
+    } catch (e) {
+      set({ error: String(e) });
+      throw e;
+    }
+  },
+
+  fetchTags: async () => {
+    try {
+      const tags = await listTags();
+      set({ tags });
+    } catch (e) {
+      set({ error: String(e) });
+      throw e;
+    }
+  },
+
+  createTag: async (name: string, message: string | null) => {
+    try {
+      await createTagService(name, message);
+    } catch (e) {
+      set({ error: String(e) });
+      throw e;
+    }
+  },
+
+  deleteTag: async (name: string) => {
+    try {
+      await deleteTagService(name);
+    } catch (e) {
+      set({ error: String(e) });
+      throw e;
+    }
+  },
+
+  checkoutTag: async (name: string) => {
+    try {
+      await checkoutTagService(name);
     } catch (e) {
       set({ error: String(e) });
       throw e;

@@ -18,6 +18,8 @@ describe("gitStore", () => {
       branches: [],
       diff: [],
       remotes: [],
+      stashes: [],
+      tags: [],
       loading: false,
       error: null,
     });
@@ -624,6 +626,198 @@ describe("gitStore", () => {
       ).rejects.toThrow();
 
       expect(useGitStore.getState().error).toContain("message error");
+    });
+  });
+
+  describe("fetchStashes", () => {
+    it("sets stashes on success", async () => {
+      const mockStashes = [
+        {
+          index: 0,
+          message: "WIP on main",
+          branch_name: "main",
+          author_date: 1700000000,
+        },
+      ];
+      mockedInvoke.mockResolvedValueOnce(mockStashes);
+
+      await useGitStore.getState().fetchStashes();
+
+      expect(useGitStore.getState().stashes).toEqual(mockStashes);
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("stash error"));
+
+      await expect(useGitStore.getState().fetchStashes()).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("stash error");
+    });
+  });
+
+  describe("stashSave", () => {
+    it("calls invoke on success", async () => {
+      mockedInvoke.mockResolvedValueOnce(undefined);
+
+      await useGitStore.getState().stashSave("test message");
+
+      expect(mockedInvoke).toHaveBeenCalledWith("stash_save", {
+        message: "test message",
+      });
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("save error"));
+
+      await expect(useGitStore.getState().stashSave("msg")).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("save error");
+    });
+  });
+
+  describe("applyStash", () => {
+    it("calls invoke on success", async () => {
+      mockedInvoke.mockResolvedValueOnce(undefined);
+
+      await useGitStore.getState().applyStash(0);
+
+      expect(mockedInvoke).toHaveBeenCalledWith("apply_stash", { index: 0 });
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("apply error"));
+
+      await expect(useGitStore.getState().applyStash(0)).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("apply error");
+    });
+  });
+
+  describe("popStash", () => {
+    it("calls invoke on success", async () => {
+      mockedInvoke.mockResolvedValueOnce(undefined);
+
+      await useGitStore.getState().popStash(0);
+
+      expect(mockedInvoke).toHaveBeenCalledWith("pop_stash", { index: 0 });
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("pop error"));
+
+      await expect(useGitStore.getState().popStash(0)).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("pop error");
+    });
+  });
+
+  describe("dropStash", () => {
+    it("calls invoke on success", async () => {
+      mockedInvoke.mockResolvedValueOnce(undefined);
+
+      await useGitStore.getState().dropStash(0);
+
+      expect(mockedInvoke).toHaveBeenCalledWith("drop_stash", { index: 0 });
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("drop error"));
+
+      await expect(useGitStore.getState().dropStash(0)).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("drop error");
+    });
+  });
+
+  describe("fetchTags", () => {
+    it("sets tags on success", async () => {
+      const mockTags = [
+        {
+          name: "v1.0.0",
+          target_oid: "abc123",
+          target_short_oid: "abc123",
+          is_annotated: false,
+          tagger_name: null,
+          tagger_date: null,
+          message: null,
+        },
+      ];
+      mockedInvoke.mockResolvedValueOnce(mockTags);
+
+      await useGitStore.getState().fetchTags();
+
+      expect(useGitStore.getState().tags).toEqual(mockTags);
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("tag error"));
+
+      await expect(useGitStore.getState().fetchTags()).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("tag error");
+    });
+  });
+
+  describe("createTag", () => {
+    it("calls invoke on success", async () => {
+      mockedInvoke.mockResolvedValueOnce(undefined);
+
+      await useGitStore.getState().createTag("v1.0.0", "Release 1.0");
+
+      expect(mockedInvoke).toHaveBeenCalledWith("create_tag", {
+        name: "v1.0.0",
+        message: "Release 1.0",
+      });
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("create tag error"));
+
+      await expect(
+        useGitStore.getState().createTag("bad", null),
+      ).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("create tag error");
+    });
+  });
+
+  describe("deleteTag", () => {
+    it("calls invoke on success", async () => {
+      mockedInvoke.mockResolvedValueOnce(undefined);
+
+      await useGitStore.getState().deleteTag("v1.0.0");
+
+      expect(mockedInvoke).toHaveBeenCalledWith("delete_tag", {
+        name: "v1.0.0",
+      });
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("delete tag error"));
+
+      await expect(useGitStore.getState().deleteTag("bad")).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("delete tag error");
+    });
+  });
+
+  describe("checkoutTag", () => {
+    it("calls invoke on success", async () => {
+      mockedInvoke.mockResolvedValueOnce(undefined);
+
+      await useGitStore.getState().checkoutTag("v1.0.0");
+
+      expect(mockedInvoke).toHaveBeenCalledWith("checkout_tag", {
+        name: "v1.0.0",
+      });
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("checkout tag error"));
+
+      await expect(useGitStore.getState().checkoutTag("bad")).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("checkout tag error");
     });
   });
 

@@ -117,6 +117,16 @@ pub fn run() {
             commands::history::get_commit_file_diff,
             commands::history::get_blame,
             commands::history::get_file_history,
+            commands::stash::stash_save,
+            commands::stash::list_stashes,
+            commands::stash::apply_stash,
+            commands::stash::pop_stash,
+            commands::stash::drop_stash,
+            commands::stash::get_stash_diff,
+            commands::tag::list_tags,
+            commands::tag::create_tag,
+            commands::tag::delete_tag,
+            commands::tag::checkout_tag,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

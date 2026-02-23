@@ -4,7 +4,7 @@ use crate::git::error::GitResult;
 use crate::git::types::{
     BlameResult, BranchInfo, CommitDetail, CommitInfo, CommitLogResult, CommitResult, DiffOptions,
     FetchResult, FileDiff, HunkIdentifier, LineRange, LogFilter, MergeOption, MergeResult,
-    PullOption, PushResult, RemoteInfo, RepoStatus,
+    PullOption, PushResult, RemoteInfo, RepoStatus, StashEntry, TagInfo,
 };
 
 pub trait GitBackend: Send + Sync {
@@ -48,4 +48,18 @@ pub trait GitBackend: Send + Sync {
     fn unstage_lines(&self, path: &Path, line_range: &LineRange) -> GitResult<()>;
     fn discard_lines(&self, path: &Path, line_range: &LineRange) -> GitResult<()>;
     fn get_head_commit_message(&self) -> GitResult<String>;
+
+    // Stash operations
+    fn stash_save(&self, message: Option<&str>) -> GitResult<()>;
+    fn stash_list(&self) -> GitResult<Vec<StashEntry>>;
+    fn stash_apply(&self, index: usize) -> GitResult<()>;
+    fn stash_pop(&self, index: usize) -> GitResult<()>;
+    fn stash_drop(&self, index: usize) -> GitResult<()>;
+    fn stash_diff(&self, index: usize) -> GitResult<Vec<FileDiff>>;
+
+    // Tag operations
+    fn list_tags(&self) -> GitResult<Vec<TagInfo>>;
+    fn create_tag(&self, name: &str, message: Option<&str>) -> GitResult<()>;
+    fn delete_tag(&self, name: &str) -> GitResult<()>;
+    fn checkout_tag(&self, name: &str) -> GitResult<()>;
 }

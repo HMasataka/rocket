@@ -14,7 +14,7 @@ use crate::git::types::{
     CommitStats, DiffHunk, DiffLine, DiffLineKind, DiffOptions, FetchResult, FileDiff, FileStatus,
     FileStatusKind, GraphEdge, GraphNodeType, HunkIdentifier, LineRange, LogFilter, MergeKind,
     MergeOption, MergeResult, PullOption, PushResult, RemoteInfo, RepoStatus, StagingState,
-    WordSegment,
+    StashEntry, TagInfo, WordSegment,
 };
 
 pub struct Git2Backend {
@@ -124,83 +124,8 @@ impl GitBackend for Git2Backend {
                 .map_err(|e| GitError::DiffFailed(Box::new(e)))?
         };
 
-        let mut file_diffs: Vec<FileDiff> = Vec::new();
-
-        diff.print(DiffFormat::Patch, |delta, hunk, line| {
-            let old_path = delta
-                .old_file()
-                .path()
-                .map(|p| p.to_string_lossy().into_owned());
-            let new_path = delta
-                .new_file()
-                .path()
-                .map(|p| p.to_string_lossy().into_owned());
-
-            // Ensure we have a FileDiff for this delta
-            let needs_new = file_diffs
-                .last()
-                .map(|fd| fd.old_path != old_path || fd.new_path != new_path)
-                .unwrap_or(true);
-
-            if needs_new {
-                file_diffs.push(FileDiff {
-                    old_path: old_path.clone(),
-                    new_path: new_path.clone(),
-                    hunks: Vec::new(),
-                });
-            }
-
-            let file_diff = file_diffs.last_mut().unwrap();
-
-            match line.origin() {
-                'H' | 'F' => {
-                    // File header line — skip, we track files via delta
-                }
-                _ => {
-                    // If there's a new hunk header, start a new hunk
-                    if let Some(h) = hunk {
-                        let header_str = String::from_utf8_lossy(h.header()).to_string();
-                        let needs_hunk = file_diff
-                            .hunks
-                            .last()
-                            .map(|dh| dh.header != header_str)
-                            .unwrap_or(true);
-
-                        if needs_hunk {
-                            file_diff.hunks.push(DiffHunk {
-                                header: header_str,
-                                old_start: h.old_start(),
-                                old_lines: h.old_lines(),
-                                new_start: h.new_start(),
-                                new_lines: h.new_lines(),
-                                lines: Vec::new(),
-                            });
-                        }
-                    }
-
-                    if let Some(current_hunk) = file_diff.hunks.last_mut() {
-                        let kind = match line.origin() {
-                            '+' | '>' => DiffLineKind::Addition,
-                            '-' | '<' => DiffLineKind::Deletion,
-                            _ => DiffLineKind::Context,
-                        };
-
-                        let content = String::from_utf8_lossy(line.content()).to_string();
-
-                        current_hunk.lines.push(DiffLine {
-                            kind,
-                            content,
-                            old_lineno: line.old_lineno(),
-                            new_lineno: line.new_lineno(),
-                            word_diff: None,
-                        });
-                    }
-                }
-            }
-
-            true
-        })
-        .map_err(|e| GitError::DiffFailed(Box::new(e)))?;
+        let mut file_diffs =
+            parse_diff_to_file_diffs(&diff).map_err(|e| GitError::DiffFailed(Box::new(e)))?;
 
         compute_word_diffs(&mut file_diffs);
 
@@ -835,77 +760,8 @@ impl GitBackend for Git2Backend {
             )
             .map_err(|e| GitError::DiffFailed(Box::new(e)))?;
 
-        let mut file_diffs: Vec<FileDiff> = Vec::new();
-        diff.print(DiffFormat::Patch, |delta, hunk, line| {
-            let old_path = delta
-                .old_file()
-                .path()
-                .map(|p| p.to_string_lossy().into_owned());
-            let new_path = delta
-                .new_file()
-                .path()
-                .map(|p| p.to_string_lossy().into_owned());
-
-            let needs_new = file_diffs
-                .last()
-                .map(|fd| fd.old_path != old_path || fd.new_path != new_path)
-                .unwrap_or(true);
-
-            if needs_new {
-                file_diffs.push(FileDiff {
-                    old_path: old_path.clone(),
-                    new_path: new_path.clone(),
-                    hunks: Vec::new(),
-                });
-            }
-
-            let file_diff = file_diffs.last_mut().unwrap();
-
-            match line.origin() {
-                'H' | 'F' => {}
-                _ => {
-                    if let Some(h) = hunk {
-                        let header_str = String::from_utf8_lossy(h.header()).to_string();
-                        let needs_hunk = file_diff
-                            .hunks
-                            .last()
-                            .map(|dh| dh.header != header_str)
-                            .unwrap_or(true);
-
-                        if needs_hunk {
-                            file_diff.hunks.push(DiffHunk {
-                                header: header_str,
-                                old_start: h.old_start(),
-                                old_lines: h.old_lines(),
-                                new_start: h.new_start(),
-                                new_lines: h.new_lines(),
-                                lines: Vec::new(),
-                            });
-                        }
-                    }
-
-                    if let Some(current_hunk) = file_diff.hunks.last_mut() {
-                        let kind = match line.origin() {
-                            '+' | '>' => DiffLineKind::Addition,
-                            '-' | '<' => DiffLineKind::Deletion,
-                            _ => DiffLineKind::Context,
-                        };
-
-                        let content = String::from_utf8_lossy(line.content()).to_string();
-
-                        current_hunk.lines.push(DiffLine {
-                            kind,
-                            content,
-                            old_lineno: line.old_lineno(),
-                            new_lineno: line.new_lineno(),
-                            word_diff: None,
-                        });
-                    }
-                }
-            }
-            true
-        })
-        .map_err(|e| GitError::DiffFailed(Box::new(e)))?;
+        let file_diffs =
+            parse_diff_to_file_diffs(&diff).map_err(|e| GitError::DiffFailed(Box::new(e)))?;
 
         Ok(file_diffs)
     }
@@ -1112,6 +968,201 @@ impl GitBackend for Git2Backend {
             .map_err(|e| GitError::LogFailed(Box::new(e)))?;
         let message = commit.message().unwrap_or("").to_string();
         Ok(message)
+    }
+
+    fn stash_save(&self, message: Option<&str>) -> GitResult<()> {
+        let mut repo = self.repo.lock().unwrap();
+        let signature = repo
+            .signature()
+            .map_err(|e| GitError::StashFailed(Box::new(e)))?;
+        let flags = git2::StashFlags::DEFAULT;
+        repo.stash_save(&signature, message.unwrap_or(""), Some(flags))
+            .map_err(|e| GitError::StashFailed(Box::new(e)))?;
+        Ok(())
+    }
+
+    fn stash_list(&self) -> GitResult<Vec<StashEntry>> {
+        let mut repo = self.repo.lock().unwrap();
+        let mut entries = Vec::new();
+        repo.stash_foreach(|index, message, _oid| {
+            let msg = message.to_string();
+            let branch_name = parse_stash_branch_name(&msg);
+            entries.push(StashEntry {
+                index,
+                message: msg,
+                branch_name,
+                author_date: 0,
+            });
+            true
+        })
+        .map_err(|e| GitError::StashFailed(Box::new(e)))?;
+
+        // Populate author_date from stash reflog
+        if let Ok(reflog) = repo.reflog("refs/stash") {
+            for entry in &mut entries {
+                if let Some(reflog_entry) = reflog.get(entry.index) {
+                    entry.author_date = reflog_entry.committer().when().seconds();
+                }
+            }
+        }
+
+        Ok(entries)
+    }
+
+    fn stash_apply(&self, index: usize) -> GitResult<()> {
+        let mut repo = self.repo.lock().unwrap();
+        repo.stash_apply(index, None)
+            .map_err(|e| GitError::StashFailed(Box::new(e)))?;
+        Ok(())
+    }
+
+    fn stash_pop(&self, index: usize) -> GitResult<()> {
+        let mut repo = self.repo.lock().unwrap();
+        repo.stash_pop(index, None)
+            .map_err(|e| GitError::StashFailed(Box::new(e)))?;
+        Ok(())
+    }
+
+    fn stash_drop(&self, index: usize) -> GitResult<()> {
+        let mut repo = self.repo.lock().unwrap();
+        repo.stash_drop(index)
+            .map_err(|e| GitError::StashFailed(Box::new(e)))?;
+        Ok(())
+    }
+
+    fn stash_diff(&self, index: usize) -> GitResult<Vec<FileDiff>> {
+        let repo = self.repo.lock().unwrap();
+
+        // Get stash commit oid from reflog
+        let reflog = repo
+            .reflog("refs/stash")
+            .map_err(|e| GitError::StashFailed(Box::new(e)))?;
+        let reflog_entry = reflog
+            .get(index)
+            .ok_or_else(|| GitError::StashFailed("stash index out of range".into()))?;
+        let stash_oid = reflog_entry.id_new();
+
+        let stash_commit = repo
+            .find_commit(stash_oid)
+            .map_err(|e| GitError::StashFailed(Box::new(e)))?;
+        let stash_tree = stash_commit
+            .tree()
+            .map_err(|e| GitError::StashFailed(Box::new(e)))?;
+        let parent_tree = stash_commit.parent(0).ok().and_then(|p| p.tree().ok());
+
+        let diff = repo
+            .diff_tree_to_tree(parent_tree.as_ref(), Some(&stash_tree), None)
+            .map_err(|e| GitError::StashFailed(Box::new(e)))?;
+
+        let mut file_diffs =
+            parse_diff_to_file_diffs(&diff).map_err(|e| GitError::StashFailed(Box::new(e)))?;
+
+        compute_word_diffs(&mut file_diffs);
+        Ok(file_diffs)
+    }
+
+    fn list_tags(&self) -> GitResult<Vec<TagInfo>> {
+        let repo = self.repo.lock().unwrap();
+        let tag_names = repo
+            .tag_names(None)
+            .map_err(|e| GitError::TagFailed(Box::new(e)))?;
+
+        let mut tags = Vec::new();
+        for name in tag_names.iter().flatten() {
+            let ref_name = format!("refs/tags/{name}");
+            let reference = match repo.find_reference(&ref_name) {
+                Ok(r) => r,
+                Err(_) => continue,
+            };
+
+            // Get the final commit oid for the tag
+            let commit_oid = match reference.peel(git2::ObjectType::Commit) {
+                Ok(obj) => obj.id(),
+                Err(_) => continue,
+            };
+
+            let target_short_oid = commit_oid.to_string()[..7].to_string();
+
+            // Check if reference directly points to a tag object (annotated tag)
+            let direct_oid = match reference.target() {
+                Some(oid) => oid,
+                None => continue,
+            };
+
+            if let Ok(tag_obj) = repo.find_tag(direct_oid) {
+                tags.push(TagInfo {
+                    name: name.to_string(),
+                    target_oid: commit_oid.to_string(),
+                    target_short_oid,
+                    is_annotated: true,
+                    tagger_name: tag_obj.tagger().map(|t| t.name().unwrap_or("").to_string()),
+                    tagger_date: tag_obj.tagger().map(|t| t.when().seconds()),
+                    message: tag_obj.message().map(|m| m.to_string()),
+                });
+            } else {
+                tags.push(TagInfo {
+                    name: name.to_string(),
+                    target_oid: commit_oid.to_string(),
+                    target_short_oid,
+                    is_annotated: false,
+                    tagger_name: None,
+                    tagger_date: None,
+                    message: None,
+                });
+            }
+        }
+
+        Ok(tags)
+    }
+
+    fn create_tag(&self, name: &str, message: Option<&str>) -> GitResult<()> {
+        let repo = self.repo.lock().unwrap();
+        let head = repo.head().map_err(|e| GitError::TagFailed(Box::new(e)))?;
+        let target = head
+            .peel(git2::ObjectType::Commit)
+            .map_err(|e| GitError::TagFailed(Box::new(e)))?;
+
+        if let Some(msg) = message {
+            let sig = repo
+                .signature()
+                .map_err(|e| GitError::TagFailed(Box::new(e)))?;
+            repo.tag(name, &target, &sig, msg, false)
+                .map_err(|e| GitError::TagFailed(Box::new(e)))?;
+        } else {
+            repo.tag_lightweight(name, &target, false)
+                .map_err(|e| GitError::TagFailed(Box::new(e)))?;
+        }
+
+        Ok(())
+    }
+
+    fn delete_tag(&self, name: &str) -> GitResult<()> {
+        let repo = self.repo.lock().unwrap();
+        let ref_name = format!("refs/tags/{name}");
+        let mut reference = repo
+            .find_reference(&ref_name)
+            .map_err(|e| GitError::TagFailed(Box::new(e)))?;
+        reference
+            .delete()
+            .map_err(|e| GitError::TagFailed(Box::new(e)))?;
+        Ok(())
+    }
+
+    fn checkout_tag(&self, name: &str) -> GitResult<()> {
+        let repo = self.repo.lock().unwrap();
+        let ref_name = format!("refs/tags/{name}");
+        let reference = repo
+            .find_reference(&ref_name)
+            .map_err(|e| GitError::TagFailed(Box::new(e)))?;
+        let target_oid = reference
+            .peel(git2::ObjectType::Commit)
+            .map_err(|e| GitError::TagFailed(Box::new(e)))?
+            .id();
+        repo.set_head_detached(target_oid)
+            .map_err(|e| GitError::TagFailed(Box::new(e)))?;
+        repo.checkout_head(Some(git2::build::CheckoutBuilder::default().force()))
+            .map_err(|e| GitError::TagFailed(Box::new(e)))?;
+        Ok(())
     }
 }
 
@@ -1809,6 +1860,99 @@ fn compute_word_diff_pair(
     }
 
     (del_segments, add_segments)
+}
+
+/// Parse branch name from git stash message.
+/// Format: "WIP on <branch>: ..." or "On <branch>: <msg>"
+fn parse_stash_branch_name(message: &str) -> String {
+    if let Some(rest) = message.strip_prefix("WIP on ") {
+        if let Some(colon_pos) = rest.find(':') {
+            return rest[..colon_pos].to_string();
+        }
+    }
+    if let Some(rest) = message.strip_prefix("On ") {
+        if let Some(colon_pos) = rest.find(':') {
+            return rest[..colon_pos].to_string();
+        }
+    }
+    String::new()
+}
+
+fn parse_diff_to_file_diffs(diff: &git2::Diff) -> Result<Vec<FileDiff>, git2::Error> {
+    let mut file_diffs: Vec<FileDiff> = Vec::new();
+
+    diff.print(DiffFormat::Patch, |delta, hunk, line| {
+        let old_path = delta
+            .old_file()
+            .path()
+            .map(|p| p.to_string_lossy().into_owned());
+        let new_path = delta
+            .new_file()
+            .path()
+            .map(|p| p.to_string_lossy().into_owned());
+
+        let needs_new = file_diffs
+            .last()
+            .map(|fd| fd.old_path != old_path || fd.new_path != new_path)
+            .unwrap_or(true);
+
+        if needs_new {
+            file_diffs.push(FileDiff {
+                old_path: old_path.clone(),
+                new_path: new_path.clone(),
+                hunks: Vec::new(),
+            });
+        }
+
+        let file_diff = file_diffs.last_mut().unwrap();
+
+        match line.origin() {
+            'H' | 'F' => {}
+            _ => {
+                if let Some(h) = hunk {
+                    let header_str = String::from_utf8_lossy(h.header()).to_string();
+                    let needs_hunk = file_diff
+                        .hunks
+                        .last()
+                        .map(|dh| dh.header != header_str)
+                        .unwrap_or(true);
+
+                    if needs_hunk {
+                        file_diff.hunks.push(DiffHunk {
+                            header: header_str,
+                            old_start: h.old_start(),
+                            old_lines: h.old_lines(),
+                            new_start: h.new_start(),
+                            new_lines: h.new_lines(),
+                            lines: Vec::new(),
+                        });
+                    }
+                }
+
+                if let Some(current_hunk) = file_diff.hunks.last_mut() {
+                    let kind = match line.origin() {
+                        '+' | '>' => DiffLineKind::Addition,
+                        '-' | '<' => DiffLineKind::Deletion,
+                        _ => DiffLineKind::Context,
+                    };
+
+                    let content = String::from_utf8_lossy(line.content()).to_string();
+
+                    current_hunk.lines.push(DiffLine {
+                        kind,
+                        content,
+                        old_lineno: line.old_lineno(),
+                        new_lineno: line.new_lineno(),
+                        word_diff: None,
+                    });
+                }
+            }
+        }
+
+        true
+    })?;
+
+    Ok(file_diffs)
 }
 
 fn compute_word_diffs(file_diffs: &mut [FileDiff]) {

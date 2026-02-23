@@ -13,6 +13,7 @@ interface AppShellProps {
   onFetch: () => void;
   onPull: () => void;
   onPush: () => void;
+  onTags: () => void;
   onRemote: () => void;
   children: ReactNode;
 }
@@ -25,6 +26,7 @@ export function AppShell({
   onFetch,
   onPull,
   onPush,
+  onTags,
   onRemote,
   children,
 }: AppShellProps) {
@@ -39,6 +41,7 @@ export function AppShell({
         onFetch={onFetch}
         onPull={onPull}
         onPush={onPush}
+        onTags={onTags}
         onRemote={onRemote}
         disabled={!hasRemotes}
       />

@@ -1,0 +1,43 @@
+/* ===== Tag-specific Styles ===== */
+.tag-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tag-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 14px;
+  background: var(--bg-tertiary);
+  border-radius: 8px;
+  transition: background-color 0.15s ease;
+}
+
+.tag-item:hover {
+  background: var(--bg-hover);
+}
+
+.tag-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tag-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--warning);
+}
+
+.tag-meta {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: "JetBrains Mono", monospace;
+}
+
+.tag-actions {
+  display: flex;
+  gap: 4px;
+}
