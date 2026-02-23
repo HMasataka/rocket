@@ -1390,30 +1390,68 @@ impl GitBackend for Git2Backend {
         std::fs::write(&todo_file, &todo_content)
             .map_err(|e| GitError::RebaseFailed(Box::new(e)))?;
 
-        let editor_file = git_dir.join("rocket-rebase-editor.sh");
-        let editor_content = format!(
+        let seq_editor_file = git_dir.join("rocket-rebase-editor.sh");
+        let seq_editor_content = format!(
             "#!/bin/sh\ncp '{}' \"$1\"\n",
             todo_file.display().to_string().replace("'", "'\\''")
         );
-        std::fs::write(&editor_file, &editor_content)
+        std::fs::write(&seq_editor_file, &seq_editor_content)
             .map_err(|e| GitError::RebaseFailed(Box::new(e)))?;
+
+        let reword_messages: Vec<&str> = todo
+            .iter()
+            .filter(|e| e.action == RebaseAction::Reword)
+            .map(|e| e.message.as_str())
+            .collect();
+
+        let commit_editor_file = git_dir.join("rocket-commit-editor.sh");
+        let commit_editor_content = if reword_messages.is_empty() {
+            "#!/bin/sh\ntrue\n".to_string()
+        } else {
+            let counter_file = git_dir.join("rocket-reword-counter");
+            std::fs::write(&counter_file, "0")
+                .map_err(|e| GitError::RebaseFailed(Box::new(e)))?;
+
+            let msgs_file = git_dir.join("rocket-reword-msgs");
+            std::fs::write(&msgs_file, reword_messages.join("\n---ROCKET_MSG_SEP---\n"))
+                .map_err(|e| GitError::RebaseFailed(Box::new(e)))?;
+
+            format!(
+                "#!/bin/sh\n\
+                COUNTER=$(cat '{counter}')\n\
+                MSG=$(awk -v n=\"$COUNTER\" 'BEGIN{{found=0}} /^---ROCKET_MSG_SEP---$/{{found++; next}} found==n{{print}}' '{msgs}')\n\
+                printf '%s\\n' \"$MSG\" > \"$1\"\n\
+                echo $((COUNTER + 1)) > '{counter}'\n",
+                counter = counter_file.display().to_string().replace("'", "'\\''"),
+                msgs = msgs_file.display().to_string().replace("'", "'\\''"),
+            )
+        };
+        std::fs::write(&commit_editor_file, &commit_editor_content)
+            .map_err(|e| GitError::RebaseFailed(Box::new(e)))?;
+
         #[cfg(unix)]
         {
             use std::os::unix::fs::PermissionsExt;
-            std::fs::set_permissions(&editor_file, std::fs::Permissions::from_mode(0o755))
+            let mode = std::fs::Permissions::from_mode(0o755);
+            std::fs::set_permissions(&seq_editor_file, mode.clone())
+                .map_err(|e| GitError::RebaseFailed(Box::new(e)))?;
+            std::fs::set_permissions(&commit_editor_file, mode)
                 .map_err(|e| GitError::RebaseFailed(Box::new(e)))?;
         }
 
         let output = std::process::Command::new("git")
             .args(["rebase", "-i", onto])
-            .env("GIT_SEQUENCE_EDITOR", editor_file.display().to_string())
-            .env("GIT_EDITOR", "true")
+            .env("GIT_SEQUENCE_EDITOR", seq_editor_file.display().to_string())
+            .env("GIT_EDITOR", commit_editor_file.display().to_string())
             .current_dir(&self.workdir)
             .output()
             .map_err(|e| GitError::RebaseFailed(Box::new(e)))?;
 
         let _ = std::fs::remove_file(&todo_file);
-        let _ = std::fs::remove_file(&editor_file);
+        let _ = std::fs::remove_file(&seq_editor_file);
+        let _ = std::fs::remove_file(&commit_editor_file);
+        let _ = std::fs::remove_file(git_dir.join("rocket-reword-counter"));
+        let _ = std::fs::remove_file(git_dir.join("rocket-reword-msgs"));
 
         if output.status.success() {
             return Ok(RebaseResult {
