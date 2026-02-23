@@ -8,8 +8,10 @@ import { useFileWatcher } from "./hooks/useFileWatcher";
 import { BlamePage } from "./pages/blame";
 import { BranchesPage } from "./pages/branches";
 import { ChangesPage } from "./pages/changes";
+import { ConflictModal } from "./pages/conflict";
 import { FileHistoryPage } from "./pages/file-history";
 import { HistoryPage } from "./pages/history";
+import { RebasePage } from "./pages/rebase";
 import { StashPage } from "./pages/stash";
 import type { PullOption } from "./services/git";
 import { useGitStore } from "./stores/gitStore";
@@ -26,7 +28,9 @@ export function App() {
   const pullRemote = useGitStore((s) => s.pullRemote);
   const pushRemote = useGitStore((s) => s.pushRemote);
   const merging = useGitStore((s) => s.merging);
+  const rebasing = useGitStore((s) => s.rebasing);
   const fetchMergeState = useGitStore((s) => s.fetchMergeState);
+  const fetchRebaseState = useGitStore((s) => s.fetchRebaseState);
   const fetchStashes = useGitStore((s) => s.fetchStashes);
   const addToast = useUIStore((s) => s.addToast);
   const activePage = useUIStore((s) => s.activePage);
@@ -47,7 +51,17 @@ export function App() {
     fetchMergeState().catch((e: unknown) => {
       addToast(String(e), "error");
     });
-  }, [fetchBranch, fetchRemotes, fetchStashes, fetchMergeState, addToast]);
+    fetchRebaseState().catch((e: unknown) => {
+      addToast(String(e), "error");
+    });
+  }, [
+    fetchBranch,
+    fetchRemotes,
+    fetchStashes,
+    fetchMergeState,
+    fetchRebaseState,
+    addToast,
+  ]);
 
   const handleRepoChanged = useCallback(() => {
     fetchStatus().catch((e: unknown) => {
@@ -59,7 +73,10 @@ export function App() {
     fetchMergeState().catch((e: unknown) => {
       console.error("Auto-refresh merge state failed:", e);
     });
-  }, [fetchStatus, fetchBranch, fetchMergeState]);
+    fetchRebaseState().catch((e: unknown) => {
+      console.error("Auto-refresh rebase state failed:", e);
+    });
+  }, [fetchStatus, fetchBranch, fetchMergeState, fetchRebaseState]);
 
   useFileWatcher(handleRepoChanged);
 
@@ -111,6 +128,7 @@ export function App() {
       <AppShell
         branch={currentBranch}
         merging={merging}
+        rebasing={rebasing}
         changesCount={changesCount}
         hasRemotes={remotes.length > 0}
         remotes={remotes}
@@ -126,6 +144,7 @@ export function App() {
         {activePage === "blame" && <BlamePage />}
         {activePage === "file-history" && <FileHistoryPage />}
         {activePage === "stash" && <StashPage />}
+        {activePage === "rebase" && <RebasePage />}
       </AppShell>
       <ToastContainer />
       {activeModal === "remotes" && <RemoteModal onClose={closeModal} />}
@@ -137,6 +156,7 @@ export function App() {
           onClose={closeModal}
         />
       )}
+      {activeModal === "conflict" && <ConflictModal />}
     </>
   );
 }
