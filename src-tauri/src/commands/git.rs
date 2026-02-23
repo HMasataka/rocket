@@ -2,7 +2,7 @@ use std::path::Path;
 
 use tauri::State;
 
-use crate::git::types::{CommitResult, DiffOptions, FileDiff, HunkIdentifier, RepoStatus};
+use crate::git::types::{CommitResult, DiffOptions, FileDiff, HunkIdentifier, LineRange, RepoStatus};
 use crate::state::AppState;
 
 #[tauri::command]
@@ -141,5 +141,53 @@ pub fn discard_hunk(
     let backend = repo_lock.as_ref().ok_or("No repository opened")?;
     backend
         .discard_hunk(Path::new(&path), &hunk)
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub fn stage_lines(
+    path: String,
+    line_range: LineRange,
+    state: State<'_, AppState>,
+) -> Result<(), String> {
+    let repo_lock = state
+        .repo
+        .lock()
+        .map_err(|e| format!("Lock poisoned: {e}"))?;
+    let backend = repo_lock.as_ref().ok_or("No repository opened")?;
+    backend
+        .stage_lines(Path::new(&path), &line_range)
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub fn unstage_lines(
+    path: String,
+    line_range: LineRange,
+    state: State<'_, AppState>,
+) -> Result<(), String> {
+    let repo_lock = state
+        .repo
+        .lock()
+        .map_err(|e| format!("Lock poisoned: {e}"))?;
+    let backend = repo_lock.as_ref().ok_or("No repository opened")?;
+    backend
+        .unstage_lines(Path::new(&path), &line_range)
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub fn discard_lines(
+    path: String,
+    line_range: LineRange,
+    state: State<'_, AppState>,
+) -> Result<(), String> {
+    let repo_lock = state
+        .repo
+        .lock()
+        .map_err(|e| format!("Lock poisoned: {e}"))?;
+    let backend = repo_lock.as_ref().ok_or("No repository opened")?;
+    backend
+        .discard_lines(Path::new(&path), &line_range)
         .map_err(|e| e.to_string())
 }

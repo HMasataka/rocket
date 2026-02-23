@@ -3,8 +3,8 @@ use std::path::Path;
 use crate::git::error::GitResult;
 use crate::git::types::{
     BlameResult, BranchInfo, CommitDetail, CommitInfo, CommitLogResult, CommitResult, DiffOptions,
-    FetchResult, FileDiff, HunkIdentifier, LogFilter, MergeOption, MergeResult, PullOption,
-    PushResult, RemoteInfo, RepoStatus,
+    FetchResult, FileDiff, HunkIdentifier, LineRange, LogFilter, MergeOption, MergeResult,
+    PullOption, PushResult, RemoteInfo, RepoStatus,
 };
 
 pub trait GitBackend: Send + Sync {
@@ -44,4 +44,7 @@ pub trait GitBackend: Send + Sync {
     fn stage_hunk(&self, path: &Path, hunk: &HunkIdentifier) -> GitResult<()>;
     fn unstage_hunk(&self, path: &Path, hunk: &HunkIdentifier) -> GitResult<()>;
     fn discard_hunk(&self, path: &Path, hunk: &HunkIdentifier) -> GitResult<()>;
+    fn stage_lines(&self, path: &Path, line_range: &LineRange) -> GitResult<()>;
+    fn unstage_lines(&self, path: &Path, line_range: &LineRange) -> GitResult<()>;
+    fn discard_lines(&self, path: &Path, line_range: &LineRange) -> GitResult<()>;
 }

@@ -12,8 +12,9 @@ use crate::git::types::{
     BlameLine, BlameResult, BranchInfo, CommitDetail, CommitFileChange, CommitFileStatus,
     CommitGraphRow, CommitInfo, CommitLogResult, CommitRef, CommitRefKind, CommitResult,
     CommitStats, DiffHunk, DiffLine, DiffLineKind, DiffOptions, FetchResult, FileDiff, FileStatus,
-    FileStatusKind, GraphEdge, GraphNodeType, HunkIdentifier, LogFilter, MergeKind, MergeOption,
-    MergeResult, PullOption, PushResult, RemoteInfo, RepoStatus, StagingState, WordSegment,
+    FileStatusKind, GraphEdge, GraphNodeType, HunkIdentifier, LineRange, LogFilter, MergeKind,
+    MergeOption, MergeResult, PullOption, PushResult, RemoteInfo, RepoStatus, StagingState,
+    WordSegment,
 };
 
 pub struct Git2Backend {
@@ -1063,6 +1064,21 @@ impl GitBackend for Git2Backend {
         let patch = self.generate_hunk_patch(path, hunk, false)?;
         run_git_apply(&self.workdir, &patch, &["-R"]).map_err(GitError::DiscardFailed)
     }
+
+    fn stage_lines(&self, path: &Path, line_range: &LineRange) -> GitResult<()> {
+        let patch = self.generate_line_patch(path, line_range, false)?;
+        run_git_apply(&self.workdir, &patch, &["--cached"]).map_err(GitError::StageFailed)
+    }
+
+    fn unstage_lines(&self, path: &Path, line_range: &LineRange) -> GitResult<()> {
+        let patch = self.generate_line_patch(path, line_range, true)?;
+        run_git_apply(&self.workdir, &patch, &["--cached", "-R"]).map_err(GitError::UnstageFailed)
+    }
+
+    fn discard_lines(&self, path: &Path, line_range: &LineRange) -> GitResult<()> {
+        let patch = self.generate_line_patch(path, line_range, false)?;
+        run_git_apply(&self.workdir, &patch, &["-R"]).map_err(GitError::DiscardFailed)
+    }
 }
 
 impl Git2Backend {
@@ -1111,6 +1127,90 @@ impl Git2Backend {
                 _ => continue,
             };
             let content = &line.content;
+            if content.ends_with('\n') {
+                patch.push_str(&format!("{prefix}{content}"));
+            } else {
+                patch.push_str(&format!("{prefix}{content}\n"));
+                patch.push_str("\\ No newline at end of file\n");
+            }
+        }
+
+        Ok(patch)
+    }
+
+    fn generate_line_patch(
+        &self,
+        path: &Path,
+        line_range: &LineRange,
+        staged: bool,
+    ) -> GitResult<String> {
+        let options = DiffOptions {
+            staged,
+            ..Default::default()
+        };
+        let diffs = self.diff(Some(path), &options)?;
+
+        let file_diff = diffs
+            .first()
+            .ok_or_else(|| GitError::DiffFailed("no diff found for path".into()))?;
+
+        let hunk = &line_range.hunk;
+        let matched_hunk = file_diff
+            .hunks
+            .iter()
+            .find(|h| {
+                h.old_start == hunk.old_start
+                    && h.old_lines == hunk.old_lines
+                    && h.new_start == hunk.new_start
+                    && h.new_lines == hunk.new_lines
+            })
+            .ok_or_else(|| GitError::DiffFailed("hunk not found".into()))?;
+
+        let selected: std::collections::HashSet<usize> =
+            line_range.line_indices.iter().copied().collect();
+
+        let mut old_lines_count: u32 = 0;
+        let mut new_lines_count: u32 = 0;
+        let mut patch_lines = Vec::new();
+
+        for (idx, line) in matched_hunk.lines.iter().enumerate() {
+            match line.kind {
+                DiffLineKind::Context => {
+                    old_lines_count += 1;
+                    new_lines_count += 1;
+                    patch_lines.push((' ', &line.content));
+                }
+                DiffLineKind::Addition => {
+                    if selected.contains(&idx) {
+                        new_lines_count += 1;
+                        patch_lines.push(('+', &line.content));
+                    }
+                }
+                DiffLineKind::Deletion => {
+                    if selected.contains(&idx) {
+                        old_lines_count += 1;
+                        patch_lines.push(('-', &line.content));
+                    } else {
+                        old_lines_count += 1;
+                        new_lines_count += 1;
+                        patch_lines.push((' ', &line.content));
+                    }
+                }
+                _ => continue,
+            }
+        }
+
+        let path_str = path.to_string_lossy();
+        let mut patch = String::new();
+        patch.push_str(&format!("diff --git a/{path_str} b/{path_str}\n"));
+        patch.push_str(&format!("--- a/{path_str}\n"));
+        patch.push_str(&format!("+++ b/{path_str}\n"));
+        patch.push_str(&format!(
+            "@@ -{},{} +{},{} @@\n",
+            hunk.old_start, old_lines_count, hunk.new_start, new_lines_count
+        ));
+
+        for (prefix, content) in &patch_lines {
             if content.ends_with('\n') {
                 patch.push_str(&format!("{prefix}{content}"));
             } else {
