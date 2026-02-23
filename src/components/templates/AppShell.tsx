@@ -7,6 +7,7 @@ import { Toolbar } from "../organisms/Toolbar";
 
 interface AppShellProps {
   branch: string | null;
+  merging?: boolean;
   changesCount: number;
   hasRemotes: boolean;
   remotes: RemoteInfo[];
@@ -20,6 +21,7 @@ interface AppShellProps {
 
 export function AppShell({
   branch,
+  merging,
   changesCount,
   hasRemotes,
   remotes,
@@ -49,7 +51,7 @@ export function AppShell({
         <Sidebar changesCount={changesCount} />
         <main className="content">{children}</main>
       </div>
-      <Statusbar branch={branch} />
+      <Statusbar branch={branch} merging={merging} />
     </div>
   );
 }

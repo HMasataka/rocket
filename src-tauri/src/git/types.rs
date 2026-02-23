@@ -8,6 +8,7 @@ pub enum FileStatusKind {
     Deleted,
     Renamed,
     Typechange,
+    Conflicted,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -147,12 +148,14 @@ pub enum MergeKind {
     Normal,
     Rebase,
     UpToDate,
+    Conflict,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MergeResult {
     pub kind: MergeKind,
     pub oid: Option<String>,
+    pub conflicts: Vec<String>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -286,6 +289,32 @@ pub struct StashEntry {
     pub message: String,
     pub branch_name: String,
     pub author_date: i64,
+}
+
+// === Conflict types ===
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ConflictFile {
+    pub path: String,
+    pub conflict_count: usize,
+    pub conflicts: Vec<ConflictBlock>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ConflictBlock {
+    pub ours: String,
+    pub theirs: String,
+    pub start_line: u32,
+    pub end_line: u32,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(tag = "type", content = "content")]
+pub enum ConflictResolution {
+    Ours,
+    Theirs,
+    Both,
+    Manual(String),
 }
 
 // === Tag types ===

@@ -6,7 +6,8 @@ export type FileStatusKind =
   | "modified"
   | "deleted"
   | "renamed"
-  | "typechange";
+  | "typechange"
+  | "conflicted";
 
 export type StagingState = "unstaged" | "staged";
 
@@ -119,11 +120,17 @@ export interface BranchInfo {
   behind_count: number;
 }
 
-export type MergeKind = "fast_forward" | "normal" | "rebase" | "up_to_date";
+export type MergeKind =
+  | "fast_forward"
+  | "normal"
+  | "rebase"
+  | "up_to_date"
+  | "conflict";
 
 export interface MergeResult {
   kind: MergeKind;
   oid: string | null;
+  conflicts: string[];
 }
 
 export type MergeOption = "default" | "fast_forward_only" | "no_fast_forward";

@@ -5,7 +5,8 @@ use std::process::Command;
 use app_lib::git::backend::GitBackend;
 use app_lib::git::git2_backend::Git2Backend;
 use app_lib::git::types::{
-    DiffLineKind, DiffOptions, HunkIdentifier, LineRange, LogFilter, MergeOption, PullOption,
+    ConflictResolution, DiffLineKind, DiffOptions, HunkIdentifier, LineRange, LogFilter,
+    MergeOption, PullOption,
 };
 
 fn init_test_repo(dir: &Path) {
@@ -1292,4 +1293,242 @@ fn create_multiple_tags_and_list() {
     let names: Vec<&str> = tags.iter().map(|t| t.name.as_str()).collect();
     assert!(names.contains(&"alpha"));
     assert!(names.contains(&"beta"));
+}
+
+// === Conflict tests ===
+
+/// Set up a repo with two branches that conflict on the same file.
+/// Returns (backend, default_branch_name).
+fn setup_conflict_repo(dir: &Path) -> (Git2Backend, String) {
+    let backend = init_repo_with_commit(dir);
+    let default_branch = backend.current_branch().unwrap();
+
+    // Create shared file on default branch
+    fs::write(dir.join("shared.txt"), "line1\nline2\nline3\n").unwrap();
+    backend.stage(Path::new("shared.txt")).unwrap();
+    backend.commit("add shared", false).unwrap();
+
+    // Create feature branch and modify shared.txt
+    backend.create_branch("conflict-branch").unwrap();
+    backend.checkout_branch("conflict-branch").unwrap();
+    fs::write(dir.join("shared.txt"), "line1\nfeature-change\nline3\n").unwrap();
+    backend.stage(Path::new("shared.txt")).unwrap();
+    backend.commit("feature change", false).unwrap();
+
+    // Go back to default branch and make a conflicting change
+    backend.checkout_branch(&default_branch).unwrap();
+    fs::write(dir.join("shared.txt"), "line1\nmain-change\nline3\n").unwrap();
+    backend.stage(Path::new("shared.txt")).unwrap();
+    backend.commit("main change", false).unwrap();
+
+    (backend, default_branch)
+}
+
+#[test]
+fn merge_branch_conflict_detection() {
+    let tmp = tempfile::tempdir().unwrap();
+    let (backend, _) = setup_conflict_repo(tmp.path());
+
+    let result = backend
+        .merge_branch("conflict-branch", MergeOption::Default)
+        .unwrap();
+
+    assert_eq!(result.kind, app_lib::git::types::MergeKind::Conflict);
+    assert!(result.oid.is_none());
+    assert!(!result.conflicts.is_empty());
+    assert!(result.conflicts.contains(&"shared.txt".to_string()));
+}
+
+#[test]
+fn get_conflict_files_returns_conflict_blocks() {
+    let tmp = tempfile::tempdir().unwrap();
+    let (backend, _) = setup_conflict_repo(tmp.path());
+
+    let _ = backend.merge_branch("conflict-branch", MergeOption::Default);
+
+    let conflict_files = backend.get_conflict_files().unwrap();
+    assert!(!conflict_files.is_empty());
+
+    let file = &conflict_files[0];
+    assert_eq!(file.path, "shared.txt");
+    assert!(file.conflict_count > 0);
+    assert!(!file.conflicts.is_empty());
+
+    let block = &file.conflicts[0];
+    assert!(!block.ours.is_empty());
+    assert!(!block.theirs.is_empty());
+}
+
+#[test]
+fn resolve_conflict_ours() {
+    let tmp = tempfile::tempdir().unwrap();
+    let (backend, _) = setup_conflict_repo(tmp.path());
+    let _ = backend.merge_branch("conflict-branch", MergeOption::Default);
+
+    backend
+        .resolve_conflict("shared.txt", ConflictResolution::Ours)
+        .unwrap();
+
+    let content = fs::read_to_string(tmp.path().join("shared.txt")).unwrap();
+    assert!(content.contains("main-change"));
+    assert!(!content.contains("<<<<<<<"));
+}
+
+#[test]
+fn resolve_conflict_theirs() {
+    let tmp = tempfile::tempdir().unwrap();
+    let (backend, _) = setup_conflict_repo(tmp.path());
+    let _ = backend.merge_branch("conflict-branch", MergeOption::Default);
+
+    backend
+        .resolve_conflict("shared.txt", ConflictResolution::Theirs)
+        .unwrap();
+
+    let content = fs::read_to_string(tmp.path().join("shared.txt")).unwrap();
+    assert!(content.contains("feature-change"));
+    assert!(!content.contains("<<<<<<<"));
+}
+
+#[test]
+fn resolve_conflict_both() {
+    let tmp = tempfile::tempdir().unwrap();
+    let (backend, _) = setup_conflict_repo(tmp.path());
+    let _ = backend.merge_branch("conflict-branch", MergeOption::Default);
+
+    backend
+        .resolve_conflict("shared.txt", ConflictResolution::Both)
+        .unwrap();
+
+    let content = fs::read_to_string(tmp.path().join("shared.txt")).unwrap();
+    assert!(content.contains("main-change"));
+    assert!(content.contains("feature-change"));
+    assert!(!content.contains("<<<<<<<"));
+}
+
+#[test]
+fn resolve_conflict_manual() {
+    let tmp = tempfile::tempdir().unwrap();
+    let (backend, _) = setup_conflict_repo(tmp.path());
+    let _ = backend.merge_branch("conflict-branch", MergeOption::Default);
+
+    backend
+        .resolve_conflict(
+            "shared.txt",
+            ConflictResolution::Manual("custom resolution\n".to_string()),
+        )
+        .unwrap();
+
+    let content = fs::read_to_string(tmp.path().join("shared.txt")).unwrap();
+    assert!(content.contains("custom resolution"));
+    assert!(!content.contains("<<<<<<<"));
+}
+
+#[test]
+fn mark_resolved_adds_to_index() {
+    let tmp = tempfile::tempdir().unwrap();
+    let (backend, _) = setup_conflict_repo(tmp.path());
+    let _ = backend.merge_branch("conflict-branch", MergeOption::Default);
+
+    backend
+        .resolve_conflict("shared.txt", ConflictResolution::Ours)
+        .unwrap();
+    backend.mark_resolved("shared.txt").unwrap();
+
+    let conflict_files = backend.get_conflict_files().unwrap();
+    assert!(
+        conflict_files.is_empty(),
+        "No conflict files should remain after mark_resolved"
+    );
+}
+
+#[test]
+fn abort_merge_cleans_state() {
+    let tmp = tempfile::tempdir().unwrap();
+    let (backend, _) = setup_conflict_repo(tmp.path());
+    let _ = backend.merge_branch("conflict-branch", MergeOption::Default);
+
+    assert!(backend.is_merging().unwrap());
+
+    backend.abort_merge().unwrap();
+
+    assert!(!backend.is_merging().unwrap());
+    let conflict_files = backend.get_conflict_files().unwrap();
+    assert!(conflict_files.is_empty());
+}
+
+#[test]
+fn continue_merge_creates_commit() {
+    let tmp = tempfile::tempdir().unwrap();
+    let (backend, _) = setup_conflict_repo(tmp.path());
+    let _ = backend.merge_branch("conflict-branch", MergeOption::Default);
+
+    backend
+        .resolve_conflict("shared.txt", ConflictResolution::Ours)
+        .unwrap();
+    backend.mark_resolved("shared.txt").unwrap();
+
+    let result = backend.continue_merge("merge commit message").unwrap();
+    assert!(!result.oid.is_empty());
+    assert!(!backend.is_merging().unwrap());
+}
+
+#[test]
+fn continue_merge_fails_with_unresolved() {
+    let tmp = tempfile::tempdir().unwrap();
+    let (backend, _) = setup_conflict_repo(tmp.path());
+    let _ = backend.merge_branch("conflict-branch", MergeOption::Default);
+
+    let result = backend.continue_merge("should fail");
+    assert!(result.is_err());
+}
+
+#[test]
+fn is_merging_returns_true_during_merge() {
+    let tmp = tempfile::tempdir().unwrap();
+    let (backend, _) = setup_conflict_repo(tmp.path());
+    let _ = backend.merge_branch("conflict-branch", MergeOption::Default);
+
+    assert!(backend.is_merging().unwrap());
+}
+
+#[test]
+fn is_merging_returns_false_normally() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+
+    assert!(!backend.is_merging().unwrap());
+}
+
+#[test]
+fn status_shows_conflicted_files() {
+    let tmp = tempfile::tempdir().unwrap();
+    let (backend, _) = setup_conflict_repo(tmp.path());
+    let _ = backend.merge_branch("conflict-branch", MergeOption::Default);
+
+    let status = backend.status().unwrap();
+    let conflicted = status
+        .files
+        .iter()
+        .filter(|f| f.kind == app_lib::git::types::FileStatusKind::Conflicted)
+        .count();
+
+    assert!(conflicted > 0, "Should have conflicted files in status");
+}
+
+#[test]
+fn resolve_conflict_block_resolves_single_block() {
+    let tmp = tempfile::tempdir().unwrap();
+    let (backend, _) = setup_conflict_repo(tmp.path());
+    let _ = backend.merge_branch("conflict-branch", MergeOption::Default);
+
+    let conflict_files = backend.get_conflict_files().unwrap();
+    assert!(!conflict_files.is_empty());
+
+    backend
+        .resolve_conflict_block("shared.txt", 0, ConflictResolution::Theirs)
+        .unwrap();
+
+    let content = fs::read_to_string(tmp.path().join("shared.txt")).unwrap();
+    assert!(content.contains("feature-change"));
+    assert!(!content.contains("<<<<<<<"));
 }

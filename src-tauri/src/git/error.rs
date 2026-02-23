@@ -85,6 +85,9 @@ pub enum GitError {
 
     #[error("failed to manage tag: {0}")]
     TagFailed(#[source] Box<dyn std::error::Error + Send + Sync>),
+
+    #[error("failed to manage conflict: {0}")]
+    ConflictFailed(#[source] Box<dyn std::error::Error + Send + Sync>),
 }
 
 pub type GitResult<T> = Result<T, GitError>;

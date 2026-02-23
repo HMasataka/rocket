@@ -25,6 +25,8 @@ export function App() {
   const fetchRemote = useGitStore((s) => s.fetchRemote);
   const pullRemote = useGitStore((s) => s.pullRemote);
   const pushRemote = useGitStore((s) => s.pushRemote);
+  const merging = useGitStore((s) => s.merging);
+  const fetchMergeState = useGitStore((s) => s.fetchMergeState);
   const fetchStashes = useGitStore((s) => s.fetchStashes);
   const addToast = useUIStore((s) => s.addToast);
   const activePage = useUIStore((s) => s.activePage);
@@ -42,7 +44,10 @@ export function App() {
     fetchStashes().catch((e: unknown) => {
       addToast(String(e), "error");
     });
-  }, [fetchBranch, fetchRemotes, fetchStashes, addToast]);
+    fetchMergeState().catch((e: unknown) => {
+      addToast(String(e), "error");
+    });
+  }, [fetchBranch, fetchRemotes, fetchStashes, fetchMergeState, addToast]);
 
   const handleRepoChanged = useCallback(() => {
     fetchStatus().catch((e: unknown) => {
@@ -51,7 +56,10 @@ export function App() {
     fetchBranch().catch((e: unknown) => {
       console.error("Auto-refresh branch failed:", e);
     });
-  }, [fetchStatus, fetchBranch]);
+    fetchMergeState().catch((e: unknown) => {
+      console.error("Auto-refresh merge state failed:", e);
+    });
+  }, [fetchStatus, fetchBranch, fetchMergeState]);
 
   useFileWatcher(handleRepoChanged);
 
@@ -102,6 +110,7 @@ export function App() {
     <>
       <AppShell
         branch={currentBranch}
+        merging={merging}
         changesCount={changesCount}
         hasRemotes={remotes.length > 0}
         remotes={remotes}

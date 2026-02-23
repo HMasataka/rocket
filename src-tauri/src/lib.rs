@@ -127,6 +127,13 @@ pub fn run() {
             commands::tag::create_tag,
             commands::tag::delete_tag,
             commands::tag::checkout_tag,
+            commands::conflict::get_conflict_files,
+            commands::conflict::resolve_conflict,
+            commands::conflict::resolve_conflict_block,
+            commands::conflict::mark_resolved,
+            commands::conflict::abort_merge,
+            commands::conflict::continue_merge,
+            commands::conflict::is_merging,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

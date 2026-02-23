@@ -2,9 +2,9 @@ use std::path::Path;
 
 use crate::git::error::GitResult;
 use crate::git::types::{
-    BlameResult, BranchInfo, CommitDetail, CommitInfo, CommitLogResult, CommitResult, DiffOptions,
-    FetchResult, FileDiff, HunkIdentifier, LineRange, LogFilter, MergeOption, MergeResult,
-    PullOption, PushResult, RemoteInfo, RepoStatus, StashEntry, TagInfo,
+    BlameResult, BranchInfo, CommitDetail, CommitInfo, CommitLogResult, CommitResult, ConflictFile,
+    ConflictResolution, DiffOptions, FetchResult, FileDiff, HunkIdentifier, LineRange, LogFilter,
+    MergeOption, MergeResult, PullOption, PushResult, RemoteInfo, RepoStatus, StashEntry, TagInfo,
 };
 
 pub trait GitBackend: Send + Sync {
@@ -62,4 +62,18 @@ pub trait GitBackend: Send + Sync {
     fn create_tag(&self, name: &str, message: Option<&str>) -> GitResult<()>;
     fn delete_tag(&self, name: &str) -> GitResult<()>;
     fn checkout_tag(&self, name: &str) -> GitResult<()>;
+
+    // Conflict operations
+    fn get_conflict_files(&self) -> GitResult<Vec<ConflictFile>>;
+    fn resolve_conflict(&self, path: &str, resolution: ConflictResolution) -> GitResult<()>;
+    fn resolve_conflict_block(
+        &self,
+        path: &str,
+        block_index: usize,
+        resolution: ConflictResolution,
+    ) -> GitResult<()>;
+    fn mark_resolved(&self, path: &str) -> GitResult<()>;
+    fn abort_merge(&self) -> GitResult<()>;
+    fn continue_merge(&self, message: &str) -> GitResult<CommitResult>;
+    fn is_merging(&self) -> GitResult<bool>;
 }

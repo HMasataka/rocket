@@ -11,10 +11,10 @@ use crate::git::error::{GitError, GitResult};
 use crate::git::types::{
     BlameLine, BlameResult, BranchInfo, CommitDetail, CommitFileChange, CommitFileStatus,
     CommitGraphRow, CommitInfo, CommitLogResult, CommitRef, CommitRefKind, CommitResult,
-    CommitStats, DiffHunk, DiffLine, DiffLineKind, DiffOptions, FetchResult, FileDiff, FileStatus,
-    FileStatusKind, GraphEdge, GraphNodeType, HunkIdentifier, LineRange, LogFilter, MergeKind,
-    MergeOption, MergeResult, PullOption, PushResult, RemoteInfo, RepoStatus, StagingState,
-    StashEntry, TagInfo, WordSegment,
+    CommitStats, ConflictBlock, ConflictFile, ConflictResolution, DiffHunk, DiffLine, DiffLineKind,
+    DiffOptions, FetchResult, FileDiff, FileStatus, FileStatusKind, GraphEdge, GraphNodeType,
+    HunkIdentifier, LineRange, LogFilter, MergeKind, MergeOption, MergeResult, PullOption,
+    PushResult, RemoteInfo, RepoStatus, StagingState, StashEntry, TagInfo, WordSegment,
 };
 
 pub struct Git2Backend {
@@ -65,6 +65,15 @@ impl GitBackend for Git2Backend {
         for entry in statuses.iter() {
             let path = entry.path().unwrap_or("").to_string();
             let status = entry.status();
+
+            if status.contains(git2::Status::CONFLICTED) {
+                files.push(FileStatus {
+                    path,
+                    kind: FileStatusKind::Conflicted,
+                    staging: StagingState::Unstaged,
+                });
+                continue;
+            }
 
             // Index (staged) changes
             if status.intersects(
@@ -431,6 +440,7 @@ impl GitBackend for Git2Backend {
             return Ok(MergeResult {
                 kind: MergeKind::UpToDate,
                 oid: None,
+                conflicts: vec![],
             });
         }
 
@@ -460,6 +470,7 @@ impl GitBackend for Git2Backend {
             return Ok(MergeResult {
                 kind: MergeKind::FastForward,
                 oid: Some(target_oid.to_string()),
+                conflicts: vec![],
             });
         }
 
@@ -524,6 +535,7 @@ impl GitBackend for Git2Backend {
             return Ok(MergeResult {
                 kind: MergeKind::UpToDate,
                 oid: None,
+                conflicts: vec![],
             });
         }
 
@@ -1164,6 +1176,166 @@ impl GitBackend for Git2Backend {
             .map_err(|e| GitError::TagFailed(Box::new(e)))?;
         Ok(())
     }
+
+    fn get_conflict_files(&self) -> GitResult<Vec<ConflictFile>> {
+        let repo = self.repo.lock().unwrap();
+        let index = repo
+            .index()
+            .map_err(|e| GitError::ConflictFailed(Box::new(e)))?;
+
+        let paths = collect_conflict_paths(&index);
+
+        let mut result = Vec::new();
+        for path in paths {
+            let full_path = self.workdir.join(&path);
+            let content = std::fs::read_to_string(&full_path).unwrap_or_default();
+            let blocks = parse_conflict_markers(&content);
+            let conflict_count = blocks.len();
+            result.push(ConflictFile {
+                path,
+                conflict_count,
+                conflicts: blocks,
+            });
+        }
+
+        Ok(result)
+    }
+
+    fn resolve_conflict(&self, path: &str, resolution: ConflictResolution) -> GitResult<()> {
+        let repo = self.repo.lock().unwrap();
+        let full_path = self.workdir.join(path);
+
+        let resolved_content = match resolution {
+            ConflictResolution::Ours => get_stage_blob_content(&repo, path, 2)?,
+            ConflictResolution::Theirs => get_stage_blob_content(&repo, path, 3)?,
+            ConflictResolution::Both => {
+                let ours = get_stage_blob_content(&repo, path, 2)?;
+                let theirs = get_stage_blob_content(&repo, path, 3)?;
+                format!("{ours}{theirs}")
+            }
+            ConflictResolution::Manual(content) => content,
+        };
+
+        std::fs::write(&full_path, resolved_content)
+            .map_err(|e| GitError::ConflictFailed(Box::new(e)))?;
+
+        Ok(())
+    }
+
+    fn resolve_conflict_block(
+        &self,
+        path: &str,
+        block_index: usize,
+        resolution: ConflictResolution,
+    ) -> GitResult<()> {
+        let full_path = self.workdir.join(path);
+        let content = std::fs::read_to_string(&full_path)
+            .map_err(|e| GitError::ConflictFailed(Box::new(e)))?;
+
+        let resolved = resolve_single_block(&content, block_index, &resolution)?;
+
+        std::fs::write(&full_path, resolved).map_err(|e| GitError::ConflictFailed(Box::new(e)))?;
+
+        Ok(())
+    }
+
+    fn mark_resolved(&self, path: &str) -> GitResult<()> {
+        let repo = self.repo.lock().unwrap();
+        let mut index = repo
+            .index()
+            .map_err(|e| GitError::ConflictFailed(Box::new(e)))?;
+
+        index
+            .add_path(Path::new(path))
+            .map_err(|e| GitError::ConflictFailed(Box::new(e)))?;
+        index
+            .write()
+            .map_err(|e| GitError::ConflictFailed(Box::new(e)))?;
+
+        Ok(())
+    }
+
+    fn abort_merge(&self) -> GitResult<()> {
+        let repo = self.repo.lock().unwrap();
+        repo.cleanup_state()
+            .map_err(|e| GitError::ConflictFailed(Box::new(e)))?;
+        repo.checkout_head(Some(git2::build::CheckoutBuilder::default().force()))
+            .map_err(|e| GitError::ConflictFailed(Box::new(e)))?;
+        Ok(())
+    }
+
+    fn continue_merge(&self, message: &str) -> GitResult<CommitResult> {
+        let repo = self.repo.lock().unwrap();
+
+        let index = repo
+            .index()
+            .map_err(|e| GitError::ConflictFailed(Box::new(e)))?;
+
+        if index.has_conflicts() {
+            return Err(GitError::ConflictFailed(
+                "unresolved conflicts remain".into(),
+            ));
+        }
+
+        let mut index = repo
+            .index()
+            .map_err(|e| GitError::ConflictFailed(Box::new(e)))?;
+        let tree_oid = index
+            .write_tree()
+            .map_err(|e| GitError::ConflictFailed(Box::new(e)))?;
+        let tree = repo
+            .find_tree(tree_oid)
+            .map_err(|e| GitError::ConflictFailed(Box::new(e)))?;
+        let sig = repo
+            .signature()
+            .map_err(|e| GitError::ConflictFailed(Box::new(e)))?;
+
+        let head_commit = repo
+            .head()
+            .and_then(|h| h.peel_to_commit())
+            .map_err(|e| GitError::ConflictFailed(Box::new(e)))?;
+
+        // MERGE_HEAD contains the commit being merged
+        let merge_head_path = repo.path().join("MERGE_HEAD");
+        let merge_head_content = std::fs::read_to_string(&merge_head_path)
+            .map_err(|e| GitError::ConflictFailed(Box::new(e)))?;
+        let merge_head_oid = git2::Oid::from_str(merge_head_content.trim())
+            .map_err(|e| GitError::ConflictFailed(Box::new(e)))?;
+        let their_commit = repo
+            .find_commit(merge_head_oid)
+            .map_err(|e| GitError::ConflictFailed(Box::new(e)))?;
+
+        let commit_message = if message.is_empty() {
+            let merge_msg_path = repo.path().join("MERGE_MSG");
+            std::fs::read_to_string(&merge_msg_path)
+                .map(|s| s.trim().to_string())
+                .unwrap_or_else(|_| "Merge commit".to_string())
+        } else {
+            message.to_string()
+        };
+
+        let oid = repo
+            .commit(
+                Some("HEAD"),
+                &sig,
+                &sig,
+                &commit_message,
+                &tree,
+                &[&head_commit, &their_commit],
+            )
+            .map_err(|e| GitError::ConflictFailed(Box::new(e)))?;
+
+        let _ = repo.cleanup_state();
+
+        Ok(CommitResult {
+            oid: oid.to_string(),
+        })
+    }
+
+    fn is_merging(&self) -> GitResult<bool> {
+        let repo = self.repo.lock().unwrap();
+        Ok(repo.state() == git2::RepositoryState::Merge)
+    }
 }
 
 impl Git2Backend {
@@ -1336,6 +1508,7 @@ impl Git2Backend {
             return Ok(MergeResult {
                 kind: MergeKind::FastForward,
                 oid: Some(target_oid.to_string()),
+                conflicts: vec![],
             });
         }
 
@@ -1395,6 +1568,7 @@ impl Git2Backend {
         Ok(MergeResult {
             kind: MergeKind::Rebase,
             oid: Some(last_oid.to_string()),
+            conflicts: vec![],
         })
     }
 
@@ -1404,17 +1578,33 @@ impl Git2Backend {
         branch_name: &str,
         annotated: &git2::AnnotatedCommit,
     ) -> GitResult<MergeResult> {
-        repo.merge(&[annotated], None, None)
-            .map_err(|e| GitError::MergeFailed(Box::new(e)))?;
+        let mut checkout_opts = git2::build::CheckoutBuilder::new();
+        checkout_opts.allow_conflicts(true);
 
-        let mut index = repo
+        let mut merge_opts = git2::MergeOptions::new();
+
+        repo.merge(
+            &[annotated],
+            Some(&mut merge_opts),
+            Some(&mut checkout_opts),
+        )
+        .map_err(|e| GitError::MergeFailed(Box::new(e)))?;
+
+        let index = repo
             .index()
             .map_err(|e| GitError::MergeFailed(Box::new(e)))?;
 
         if index.has_conflicts() {
-            let _ = repo.cleanup_state();
-            return Err(GitError::MergeFailed("merge conflicts detected".into()));
+            return Ok(MergeResult {
+                kind: MergeKind::Conflict,
+                oid: None,
+                conflicts: collect_conflict_paths(&index),
+            });
         }
+
+        let mut index = repo
+            .index()
+            .map_err(|e| GitError::MergeFailed(Box::new(e)))?;
 
         let tree_oid = index
             .write_tree()
@@ -1451,6 +1641,7 @@ impl Git2Backend {
         Ok(MergeResult {
             kind: MergeKind::Normal,
             oid: Some(oid.to_string()),
+            conflicts: vec![],
         })
     }
 }
@@ -1955,6 +2146,151 @@ fn parse_diff_to_file_diffs(diff: &git2::Diff) -> Result<Vec<FileDiff>, git2::Er
     Ok(file_diffs)
 }
 
+fn collect_conflict_paths(index: &git2::Index) -> Vec<String> {
+    let mut paths = Vec::new();
+    if let Ok(conflicts) = index.conflicts() {
+        for conflict in conflicts.flatten() {
+            let path = conflict
+                .our
+                .as_ref()
+                .or(conflict.their.as_ref())
+                .and_then(|e| String::from_utf8(e.path.clone()).ok());
+            if let Some(p) = path {
+                if !paths.contains(&p) {
+                    paths.push(p);
+                }
+            }
+        }
+    }
+    paths
+}
+
+fn parse_one_block(lines: &[&str], start: usize) -> (String, String, usize) {
+    let mut i = start + 1; // skip <<<<<<<
+    let mut ours = String::new();
+    while i < lines.len() && !lines[i].starts_with("=======") && !lines[i].starts_with("|||||||") {
+        ours.push_str(lines[i]);
+        ours.push('\n');
+        i += 1;
+    }
+    // skip diff3 base section (||||||| ... =======) if present
+    if i < lines.len() && lines[i].starts_with("|||||||") {
+        i += 1;
+        while i < lines.len() && !lines[i].starts_with("=======") {
+            i += 1;
+        }
+    }
+    i += 1; // skip =======
+    let mut theirs = String::new();
+    while i < lines.len() && !lines[i].starts_with(">>>>>>>") {
+        theirs.push_str(lines[i]);
+        theirs.push('\n');
+        i += 1;
+    }
+    i += 1; // skip >>>>>>>
+    (ours, theirs, i)
+}
+
+fn parse_conflict_markers(content: &str) -> Vec<ConflictBlock> {
+    let mut blocks = Vec::new();
+    let lines: Vec<&str> = content.lines().collect();
+    let mut i = 0;
+
+    while i < lines.len() {
+        if lines[i].starts_with("<<<<<<<") {
+            let start_line = (i + 1) as u32;
+            let (ours, theirs, next) = parse_one_block(&lines, i);
+            let end_line = next as u32;
+            blocks.push(ConflictBlock {
+                ours,
+                theirs,
+                start_line,
+                end_line,
+            });
+            i = next;
+        } else {
+            i += 1;
+        }
+    }
+
+    blocks
+}
+
+fn get_stage_blob_content(repo: &Repository, path: &str, stage: i32) -> GitResult<String> {
+    let index = repo
+        .index()
+        .map_err(|e| GitError::ConflictFailed(Box::new(e)))?;
+
+    for entry in index.iter() {
+        let entry_path = String::from_utf8_lossy(&entry.path).to_string();
+        if entry_path == path && (entry.flags & 0x3000) >> 12 == stage as u16 {
+            let blob = repo
+                .find_blob(entry.id)
+                .map_err(|e| GitError::ConflictFailed(Box::new(e)))?;
+            return Ok(String::from_utf8_lossy(blob.content()).to_string());
+        }
+    }
+
+    Err(GitError::ConflictFailed(
+        format!("stage {stage} entry not found for {path}").into(),
+    ))
+}
+
+fn resolve_single_block(
+    content: &str,
+    block_index: usize,
+    resolution: &ConflictResolution,
+) -> GitResult<String> {
+    let total_blocks = content
+        .lines()
+        .filter(|line| line.starts_with("<<<<<<<"))
+        .count();
+    if block_index >= total_blocks {
+        return Err(GitError::ConflictFailed(
+            format!("block_index {block_index} out of range (total: {total_blocks})").into(),
+        ));
+    }
+
+    let mut result = String::new();
+    let lines: Vec<&str> = content.lines().collect();
+    let mut current_block = 0;
+    let mut i = 0;
+
+    while i < lines.len() {
+        if lines[i].starts_with("<<<<<<<") {
+            if current_block == block_index {
+                let (ours, theirs, next) = parse_one_block(&lines, i);
+                match resolution {
+                    ConflictResolution::Ours => result.push_str(&ours),
+                    ConflictResolution::Theirs => result.push_str(&theirs),
+                    ConflictResolution::Both => {
+                        result.push_str(&ours);
+                        result.push_str(&theirs);
+                    }
+                    ConflictResolution::Manual(manual) => {
+                        result.push_str(manual);
+                        if !manual.ends_with('\n') {
+                            result.push('\n');
+                        }
+                    }
+                }
+                i = next;
+            } else {
+                result.push_str(lines[i]);
+                result.push('\n');
+                i += 1;
+            }
+            current_block += 1;
+        } else {
+            result.push_str(lines[i]);
+            result.push('\n');
+            i += 1;
+        }
+    }
+
+    Ok(result)
+}
+
 fn compute_word_diffs(file_diffs: &mut [FileDiff]) {
     for file_diff in file_diffs.iter_mut() {
         for hunk in file_diff.hunks.iter_mut() {
@@ -1991,5 +2327,69 @@ fn compute_word_diffs(file_diffs: &mut [FileDiff]) {
                 }
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parse_conflict_markers_standard_format() {
+        let content =
+            "before\n<<<<<<< HEAD\nours line\n=======\ntheirs line\n>>>>>>> branch\nafter\n";
+        let blocks = parse_conflict_markers(content);
+        assert_eq!(blocks.len(), 1);
+        assert_eq!(blocks[0].ours, "ours line\n");
+        assert_eq!(blocks[0].theirs, "theirs line\n");
+    }
+
+    #[test]
+    fn parse_conflict_markers_diff3_format() {
+        let content = "before\n<<<<<<< HEAD\nours line\n||||||| base\nbase line\n=======\ntheirs line\n>>>>>>> branch\nafter\n";
+        let blocks = parse_conflict_markers(content);
+        assert_eq!(blocks.len(), 1);
+        assert_eq!(blocks[0].ours, "ours line\n");
+        assert_eq!(blocks[0].theirs, "theirs line\n");
+    }
+
+    #[test]
+    fn parse_conflict_markers_multiple_blocks() {
+        let content = "<<<<<<< HEAD\na\n=======\nb\n>>>>>>> br\nmiddle\n<<<<<<< HEAD\nc\n=======\nd\n>>>>>>> br\n";
+        let blocks = parse_conflict_markers(content);
+        assert_eq!(blocks.len(), 2);
+        assert_eq!(blocks[0].ours, "a\n");
+        assert_eq!(blocks[0].theirs, "b\n");
+        assert_eq!(blocks[1].ours, "c\n");
+        assert_eq!(blocks[1].theirs, "d\n");
+    }
+
+    #[test]
+    fn parse_conflict_markers_diff3_with_multiple_base_lines() {
+        let content = "<<<<<<< HEAD\nours1\nours2\n||||||| base-ref\nbase1\nbase2\nbase3\n=======\ntheirs1\n>>>>>>> branch\n";
+        let blocks = parse_conflict_markers(content);
+        assert_eq!(blocks.len(), 1);
+        assert_eq!(blocks[0].ours, "ours1\nours2\n");
+        assert_eq!(blocks[0].theirs, "theirs1\n");
+    }
+
+    #[test]
+    fn resolve_single_block_with_diff3() {
+        let content = "before\n<<<<<<< HEAD\nours\n||||||| base\noriginal\n=======\ntheirs\n>>>>>>> branch\nafter\n";
+        let result = resolve_single_block(content, 0, &ConflictResolution::Ours).unwrap();
+        assert_eq!(result, "before\nours\nafter\n");
+
+        let result = resolve_single_block(content, 0, &ConflictResolution::Theirs).unwrap();
+        assert_eq!(result, "before\ntheirs\nafter\n");
+
+        let result = resolve_single_block(content, 0, &ConflictResolution::Both).unwrap();
+        assert_eq!(result, "before\nours\ntheirs\nafter\n");
+    }
+
+    #[test]
+    fn resolve_single_block_out_of_range() {
+        let content = "<<<<<<< HEAD\na\n=======\nb\n>>>>>>> br\n";
+        let result = resolve_single_block(content, 1, &ConflictResolution::Ours);
+        assert!(result.is_err());
     }
 }

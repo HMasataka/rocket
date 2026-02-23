@@ -10,6 +10,7 @@ const kindToLabel: Record<FileStatusKind, string> = {
   deleted: "D",
   renamed: "R",
   typechange: "T",
+  conflicted: "C",
 };
 
 const kindToClass: Record<FileStatusKind, string> = {
@@ -18,6 +19,7 @@ const kindToClass: Record<FileStatusKind, string> = {
   deleted: "delete",
   renamed: "modify",
   typechange: "modify",
+  conflicted: "conflict",
 };
 
 export function StatusBadge({ kind }: StatusBadgeProps) {
