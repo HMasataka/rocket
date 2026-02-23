@@ -316,7 +316,7 @@ impl GitBackend for Git2Backend {
         Ok(name)
     }
 
-    fn commit(&self, message: &str) -> GitResult<CommitResult> {
+    fn commit(&self, message: &str, amend: bool) -> GitResult<CommitResult> {
         let repo = self.repo.lock().unwrap();
 
         let mut index = repo
@@ -334,6 +334,23 @@ impl GitBackend for Git2Backend {
         let sig = repo
             .signature()
             .map_err(|e| GitError::CommitFailed(Box::new(e)))?;
+
+        if amend {
+            let head = repo
+                .head()
+                .map_err(|e| GitError::AmendFailed(Box::new(e)))?;
+            let head_commit = head
+                .peel_to_commit()
+                .map_err(|e| GitError::AmendFailed(Box::new(e)))?;
+
+            let oid = head_commit
+                .amend(Some("HEAD"), Some(&sig), Some(&sig), None, Some(message), Some(&tree))
+                .map_err(|e| GitError::AmendFailed(Box::new(e)))?;
+
+            return Ok(CommitResult {
+                oid: oid.to_string(),
+            });
+        }
 
         let parents: Vec<git2::Commit> = match repo.head() {
             Ok(head) => {
@@ -1078,6 +1095,18 @@ impl GitBackend for Git2Backend {
     fn discard_lines(&self, path: &Path, line_range: &LineRange) -> GitResult<()> {
         let patch = self.generate_line_patch(path, line_range, false)?;
         run_git_apply(&self.workdir, &patch, &["-R"]).map_err(GitError::DiscardFailed)
+    }
+
+    fn get_head_commit_message(&self) -> GitResult<String> {
+        let repo = self.repo.lock().unwrap();
+        let head = repo
+            .head()
+            .map_err(|e| GitError::LogFailed(Box::new(e)))?;
+        let commit = head
+            .peel_to_commit()
+            .map_err(|e| GitError::LogFailed(Box::new(e)))?;
+        let message = commit.message().unwrap_or("").to_string();
+        Ok(message)
     }
 }
 

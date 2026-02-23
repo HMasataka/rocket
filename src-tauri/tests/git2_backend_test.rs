@@ -31,7 +31,7 @@ fn init_repo_with_commit(dir: &Path) -> Git2Backend {
     fs::write(dir.join("init.txt"), "init").unwrap();
     let backend = Git2Backend::open(dir).unwrap();
     backend.stage(Path::new("init.txt")).unwrap();
-    backend.commit("initial commit").unwrap();
+    backend.commit("initial commit", false).unwrap();
     backend
 }
 
@@ -125,7 +125,7 @@ fn commit_creates_oid() {
     let backend = Git2Backend::open(tmp.path()).unwrap();
     backend.stage(Path::new("file.txt")).unwrap();
 
-    let result = backend.commit("initial commit").unwrap();
+    let result = backend.commit("initial commit", false).unwrap();
     assert!(!result.oid.is_empty());
 }
 
@@ -138,7 +138,7 @@ fn current_branch_after_commit() {
 
     let backend = Git2Backend::open(tmp.path()).unwrap();
     backend.stage(Path::new("file.txt")).unwrap();
-    backend.commit("init").unwrap();
+    backend.commit("init", false).unwrap();
 
     let branch = backend.current_branch().unwrap();
     assert!(!branch.is_empty());
@@ -153,7 +153,7 @@ fn diff_unstaged_changes() {
 
     let backend = Git2Backend::open(tmp.path()).unwrap();
     backend.stage(Path::new("file.txt")).unwrap();
-    backend.commit("init").unwrap();
+    backend.commit("init", false).unwrap();
 
     fs::write(tmp.path().join("file.txt"), "line1\nline2\n").unwrap();
 
@@ -176,7 +176,7 @@ fn diff_staged_changes() {
 
     let backend = Git2Backend::open(tmp.path()).unwrap();
     backend.stage(Path::new("file.txt")).unwrap();
-    backend.commit("init").unwrap();
+    backend.commit("init", false).unwrap();
 
     fs::write(tmp.path().join("file.txt"), "modified\n").unwrap();
     backend.stage(Path::new("file.txt")).unwrap();
@@ -266,7 +266,7 @@ fn merge_fast_forward() {
 
     fs::write(tmp.path().join("feature.txt"), "feature work").unwrap();
     backend.stage(Path::new("feature.txt")).unwrap();
-    backend.commit("feature commit").unwrap();
+    backend.commit("feature commit", false).unwrap();
 
     backend.checkout_branch(&default_branch).unwrap();
 
@@ -406,12 +406,12 @@ fn merge_ff_only_fails_when_not_possible() {
     backend.checkout_branch("feature").unwrap();
     fs::write(tmp.path().join("feature.txt"), "feature").unwrap();
     backend.stage(Path::new("feature.txt")).unwrap();
-    backend.commit("feature commit").unwrap();
+    backend.commit("feature commit", false).unwrap();
 
     backend.checkout_branch(&default_branch).unwrap();
     fs::write(tmp.path().join("main.txt"), "main work").unwrap();
     backend.stage(Path::new("main.txt")).unwrap();
-    backend.commit("main commit").unwrap();
+    backend.commit("main commit", false).unwrap();
 
     let result = backend.merge_branch("feature", MergeOption::FastForwardOnly);
     assert!(result.is_err());
@@ -463,7 +463,7 @@ fn get_commit_log_returns_commits() {
 
     fs::write(tmp.path().join("second.txt"), "second").unwrap();
     backend.stage(Path::new("second.txt")).unwrap();
-    backend.commit("second commit").unwrap();
+    backend.commit("second commit", false).unwrap();
 
     let filter = LogFilter {
         author: None,
@@ -514,7 +514,7 @@ fn get_commit_detail_returns_info_and_files() {
 
     fs::write(tmp.path().join("detail.txt"), "detail content").unwrap();
     backend.stage(Path::new("detail.txt")).unwrap();
-    let commit_result = backend.commit("detail commit").unwrap();
+    let commit_result = backend.commit("detail commit", false).unwrap();
 
     let detail = backend.get_commit_detail(&commit_result.oid).unwrap();
 
@@ -544,7 +544,7 @@ fn get_blame_returns_correct_line_count() {
 
     let backend = Git2Backend::open(tmp.path()).unwrap();
     backend.stage(Path::new("blame.txt")).unwrap();
-    backend.commit("add blame file").unwrap();
+    backend.commit("add blame file", false).unwrap();
 
     let blame_result = backend.get_blame("blame.txt", None).unwrap();
 
@@ -567,11 +567,11 @@ fn get_blame_with_multiple_commits_tracks_authors() {
     fs::write(tmp.path().join("multi.txt"), "original\n").unwrap();
     let backend = Git2Backend::open(tmp.path()).unwrap();
     backend.stage(Path::new("multi.txt")).unwrap();
-    let first_commit = backend.commit("first").unwrap();
+    let first_commit = backend.commit("first", false).unwrap();
 
     fs::write(tmp.path().join("multi.txt"), "original\nadded\n").unwrap();
     backend.stage(Path::new("multi.txt")).unwrap();
-    backend.commit("second").unwrap();
+    backend.commit("second", false).unwrap();
 
     let blame_result = backend.get_blame("multi.txt", None).unwrap();
 
@@ -588,15 +588,15 @@ fn get_file_history_returns_only_touching_commits() {
 
     fs::write(tmp.path().join("tracked.txt"), "v1").unwrap();
     backend.stage(Path::new("tracked.txt")).unwrap();
-    backend.commit("add tracked").unwrap();
+    backend.commit("add tracked", false).unwrap();
 
     fs::write(tmp.path().join("other.txt"), "other").unwrap();
     backend.stage(Path::new("other.txt")).unwrap();
-    backend.commit("add other").unwrap();
+    backend.commit("add other", false).unwrap();
 
     fs::write(tmp.path().join("tracked.txt"), "v2").unwrap();
     backend.stage(Path::new("tracked.txt")).unwrap();
-    backend.commit("update tracked").unwrap();
+    backend.commit("update tracked", false).unwrap();
 
     let history = backend.get_file_history("tracked.txt", 100, 0).unwrap();
 
@@ -627,7 +627,7 @@ fn get_branch_commits_returns_commits_for_branch() {
 
     fs::write(tmp.path().join("feature.txt"), "feature work").unwrap();
     backend.stage(Path::new("feature.txt")).unwrap();
-    backend.commit("feature commit").unwrap();
+    backend.commit("feature commit", false).unwrap();
 
     let commits = backend.get_branch_commits("feature", 10).unwrap();
 
@@ -645,7 +645,7 @@ fn get_branch_commits_respects_limit() {
         let filename = format!("file{i}.txt");
         fs::write(tmp.path().join(&filename), format!("content {i}")).unwrap();
         backend.stage(Path::new(&filename)).unwrap();
-        backend.commit(&format!("commit {i}")).unwrap();
+        backend.commit(&format!("commit {i}"), false).unwrap();
     }
 
     let branch_name = backend.current_branch().unwrap();
@@ -670,7 +670,7 @@ fn diff_includes_hunk_range_fields() {
 
     fs::write(tmp.path().join("file.txt"), "line1\nline2\nline3\n").unwrap();
     backend.stage(Path::new("file.txt")).unwrap();
-    backend.commit("add file").unwrap();
+    backend.commit("add file", false).unwrap();
 
     fs::write(tmp.path().join("file.txt"), "line1\nmodified\nline3\n").unwrap();
 
@@ -695,7 +695,7 @@ fn create_two_hunk_file(dir: &Path, backend: &Git2Backend) {
     }
     fs::write(dir.join("multi.txt"), &content).unwrap();
     backend.stage(Path::new("multi.txt")).unwrap();
-    backend.commit("add multi").unwrap();
+    backend.commit("add multi", false).unwrap();
 
     let mut modified = String::new();
     for i in 1..=20 {

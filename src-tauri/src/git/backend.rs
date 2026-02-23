@@ -15,7 +15,7 @@ pub trait GitBackend: Send + Sync {
     fn stage_all(&self) -> GitResult<()>;
     fn unstage_all(&self) -> GitResult<()>;
     fn current_branch(&self) -> GitResult<String>;
-    fn commit(&self, message: &str) -> GitResult<CommitResult>;
+    fn commit(&self, message: &str, amend: bool) -> GitResult<CommitResult>;
     fn list_branches(&self) -> GitResult<Vec<BranchInfo>>;
     fn create_branch(&self, name: &str) -> GitResult<()>;
     fn checkout_branch(&self, name: &str) -> GitResult<()>;
@@ -47,4 +47,5 @@ pub trait GitBackend: Send + Sync {
     fn stage_lines(&self, path: &Path, line_range: &LineRange) -> GitResult<()>;
     fn unstage_lines(&self, path: &Path, line_range: &LineRange) -> GitResult<()>;
     fn discard_lines(&self, path: &Path, line_range: &LineRange) -> GitResult<()>;
+    fn get_head_commit_message(&self) -> GitResult<String>;
 }

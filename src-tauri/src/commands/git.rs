@@ -77,13 +77,17 @@ pub fn unstage_all(state: State<'_, AppState>) -> Result<(), String> {
 }
 
 #[tauri::command]
-pub fn commit(message: String, state: State<'_, AppState>) -> Result<CommitResult, String> {
+pub fn commit(
+    message: String,
+    amend: bool,
+    state: State<'_, AppState>,
+) -> Result<CommitResult, String> {
     let repo_lock = state
         .repo
         .lock()
         .map_err(|e| format!("Lock poisoned: {e}"))?;
     let backend = repo_lock.as_ref().ok_or("No repository opened")?;
-    backend.commit(&message).map_err(|e| e.to_string())
+    backend.commit(&message, amend).map_err(|e| e.to_string())
 }
 
 #[tauri::command]
@@ -190,4 +194,14 @@ pub fn discard_lines(
     backend
         .discard_lines(Path::new(&path), &line_range)
         .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub fn get_head_commit_message(state: State<'_, AppState>) -> Result<String, String> {
+    let repo_lock = state
+        .repo
+        .lock()
+        .map_err(|e| format!("Lock poisoned: {e}"))?;
+    let backend = repo_lock.as_ref().ok_or("No repository opened")?;
+    backend.get_head_commit_message().map_err(|e| e.to_string())
 }

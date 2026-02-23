@@ -95,6 +95,7 @@ pub fn run() {
             commands::git::stage_lines,
             commands::git::unstage_lines,
             commands::git::discard_lines,
+            commands::git::get_head_commit_message,
             commands::config::get_config,
             commands::config::save_config,
             commands::branch::list_branches,
