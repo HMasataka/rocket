@@ -11,6 +11,8 @@ import "./styles/remote.css";
 import "./styles/history.css";
 import "./styles/blame.css";
 import "./styles/file-history.css";
+import "./styles/stash.css";
+import "./styles/tags.css";
 
 const root = document.getElementById("root");
 if (!root) throw new Error("Root element not found");

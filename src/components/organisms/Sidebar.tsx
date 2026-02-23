@@ -1,3 +1,4 @@
+import { useGitStore } from "../../stores/gitStore";
 import { useUIStore } from "../../stores/uiStore";
 
 interface SidebarProps {
@@ -7,6 +8,7 @@ interface SidebarProps {
 export function Sidebar({ changesCount }: SidebarProps) {
   const activePage = useUIStore((s) => s.activePage);
   const setActivePage = useUIStore((s) => s.setActivePage);
+  const stashCount = useGitStore((s) => s.stashes.length);
 
   return (
     <nav className="sidebar">
@@ -63,6 +65,22 @@ export function Sidebar({ changesCount }: SidebarProps) {
             <path d="M9.5 3.25a2.25 2.25 0 1 1 3 2.122V6A2.5 2.5 0 0 1 10 8.5H6a1 1 0 0 0-1 1v1.128a2.251 2.251 0 1 1-1.5 0V5.372a2.25 2.25 0 1 1 1.5 0v1.836A2.492 2.492 0 0 1 6 7h4a1 1 0 0 0 1-1v-.628A2.25 2.25 0 0 1 9.5 3.25z" />
           </svg>
           Branches
+        </button>
+        <button
+          type="button"
+          className={`nav-item${activePage === "stash" ? " active" : ""}`}
+          onClick={() => setActivePage("stash")}
+        >
+          <svg
+            viewBox="0 0 16 16"
+            fill="currentColor"
+            role="img"
+            aria-label="Stash"
+          >
+            <path d="M1 3.5A1.5 1.5 0 0 1 2.5 2h11A1.5 1.5 0 0 1 15 3.5v1A1.5 1.5 0 0 1 13.5 6h-11A1.5 1.5 0 0 1 1 4.5v-1zM2.5 3a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h11a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-11zm0 4A1.5 1.5 0 0 0 1 8.5v1A1.5 1.5 0 0 0 2.5 11h11A1.5 1.5 0 0 0 15 9.5v-1A1.5 1.5 0 0 0 13.5 7h-11zm0 1h11a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5z" />
+          </svg>
+          Stash
+          {stashCount > 0 && <span className="nav-badge">{stashCount}</span>}
         </button>
       </div>
     </nav>
