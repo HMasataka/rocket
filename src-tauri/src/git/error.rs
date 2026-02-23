@@ -88,6 +88,9 @@ pub enum GitError {
 
     #[error("failed to manage conflict: {0}")]
     ConflictFailed(#[source] Box<dyn std::error::Error + Send + Sync>),
+
+    #[error("failed to rebase: {0}")]
+    RebaseFailed(#[source] Box<dyn std::error::Error + Send + Sync>),
 }
 
 pub type GitResult<T> = Result<T, GitError>;
