@@ -1,0 +1,411 @@
+/* ===== File History Header ===== */
+.fh-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 20px;
+  height: 48px;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.fh-file-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.fh-file-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: #00add8;
+}
+
+.fh-file-path {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.fh-path-dir {
+  color: var(--text-muted);
+}
+.fh-path-name {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.fh-commit-count {
+  font-size: 11px;
+  color: var(--text-muted);
+  background: var(--bg-tertiary);
+  padding: 2px 8px;
+  border-radius: 10px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.fh-actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+/* ===== Two Column Content ===== */
+.fh-content {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ===== Commit List Panel ===== */
+.fh-list-panel {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-right: 1px solid var(--border);
+}
+
+.fh-commit-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* ===== Commit Row ===== */
+.fh-commit {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 16px;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.fh-commit:hover {
+  background: var(--bg-hover);
+}
+
+.fh-commit.selected {
+  background: var(--accent-dim);
+  border-left: 3px solid var(--accent);
+  padding-left: 13px;
+}
+
+.fh-commit.selected:hover {
+  background: var(--accent-dim);
+}
+
+.fh-commit-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.fh-commit-message {
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.fh-commit-refs {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.fh-commit-meta {
+  display: flex;
+  gap: 12px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.fh-commit-hash {
+  font-family: "JetBrains Mono", monospace;
+  color: var(--accent);
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.fh-commit-hash:hover {
+  color: var(--text-primary);
+}
+
+.fh-commit-stats {
+  display: flex;
+  gap: 8px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+}
+
+/* ===== Detail Panel ===== */
+.fh-detail-panel {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ===== Detail Info ===== */
+.fh-detail-info {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.fh-detail-commit-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.fh-detail-avatar {
+  width: 32px;
+  height: 32px;
+  background: var(--bg-tertiary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.fh-detail-avatar svg {
+  width: 16px;
+  height: 16px;
+  color: var(--text-muted);
+}
+
+.fh-detail-author-block {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.fh-detail-author {
+  font-size: 13px;
+  font-weight: 600;
+}
+.fh-detail-email {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.fh-detail-date-block {
+  display: flex;
+  flex-direction: column;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.fh-detail-date-relative {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.fh-detail-date-absolute {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.fh-detail-message {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fh-detail-message-title {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.fh-detail-message-body {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  white-space: pre-wrap;
+  padding: 10px 12px;
+  background: var(--bg-secondary);
+  border-radius: 6px;
+  border-left: 3px solid var(--accent);
+}
+
+.fh-detail-hash-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  padding: 8px 12px;
+  background: var(--bg-tertiary);
+  border-radius: 6px;
+}
+
+.fh-detail-full-hash {
+  font-family: "JetBrains Mono", monospace;
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+
+/* ===== Diff Section ===== */
+.fh-diff {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.fh-diff-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-secondary);
+  flex-shrink: 0;
+}
+
+.fh-diff-stats-summary {
+  display: flex;
+  gap: 8px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.fh-diff-toggle {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.toggle-btn {
+  padding: 4px 12px;
+  font-size: 11px;
+  font-family: inherit;
+  background: transparent;
+  color: var(--text-muted);
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.toggle-btn:hover {
+  color: var(--text-primary);
+  background: var(--bg-tertiary);
+}
+
+.toggle-btn.active {
+  background: var(--accent-dim);
+  color: var(--accent);
+}
+
+.fh-diff-content {
+  flex: 1;
+  overflow-y: auto;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+}
+
+/* Diff rendering */
+.fh-diff-content .diff-hunk-header {
+  padding: 6px 12px;
+  background: var(--purple-dim);
+  color: var(--purple);
+  font-size: 10px;
+}
+
+.fh-diff-content .diff-line {
+  display: flex;
+}
+
+.fh-diff-content .diff-line .line-num {
+  width: 32px;
+  padding: 2px 8px;
+  text-align: right;
+  color: var(--text-muted);
+  background: var(--bg-tertiary);
+  flex-shrink: 0;
+}
+
+.fh-diff-content .diff-line .line-code {
+  flex: 1;
+  padding: 2px 12px;
+  white-space: pre;
+}
+
+.fh-diff-content .diff-line.add {
+  background: rgba(34, 197, 94, 0.1);
+}
+.fh-diff-content .diff-line.add .line-code {
+  color: var(--success);
+}
+
+.fh-diff-content .diff-line.del {
+  background: rgba(239, 68, 68, 0.1);
+}
+.fh-diff-content .diff-line.del .line-code {
+  color: var(--danger);
+}
+
+.fh-diff-content .diff-line.context .line-code {
+  color: var(--text-secondary);
+}
+
+/* ===== Responsive ===== */
+@media (min-width: 1400px) {
+  .fh-content {
+    grid-template-columns: 440px 1fr;
+  }
+}
+
+@media (max-width: 1023px) {
+  .fh-content {
+    grid-template-columns: 1fr;
+  }
+  .fh-list-panel {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    max-height: 40%;
+  }
+  .fh-detail-panel {
+    max-height: 60%;
+  }
+}
+
+@media (max-width: 767px) {
+  .fh-header {
+    padding: 0 12px;
+  }
+  .fh-commit-count {
+    display: none;
+  }
+  .fh-detail-date-block {
+    display: none;
+  }
+  .fh-detail-info {
+    padding: 12px 16px;
+  }
+}

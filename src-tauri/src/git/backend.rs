@@ -2,8 +2,9 @@ use std::path::Path;
 
 use crate::git::error::GitResult;
 use crate::git::types::{
-    BranchInfo, CommitResult, DiffOptions, FetchResult, FileDiff, MergeOption, MergeResult,
-    PullOption, PushResult, RemoteInfo, RepoStatus,
+    BlameResult, BranchInfo, CommitDetail, CommitInfo, CommitLogResult, CommitResult, DiffOptions,
+    FetchResult, FileDiff, LogFilter, MergeOption, MergeResult, PullOption, PushResult, RemoteInfo,
+    RepoStatus,
 };
 
 pub trait GitBackend: Send + Sync {
@@ -28,4 +29,15 @@ pub trait GitBackend: Send + Sync {
     fn add_remote(&self, name: &str, url: &str) -> GitResult<()>;
     fn remove_remote(&self, name: &str) -> GitResult<()>;
     fn edit_remote(&self, name: &str, new_url: &str) -> GitResult<()>;
+    fn get_commit_log(
+        &self,
+        filter: &LogFilter,
+        limit: usize,
+        skip: usize,
+    ) -> GitResult<CommitLogResult>;
+    fn get_commit_detail(&self, oid: &str) -> GitResult<CommitDetail>;
+    fn get_commit_file_diff(&self, oid: &str, path: &str) -> GitResult<Vec<FileDiff>>;
+    fn get_blame(&self, path: &str, commit_oid: Option<&str>) -> GitResult<BlameResult>;
+    fn get_file_history(&self, path: &str, limit: usize, skip: usize)
+        -> GitResult<Vec<CommitInfo>>;
 }

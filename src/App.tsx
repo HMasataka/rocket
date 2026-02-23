@@ -4,8 +4,11 @@ import { RemoteModal } from "./components/organisms/RemoteModal";
 import { ToastContainer } from "./components/organisms/ToastContainer";
 import { AppShell } from "./components/templates/AppShell";
 import { useFileWatcher } from "./hooks/useFileWatcher";
+import { BlamePage } from "./pages/blame";
 import { BranchesPage } from "./pages/branches";
 import { ChangesPage } from "./pages/changes";
+import { FileHistoryPage } from "./pages/file-history";
+import { HistoryPage } from "./pages/history";
 import type { PullOption } from "./services/git";
 import { useGitStore } from "./stores/gitStore";
 import { useUIStore } from "./stores/uiStore";
@@ -103,6 +106,9 @@ export function App() {
       >
         {activePage === "changes" && <ChangesPage />}
         {activePage === "branches" && <BranchesPage />}
+        {activePage === "history" && <HistoryPage />}
+        {activePage === "blame" && <BlamePage />}
+        {activePage === "file-history" && <FileHistoryPage />}
       </AppShell>
       <ToastContainer />
       {activeModal === "remotes" && <RemoteModal onClose={closeModal} />}

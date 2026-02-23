@@ -30,6 +30,22 @@ export function Sidebar({ changesCount }: SidebarProps) {
             <span className="nav-badge">{changesCount}</span>
           )}
         </button>
+        <button
+          type="button"
+          className={`nav-item${activePage === "history" ? " active" : ""}`}
+          onClick={() => setActivePage("history")}
+        >
+          <svg
+            viewBox="0 0 16 16"
+            fill="currentColor"
+            role="img"
+            aria-label="History"
+          >
+            <path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022l-.074.997zm2.004.45a7.003 7.003 0 0 0-.985-.299l.219-.976c.383.086.76.2 1.126.342l-.36.933zm1.37.71a7.01 7.01 0 0 0-.439-.27l.493-.87a8.025 8.025 0 0 1 .979.654l-.615.789a6.996 6.996 0 0 0-.418-.302zm1.834 1.79a6.99 6.99 0 0 0-.653-.796l.724-.69c.27.285.52.59.747.91l-.818.576zm.744 1.352a7.08 7.08 0 0 0-.214-.468l.893-.45a7.976 7.976 0 0 1 .45 1.088l-.95.313a7.023 7.023 0 0 0-.179-.483zM8 1a7 7 0 1 0 4.95 11.95l.707.707A8.001 8.001 0 1 1 8 0v1z" />
+            <path d="M7.5 3a.5.5 0 0 1 .5.5v5.21l3.248 1.856a.5.5 0 0 1-.496.868l-3.5-2A.5.5 0 0 1 7 9V3.5a.5.5 0 0 1 .5-.5z" />
+          </svg>
+          History
+        </button>
       </div>
       <div className="sidebar-section">
         <div className="section-label">Branches</div>
