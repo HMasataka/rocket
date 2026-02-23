@@ -41,6 +41,14 @@ export function CommitPanel({
     <div className="commit-panel">
       <div className="panel-header">
         <span className="panel-title">Commit</span>
+        <label className="amend-toggle">
+          <input
+            type="checkbox"
+            checked={amend}
+            onChange={handleAmendToggle}
+          />
+          <span>Amend</span>
+        </label>
       </div>
       <div className="commit-form">
         <input
@@ -62,14 +70,6 @@ export function CommitPanel({
           onChange={(e) => setBody(e.target.value)}
         />
         <div className="commit-actions">
-          <label className="amend-toggle">
-            <input
-              type="checkbox"
-              checked={amend}
-              onChange={handleAmendToggle}
-            />
-            <span>Amend</span>
-          </label>
           <Button
             variant="primary"
             onClick={handleCommit}

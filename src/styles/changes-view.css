@@ -268,6 +268,45 @@
 }
 
 /* ===== Commit Panel Components ===== */
+.amend-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.amend-toggle:hover {
+  color: var(--text-secondary);
+}
+
+.amend-toggle input {
+  width: 14px;
+  height: 14px;
+  appearance: none;
+  -webkit-appearance: none;
+  border: 1.5px solid var(--text-muted);
+  border-radius: 3px;
+  background: var(--bg-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.amend-toggle input:hover {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+}
+
+.amend-toggle input:checked {
+  background: var(--accent);
+  border-color: var(--accent);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23fff'%3E%3Cpath d='M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z'/%3E%3C/svg%3E");
+  background-size: 10px;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
 .commit-form {
   flex: 1;
   display: flex;
