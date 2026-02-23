@@ -2168,10 +2168,17 @@ fn collect_conflict_paths(index: &git2::Index) -> Vec<String> {
 fn parse_one_block(lines: &[&str], start: usize) -> (String, String, usize) {
     let mut i = start + 1; // skip <<<<<<<
     let mut ours = String::new();
-    while i < lines.len() && !lines[i].starts_with("=======") {
+    while i < lines.len() && !lines[i].starts_with("=======") && !lines[i].starts_with("|||||||") {
         ours.push_str(lines[i]);
         ours.push('\n');
         i += 1;
+    }
+    // skip diff3 base section (||||||| ... =======) if present
+    if i < lines.len() && lines[i].starts_with("|||||||") {
+        i += 1;
+        while i < lines.len() && !lines[i].starts_with("=======") {
+            i += 1;
+        }
     }
     i += 1; // skip =======
     let mut theirs = String::new();
@@ -2320,5 +2327,69 @@ fn compute_word_diffs(file_diffs: &mut [FileDiff]) {
                 }
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parse_conflict_markers_standard_format() {
+        let content =
+            "before\n<<<<<<< HEAD\nours line\n=======\ntheirs line\n>>>>>>> branch\nafter\n";
+        let blocks = parse_conflict_markers(content);
+        assert_eq!(blocks.len(), 1);
+        assert_eq!(blocks[0].ours, "ours line\n");
+        assert_eq!(blocks[0].theirs, "theirs line\n");
+    }
+
+    #[test]
+    fn parse_conflict_markers_diff3_format() {
+        let content = "before\n<<<<<<< HEAD\nours line\n||||||| base\nbase line\n=======\ntheirs line\n>>>>>>> branch\nafter\n";
+        let blocks = parse_conflict_markers(content);
+        assert_eq!(blocks.len(), 1);
+        assert_eq!(blocks[0].ours, "ours line\n");
+        assert_eq!(blocks[0].theirs, "theirs line\n");
+    }
+
+    #[test]
+    fn parse_conflict_markers_multiple_blocks() {
+        let content = "<<<<<<< HEAD\na\n=======\nb\n>>>>>>> br\nmiddle\n<<<<<<< HEAD\nc\n=======\nd\n>>>>>>> br\n";
+        let blocks = parse_conflict_markers(content);
+        assert_eq!(blocks.len(), 2);
+        assert_eq!(blocks[0].ours, "a\n");
+        assert_eq!(blocks[0].theirs, "b\n");
+        assert_eq!(blocks[1].ours, "c\n");
+        assert_eq!(blocks[1].theirs, "d\n");
+    }
+
+    #[test]
+    fn parse_conflict_markers_diff3_with_multiple_base_lines() {
+        let content = "<<<<<<< HEAD\nours1\nours2\n||||||| base-ref\nbase1\nbase2\nbase3\n=======\ntheirs1\n>>>>>>> branch\n";
+        let blocks = parse_conflict_markers(content);
+        assert_eq!(blocks.len(), 1);
+        assert_eq!(blocks[0].ours, "ours1\nours2\n");
+        assert_eq!(blocks[0].theirs, "theirs1\n");
+    }
+
+    #[test]
+    fn resolve_single_block_with_diff3() {
+        let content = "before\n<<<<<<< HEAD\nours\n||||||| base\noriginal\n=======\ntheirs\n>>>>>>> branch\nafter\n";
+        let result = resolve_single_block(content, 0, &ConflictResolution::Ours).unwrap();
+        assert_eq!(result, "before\nours\nafter\n");
+
+        let result = resolve_single_block(content, 0, &ConflictResolution::Theirs).unwrap();
+        assert_eq!(result, "before\ntheirs\nafter\n");
+
+        let result = resolve_single_block(content, 0, &ConflictResolution::Both).unwrap();
+        assert_eq!(result, "before\nours\ntheirs\nafter\n");
+    }
+
+    #[test]
+    fn resolve_single_block_out_of_range() {
+        let content = "<<<<<<< HEAD\na\n=======\nb\n>>>>>>> br\n";
+        let result = resolve_single_block(content, 1, &ConflictResolution::Ours);
+        assert!(result.is_err());
     }
 }
