@@ -87,10 +87,11 @@ export function App() {
     try {
       await fetchRemote(defaultRemote);
       addToast(`Fetched from '${defaultRemote}'`, "success");
+      await fetchBranch();
     } catch (e: unknown) {
       addToast(`Fetch failed: ${String(e)}`, "error");
     }
-  }, [defaultRemote, fetchRemote, addToast]);
+  }, [defaultRemote, fetchRemote, addToast, fetchBranch]);
 
   const handlePull = useCallback(
     async (option: PullOption) => {
@@ -116,10 +117,11 @@ export function App() {
         `Pushed '${result.branch}' to '${result.remote_name}'`,
         "success",
       );
+      await fetchBranch();
     } catch (e: unknown) {
       addToast(`Push failed: ${String(e)}`, "error");
     }
-  }, [defaultRemote, pushRemote, addToast]);
+  }, [defaultRemote, pushRemote, addToast, fetchBranch]);
 
   const changesCount = status?.files.length ?? 0;
 
