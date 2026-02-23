@@ -4,6 +4,7 @@ import { getBranchCommits } from "../../services/git";
 import type { CommitInfo } from "../../services/history";
 import { useGitStore } from "../../stores/gitStore";
 import { useUIStore } from "../../stores/uiStore";
+import { ConflictModal } from "../conflict";
 import { BranchDetailPanel } from "./organisms/BranchDetailPanel";
 import { BranchFooter } from "./organisms/BranchFooter";
 import { BranchListPanel } from "./organisms/BranchListPanel";
@@ -124,6 +125,15 @@ export function BranchesPage() {
       if (!selected) return;
       try {
         const result = await mergeBranch(selected.name, option);
+        if (result.kind === "conflict") {
+          closeModal();
+          openModal("conflict");
+          addToast(
+            `Merge has ${result.conflicts.length} conflicting file(s)`,
+            "warning",
+          );
+          return;
+        }
         addToast(`Merge ${result.kind}: ${selected.name}`, "success");
         closeModal();
         await refreshAll();
@@ -131,7 +141,7 @@ export function BranchesPage() {
         addToast(`Merge failed: ${String(e)}`, "error");
       }
     },
-    [selected, mergeBranch, addToast, closeModal, refreshAll],
+    [selected, mergeBranch, addToast, closeModal, openModal, refreshAll],
   );
 
   return (
@@ -198,6 +208,7 @@ export function BranchesPage() {
           onClose={closeModal}
         />
       )}
+      {activeModal === "conflict" && <ConflictModal />}
     </div>
   );
 }
