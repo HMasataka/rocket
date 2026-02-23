@@ -134,6 +134,14 @@ pub fn run() {
             commands::conflict::abort_merge,
             commands::conflict::continue_merge,
             commands::conflict::is_merging,
+            commands::rebase::rebase,
+            commands::rebase::interactive_rebase,
+            commands::rebase::is_rebasing,
+            commands::rebase::abort_rebase,
+            commands::rebase::continue_rebase,
+            commands::rebase::get_rebase_state,
+            commands::rebase::get_rebase_todo,
+            commands::rebase::get_merge_base_content,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

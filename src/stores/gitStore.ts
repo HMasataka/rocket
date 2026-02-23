@@ -52,6 +52,20 @@ import {
   unstageHunk as unstageHunkService,
   unstageLines as unstageLinesService,
 } from "../services/git";
+import type {
+  RebaseResult,
+  RebaseState,
+  RebaseTodoEntry,
+} from "../services/rebase";
+import {
+  abortRebase as abortRebaseService,
+  continueRebase as continueRebaseService,
+  getRebaseState,
+  getRebaseTodo as getRebaseTodoService,
+  interactiveRebase as interactiveRebaseService,
+  isRebasing as isRebasingService,
+  rebase as rebaseService,
+} from "../services/rebase";
 import type { StashEntry } from "../services/stash";
 import {
   applyStash as applyStashService,
@@ -68,6 +82,8 @@ import {
   listTags,
 } from "../services/tag";
 
+const REBASE_TODO_DEFAULT_LIMIT = 100;
+
 interface GitState {
   status: RepoStatus | null;
   currentBranch: string | null;
@@ -77,6 +93,8 @@ interface GitState {
   stashes: StashEntry[];
   tags: TagInfo[];
   merging: boolean;
+  rebasing: boolean;
+  rebaseState: RebaseState | null;
   conflictFiles: ConflictFile[];
   loading: boolean;
   error: string | null;
@@ -137,6 +155,15 @@ interface GitActions {
   markResolved: (path: string) => Promise<void>;
   abortMerge: () => Promise<void>;
   continueMerge: (message: string) => Promise<string>;
+  fetchRebaseState: () => Promise<void>;
+  rebase: (onto: string) => Promise<RebaseResult>;
+  interactiveRebase: (
+    onto: string,
+    todo: RebaseTodoEntry[],
+  ) => Promise<RebaseResult>;
+  abortRebase: () => Promise<void>;
+  continueRebase: () => Promise<RebaseResult>;
+  getRebaseTodo: (onto: string) => Promise<RebaseTodoEntry[]>;
   clearError: () => void;
 }
 
@@ -149,6 +176,8 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
   stashes: [],
   tags: [],
   merging: false,
+  rebasing: false,
+  rebaseState: null,
   conflictFiles: [],
   loading: false,
   error: null,
@@ -561,6 +590,67 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
       const result = await continueMergeService(message);
       set({ merging: false, conflictFiles: [] });
       return result.oid;
+    } catch (e) {
+      set({ error: String(e) });
+      throw e;
+    }
+  },
+
+  fetchRebaseState: async () => {
+    try {
+      const rebasing = await isRebasingService();
+      const rebaseState = await getRebaseState();
+      set({ rebasing, rebaseState });
+    } catch (e) {
+      set({ error: String(e) });
+      throw e;
+    }
+  },
+
+  rebase: async (onto: string) => {
+    try {
+      return await rebaseService(onto);
+    } catch (e) {
+      set({ error: String(e) });
+      throw e;
+    }
+  },
+
+  interactiveRebase: async (onto: string, todo: RebaseTodoEntry[]) => {
+    try {
+      return await interactiveRebaseService(onto, todo);
+    } catch (e) {
+      set({ error: String(e) });
+      throw e;
+    }
+  },
+
+  abortRebase: async () => {
+    try {
+      await abortRebaseService();
+      set({ rebasing: false, rebaseState: null, conflictFiles: [] });
+    } catch (e) {
+      set({ error: String(e) });
+      throw e;
+    }
+  },
+
+  continueRebase: async () => {
+    try {
+      const result = await continueRebaseService();
+      if (result.completed) {
+        set({ rebasing: false, rebaseState: null, conflictFiles: [] });
+      }
+      return result;
+    } catch (e) {
+      set({ error: String(e) });
+      throw e;
+    }
+  },
+
+  getRebaseTodo: async (onto: string) => {
+    try {
+      return await getRebaseTodoService(onto, REBASE_TODO_DEFAULT_LIMIT);
     } catch (e) {
       set({ error: String(e) });
       throw e;

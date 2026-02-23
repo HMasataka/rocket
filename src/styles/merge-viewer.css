@@ -1,0 +1,85 @@
+/* ===== Merge Viewer Modal ===== */
+.merge-viewer-modal {
+  width: 95vw;
+}
+
+.merge-viewer-modal .modal-body.merge-body {
+  padding: 0;
+}
+
+.merge-viewer-modal .error-message {
+  padding: 16px;
+  color: var(--danger);
+  font-size: 13px;
+}
+
+.merge-panels {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  height: 400px;
+}
+
+.merge-panel {
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--border);
+}
+
+.merge-panel:last-child {
+  border-right: none;
+}
+
+.merge-panel-header {
+  padding: 10px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  border-bottom: 1px solid var(--border);
+}
+
+.merge-panel-header.ours {
+  background: var(--success-dim);
+  color: var(--success);
+}
+
+.merge-panel-header.base {
+  background: var(--bg-tertiary);
+  color: var(--text-muted);
+}
+
+.merge-panel-header.theirs {
+  background: var(--danger-dim);
+  color: var(--danger);
+}
+
+.merge-panel-header.result-header {
+  background: var(--accent-dim);
+  color: var(--accent);
+}
+
+.merge-code {
+  flex: 1;
+  margin: 0;
+  padding: 16px;
+  font-size: 12px;
+  line-height: 1.6;
+  overflow: auto;
+  background: var(--bg-primary);
+  font-family: "JetBrains Mono", monospace;
+  color: var(--text-primary);
+}
+
+.merge-result {
+  flex: 1;
+  padding: 16px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  line-height: 1.6;
+  background: var(--bg-primary);
+  border: none;
+  color: var(--text-primary);
+  resize: none;
+}
+
+.merge-result:focus {
+  outline: none;
+}

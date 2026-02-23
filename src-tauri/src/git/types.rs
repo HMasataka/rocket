@@ -303,6 +303,7 @@ pub struct ConflictFile {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ConflictBlock {
     pub ours: String,
+    pub base: Option<String>,
     pub theirs: String,
     pub start_line: u32,
     pub end_line: u32,
@@ -328,4 +329,49 @@ pub struct TagInfo {
     pub tagger_name: Option<String>,
     pub tagger_date: Option<i64>,
     pub message: Option<String>,
+}
+
+// === Rebase types ===
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum RebaseAction {
+    Pick,
+    Reword,
+    Edit,
+    Squash,
+    Fixup,
+    Drop,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct RebaseTodoEntry {
+    pub action: RebaseAction,
+    pub oid: String,
+    pub short_oid: String,
+    pub message: String,
+    pub author_name: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct RebaseState {
+    pub onto_branch: String,
+    pub onto_oid: String,
+    pub current_step: usize,
+    pub total_steps: usize,
+    pub has_conflicts: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct RebaseResult {
+    pub completed: bool,
+    pub conflicts: Vec<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MergeBaseContent {
+    pub path: String,
+    pub base_content: Option<String>,
+    pub ours_content: String,
+    pub theirs_content: String,
 }

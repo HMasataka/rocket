@@ -4,6 +4,7 @@ import { useGitStore } from "../../stores/gitStore";
 import { useUIStore } from "../../stores/uiStore";
 import { ConflictDetail } from "./organisms/ConflictDetail";
 import { ConflictFileList } from "./organisms/ConflictFileList";
+import { MergeViewerModal } from "./organisms/MergeViewerModal";
 
 export function ConflictModal() {
   const conflictFiles = useGitStore((s) => s.conflictFiles);
@@ -13,6 +14,9 @@ export function ConflictModal() {
   const markResolved = useGitStore((s) => s.markResolved);
   const abortMerge = useGitStore((s) => s.abortMerge);
   const continueMerge = useGitStore((s) => s.continueMerge);
+  const rebasing = useGitStore((s) => s.rebasing);
+  const abortRebase = useGitStore((s) => s.abortRebase);
+  const continueRebase = useGitStore((s) => s.continueRebase);
   const fetchStatus = useGitStore((s) => s.fetchStatus);
   const addToast = useUIStore((s) => s.addToast);
   const closeModal = useUIStore((s) => s.closeModal);
@@ -20,6 +24,7 @@ export function ConflictModal() {
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
   const [resolvedPaths, setResolvedPaths] = useState<Set<string>>(new Set());
   const [initialPaths, setInitialPaths] = useState<string[]>([]);
+  const [mergeViewerPath, setMergeViewerPath] = useState<string | null>(null);
 
   useEffect(() => {
     fetchConflictFiles().catch((e: unknown) => {
@@ -93,25 +98,67 @@ export function ConflictModal() {
 
   const handleAbort = useCallback(async () => {
     try {
-      await abortMerge();
+      if (rebasing) {
+        await abortRebase();
+        addToast("Rebase aborted", "success");
+      } else {
+        await abortMerge();
+        addToast("Merge aborted", "success");
+      }
       await fetchStatus();
-      addToast("Merge aborted", "success");
       closeModal();
     } catch (e: unknown) {
       addToast(String(e), "error");
     }
-  }, [abortMerge, fetchStatus, addToast, closeModal]);
+  }, [rebasing, abortRebase, abortMerge, fetchStatus, addToast, closeModal]);
 
   const handleContinue = useCallback(async () => {
     try {
-      await continueMerge("");
+      if (rebasing) {
+        const result = await continueRebase();
+        if (result.completed) {
+          addToast("Rebase completed", "success");
+          closeModal();
+        } else {
+          addToast("Rebase has more conflicts", "warning");
+          await refreshConflicts();
+        }
+      } else {
+        await continueMerge("");
+        addToast("Merge completed", "success");
+        closeModal();
+      }
       await fetchStatus();
-      addToast("Merge completed", "success");
-      closeModal();
     } catch (e: unknown) {
       addToast(String(e), "error");
     }
-  }, [continueMerge, fetchStatus, addToast, closeModal]);
+  }, [
+    rebasing,
+    continueRebase,
+    continueMerge,
+    fetchStatus,
+    refreshConflicts,
+    addToast,
+    closeModal,
+  ]);
+
+  const handleMergeViewerApply = useCallback(
+    async (content: string) => {
+      if (!mergeViewerPath) return;
+      try {
+        await resolveConflict(mergeViewerPath, {
+          type: "Manual",
+          content,
+        });
+        await refreshConflicts();
+        addToast(`Applied merge result: ${mergeViewerPath}`, "success");
+      } catch (e: unknown) {
+        addToast(String(e), "error");
+      }
+      setMergeViewerPath(null);
+    },
+    [mergeViewerPath, resolveConflict, refreshConflicts, addToast],
+  );
 
   const progressPercent =
     totalCount > 0 ? Math.round((resolvedCount / totalCount) * 100) : 0;
@@ -121,9 +168,9 @@ export function ConflictModal() {
       {/* biome-ignore lint/a11y/noStaticElementInteractions: overlay dismiss is mouse-only */}
       <div
         className="modal-overlay active"
-        onClick={closeModal}
+        onClick={handleAbort}
         onKeyDown={(e) => {
-          if (e.key === "Escape") closeModal();
+          if (e.key === "Escape") handleAbort();
         }}
       />
       <div className="modal conflict-modal active">
@@ -140,7 +187,7 @@ export function ConflictModal() {
               <span className="conflict-progress-total">{totalCount}</span>
               <span className="conflict-progress-label">resolved</span>
             </span>
-            <button type="button" className="modal-close" onClick={closeModal}>
+            <button type="button" className="modal-close" onClick={handleAbort}>
               <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
                 <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z" />
               </svg>
@@ -169,6 +216,7 @@ export function ConflictModal() {
               onResolveBlock={handleResolveBlock}
               onResolveFile={handleResolveFile}
               onMarkResolved={handleMarkResolved}
+              onOpenMergeViewer={() => setMergeViewerPath(selectedFile.path)}
             />
           )}
         </div>
@@ -179,26 +227,26 @@ export function ConflictModal() {
             className="btn btn-danger-outline"
             onClick={handleAbort}
           >
-            Abort Merge
+            {rebasing ? "Abort Rebase" : "Abort Merge"}
           </button>
           <div className="modal-footer-spacer" />
-          <button
-            type="button"
-            className="btn btn-secondary"
-            onClick={closeModal}
-          >
-            Close
-          </button>
           <button
             type="button"
             className="btn btn-primary"
             disabled={!allResolved}
             onClick={handleContinue}
           >
-            Continue Merge
+            {rebasing ? "Continue Rebase" : "Continue Merge"}
           </button>
         </div>
       </div>
+      {mergeViewerPath && (
+        <MergeViewerModal
+          path={mergeViewerPath}
+          onApply={handleMergeViewerApply}
+          onCancel={() => setMergeViewerPath(null)}
+        />
+      )}
     </>
   );
 }

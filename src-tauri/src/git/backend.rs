@@ -4,7 +4,8 @@ use crate::git::error::GitResult;
 use crate::git::types::{
     BlameResult, BranchInfo, CommitDetail, CommitInfo, CommitLogResult, CommitResult, ConflictFile,
     ConflictResolution, DiffOptions, FetchResult, FileDiff, HunkIdentifier, LineRange, LogFilter,
-    MergeOption, MergeResult, PullOption, PushResult, RemoteInfo, RepoStatus, StashEntry, TagInfo,
+    MergeBaseContent, MergeOption, MergeResult, PullOption, PushResult, RebaseResult, RebaseState,
+    RebaseTodoEntry, RemoteInfo, RepoStatus, StashEntry, TagInfo,
 };
 
 pub trait GitBackend: Send + Sync {
@@ -76,4 +77,14 @@ pub trait GitBackend: Send + Sync {
     fn abort_merge(&self) -> GitResult<()>;
     fn continue_merge(&self, message: &str) -> GitResult<CommitResult>;
     fn is_merging(&self) -> GitResult<bool>;
+
+    // Rebase operations
+    fn rebase(&self, onto: &str) -> GitResult<RebaseResult>;
+    fn interactive_rebase(&self, onto: &str, todo: &[RebaseTodoEntry]) -> GitResult<RebaseResult>;
+    fn is_rebasing(&self) -> GitResult<bool>;
+    fn abort_rebase(&self) -> GitResult<()>;
+    fn continue_rebase(&self) -> GitResult<RebaseResult>;
+    fn get_rebase_state(&self) -> GitResult<Option<RebaseState>>;
+    fn get_rebase_todo(&self, onto: &str, limit: usize) -> GitResult<Vec<RebaseTodoEntry>>;
+    fn get_merge_base_content(&self, path: &str) -> GitResult<MergeBaseContent>;
 }
