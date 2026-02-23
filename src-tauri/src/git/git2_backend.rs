@@ -13,8 +13,9 @@ use crate::git::types::{
     CommitGraphRow, CommitInfo, CommitLogResult, CommitRef, CommitRefKind, CommitResult,
     CommitStats, ConflictBlock, ConflictFile, ConflictResolution, DiffHunk, DiffLine, DiffLineKind,
     DiffOptions, FetchResult, FileDiff, FileStatus, FileStatusKind, GraphEdge, GraphNodeType,
-    HunkIdentifier, LineRange, LogFilter, MergeKind, MergeOption, MergeResult, PullOption,
-    PushResult, RemoteInfo, RepoStatus, StagingState, StashEntry, TagInfo, WordSegment,
+    HunkIdentifier, LineRange, LogFilter, MergeBaseContent, MergeKind, MergeOption, MergeResult,
+    PullOption, PushResult, RebaseAction, RebaseResult, RebaseState, RebaseTodoEntry, RemoteInfo,
+    RepoStatus, StagingState, StashEntry, TagInfo, WordSegment,
 };
 
 pub struct Git2Backend {
@@ -1336,6 +1337,267 @@ impl GitBackend for Git2Backend {
         let repo = self.repo.lock().unwrap();
         Ok(repo.state() == git2::RepositoryState::Merge)
     }
+
+    fn rebase(&self, onto: &str) -> GitResult<RebaseResult> {
+        let output = std::process::Command::new("git")
+            .args(["rebase", onto])
+            .current_dir(&self.workdir)
+            .output()
+            .map_err(|e| GitError::RebaseFailed(Box::new(e)))?;
+
+        if output.status.success() {
+            return Ok(RebaseResult {
+                completed: true,
+                conflicts: Vec::new(),
+            });
+        }
+
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        if stderr.contains("CONFLICT") || stderr.contains("conflict") {
+            let conflicts = collect_conflict_paths_from_workdir(&self.workdir);
+            return Ok(RebaseResult {
+                completed: false,
+                conflicts,
+            });
+        }
+
+        Err(GitError::RebaseFailed(stderr.to_string().into()))
+    }
+
+    fn interactive_rebase(
+        &self,
+        onto: &str,
+        todo: &[RebaseTodoEntry],
+    ) -> GitResult<RebaseResult> {
+        let todo_content = todo
+            .iter()
+            .map(|entry| {
+                let action = match entry.action {
+                    RebaseAction::Pick => "pick",
+                    RebaseAction::Reword => "reword",
+                    RebaseAction::Edit => "edit",
+                    RebaseAction::Squash => "squash",
+                    RebaseAction::Fixup => "fixup",
+                    RebaseAction::Drop => "drop",
+                };
+                format!("{} {} {}", action, entry.short_oid, entry.message)
+            })
+            .collect::<Vec<_>>()
+            .join("\n");
+
+        let todo_file = self.workdir.join(".git").join("rocket-rebase-todo");
+        std::fs::write(&todo_file, &todo_content)
+            .map_err(|e| GitError::RebaseFailed(Box::new(e)))?;
+
+        let editor_script = format!(
+            "cat '{}' > \"$1\"",
+            todo_file.display()
+        );
+
+        let output = std::process::Command::new("git")
+            .args(["rebase", "-i", onto])
+            .env("GIT_SEQUENCE_EDITOR", editor_script)
+            .current_dir(&self.workdir)
+            .output()
+            .map_err(|e| GitError::RebaseFailed(Box::new(e)))?;
+
+        let _ = std::fs::remove_file(&todo_file);
+
+        if output.status.success() {
+            return Ok(RebaseResult {
+                completed: true,
+                conflicts: Vec::new(),
+            });
+        }
+
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        if stderr.contains("CONFLICT") || stderr.contains("conflict") || stderr.contains("Stopped at") {
+            let conflicts = collect_conflict_paths_from_workdir(&self.workdir);
+            return Ok(RebaseResult {
+                completed: false,
+                conflicts,
+            });
+        }
+
+        Err(GitError::RebaseFailed(stderr.to_string().into()))
+    }
+
+    fn is_rebasing(&self) -> GitResult<bool> {
+        let repo = self.repo.lock().unwrap();
+        Ok(matches!(
+            repo.state(),
+            git2::RepositoryState::Rebase
+                | git2::RepositoryState::RebaseInteractive
+                | git2::RepositoryState::RebaseMerge
+        ))
+    }
+
+    fn abort_rebase(&self) -> GitResult<()> {
+        let output = std::process::Command::new("git")
+            .args(["rebase", "--abort"])
+            .current_dir(&self.workdir)
+            .output()
+            .map_err(|e| GitError::RebaseFailed(Box::new(e)))?;
+
+        if !output.status.success() {
+            let stderr = String::from_utf8_lossy(&output.stderr);
+            return Err(GitError::RebaseFailed(stderr.to_string().into()));
+        }
+
+        Ok(())
+    }
+
+    fn continue_rebase(&self) -> GitResult<RebaseResult> {
+        let output = std::process::Command::new("git")
+            .args(["rebase", "--continue"])
+            .current_dir(&self.workdir)
+            .output()
+            .map_err(|e| GitError::RebaseFailed(Box::new(e)))?;
+
+        if output.status.success() {
+            return Ok(RebaseResult {
+                completed: true,
+                conflicts: Vec::new(),
+            });
+        }
+
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        if stderr.contains("CONFLICT") || stderr.contains("conflict") {
+            let conflicts = collect_conflict_paths_from_workdir(&self.workdir);
+            return Ok(RebaseResult {
+                completed: false,
+                conflicts,
+            });
+        }
+
+        Err(GitError::RebaseFailed(stderr.to_string().into()))
+    }
+
+    fn get_rebase_state(&self) -> GitResult<Option<RebaseState>> {
+        let repo = self.repo.lock().unwrap();
+        let git_dir = repo.path();
+
+        let rebase_merge = git_dir.join("rebase-merge");
+        let rebase_apply = git_dir.join("rebase-apply");
+
+        let rebase_dir = if rebase_merge.is_dir() {
+            rebase_merge
+        } else if rebase_apply.is_dir() {
+            rebase_apply
+        } else {
+            return Ok(None);
+        };
+
+        let onto_oid = std::fs::read_to_string(rebase_dir.join("onto"))
+            .unwrap_or_default()
+            .trim()
+            .to_string();
+
+        let onto_branch = std::fs::read_to_string(rebase_dir.join("onto_name"))
+            .unwrap_or_else(|_| onto_oid.clone())
+            .trim()
+            .trim_start_matches("refs/heads/")
+            .to_string();
+
+        let current_step = std::fs::read_to_string(rebase_dir.join("msgnum"))
+            .unwrap_or_else(|_| "0".to_string())
+            .trim()
+            .parse::<usize>()
+            .unwrap_or(0);
+
+        let total_steps = std::fs::read_to_string(rebase_dir.join("end"))
+            .unwrap_or_else(|_| "0".to_string())
+            .trim()
+            .parse::<usize>()
+            .unwrap_or(0);
+
+        let index = repo
+            .index()
+            .map_err(|e| GitError::RebaseFailed(Box::new(e)))?;
+        let has_conflicts = index.has_conflicts();
+
+        Ok(Some(RebaseState {
+            onto_branch,
+            onto_oid,
+            current_step,
+            total_steps,
+            has_conflicts,
+        }))
+    }
+
+    fn get_rebase_todo(&self, onto: &str, limit: usize) -> GitResult<Vec<RebaseTodoEntry>> {
+        let repo = self.repo.lock().unwrap();
+
+        let onto_obj = repo
+            .revparse_single(onto)
+            .map_err(|e| GitError::RebaseFailed(Box::new(e)))?;
+        let onto_commit = onto_obj
+            .peel_to_commit()
+            .map_err(|e| GitError::RebaseFailed(Box::new(e)))?;
+
+        let head_commit = repo
+            .head()
+            .and_then(|h| h.peel_to_commit())
+            .map_err(|e| GitError::RebaseFailed(Box::new(e)))?;
+
+        let merge_base = repo
+            .merge_base(onto_commit.id(), head_commit.id())
+            .map_err(|e| GitError::RebaseFailed(Box::new(e)))?;
+
+        let mut revwalk = repo
+            .revwalk()
+            .map_err(|e| GitError::RebaseFailed(Box::new(e)))?;
+        revwalk.set_sorting(Sort::TOPOLOGICAL | Sort::REVERSE)
+            .map_err(|e| GitError::RebaseFailed(Box::new(e)))?;
+        revwalk.push(head_commit.id())
+            .map_err(|e| GitError::RebaseFailed(Box::new(e)))?;
+        revwalk.hide(merge_base)
+            .map_err(|e| GitError::RebaseFailed(Box::new(e)))?;
+
+        let mut entries = Vec::new();
+        for oid_result in revwalk {
+            if entries.len() >= limit {
+                break;
+            }
+            let oid = oid_result.map_err(|e| GitError::RebaseFailed(Box::new(e)))?;
+            let commit = repo
+                .find_commit(oid)
+                .map_err(|e| GitError::RebaseFailed(Box::new(e)))?;
+
+            let oid_str = oid.to_string();
+            let short_oid = oid_str[..7.min(oid_str.len())].to_string();
+            let message = commit
+                .summary()
+                .unwrap_or("")
+                .to_string();
+            let author_name = commit.author().name().unwrap_or("").to_string();
+
+            entries.push(RebaseTodoEntry {
+                action: RebaseAction::Pick,
+                oid: oid_str,
+                short_oid,
+                message,
+                author_name,
+            });
+        }
+
+        Ok(entries)
+    }
+
+    fn get_merge_base_content(&self, path: &str) -> GitResult<MergeBaseContent> {
+        let repo = self.repo.lock().unwrap();
+
+        let base_content = get_stage_blob_content(&repo, path, 1).ok();
+        let ours_content = get_stage_blob_content(&repo, path, 2)?;
+        let theirs_content = get_stage_blob_content(&repo, path, 3)?;
+
+        Ok(MergeBaseContent {
+            path: path.to_string(),
+            base_content,
+            ours_content,
+            theirs_content,
+        })
+    }
 }
 
 impl Git2Backend {
@@ -2146,6 +2408,24 @@ fn parse_diff_to_file_diffs(diff: &git2::Diff) -> Result<Vec<FileDiff>, git2::Er
     Ok(file_diffs)
 }
 
+fn collect_conflict_paths_from_workdir(workdir: &Path) -> Vec<String> {
+    let output = std::process::Command::new("git")
+        .args(["diff", "--name-only", "--diff-filter=U"])
+        .current_dir(workdir)
+        .output();
+
+    match output {
+        Ok(out) if out.status.success() => {
+            String::from_utf8_lossy(&out.stdout)
+                .lines()
+                .filter(|l| !l.is_empty())
+                .map(|l| l.to_string())
+                .collect()
+        }
+        _ => Vec::new(),
+    }
+}
+
 fn collect_conflict_paths(index: &git2::Index) -> Vec<String> {
     let mut paths = Vec::new();
     if let Ok(conflicts) = index.conflicts() {
@@ -2165,7 +2445,7 @@ fn collect_conflict_paths(index: &git2::Index) -> Vec<String> {
     paths
 }
 
-fn parse_one_block(lines: &[&str], start: usize) -> (String, String, usize) {
+fn parse_one_block(lines: &[&str], start: usize) -> (String, Option<String>, String, usize) {
     let mut i = start + 1; // skip <<<<<<<
     let mut ours = String::new();
     while i < lines.len() && !lines[i].starts_with("=======") && !lines[i].starts_with("|||||||") {
@@ -2173,13 +2453,19 @@ fn parse_one_block(lines: &[&str], start: usize) -> (String, String, usize) {
         ours.push('\n');
         i += 1;
     }
-    // skip diff3 base section (||||||| ... =======) if present
-    if i < lines.len() && lines[i].starts_with("|||||||") {
+    // capture diff3 base section (||||||| ... =======) if present
+    let base = if i < lines.len() && lines[i].starts_with("|||||||") {
         i += 1;
+        let mut base_content = String::new();
         while i < lines.len() && !lines[i].starts_with("=======") {
+            base_content.push_str(lines[i]);
+            base_content.push('\n');
             i += 1;
         }
-    }
+        Some(base_content)
+    } else {
+        None
+    };
     i += 1; // skip =======
     let mut theirs = String::new();
     while i < lines.len() && !lines[i].starts_with(">>>>>>>") {
@@ -2188,7 +2474,7 @@ fn parse_one_block(lines: &[&str], start: usize) -> (String, String, usize) {
         i += 1;
     }
     i += 1; // skip >>>>>>>
-    (ours, theirs, i)
+    (ours, base, theirs, i)
 }
 
 fn parse_conflict_markers(content: &str) -> Vec<ConflictBlock> {
@@ -2199,10 +2485,11 @@ fn parse_conflict_markers(content: &str) -> Vec<ConflictBlock> {
     while i < lines.len() {
         if lines[i].starts_with("<<<<<<<") {
             let start_line = (i + 1) as u32;
-            let (ours, theirs, next) = parse_one_block(&lines, i);
+            let (ours, base, theirs, next) = parse_one_block(&lines, i);
             let end_line = next as u32;
             blocks.push(ConflictBlock {
                 ours,
+                base,
                 theirs,
                 start_line,
                 end_line,
@@ -2259,7 +2546,7 @@ fn resolve_single_block(
     while i < lines.len() {
         if lines[i].starts_with("<<<<<<<") {
             if current_block == block_index {
-                let (ours, theirs, next) = parse_one_block(&lines, i);
+                let (ours, _base, theirs, next) = parse_one_block(&lines, i);
                 match resolution {
                     ConflictResolution::Ours => result.push_str(&ours),
                     ConflictResolution::Theirs => result.push_str(&theirs),
@@ -2341,6 +2628,7 @@ mod tests {
         let blocks = parse_conflict_markers(content);
         assert_eq!(blocks.len(), 1);
         assert_eq!(blocks[0].ours, "ours line\n");
+        assert_eq!(blocks[0].base, None);
         assert_eq!(blocks[0].theirs, "theirs line\n");
     }
 
@@ -2350,6 +2638,7 @@ mod tests {
         let blocks = parse_conflict_markers(content);
         assert_eq!(blocks.len(), 1);
         assert_eq!(blocks[0].ours, "ours line\n");
+        assert_eq!(blocks[0].base, Some("base line\n".to_string()));
         assert_eq!(blocks[0].theirs, "theirs line\n");
     }
 
@@ -2359,8 +2648,10 @@ mod tests {
         let blocks = parse_conflict_markers(content);
         assert_eq!(blocks.len(), 2);
         assert_eq!(blocks[0].ours, "a\n");
+        assert_eq!(blocks[0].base, None);
         assert_eq!(blocks[0].theirs, "b\n");
         assert_eq!(blocks[1].ours, "c\n");
+        assert_eq!(blocks[1].base, None);
         assert_eq!(blocks[1].theirs, "d\n");
     }
 
@@ -2370,6 +2661,7 @@ mod tests {
         let blocks = parse_conflict_markers(content);
         assert_eq!(blocks.len(), 1);
         assert_eq!(blocks[0].ours, "ours1\nours2\n");
+        assert_eq!(blocks[0].base, Some("base1\nbase2\nbase3\n".to_string()));
         assert_eq!(blocks[0].theirs, "theirs1\n");
     }
 

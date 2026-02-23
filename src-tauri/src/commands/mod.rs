@@ -3,6 +3,7 @@ pub mod config;
 pub mod conflict;
 pub mod git;
 pub mod history;
+pub mod rebase;
 pub mod remote;
 pub mod stash;
 pub mod tag;
