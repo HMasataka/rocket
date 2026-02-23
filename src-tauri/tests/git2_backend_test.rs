@@ -604,3 +604,60 @@ fn get_file_history_returns_only_touching_commits() {
     assert_eq!(history[0].message, "update tracked");
     assert_eq!(history[1].message, "add tracked");
 }
+
+#[test]
+fn list_branches_has_ahead_behind_zero_without_upstream() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+
+    let branches = backend.list_branches().unwrap();
+    let head = branches.iter().find(|b| b.is_head).unwrap();
+
+    assert_eq!(head.ahead_count, 0);
+    assert_eq!(head.behind_count, 0);
+}
+
+#[test]
+fn get_branch_commits_returns_commits_for_branch() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+
+    backend.create_branch("feature").unwrap();
+    backend.checkout_branch("feature").unwrap();
+
+    fs::write(tmp.path().join("feature.txt"), "feature work").unwrap();
+    backend.stage(Path::new("feature.txt")).unwrap();
+    backend.commit("feature commit").unwrap();
+
+    let commits = backend.get_branch_commits("feature", 10).unwrap();
+
+    assert_eq!(commits.len(), 2);
+    assert_eq!(commits[0].message, "feature commit");
+    assert_eq!(commits[1].message, "initial commit");
+}
+
+#[test]
+fn get_branch_commits_respects_limit() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+
+    for i in 0..5 {
+        let filename = format!("file{i}.txt");
+        fs::write(tmp.path().join(&filename), format!("content {i}")).unwrap();
+        backend.stage(Path::new(&filename)).unwrap();
+        backend.commit(&format!("commit {i}")).unwrap();
+    }
+
+    let commits = backend.get_branch_commits("main", 3).unwrap();
+
+    assert_eq!(commits.len(), 3);
+}
+
+#[test]
+fn get_branch_commits_nonexistent_branch_fails() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+
+    let result = backend.get_branch_commits("nonexistent", 10);
+    assert!(result.is_err());
+}

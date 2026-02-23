@@ -377,12 +377,32 @@ impl GitBackend for Git2Backend {
                 .ok()
                 .and_then(|u| u.name().ok().flatten().map(|s| s.to_string()));
 
+            let (ahead_count, behind_count) = if !is_remote {
+                branch
+                    .get()
+                    .target()
+                    .and_then(|local_oid| {
+                        branch
+                            .upstream()
+                            .ok()
+                            .and_then(|u| u.get().target())
+                            .and_then(|upstream_oid| {
+                                repo.graph_ahead_behind(local_oid, upstream_oid).ok()
+                            })
+                    })
+                    .unwrap_or((0, 0))
+            } else {
+                (0, 0)
+            };
+
             result.push(BranchInfo {
                 name,
                 is_head,
                 is_remote,
                 remote_name,
                 upstream,
+                ahead_count: ahead_count as u32,
+                behind_count: behind_count as u32,
             });
         }
         Ok(result)
@@ -966,6 +986,50 @@ impl GitBackend for Git2Backend {
                 skipped += 1;
                 continue;
             }
+
+            commits.push(commit_to_info(&commit, &ref_map));
+
+            if commits.len() >= limit {
+                break;
+            }
+        }
+
+        Ok(commits)
+    }
+
+    fn get_branch_commits(
+        &self,
+        branch_name: &str,
+        limit: usize,
+    ) -> GitResult<Vec<CommitInfo>> {
+        let repo = self.repo.lock().unwrap();
+
+        let branch = repo
+            .find_branch(branch_name, BranchType::Local)
+            .map_err(|e| GitError::LogFailed(Box::new(e)))?;
+        let branch_oid = branch
+            .get()
+            .target()
+            .ok_or_else(|| GitError::LogFailed("branch has no target".into()))?;
+
+        let mut revwalk = repo
+            .revwalk()
+            .map_err(|e| GitError::LogFailed(Box::new(e)))?;
+        revwalk
+            .set_sorting(Sort::TIME | Sort::TOPOLOGICAL)
+            .map_err(|e| GitError::LogFailed(Box::new(e)))?;
+        revwalk
+            .push(branch_oid)
+            .map_err(|e| GitError::LogFailed(Box::new(e)))?;
+
+        let ref_map = build_ref_map(&repo);
+        let mut commits = Vec::new();
+
+        for oid_result in revwalk {
+            let oid = oid_result.map_err(|e| GitError::LogFailed(Box::new(e)))?;
+            let commit = repo
+                .find_commit(oid)
+                .map_err(|e| GitError::LogFailed(Box::new(e)))?;
 
             commits.push(commit_to_info(&commit, &ref_map));
 
