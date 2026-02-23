@@ -1389,10 +1389,8 @@ impl GitBackend for Git2Backend {
         std::fs::write(&todo_file, &todo_content)
             .map_err(|e| GitError::RebaseFailed(Box::new(e)))?;
 
-        let editor_script = format!(
-            "cat '{}' > \"$1\"",
-            todo_file.display()
-        );
+        let escaped_path = todo_file.display().to_string().replace("'", "'\\''");
+        let editor_script = format!("cat '{}' > \"$1\"", escaped_path);
 
         let output = std::process::Command::new("git")
             .args(["rebase", "-i", onto])
