@@ -1102,3 +1102,197 @@ fn get_head_commit_message_returns_message() {
     let msg = backend.get_head_commit_message().unwrap();
     assert_eq!(msg.trim(), "initial commit");
 }
+
+// === Stash tests ===
+
+#[test]
+fn stash_save_and_list() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+
+    // Create a modification to stash
+    fs::write(tmp.path().join("init.txt"), "modified").unwrap();
+
+    backend.stash_save(Some("test stash")).unwrap();
+
+    let stashes = backend.stash_list().unwrap();
+    assert_eq!(stashes.len(), 1);
+    assert_eq!(stashes[0].index, 0);
+    assert!(stashes[0].message.contains("test stash"));
+}
+
+#[test]
+fn stash_list_empty() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+
+    let stashes = backend.stash_list().unwrap();
+    assert!(stashes.is_empty());
+}
+
+#[test]
+fn stash_apply_restores_changes() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+
+    fs::write(tmp.path().join("init.txt"), "modified").unwrap();
+    backend.stash_save(Some("to apply")).unwrap();
+
+    // Working tree should be clean after stash
+    let status = backend.status().unwrap();
+    assert!(status.files.is_empty());
+
+    backend.stash_apply(0).unwrap();
+
+    // Changes should be restored
+    let status = backend.status().unwrap();
+    assert!(!status.files.is_empty());
+
+    // Stash should still exist after apply
+    let stashes = backend.stash_list().unwrap();
+    assert_eq!(stashes.len(), 1);
+}
+
+#[test]
+fn stash_pop_restores_and_removes() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+
+    fs::write(tmp.path().join("init.txt"), "modified").unwrap();
+    backend.stash_save(Some("to pop")).unwrap();
+
+    backend.stash_pop(0).unwrap();
+
+    // Changes should be restored
+    let status = backend.status().unwrap();
+    assert!(!status.files.is_empty());
+
+    // Stash should be removed after pop
+    let stashes = backend.stash_list().unwrap();
+    assert!(stashes.is_empty());
+}
+
+#[test]
+fn stash_drop_removes_stash() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+
+    fs::write(tmp.path().join("init.txt"), "modified").unwrap();
+    backend.stash_save(Some("to drop")).unwrap();
+
+    backend.stash_drop(0).unwrap();
+
+    let stashes = backend.stash_list().unwrap();
+    assert!(stashes.is_empty());
+}
+
+#[test]
+fn stash_diff_returns_file_diffs() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+
+    fs::write(tmp.path().join("init.txt"), "modified content").unwrap();
+    backend.stash_save(Some("diff test")).unwrap();
+
+    let diffs = backend.stash_diff(0).unwrap();
+    assert!(!diffs.is_empty());
+    assert!(diffs[0].hunks.len() > 0);
+}
+
+#[test]
+fn stash_branch_name_parsed_from_message() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+
+    fs::write(tmp.path().join("init.txt"), "modified").unwrap();
+    backend.stash_save(None).unwrap();
+
+    let stashes = backend.stash_list().unwrap();
+    assert_eq!(stashes.len(), 1);
+    // Default stash message is "WIP on main: ..." so branch_name should be "main"
+    assert_eq!(stashes[0].branch_name, "main");
+}
+
+// === Tag tests ===
+
+#[test]
+fn list_tags_empty() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+
+    let tags = backend.list_tags().unwrap();
+    assert!(tags.is_empty());
+}
+
+#[test]
+fn create_lightweight_tag_and_list() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+
+    backend.create_tag("v0.1.0", None).unwrap();
+
+    let tags = backend.list_tags().unwrap();
+    assert_eq!(tags.len(), 1);
+    assert_eq!(tags[0].name, "v0.1.0");
+    assert!(!tags[0].is_annotated);
+    assert!(tags[0].message.is_none());
+}
+
+#[test]
+fn create_annotated_tag_and_list() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+
+    backend
+        .create_tag("v1.0.0", Some("Release 1.0"))
+        .unwrap();
+
+    let tags = backend.list_tags().unwrap();
+    assert_eq!(tags.len(), 1);
+    assert_eq!(tags[0].name, "v1.0.0");
+    assert!(tags[0].is_annotated);
+    assert_eq!(tags[0].message.as_deref(), Some("Release 1.0"));
+}
+
+#[test]
+fn delete_tag_removes_it() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+
+    backend.create_tag("to-delete", None).unwrap();
+    assert_eq!(backend.list_tags().unwrap().len(), 1);
+
+    backend.delete_tag("to-delete").unwrap();
+    assert!(backend.list_tags().unwrap().is_empty());
+}
+
+#[test]
+fn checkout_tag_detaches_head() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+
+    backend.create_tag("v0.1.0", None).unwrap();
+    backend.checkout_tag("v0.1.0").unwrap();
+
+    // HEAD should be detached, so current_branch returns an error or "HEAD"
+    let branch = backend.current_branch();
+    assert!(branch.is_err() || branch.unwrap().contains("HEAD"));
+}
+
+#[test]
+fn create_multiple_tags_and_list() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+
+    backend.create_tag("alpha", None).unwrap();
+    backend
+        .create_tag("beta", Some("Beta release"))
+        .unwrap();
+
+    let tags = backend.list_tags().unwrap();
+    assert_eq!(tags.len(), 2);
+
+    let names: Vec<&str> = tags.iter().map(|t| t.name.as_str()).collect();
+    assert!(names.contains(&"alpha"));
+    assert!(names.contains(&"beta"));
+}
