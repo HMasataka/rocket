@@ -45,6 +45,20 @@ export function BranchRow({ branch, isSelected, onSelect }: BranchRowProps) {
           {trackingLabel(branch)}
         </div>
       </div>
+      <div className="branch-status">
+        {branch.ahead_count > 0 && (
+          <span className="ahead">
+            {"\u2191"}
+            {branch.ahead_count}
+          </span>
+        )}
+        {branch.behind_count > 0 && (
+          <span className="behind">
+            {"\u2193"}
+            {branch.behind_count}
+          </span>
+        )}
+      </div>
       {branch.is_head && <span className="current-badge">HEAD</span>}
     </button>
   );

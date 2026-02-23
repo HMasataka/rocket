@@ -40,4 +40,5 @@ pub trait GitBackend: Send + Sync {
     fn get_blame(&self, path: &str, commit_oid: Option<&str>) -> GitResult<BlameResult>;
     fn get_file_history(&self, path: &str, limit: usize, skip: usize)
         -> GitResult<Vec<CommitInfo>>;
+    fn get_branch_commits(&self, branch_name: &str, limit: usize) -> GitResult<Vec<CommitInfo>>;
 }

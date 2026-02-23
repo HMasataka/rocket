@@ -97,6 +97,7 @@ pub fn run() {
             commands::branch::delete_branch,
             commands::branch::rename_branch,
             commands::branch::merge_branch,
+            commands::branch::get_branch_commits,
             commands::remote::fetch_remote,
             commands::remote::pull_remote,
             commands::remote::push_remote,

@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import type { MergeOption } from "../../services/git";
+import { getBranchCommits } from "../../services/git";
+import type { CommitInfo } from "../../services/history";
 import { useGitStore } from "../../stores/gitStore";
 import { useUIStore } from "../../stores/uiStore";
 import { BranchDetailPanel } from "./organisms/BranchDetailPanel";
@@ -25,12 +27,36 @@ export function BranchesPage() {
   const closeModal = useUIStore((s) => s.closeModal);
 
   const [selectedBranch, setSelectedBranch] = useState<string | null>(null);
+  const [branchCommits, setBranchCommits] = useState<CommitInfo[]>([]);
 
   useEffect(() => {
     fetchBranches().catch((e: unknown) => {
       addToast(String(e), "error");
     });
   }, [fetchBranches, addToast]);
+
+  useEffect(() => {
+    if (selectedBranch) return;
+    const head = branches.find((b) => b.is_head);
+    if (head) {
+      setSelectedBranch(head.name);
+    }
+  }, [branches, selectedBranch]);
+
+  useEffect(() => {
+    if (!selectedBranch) {
+      setBranchCommits([]);
+      return;
+    }
+    const branch = branches.find((b) => b.name === selectedBranch);
+    if (!branch || branch.is_remote) {
+      setBranchCommits([]);
+      return;
+    }
+    getBranchCommits(selectedBranch, 10)
+      .then(setBranchCommits)
+      .catch(() => setBranchCommits([]));
+  }, [selectedBranch, branches]);
 
   const selected = branches.find((b) => b.name === selectedBranch) ?? null;
 
@@ -133,6 +159,7 @@ export function BranchesPage() {
         />
         <BranchDetailPanel
           branch={selected}
+          commits={branchCommits}
           onSwitch={handleCheckoutBranch}
           onMerge={() => openModal("merge")}
         />

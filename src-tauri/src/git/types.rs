@@ -87,6 +87,8 @@ pub struct BranchInfo {
     pub is_remote: bool,
     pub remote_name: Option<String>,
     pub upstream: Option<String>,
+    pub ahead_count: u32,
+    pub behind_count: u32,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

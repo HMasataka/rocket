@@ -76,7 +76,8 @@
   cursor: pointer;
   transition: all 0.15s;
   background: none;
-  font-family: inherit;
+  color: inherit;
+  font: inherit;
   text-align: left;
 }
 
@@ -123,6 +124,20 @@
 .branch-tracking.local-only {
   color: var(--warning);
   font-style: italic;
+}
+
+.branch-status {
+  display: flex;
+  gap: 8px;
+  font-size: 11px;
+}
+
+.ahead {
+  color: var(--success);
+}
+
+.behind {
+  color: var(--warning);
 }
 
 .current-badge {

@@ -1,4 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
+import type { CommitInfo } from "./history";
 
 export type FileStatusKind =
   | "untracked"
@@ -89,6 +90,8 @@ export interface BranchInfo {
   is_remote: boolean;
   remote_name: string | null;
   upstream: string | null;
+  ahead_count: number;
+  behind_count: number;
 }
 
 export type MergeKind = "fast_forward" | "normal" | "rebase" | "up_to_date";
@@ -172,4 +175,11 @@ export function removeRemote(name: string): Promise<void> {
 
 export function editRemote(name: string, newUrl: string): Promise<void> {
   return invoke<void>("edit_remote", { name, newUrl });
+}
+
+export function getBranchCommits(
+  branchName: string,
+  limit: number,
+): Promise<CommitInfo[]> {
+  return invoke<CommitInfo[]>("get_branch_commits", { branchName, limit });
 }
