@@ -76,7 +76,8 @@
   cursor: pointer;
   transition: all 0.15s;
   background: none;
-  font-family: inherit;
+  color: inherit;
+  font: inherit;
   text-align: left;
 }
 
