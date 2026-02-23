@@ -1243,9 +1243,7 @@ fn create_annotated_tag_and_list() {
     let tmp = tempfile::tempdir().unwrap();
     let backend = init_repo_with_commit(tmp.path());
 
-    backend
-        .create_tag("v1.0.0", Some("Release 1.0"))
-        .unwrap();
+    backend.create_tag("v1.0.0", Some("Release 1.0")).unwrap();
 
     let tags = backend.list_tags().unwrap();
     assert_eq!(tags.len(), 1);
@@ -1285,9 +1283,7 @@ fn create_multiple_tags_and_list() {
     let backend = init_repo_with_commit(tmp.path());
 
     backend.create_tag("alpha", None).unwrap();
-    backend
-        .create_tag("beta", Some("Beta release"))
-        .unwrap();
+    backend.create_tag("beta", Some("Beta release")).unwrap();
 
     let tags = backend.list_tags().unwrap();
     assert_eq!(tags.len(), 2);

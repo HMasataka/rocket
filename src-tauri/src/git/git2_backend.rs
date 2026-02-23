@@ -1048,10 +1048,7 @@ impl GitBackend for Git2Backend {
         let stash_tree = stash_commit
             .tree()
             .map_err(|e| GitError::StashFailed(Box::new(e)))?;
-        let parent_tree = stash_commit
-            .parent(0)
-            .ok()
-            .and_then(|p| p.tree().ok());
+        let parent_tree = stash_commit.parent(0).ok().and_then(|p| p.tree().ok());
 
         let diff = repo
             .diff_tree_to_tree(parent_tree.as_ref(), Some(&stash_tree), None)
@@ -1098,9 +1095,7 @@ impl GitBackend for Git2Backend {
                     target_oid: commit_oid.to_string(),
                     target_short_oid,
                     is_annotated: true,
-                    tagger_name: tag_obj
-                        .tagger()
-                        .map(|t| t.name().unwrap_or("").to_string()),
+                    tagger_name: tag_obj.tagger().map(|t| t.name().unwrap_or("").to_string()),
                     tagger_date: tag_obj.tagger().map(|t| t.when().seconds()),
                     message: tag_obj.message().map(|m| m.to_string()),
                 });
@@ -1122,9 +1117,7 @@ impl GitBackend for Git2Backend {
 
     fn create_tag(&self, name: &str, message: Option<&str>) -> GitResult<()> {
         let repo = self.repo.lock().unwrap();
-        let head = repo
-            .head()
-            .map_err(|e| GitError::TagFailed(Box::new(e)))?;
+        let head = repo.head().map_err(|e| GitError::TagFailed(Box::new(e)))?;
         let target = head
             .peel(git2::ObjectType::Commit)
             .map_err(|e| GitError::TagFailed(Box::new(e)))?;
