@@ -10,6 +10,7 @@ describe("uiStore", () => {
       activePage: "changes",
       activeModal: null,
       toasts: [],
+      diffViewMode: "inline",
     });
   });
 
@@ -126,6 +127,23 @@ describe("uiStore", () => {
       useUIStore.getState().openModal("merge");
 
       expect(useUIStore.getState().activeModal).toBe("merge");
+    });
+  });
+
+  describe("setDiffViewMode", () => {
+    it("defaults to inline", () => {
+      expect(useUIStore.getState().diffViewMode).toBe("inline");
+    });
+
+    it("switches to split mode", () => {
+      useUIStore.getState().setDiffViewMode("split");
+      expect(useUIStore.getState().diffViewMode).toBe("split");
+    });
+
+    it("switches back to inline mode", () => {
+      useUIStore.getState().setDiffViewMode("split");
+      useUIStore.getState().setDiffViewMode("inline");
+      expect(useUIStore.getState().diffViewMode).toBe("inline");
     });
   });
 });

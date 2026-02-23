@@ -23,6 +23,8 @@ interface Toast {
   kind: ToastKind;
 }
 
+export type DiffViewMode = "inline" | "split";
+
 interface UIState {
   selectedFile: string | null;
   selectedFileStaged: boolean;
@@ -31,6 +33,7 @@ interface UIState {
   toasts: Toast[];
   blameTarget: BlameTarget | null;
   fileHistoryTarget: FileHistoryTarget | null;
+  diffViewMode: DiffViewMode;
 }
 
 interface UIActions {
@@ -43,6 +46,7 @@ interface UIActions {
   removeToast: (id: number) => void;
   openBlame: (path: string, commitOid: string | null) => void;
   openFileHistory: (path: string) => void;
+  setDiffViewMode: (mode: DiffViewMode) => void;
 }
 
 const AUTO_DISMISS_MS = 4000;
@@ -56,6 +60,7 @@ export const useUIStore = create<UIState & UIActions>((set) => ({
   toasts: [],
   blameTarget: null,
   fileHistoryTarget: null,
+  diffViewMode: "inline" as DiffViewMode,
 
   selectFile: (path: string, staged: boolean) => {
     set({ selectedFile: path, selectedFileStaged: staged });
@@ -101,5 +106,9 @@ export const useUIStore = create<UIState & UIActions>((set) => ({
 
   openFileHistory: (path: string) => {
     set({ fileHistoryTarget: { path }, activePage: "file-history" });
+  },
+
+  setDiffViewMode: (mode: DiffViewMode) => {
+    set({ diffViewMode: mode });
   },
 }));
