@@ -125,6 +125,20 @@
   font-style: italic;
 }
 
+.branch-status {
+  display: flex;
+  gap: 8px;
+  font-size: 11px;
+}
+
+.ahead {
+  color: var(--success);
+}
+
+.behind {
+  color: var(--warning);
+}
+
 .current-badge {
   padding: 3px 8px;
   background: var(--accent);
