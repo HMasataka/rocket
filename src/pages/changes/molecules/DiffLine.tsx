@@ -6,6 +6,9 @@ import { segmentKey, wordHighlightClass } from "../utils/diffUtils";
 
 interface DiffLineProps {
   line: DiffLineType;
+  lineKey?: string;
+  selected?: boolean;
+  onToggleLine?: (lineKey: string) => void;
 }
 
 function lineClass(kind: DiffLineType["kind"]): string {
@@ -40,9 +43,29 @@ function renderContent(line: DiffLineType) {
   );
 }
 
-export function DiffLineRow({ line }: DiffLineProps) {
+export function DiffLineRow({
+  line,
+  lineKey,
+  selected,
+  onToggleLine,
+}: DiffLineProps) {
+  const showCheckbox =
+    onToggleLine &&
+    lineKey &&
+    (line.kind === "addition" || line.kind === "deletion");
+
   return (
     <div className={lineClass(line.kind)}>
+      {showCheckbox ? (
+        <input
+          type="checkbox"
+          className="line-checkbox"
+          checked={selected ?? false}
+          onChange={() => onToggleLine(lineKey)}
+        />
+      ) : (
+        <span className="line-checkbox-placeholder" />
+      )}
       <span className="line-num">{line.old_lineno ?? ""}</span>
       <span className="line-num">{line.new_lineno ?? ""}</span>
       {renderContent(line)}
