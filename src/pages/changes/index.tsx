@@ -71,9 +71,9 @@ export function ChangesPage() {
   }, [unstageAllAction, fetchStatus]);
 
   const handleCommit = useCallback(
-    async (message: string) => {
+    async (message: string, amend: boolean) => {
       try {
-        await commitAction(message);
+        await commitAction(message, amend);
         addToast("Commit created successfully", "success");
         await fetchStatus();
       } catch (e: unknown) {

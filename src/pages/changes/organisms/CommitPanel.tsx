@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "../../../components/atoms/Button";
 
 interface CommitPanelProps {
-  onCommit: (message: string) => void;
+  onCommit: (message: string, amend: boolean) => void;
   hasStagedFiles: boolean;
 }
 
@@ -12,7 +12,7 @@ export function CommitPanel({ onCommit, hasStagedFiles }: CommitPanelProps) {
 
   const handleCommit = () => {
     const message = body.trim() ? `${subject}\n\n${body}` : subject;
-    onCommit(message);
+    onCommit(message, false);
     setSubject("");
     setBody("");
   };

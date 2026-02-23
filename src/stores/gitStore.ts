@@ -4,6 +4,7 @@ import type {
   FetchResult,
   FileDiff,
   HunkIdentifier,
+  LineRange,
   MergeOption,
   MergeResult,
   PullOption,
@@ -18,8 +19,10 @@ import {
   createBranch as createBranchService,
   deleteBranch as deleteBranchService,
   discardHunk as discardHunkService,
+  discardLines as discardLinesService,
   editRemote as editRemoteService,
   fetchRemote as fetchRemoteService,
+  getHeadCommitMessage,
   getCurrentBranch,
   getDiff,
   getStatus,
@@ -33,9 +36,11 @@ import {
   stageAll as stageAllService,
   stageFile as stageFileService,
   stageHunk as stageHunkService,
+  stageLines as stageLinesService,
   unstageAll as unstageAllService,
   unstageFile as unstageFileService,
   unstageHunk as unstageHunkService,
+  unstageLines as unstageLinesService,
 } from "../services/git";
 
 interface GitState {
@@ -57,7 +62,7 @@ interface GitActions {
   unstageFile: (path: string) => Promise<void>;
   stageAll: () => Promise<void>;
   unstageAll: () => Promise<void>;
-  commit: (message: string) => Promise<string>;
+  commit: (message: string, amend: boolean) => Promise<string>;
   createBranch: (name: string) => Promise<void>;
   checkoutBranch: (name: string) => Promise<void>;
   deleteBranch: (name: string) => Promise<void>;
@@ -76,6 +81,10 @@ interface GitActions {
   stageHunk: (path: string, hunk: HunkIdentifier) => Promise<void>;
   unstageHunk: (path: string, hunk: HunkIdentifier) => Promise<void>;
   discardHunk: (path: string, hunk: HunkIdentifier) => Promise<void>;
+  stageLines: (path: string, lineRange: LineRange) => Promise<void>;
+  unstageLines: (path: string, lineRange: LineRange) => Promise<void>;
+  discardLines: (path: string, lineRange: LineRange) => Promise<void>;
+  getHeadCommitMessage: () => Promise<string>;
   clearError: () => void;
 }
 
@@ -165,9 +174,9 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
     }
   },
 
-  commit: async (message: string) => {
+  commit: async (message: string, amend: boolean) => {
     try {
-      const result = await commitChanges(message);
+      const result = await commitChanges(message, amend);
       return result.oid;
     } catch (e) {
       set({ error: String(e) });
@@ -305,6 +314,42 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
   discardHunk: async (path: string, hunk: HunkIdentifier) => {
     try {
       await discardHunkService(path, hunk);
+    } catch (e) {
+      set({ error: String(e) });
+      throw e;
+    }
+  },
+
+  stageLines: async (path: string, lineRange: LineRange) => {
+    try {
+      await stageLinesService(path, lineRange);
+    } catch (e) {
+      set({ error: String(e) });
+      throw e;
+    }
+  },
+
+  unstageLines: async (path: string, lineRange: LineRange) => {
+    try {
+      await unstageLinesService(path, lineRange);
+    } catch (e) {
+      set({ error: String(e) });
+      throw e;
+    }
+  },
+
+  discardLines: async (path: string, lineRange: LineRange) => {
+    try {
+      await discardLinesService(path, lineRange);
+    } catch (e) {
+      set({ error: String(e) });
+      throw e;
+    }
+  },
+
+  getHeadCommitMessage: async () => {
+    try {
+      return await getHeadCommitMessage();
     } catch (e) {
       set({ error: String(e) });
       throw e;

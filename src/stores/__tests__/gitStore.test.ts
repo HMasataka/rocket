@@ -92,7 +92,7 @@ describe("gitStore", () => {
     it("returns oid on success", async () => {
       mockedInvoke.mockResolvedValueOnce({ oid: "abc123" });
 
-      const oid = await useGitStore.getState().commit("test message");
+      const oid = await useGitStore.getState().commit("test message", false);
 
       expect(oid).toBe("abc123");
     });
@@ -100,7 +100,9 @@ describe("gitStore", () => {
     it("sets error on failure", async () => {
       mockedInvoke.mockRejectedValueOnce(new Error("commit error"));
 
-      await expect(useGitStore.getState().commit("test")).rejects.toThrow();
+      await expect(
+        useGitStore.getState().commit("test", false),
+      ).rejects.toThrow();
 
       expect(useGitStore.getState().error).toContain("commit error");
     });
