@@ -1385,21 +1385,35 @@ impl GitBackend for Git2Backend {
             .collect::<Vec<_>>()
             .join("\n");
 
-        let todo_file = self.workdir.join(".git").join("rocket-rebase-todo");
+        let git_dir = self.workdir.join(".git");
+        let todo_file = git_dir.join("rocket-rebase-todo");
         std::fs::write(&todo_file, &todo_content)
             .map_err(|e| GitError::RebaseFailed(Box::new(e)))?;
 
-        let escaped_path = todo_file.display().to_string().replace("'", "'\\''");
-        let editor_script = format!("cat '{}' > \"$1\"", escaped_path);
+        let editor_file = git_dir.join("rocket-rebase-editor.sh");
+        let editor_content = format!(
+            "#!/bin/sh\ncp '{}' \"$1\"\n",
+            todo_file.display().to_string().replace("'", "'\\''")
+        );
+        std::fs::write(&editor_file, &editor_content)
+            .map_err(|e| GitError::RebaseFailed(Box::new(e)))?;
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            std::fs::set_permissions(&editor_file, std::fs::Permissions::from_mode(0o755))
+                .map_err(|e| GitError::RebaseFailed(Box::new(e)))?;
+        }
 
         let output = std::process::Command::new("git")
             .args(["rebase", "-i", onto])
-            .env("GIT_SEQUENCE_EDITOR", editor_script)
+            .env("GIT_SEQUENCE_EDITOR", editor_file.display().to_string())
+            .env("GIT_EDITOR", "true")
             .current_dir(&self.workdir)
             .output()
             .map_err(|e| GitError::RebaseFailed(Box::new(e)))?;
 
         let _ = std::fs::remove_file(&todo_file);
+        let _ = std::fs::remove_file(&editor_file);
 
         if output.status.success() {
             return Ok(RebaseResult {
