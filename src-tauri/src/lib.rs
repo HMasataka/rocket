@@ -1,7 +1,7 @@
-mod commands;
+pub mod commands;
 mod config;
 pub mod git;
-mod state;
+pub mod state;
 mod watcher;
 
 use std::sync::Mutex;
