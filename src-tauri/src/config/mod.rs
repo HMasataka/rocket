@@ -3,11 +3,14 @@ use std::path::PathBuf;
 
 use serde::{Deserialize, Serialize};
 
+use crate::ai::types::AiConfig;
 use crate::git::error::{GitError, GitResult};
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct AppConfig {
     pub last_opened_repo: Option<String>,
+    #[serde(default)]
+    pub ai: AiConfig,
 }
 
 fn config_path() -> GitResult<PathBuf> {
@@ -51,6 +54,7 @@ mod tests {
     fn config_serialization_roundtrip() {
         let config = AppConfig {
             last_opened_repo: Some("/tmp/test-repo".to_string()),
+            ai: AiConfig::default(),
         };
         let serialized = toml::to_string(&config).unwrap();
         let deserialized: AppConfig = toml::from_str(&serialized).unwrap();

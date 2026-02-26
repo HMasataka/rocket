@@ -1,3 +1,4 @@
+pub mod ai;
 pub mod commands;
 mod config;
 pub mod git;
@@ -142,6 +143,10 @@ pub fn run() {
             commands::rebase::get_rebase_state,
             commands::rebase::get_rebase_todo,
             commands::rebase::get_merge_base_content,
+            commands::ai::detect_cli_adapters,
+            commands::ai::generate_commit_message,
+            commands::ai::get_ai_config,
+            commands::ai::save_ai_config,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
