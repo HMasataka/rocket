@@ -33,103 +33,23 @@
   height: 18px;
 }
 
-/* ===== AI Commit Modal ===== */
-.ai-settings-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
-}
-
-.ai-settings-row label {
-  font-size: 13px;
-  color: var(--text-secondary);
-}
-
-.ai-generating {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 40px;
-  color: var(--text-muted);
-}
-
-.ai-spinner {
-  width: 20px;
-  height: 20px;
-  border: 2px solid var(--border);
-  border-top-color: var(--accent);
+/* ===== AI Spinner (inline in button) ===== */
+.ai-generate-btn .ai-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--purple);
+  border-top-color: transparent;
   border-radius: 50%;
   animation: ai-spin 1s linear infinite;
+}
+
+.ai-generate-btn:hover .ai-spinner {
+  border-color: rgba(255, 255, 255, 0.4);
+  border-top-color: transparent;
 }
 
 @keyframes ai-spin {
   to {
     transform: rotate(360deg);
   }
-}
-
-.ai-result {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.ai-suggestion {
-  padding: 16px;
-  background: var(--bg-tertiary);
-  border-radius: 8px;
-  border: 1px solid var(--accent);
-}
-
-.suggestion-subject {
-  font-size: 14px;
-  font-weight: 600;
-  margin-bottom: 8px;
-}
-
-.suggestion-body {
-  font-size: 12px;
-  color: var(--text-secondary);
-  white-space: pre-line;
-}
-
-.ai-alternatives {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.alternatives-label {
-  font-size: 12px;
-  color: var(--text-muted);
-}
-
-.alt-btn {
-  padding: 6px 12px;
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  color: var(--text-secondary);
-  font-size: 11px;
-  font-family: inherit;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.alt-btn:hover {
-  background: var(--bg-hover);
-  color: var(--text-primary);
-}
-
-.ai-error {
-  padding: 12px 16px;
-  background: var(--bg-tertiary);
-  border: 1px solid var(--red, #f87171);
-  border-radius: 8px;
-  color: var(--red, #f87171);
-  font-size: 13px;
 }
