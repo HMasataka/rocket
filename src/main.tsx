@@ -14,6 +14,7 @@ import "./styles/file-history.css";
 import "./styles/stash.css";
 import "./styles/tags.css";
 import "./styles/conflict.css";
+import "./styles/ai.css";
 
 const root = document.getElementById("root");
 if (!root) throw new Error("Root element not found");
