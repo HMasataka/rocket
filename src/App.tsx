@@ -1,6 +1,7 @@
 import { useCallback, useEffect } from "react";
 import { PullDialog } from "./components/organisms/PullDialog";
 import { RemoteModal } from "./components/organisms/RemoteModal";
+import { SettingsModal } from "./components/organisms/SettingsModal";
 import { TagsModal } from "./components/organisms/TagsModal";
 import { ToastContainer } from "./components/organisms/ToastContainer";
 import { AppShell } from "./components/templates/AppShell";
@@ -159,6 +160,7 @@ export function App() {
         />
       )}
       {activeModal === "conflict" && <ConflictModal />}
+      {activeModal === "settings" && <SettingsModal onClose={closeModal} />}
     </>
   );
 }

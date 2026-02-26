@@ -5,10 +5,18 @@ interface ModalProps {
   children: ReactNode;
   footer?: ReactNode;
   width?: number;
+  className?: string;
   onClose: () => void;
 }
 
-export function Modal({ title, children, footer, width, onClose }: ModalProps) {
+export function Modal({
+  title,
+  children,
+  footer,
+  width,
+  className,
+  onClose,
+}: ModalProps) {
   const handleOverlayClick = useCallback(() => {
     onClose();
   }, [onClose]);
@@ -33,7 +41,10 @@ export function Modal({ title, children, footer, width, onClose }: ModalProps) {
           if (e.key === "Escape") onClose();
         }}
       />
-      <div className="modal active" style={width ? { width } : undefined}>
+      <div
+        className={`modal active${className ? ` ${className}` : ""}`}
+        style={width ? { width } : undefined}
+      >
         <div className="modal-header">
           <span className="modal-title">{title}</span>
           <button type="button" className="modal-close" onClick={onClose}>
