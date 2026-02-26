@@ -65,7 +65,11 @@ pub fn generate_commit_message(
         return Err("No staged changes to generate a commit message from".to_string());
     }
 
-    let adapter = detector::first_available_adapter()
+    let ai_config = config::load_config()
+        .map(|c| c.ai)
+        .unwrap_or_default();
+
+    let adapter = detector::first_available_adapter_with_priority(&ai_config.provider_priority)
         .ok_or("No AI CLI adapter available. Install one of: claude, codex, gemini, aider, llm")?;
 
     let request = GenerateRequest {

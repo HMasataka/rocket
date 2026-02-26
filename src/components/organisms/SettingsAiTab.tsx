@@ -1,7 +1,19 @@
-import { type ChangeEvent, useCallback, useEffect } from "react";
+import {
+  type ChangeEvent,
+  type DragEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import type { CommitMessageStyle, Language } from "../../services/ai";
 import { useAiStore } from "../../stores/aiStore";
 import { useUIStore } from "../../stores/uiStore";
+import {
+  findFirstAvailableIndex,
+  sortAdaptersByPriority,
+} from "./providerPriority";
 
 export function SettingsAiTab() {
   const adapters = useAiStore((s) => s.adapters);
@@ -19,6 +31,64 @@ export function SettingsAiTab() {
       addToast(String(e), "error");
     });
   }, [fetchConfig, detectAdapters, addToast]);
+
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
+  const dragSourceIndex = useRef<number | null>(null);
+
+  const sortedAdapters = useMemo(
+    () => sortAdaptersByPriority(adapters, config?.provider_priority ?? []),
+    [adapters, config?.provider_priority],
+  );
+
+  const firstAvailableIndex = useMemo(
+    () => findFirstAvailableIndex(sortedAdapters),
+    [sortedAdapters],
+  );
+
+  const handleDragStart = useCallback((index: number) => {
+    dragSourceIndex.current = index;
+    setDraggingIndex(index);
+  }, []);
+
+  const handleDragOver = useCallback(
+    (e: DragEvent<HTMLDivElement>, index: number) => {
+      e.preventDefault();
+      setDragOverIndex(index);
+    },
+    [],
+  );
+
+  const handleDragLeave = useCallback(() => {
+    setDragOverIndex(null);
+  }, []);
+
+  const handleDrop = useCallback(
+    (targetIndex: number) => {
+      setDragOverIndex(null);
+      const sourceIndex = dragSourceIndex.current;
+      dragSourceIndex.current = null;
+      if (sourceIndex === null || sourceIndex === targetIndex) return;
+      if (!config) return;
+
+      const names = sortedAdapters.map((a) => a.name);
+      const [moved] = names.splice(sourceIndex, 1);
+      names.splice(targetIndex, 0, moved);
+
+      saveConfig({ ...config, provider_priority: names }).catch(
+        (err: unknown) => {
+          addToast(String(err), "error");
+        },
+      );
+    },
+    [config, sortedAdapters, saveConfig, addToast],
+  );
+
+  const handleDragEnd = useCallback(() => {
+    dragSourceIndex.current = null;
+    setDragOverIndex(null);
+    setDraggingIndex(null);
+  }, []);
 
   const handleStyleChange = useCallback(
     (e: ChangeEvent<HTMLSelectElement>) => {
@@ -49,25 +119,34 @@ export function SettingsAiTab() {
   return (
     <div className="settings-tab">
       <div className="settings-section">
-        <h3>LLM CLI Adapters</h3>
-        <div className="settings-hint" style={{ marginBottom: 10 }}>
-          CLI tools detected in PATH.
+        <h3>Provider Priority</h3>
+        <div className="settings-hint">
+          Drag to reorder. The highest available provider is used for AI
+          requests.
         </div>
-        <div className="cli-adapter-list">
-          {adapters.map((adapter) => (
-            <div key={adapter.name} className="cli-adapter-item">
-              <div className="cli-adapter-info">
-                <span className="cli-adapter-name">{adapter.name}</span>
-                <code className="cli-adapter-cmd">{adapter.command}</code>
-              </div>
+        <ol className="provider-priority-list">
+          {sortedAdapters.map((adapter, index) => (
+            <li
+              key={adapter.name}
+              className={`provider-priority-item${index === firstAvailableIndex ? " active" : ""}${draggingIndex === index ? " dragging" : ""}${dragOverIndex === index ? " drag-over" : ""}`}
+              draggable
+              onDragStart={() => handleDragStart(index)}
+              onDragOver={(e) => handleDragOver(e, index)}
+              onDragLeave={handleDragLeave}
+              onDrop={() => handleDrop(index)}
+              onDragEnd={handleDragEnd}
+            >
+              <span className="provider-priority-num">{index + 1}</span>
+              <span className="provider-priority-name">{adapter.name}</span>
+              <span className="provider-priority-desc">{adapter.command}</span>
               <span
                 className={`provider-priority-status ${adapter.available ? "available" : "unavailable"}`}
               >
                 {adapter.available ? "Detected" : "Not found"}
               </span>
-            </div>
+            </li>
           ))}
-        </div>
+        </ol>
       </div>
 
       <div className="settings-section">
@@ -85,7 +164,7 @@ export function SettingsAiTab() {
             <option value="detailed">Detailed</option>
           </select>
         </div>
-        <div className="setting-row" style={{ marginTop: 8 }}>
+        <div className="setting-row">
           <label htmlFor="commit-language-select">Language</label>
           <select
             id="commit-language-select"

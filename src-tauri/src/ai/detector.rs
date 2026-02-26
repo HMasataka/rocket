@@ -54,7 +54,7 @@ pub fn detect_cli_adapters() -> Vec<CliAdapterInfo> {
         .collect()
 }
 
-pub fn first_available_adapter() -> Option<CliAdapter> {
+fn first_available_adapter() -> Option<CliAdapter> {
     PRESET_CLIS
         .iter()
         .find(|preset| which::which(preset.command).is_ok())
@@ -65,6 +65,24 @@ pub fn first_available_adapter() -> Option<CliAdapter> {
                 preset.args.iter().map(|s| s.to_string()).collect(),
             )
         })
+}
+
+pub fn first_available_adapter_with_priority(priority: &[String]) -> Option<CliAdapter> {
+    if priority.is_empty() {
+        return first_available_adapter();
+    }
+    for name in priority {
+        if let Some(preset) = PRESET_CLIS.iter().find(|p| p.name == name) {
+            if which::which(preset.command).is_ok() {
+                return Some(CliAdapter::new(
+                    preset.name.to_string(),
+                    preset.command.to_string(),
+                    preset.args.iter().map(|s| s.to_string()).collect(),
+                ));
+            }
+        }
+    }
+    None
 }
 
 #[cfg(test)]
@@ -79,4 +97,23 @@ mod tests {
         assert_eq!(adapters[0].command, "claude");
     }
 
+    #[test]
+    fn priority_with_empty_list_delegates_to_default() {
+        let from_priority = first_available_adapter_with_priority(&[]);
+        let from_default = first_available_adapter();
+        match (from_priority, from_default) {
+            (Some(p), Some(d)) => assert_eq!(p.adapter_name, d.adapter_name),
+            (None, None) => {}
+            _ => panic!("empty priority should match default behavior"),
+        }
+    }
+
+    #[test]
+    fn priority_with_unknown_names_returns_none() {
+        let result = first_available_adapter_with_priority(&[
+            "NonExistent Tool".to_string(),
+            "Another Fake".to_string(),
+        ]);
+        assert!(result.is_none());
+    }
 }

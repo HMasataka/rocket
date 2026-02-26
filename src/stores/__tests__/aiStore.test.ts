@@ -100,6 +100,7 @@ describe("aiStore", () => {
       const mockConfig = {
         commit_message_style: "conventional",
         commit_message_language: "en",
+        provider_priority: [],
       };
       mockedInvoke.mockResolvedValueOnce(mockConfig);
 
@@ -123,6 +124,7 @@ describe("aiStore", () => {
       const mockConfig = {
         commit_message_style: "detailed" as const,
         commit_message_language: "ja" as const,
+        provider_priority: ["Claude Code"],
       };
       mockedInvoke.mockResolvedValueOnce(undefined);
 
@@ -141,6 +143,7 @@ describe("aiStore", () => {
         useAiStore.getState().saveConfig({
           commit_message_style: "conventional",
           commit_message_language: "en",
+          provider_priority: [],
         }),
       ).rejects.toThrow();
 

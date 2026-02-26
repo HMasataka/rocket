@@ -18,6 +18,7 @@ export interface GenerateResult {
 export interface AiConfig {
   commit_message_style: CommitMessageStyle;
   commit_message_language: Language;
+  provider_priority: string[];
 }
 
 export function detectCliAdapters(): Promise<CliAdapterInfo[]> {

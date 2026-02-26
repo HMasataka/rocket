@@ -23,6 +23,8 @@ pub struct AiConfig {
     pub commit_message_style: CommitMessageStyle,
     #[serde(default)]
     pub commit_message_language: Language,
+    #[serde(default)]
+    pub provider_priority: Vec<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -67,6 +69,7 @@ mod tests {
         let config = AiConfig::default();
         assert_eq!(config.commit_message_style, CommitMessageStyle::Conventional);
         assert_eq!(config.commit_message_language, Language::En);
+        assert!(config.provider_priority.is_empty());
     }
 
     #[test]
@@ -74,11 +77,13 @@ mod tests {
         let config = AiConfig {
             commit_message_style: CommitMessageStyle::Detailed,
             commit_message_language: Language::Ja,
+            provider_priority: vec!["Claude Code".to_string(), "LLM CLI".to_string()],
         };
         let serialized = toml::to_string(&config).unwrap();
         let deserialized: AiConfig = toml::from_str(&serialized).unwrap();
         assert_eq!(deserialized.commit_message_style, CommitMessageStyle::Detailed);
         assert_eq!(deserialized.commit_message_language, Language::Ja);
+        assert_eq!(deserialized.provider_priority, vec!["Claude Code", "LLM CLI"]);
     }
 
     #[test]
@@ -86,6 +91,7 @@ mod tests {
         let config: AiConfig = toml::from_str("").unwrap();
         assert_eq!(config.commit_message_style, CommitMessageStyle::Conventional);
         assert_eq!(config.commit_message_language, Language::En);
+        assert!(config.provider_priority.is_empty());
     }
 
     #[test]
