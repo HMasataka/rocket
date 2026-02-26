@@ -1,36 +1,26 @@
 /* ===== AI Generate Button in Commit Panel ===== */
 .commit-input-group {
   display: flex;
-  align-items: center;
-  gap: 0;
-}
-
-.commit-input-group .commit-subject {
-  flex: 1;
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
+  gap: 8px;
 }
 
 .ai-generate-btn {
+  width: 40px;
+  border: 1px solid var(--purple);
+  border-radius: 6px;
+  background: var(--purple-dim);
+  color: var(--purple);
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  border: 1px solid var(--border);
-  border-left: none;
-  border-radius: 0 6px 6px 0;
-  background: var(--bg-tertiary);
-  color: var(--purple, #a78bfa);
   cursor: pointer;
   transition: all 0.15s ease;
   flex-shrink: 0;
 }
 
 .ai-generate-btn:hover {
-  background: var(--bg-hover);
-  color: var(--purple-dim, #c4b5fd);
+  background: var(--purple);
+  color: #fff;
 }
 
 .ai-generate-btn:disabled {
@@ -39,8 +29,8 @@
 }
 
 .ai-generate-btn svg {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
 }
 
 /* ===== AI Commit Modal ===== */
