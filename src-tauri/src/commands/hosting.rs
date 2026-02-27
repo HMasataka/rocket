@@ -1,4 +1,5 @@
 use tauri::State;
+use tauri_plugin_opener::OpenerExt;
 
 use crate::hosting::detector;
 use crate::hosting::github;
@@ -64,7 +65,8 @@ pub fn create_pull_request_url(
 }
 
 #[tauri::command]
-pub fn open_in_browser(state: State<'_, AppState>, url: String) -> Result<(), String> {
-    let repo_path = get_repo_path(&state)?;
-    github::open_in_browser(&repo_path, &url)
+pub fn open_in_browser(app: tauri::AppHandle, url: String) -> Result<(), String> {
+    app.opener()
+        .open_url(&url, None::<&str>)
+        .map_err(|e| format!("failed to open browser: {e}"))
 }

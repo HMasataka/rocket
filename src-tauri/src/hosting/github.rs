@@ -116,33 +116,6 @@ pub fn create_pull_request_url(repo_path: &str, head: &str, base: &str) -> Resul
     Ok(format!("{repo_url}/compare/{base}...{head}?expand=1"))
 }
 
-pub fn open_in_browser(repo_path: &str, url: &str) -> Result<(), String> {
-    #[cfg(target_os = "macos")]
-    let cmd = "open";
-    #[cfg(target_os = "linux")]
-    let cmd = "xdg-open";
-    #[cfg(target_os = "windows")]
-    let cmd = "cmd";
-
-    #[cfg(target_os = "windows")]
-    let args = vec!["/C", "start", "", url];
-    #[cfg(not(target_os = "windows"))]
-    let args = vec![url];
-
-    let output = Command::new(cmd)
-        .args(&args)
-        .current_dir(repo_path)
-        .output()
-        .map_err(|e| format!("failed to open browser: {e}"))?;
-
-    if !output.status.success() {
-        let stderr = String::from_utf8_lossy(&output.stderr);
-        return Err(format!("open failed: {stderr}"));
-    }
-
-    Ok(())
-}
-
 fn parse_pr_list_json(json: &str) -> Result<Vec<PullRequest>, String> {
     let raw: Vec<serde_json::Value> =
         serde_json::from_str(json).map_err(|e| format!("failed to parse JSON: {e}"))?;

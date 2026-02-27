@@ -55,6 +55,7 @@ pub fn run() {
     });
 
     tauri::Builder::default()
+        .plugin(tauri_plugin_opener::init())
         .manage(AppState {
             repo: Mutex::new(repo),
             watcher: Mutex::new(None),
