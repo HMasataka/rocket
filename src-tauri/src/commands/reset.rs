@@ -18,11 +18,7 @@ pub fn reset(
 }
 
 #[tauri::command]
-pub fn reset_file(
-    path: String,
-    oid: String,
-    state: State<'_, AppState>,
-) -> Result<(), String> {
+pub fn reset_file(path: String, oid: String, state: State<'_, AppState>) -> Result<(), String> {
     let repo_lock = state
         .repo
         .lock()

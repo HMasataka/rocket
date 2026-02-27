@@ -1975,7 +1975,10 @@ fn reset_soft_moves_head_preserves_staging() {
         .iter()
         .filter(|f| f.staging == app_lib::git::types::StagingState::Staged)
         .collect();
-    assert!(!staged_files.is_empty(), "Soft reset should keep changes staged");
+    assert!(
+        !staged_files.is_empty(),
+        "Soft reset should keep changes staged"
+    );
 }
 
 #[test]
@@ -2008,7 +2011,9 @@ fn reset_mixed_moves_head_unstages_changes() {
     let unstaged: Vec<_> = status
         .files
         .iter()
-        .filter(|f| f.path == "mixed.txt" && f.staging == app_lib::git::types::StagingState::Unstaged)
+        .filter(|f| {
+            f.path == "mixed.txt" && f.staging == app_lib::git::types::StagingState::Unstaged
+        })
         .collect();
     assert!(!unstaged.is_empty(), "Mixed reset should unstage changes");
 }
@@ -2114,5 +2119,8 @@ fn get_reflog_has_action_and_message() {
     let entries = backend.get_reflog("HEAD", 10).unwrap();
     // The first commit's reflog entry should have "commit" as action
     let has_commit_action = entries.iter().any(|e| e.action.contains("commit"));
-    assert!(has_commit_action, "Reflog should contain commit action entries");
+    assert!(
+        has_commit_action,
+        "Reflog should contain commit action entries"
+    );
 }

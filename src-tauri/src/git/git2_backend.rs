@@ -2749,10 +2749,7 @@ fn compute_word_diff_pair(
 /// Format: "action: description" (e.g. "commit: initial commit", "checkout: moving from main to feature")
 fn parse_reflog_message(message: &str) -> (String, String) {
     match message.find(": ") {
-        Some(pos) => (
-            message[..pos].to_string(),
-            message[pos + 2..].to_string(),
-        ),
+        Some(pos) => (message[..pos].to_string(), message[pos + 2..].to_string()),
         None => (message.to_string(), String::new()),
     }
 }
