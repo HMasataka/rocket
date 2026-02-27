@@ -1,0 +1,55 @@
+/* ===== AI Generate Button in Commit Panel ===== */
+.commit-input-group {
+  display: flex;
+  gap: 8px;
+}
+
+.ai-generate-btn {
+  width: 40px;
+  border: 1px solid var(--purple);
+  border-radius: 6px;
+  background: var(--purple-dim);
+  color: var(--purple);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.ai-generate-btn:hover {
+  background: var(--purple);
+  color: #fff;
+}
+
+.ai-generate-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.ai-generate-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* ===== AI Spinner (inline in button) ===== */
+.ai-generate-btn .ai-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--purple);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: ai-spin 1s linear infinite;
+}
+
+.ai-generate-btn:hover .ai-spinner {
+  border-color: rgba(255, 255, 255, 0.4);
+  border-top-color: transparent;
+}
+
+@keyframes ai-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

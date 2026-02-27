@@ -1,0 +1,292 @@
+/* ===== Settings Modal ===== */
+.settings-modal {
+  width: 720px;
+  max-width: 90vw;
+  height: 70vh;
+}
+
+/* ===== Settings Layout ===== */
+.settings-layout {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 24px;
+  height: 100%;
+  overflow: hidden;
+}
+
+.settings-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.settings-nav-item {
+  padding: 8px 12px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.settings-nav-item:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.settings-nav-item.active {
+  background: var(--accent-dim);
+  color: var(--accent);
+}
+
+.settings-nav-item.active:hover {
+  background: var(--accent-dim);
+}
+
+.settings-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  overflow-y: auto;
+  padding-right: 12px;
+}
+
+.settings-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.settings-section h3 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.settings-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 6px;
+}
+
+.settings-section > .settings-hint {
+  margin-bottom: 10px;
+}
+
+.setting-row + .setting-row {
+  margin-top: 8px;
+}
+
+/* ===== Setting Row ===== */
+.setting-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.setting-row label {
+  flex: 1;
+  font-size: 13px;
+}
+
+/* ===== Provider Priority List ===== */
+.provider-priority-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.provider-priority-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: grab;
+  transition: all 0.15s ease;
+}
+
+.provider-priority-item:hover {
+  border-color: var(--text-muted);
+  background: var(--bg-tertiary);
+}
+
+.provider-priority-item.active {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+}
+
+.provider-priority-item.dragging {
+  opacity: 0.4;
+}
+
+.provider-priority-item.drag-over {
+  border-color: var(--accent);
+  border-style: dashed;
+}
+
+.provider-priority-num {
+  font-size: 11px;
+  font-weight: 700;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--bg-tertiary);
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.provider-priority-item.active .provider-priority-num {
+  background: var(--accent);
+  color: #fff;
+}
+
+.provider-priority-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  min-width: 70px;
+}
+
+.provider-priority-desc {
+  font-size: 11px;
+  color: var(--text-muted);
+  flex: 1;
+}
+
+/* ===== Provider Priority Status ===== */
+.provider-priority-status {
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--bg-tertiary);
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.provider-priority-status.available {
+  background: rgba(63, 185, 80, 0.15);
+  color: var(--success);
+}
+
+.provider-priority-status.unavailable {
+  background: var(--bg-tertiary);
+  color: var(--text-muted);
+}
+
+/* ===== CLI Adapter List ===== */
+.cli-adapter-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.cli-adapter-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--border);
+  transition: background-color 0.15s ease;
+}
+
+.cli-adapter-item:hover {
+  background: var(--bg-tertiary);
+}
+
+.cli-adapter-item:last-child {
+  border-bottom: none;
+}
+
+.cli-adapter-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cli-adapter-name {
+  font-size: 13px;
+  color: var(--text-primary);
+  min-width: 110px;
+}
+
+.cli-adapter-cmd {
+  font-size: 11px;
+  padding: 2px 6px;
+  background: var(--bg-tertiary);
+  border-radius: 4px;
+  color: var(--text-secondary);
+}
+
+/* ===== Settings Toggle ===== */
+.settings-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 0;
+}
+
+.settings-toggle-row label {
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.settings-toggle {
+  width: 36px;
+  height: 20px;
+  background: var(--bg-hover);
+  border-radius: 10px;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.2s;
+  flex-shrink: 0;
+  border: none;
+}
+
+.settings-toggle.active {
+  background: var(--accent);
+}
+
+.settings-toggle-knob {
+  width: 16px;
+  height: 16px;
+  background: #fff;
+  border-radius: 50%;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transition: left 0.2s;
+}
+
+.settings-toggle.active .settings-toggle-knob {
+  left: 18px;
+}
+
+/* ===== Settings Input ===== */
+.settings-input {
+  flex: 1;
+  padding: 8px 12px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  transition: border-color 0.15s ease;
+}
+
+.settings-input:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.settings-input::placeholder {
+  color: var(--text-muted);
+}
