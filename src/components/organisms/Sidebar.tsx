@@ -68,21 +68,6 @@ export function Sidebar({ changesCount }: SidebarProps) {
         </button>
         <button
           type="button"
-          className={`nav-item${activePage === "rebase" ? " active" : ""}`}
-          onClick={() => setActivePage("rebase")}
-        >
-          <svg
-            viewBox="0 0 16 16"
-            fill="currentColor"
-            role="img"
-            aria-label="Rebase"
-          >
-            <path d="M5 3.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0zM1.75 3.25a2.5 2.5 0 1 0 4.134 1.885l3.866 2.573a2.5 2.5 0 1 0 .832-1.248L6.716 3.887A2.5 2.5 0 0 0 1.75 3.25zM12.5 8.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0z" />
-          </svg>
-          Rebase
-        </button>
-        <button
-          type="button"
           className={`nav-item${activePage === "stash" ? " active" : ""}`}
           onClick={() => setActivePage("stash")}
         >
@@ -130,6 +115,21 @@ export function Sidebar({ changesCount }: SidebarProps) {
             <path d="M8 4.466V.534a.25.25 0 0 0-.41-.192L5.23 2.308a.25.25 0 0 0 0 .384l2.36 1.966A.25.25 0 0 0 8 4.466z" />
           </svg>
           Revert
+        </button>
+        <button
+          type="button"
+          className={`nav-item${activePage === "rebase" ? " active" : ""}`}
+          onClick={() => setActivePage("rebase")}
+        >
+          <svg
+            viewBox="0 0 16 16"
+            fill="currentColor"
+            role="img"
+            aria-label="Rebase"
+          >
+            <path d="M5 3.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0zM1.75 3.25a2.5 2.5 0 1 0 4.134 1.885l3.866 2.573a2.5 2.5 0 1 0 .832-1.248L6.716 3.887A2.5 2.5 0 0 0 1.75 3.25zM12.5 8.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0z" />
+          </svg>
+          Rebase
         </button>
       </div>
       <div className="sidebar-section">
