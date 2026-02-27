@@ -23,6 +23,8 @@ describe("gitStore", () => {
       merging: false,
       rebasing: false,
       rebaseState: null,
+      cherryPicking: false,
+      reverting: false,
       conflictFiles: [],
       loading: false,
       error: null,
@@ -1160,6 +1162,238 @@ describe("gitStore", () => {
       ).rejects.toThrow();
 
       expect(useGitStore.getState().error).toContain("todo error");
+    });
+  });
+
+  describe("cherryPick", () => {
+    it("returns result and resets cherryPicking on completion", async () => {
+      const mockResult = { completed: true, conflicts: [], oid: "abc123" };
+      mockedInvoke.mockResolvedValueOnce(mockResult);
+
+      const result = await useGitStore
+        .getState()
+        .cherryPick(["abc123"], "normal");
+
+      expect(result).toEqual(mockResult);
+      expect(useGitStore.getState().cherryPicking).toBe(false);
+    });
+
+    it("sets cherryPicking when conflicts exist", async () => {
+      const mockResult = {
+        completed: false,
+        conflicts: ["file.txt"],
+        oid: null,
+      };
+      mockedInvoke.mockResolvedValueOnce(mockResult);
+
+      const result = await useGitStore
+        .getState()
+        .cherryPick(["abc123"], "normal");
+
+      expect(result.completed).toBe(false);
+      expect(useGitStore.getState().cherryPicking).toBe(true);
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("cherry-pick error"));
+
+      await expect(
+        useGitStore.getState().cherryPick(["abc123"], "normal"),
+      ).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("cherry-pick error");
+    });
+  });
+
+  describe("fetchCherryPickState", () => {
+    it("sets cherryPicking on success", async () => {
+      mockedInvoke.mockResolvedValueOnce(true);
+
+      await useGitStore.getState().fetchCherryPickState();
+
+      expect(useGitStore.getState().cherryPicking).toBe(true);
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("cherry-pick state error"));
+
+      await expect(
+        useGitStore.getState().fetchCherryPickState(),
+      ).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("cherry-pick state error");
+    });
+  });
+
+  describe("abortCherryPick", () => {
+    it("resets cherryPicking state on success", async () => {
+      useGitStore.setState({ cherryPicking: true });
+      mockedInvoke.mockResolvedValueOnce(undefined);
+
+      await useGitStore.getState().abortCherryPick();
+
+      expect(useGitStore.getState().cherryPicking).toBe(false);
+      expect(useGitStore.getState().conflictFiles).toEqual([]);
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("abort cherry-pick error"));
+
+      await expect(useGitStore.getState().abortCherryPick()).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("abort cherry-pick error");
+    });
+  });
+
+  describe("continueCherryPick", () => {
+    it("resets state when completed", async () => {
+      useGitStore.setState({ cherryPicking: true });
+      mockedInvoke.mockResolvedValueOnce({ completed: true, conflicts: [] });
+
+      const result = await useGitStore.getState().continueCherryPick();
+
+      expect(result.completed).toBe(true);
+      expect(useGitStore.getState().cherryPicking).toBe(false);
+      expect(useGitStore.getState().conflictFiles).toEqual([]);
+    });
+
+    it("keeps cherryPicking state when not completed", async () => {
+      useGitStore.setState({ cherryPicking: true });
+      mockedInvoke.mockResolvedValueOnce({
+        completed: false,
+        conflicts: ["file.txt"],
+      });
+
+      const result = await useGitStore.getState().continueCherryPick();
+
+      expect(result.completed).toBe(false);
+      expect(useGitStore.getState().cherryPicking).toBe(true);
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(
+        new Error("continue cherry-pick error"),
+      );
+
+      await expect(
+        useGitStore.getState().continueCherryPick(),
+      ).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain(
+        "continue cherry-pick error",
+      );
+    });
+  });
+
+  describe("revertCommit", () => {
+    it("returns result and resets reverting on completion", async () => {
+      const mockResult = { completed: true, conflicts: [], oid: "abc123" };
+      mockedInvoke.mockResolvedValueOnce(mockResult);
+
+      const result = await useGitStore
+        .getState()
+        .revertCommit("abc123", "auto");
+
+      expect(result).toEqual(mockResult);
+      expect(useGitStore.getState().reverting).toBe(false);
+    });
+
+    it("sets reverting when conflicts exist", async () => {
+      const mockResult = {
+        completed: false,
+        conflicts: ["file.txt"],
+        oid: null,
+      };
+      mockedInvoke.mockResolvedValueOnce(mockResult);
+
+      const result = await useGitStore
+        .getState()
+        .revertCommit("abc123", "auto");
+
+      expect(result.completed).toBe(false);
+      expect(useGitStore.getState().reverting).toBe(true);
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("revert error"));
+
+      await expect(
+        useGitStore.getState().revertCommit("abc123", "auto"),
+      ).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("revert error");
+    });
+  });
+
+  describe("fetchRevertState", () => {
+    it("sets reverting on success", async () => {
+      mockedInvoke.mockResolvedValueOnce(true);
+
+      await useGitStore.getState().fetchRevertState();
+
+      expect(useGitStore.getState().reverting).toBe(true);
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("revert state error"));
+
+      await expect(useGitStore.getState().fetchRevertState()).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("revert state error");
+    });
+  });
+
+  describe("abortRevert", () => {
+    it("resets reverting state on success", async () => {
+      useGitStore.setState({ reverting: true });
+      mockedInvoke.mockResolvedValueOnce(undefined);
+
+      await useGitStore.getState().abortRevert();
+
+      expect(useGitStore.getState().reverting).toBe(false);
+      expect(useGitStore.getState().conflictFiles).toEqual([]);
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("abort revert error"));
+
+      await expect(useGitStore.getState().abortRevert()).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("abort revert error");
+    });
+  });
+
+  describe("continueRevert", () => {
+    it("resets state when completed", async () => {
+      useGitStore.setState({ reverting: true });
+      mockedInvoke.mockResolvedValueOnce({ completed: true, conflicts: [] });
+
+      const result = await useGitStore.getState().continueRevert();
+
+      expect(result.completed).toBe(true);
+      expect(useGitStore.getState().reverting).toBe(false);
+      expect(useGitStore.getState().conflictFiles).toEqual([]);
+    });
+
+    it("keeps reverting state when not completed", async () => {
+      useGitStore.setState({ reverting: true });
+      mockedInvoke.mockResolvedValueOnce({
+        completed: false,
+        conflicts: ["file.txt"],
+      });
+
+      const result = await useGitStore.getState().continueRevert();
+
+      expect(result.completed).toBe(false);
+      expect(useGitStore.getState().reverting).toBe(true);
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("continue revert error"));
+
+      await expect(useGitStore.getState().continueRevert()).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("continue revert error");
     });
   });
 
