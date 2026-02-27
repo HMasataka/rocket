@@ -406,6 +406,7 @@
 .summary-stat.additions { color: var(--success); font-family: 'JetBrains Mono', monospace; font-weight: 600; }
 .summary-stat.deletions { color: var(--danger); font-family: 'JetBrains Mono', monospace; font-weight: 600; }
 .summary-divider { width: 1px; height: 16px; background: var(--border); }
+.operation-buttons { display: flex; gap: 8px; }
 
 /* ===== Operation Responsive ===== */
 @media (max-width: 1023px) {
