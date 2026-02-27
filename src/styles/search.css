@@ -64,6 +64,21 @@
   cursor: pointer;
 }
 
+.search-option-label input[type="checkbox"] {
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--bg-tertiary);
+  cursor: pointer;
+}
+
+.search-option-label input[type="checkbox"]:checked {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
 .search-results {
   display: flex;
   flex-direction: column;
