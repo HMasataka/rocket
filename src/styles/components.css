@@ -66,6 +66,16 @@
   filter: brightness(1.1);
 }
 
+.btn-danger-outline {
+  background: transparent;
+  color: var(--danger);
+  border: 1px solid var(--danger);
+}
+
+.btn-danger-outline:hover {
+  background: var(--danger-dim);
+}
+
 /* ===== Icon Button ===== */
 .icon-btn {
   width: 28px;

@@ -53,3 +53,49 @@
     transform: rotate(360deg);
   }
 }
+
+/* ===== AI Review Button ===== */
+.ai-review-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  background: var(--purple-dim);
+  border: 1px solid color-mix(in srgb, var(--purple) 30%, transparent);
+  border-radius: 6px;
+  color: var(--purple);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ai-review-btn:hover {
+  background: color-mix(in srgb, var(--purple) 25%, transparent);
+  border-color: var(--purple);
+}
+
+.ai-review-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.ai-review-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.ai-review-btn .ai-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--purple);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: ai-spin 1s linear infinite;
+}
+
+.ai-review-btn:hover .ai-spinner {
+  border-color: rgba(255, 255, 255, 0.4);
+  border-top-color: transparent;
+}
