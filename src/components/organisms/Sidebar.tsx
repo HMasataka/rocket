@@ -131,6 +131,39 @@ export function Sidebar({ changesCount }: SidebarProps) {
           </svg>
           Rebase
         </button>
+        <button
+          type="button"
+          className={`nav-item${activePage === "reset" ? " active" : ""}`}
+          onClick={() => setActivePage("reset")}
+        >
+          <svg
+            viewBox="0 0 16 16"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            role="img"
+            aria-label="Reset"
+          >
+            <path d="M2 2v4.5h4.5M2 6.5A6.5 6.5 0 1 1 3.29 10" />
+          </svg>
+          Reset
+        </button>
+        <button
+          type="button"
+          className={`nav-item${activePage === "reflog" ? " active" : ""}`}
+          onClick={() => setActivePage("reflog")}
+        >
+          <svg
+            viewBox="0 0 16 16"
+            fill="currentColor"
+            role="img"
+            aria-label="Reflog"
+          >
+            <path d="M5 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm4 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 1a1 1 0 1 0 0-2 1 1 0 0 0 0 2z" />
+            <path d="M2.5 2A1.5 1.5 0 0 0 1 3.5v9A1.5 1.5 0 0 0 2.5 14h11a1.5 1.5 0 0 0 1.5-1.5v-7A1.5 1.5 0 0 0 13.5 4H8.236a2 2 0 0 1-1.789-1.106l-.447-.894A1 1 0 0 0 5.105 1.5H2.5zM2 3.5a.5.5 0 0 1 .5-.5h2.605a.5.5 0 0 1 .447.276l.447.894A3 3 0 0 0 8.236 5.5h5.264a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-9z" />
+          </svg>
+          Reflog
+        </button>
       </div>
       <div className="sidebar-section">
         <div className="section-label">Hosting</div>
