@@ -120,10 +120,7 @@ mod tests {
 
     #[test]
     fn pr_state_serializes_as_lowercase() {
-        assert_eq!(
-            serde_json::to_string(&PrState::Open).unwrap(),
-            "\"open\""
-        );
+        assert_eq!(serde_json::to_string(&PrState::Open).unwrap(), "\"open\"");
         assert_eq!(
             serde_json::to_string(&PrState::Merged).unwrap(),
             "\"merged\""

@@ -6,14 +6,20 @@ use crate::hosting::types::{HostingInfo, Issue, PrDetail, PullRequest};
 use crate::state::AppState;
 
 fn get_repo_path(state: &State<'_, AppState>) -> Result<String, String> {
-    let guard = state.repo.lock().map_err(|e| format!("Lock poisoned: {e}"))?;
+    let guard = state
+        .repo
+        .lock()
+        .map_err(|e| format!("Lock poisoned: {e}"))?;
     let repo = guard.as_ref().ok_or("No repository opened")?;
     Ok(repo.workdir().to_string_lossy().to_string())
 }
 
 #[tauri::command]
 pub fn detect_hosting_provider(state: State<'_, AppState>) -> Result<HostingInfo, String> {
-    let guard = state.repo.lock().map_err(|e| format!("Lock poisoned: {e}"))?;
+    let guard = state
+        .repo
+        .lock()
+        .map_err(|e| format!("Lock poisoned: {e}"))?;
     let repo = guard.as_ref().ok_or("No repository opened")?;
     let remotes = repo.list_remotes().map_err(|e| e.to_string())?;
     let remote = remotes.first().ok_or("No remotes found")?;
@@ -21,9 +27,7 @@ pub fn detect_hosting_provider(state: State<'_, AppState>) -> Result<HostingInfo
 }
 
 #[tauri::command]
-pub fn list_pull_requests(
-    state: State<'_, AppState>,
-) -> Result<Vec<PullRequest>, String> {
+pub fn list_pull_requests(state: State<'_, AppState>) -> Result<Vec<PullRequest>, String> {
     let repo_path = get_repo_path(&state)?;
     github::list_pull_requests(&repo_path)
 }
@@ -60,10 +64,7 @@ pub fn create_pull_request_url(
 }
 
 #[tauri::command]
-pub fn open_in_browser(
-    state: State<'_, AppState>,
-    url: String,
-) -> Result<(), String> {
+pub fn open_in_browser(state: State<'_, AppState>, url: String) -> Result<(), String> {
     let repo_path = get_repo_path(&state)?;
     github::open_in_browser(&repo_path, &url)
 }

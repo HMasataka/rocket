@@ -28,10 +28,7 @@ pub fn list_pull_requests(repo_path: &str) -> Result<Vec<PullRequest>, String> {
     parse_pr_list_json(&stdout)
 }
 
-pub fn get_pull_request_detail(
-    repo_path: &str,
-    number: u64,
-) -> Result<PrDetail, String> {
+pub fn get_pull_request_detail(repo_path: &str, number: u64) -> Result<PrDetail, String> {
     let output = Command::new("gh")
         .args([
             "pr",
@@ -78,7 +75,14 @@ pub fn list_issues(repo_path: &str) -> Result<Vec<Issue>, String> {
 
 pub fn get_default_branch(repo_path: &str) -> Result<String, String> {
     let output = Command::new("gh")
-        .args(["repo", "view", "--json", "defaultBranchRef", "--jq", ".defaultBranchRef.name"])
+        .args([
+            "repo",
+            "view",
+            "--json",
+            "defaultBranchRef",
+            "--jq",
+            ".defaultBranchRef.name",
+        ])
         .current_dir(repo_path)
         .output()
         .map_err(|e| format!("failed to execute gh: {e}"))?;
@@ -96,11 +100,7 @@ pub fn get_default_branch(repo_path: &str) -> Result<String, String> {
     Ok(branch)
 }
 
-pub fn create_pull_request_url(
-    repo_path: &str,
-    head: &str,
-    base: &str,
-) -> Result<String, String> {
+pub fn create_pull_request_url(repo_path: &str, head: &str, base: &str) -> Result<String, String> {
     let output = Command::new("gh")
         .args(["browse", "--no-browser", "-n"])
         .current_dir(repo_path)
@@ -113,9 +113,7 @@ pub fn create_pull_request_url(
     }
 
     let repo_url = String::from_utf8_lossy(&output.stdout).trim().to_string();
-    Ok(format!(
-        "{repo_url}/compare/{base}...{head}?expand=1"
-    ))
+    Ok(format!("{repo_url}/compare/{base}...{head}?expand=1"))
 }
 
 pub fn open_in_browser(repo_path: &str, url: &str) -> Result<(), String> {
@@ -173,17 +171,12 @@ fn parse_issue_list_json(json: &str) -> Result<Vec<Issue>, String> {
 
     raw.into_iter()
         .map(|v| {
-            let number = v["number"]
-                .as_u64()
-                .ok_or("missing field: number")?;
+            let number = v["number"].as_u64().ok_or("missing field: number")?;
             let title = v["title"]
                 .as_str()
                 .ok_or("missing field: title")?
                 .to_string();
-            let url = v["url"]
-                .as_str()
-                .ok_or("missing field: url")?
-                .to_string();
+            let url = v["url"].as_str().ok_or("missing field: url")?.to_string();
 
             Ok(Issue {
                 number,
@@ -202,17 +195,12 @@ fn parse_issue_list_json(json: &str) -> Result<Vec<Issue>, String> {
 }
 
 fn map_pr_from_gh_json(v: &serde_json::Value) -> Result<PullRequest, String> {
-    let number = v["number"]
-        .as_u64()
-        .ok_or("missing field: number")?;
+    let number = v["number"].as_u64().ok_or("missing field: number")?;
     let title = v["title"]
         .as_str()
         .ok_or("missing field: title")?
         .to_string();
-    let url = v["url"]
-        .as_str()
-        .ok_or("missing field: url")?
-        .to_string();
+    let url = v["url"].as_str().ok_or("missing field: url")?.to_string();
 
     Ok(PullRequest {
         number,
