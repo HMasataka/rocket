@@ -1,0 +1,107 @@
+/* ===== Cherry-pick Commit List ===== */
+.cherry-commit-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.cherry-commit-row {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+  padding: 14px 16px;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.cherry-commit-row:hover {
+  background: var(--bg-hover);
+}
+.cherry-commit-row.selected {
+  background: var(--accent-dim);
+  border-left: 3px solid #ec4899;
+}
+.cherry-commit-row.selected:hover {
+  background: var(--accent-dim);
+}
+
+.cherry-checkbox {
+  margin-right: 12px;
+  padding-top: 2px;
+}
+.cherry-checkbox input {
+  width: 1.15em;
+  height: 1.15em;
+  appearance: none;
+  -webkit-appearance: none;
+  border-radius: 50%;
+  border: 0.1em solid #6b6b76;
+  background: transparent;
+  display: grid;
+  place-content: center;
+  cursor: pointer;
+}
+
+.cherry-checkbox input::before {
+  content: "";
+  width: 0.65em;
+  height: 0.65em;
+  border-radius: 50%;
+  transform: scale(0);
+  transition: 120ms transform ease-in-out;
+  background-color: #ec4899;
+}
+
+.cherry-checkbox input:checked {
+  border-color: #ec4899;
+}
+.cherry-checkbox input:checked::before {
+  transform: scale(1);
+}
+
+.cherry-graph {
+  width: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-right: 12px;
+}
+.graph-node.cherry {
+  width: 12px;
+  height: 12px;
+  background: linear-gradient(135deg, #f472b6, #ec4899);
+  border-radius: 50%;
+}
+
+.cherry-info {
+  flex: 1;
+  min-width: 0;
+}
+.cherry-message {
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cherry-meta {
+  display: flex;
+  gap: 12px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.cherry-hash {
+  font-family: "JetBrains Mono", monospace;
+  color: #ec4899;
+}
+
+/* ===== Cherry-pick Preview Hash ===== */
+.preview-hash.cherry {
+  color: #ec4899;
+}

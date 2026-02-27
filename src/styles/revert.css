@@ -1,0 +1,107 @@
+/* ===== Revert Commit List ===== */
+.revert-commit-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.revert-commit-row {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+  padding: 14px 16px;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.revert-commit-row:hover {
+  background: var(--bg-hover);
+}
+.revert-commit-row.selected {
+  background: var(--warning-dim);
+  border-left: 3px solid var(--warning);
+}
+.revert-commit-row.selected:hover {
+  background: var(--warning-dim);
+}
+
+.revert-radio {
+  margin-right: 12px;
+  padding-top: 2px;
+}
+.revert-radio input {
+  width: 1.15em;
+  height: 1.15em;
+  appearance: none;
+  -webkit-appearance: none;
+  border-radius: 50%;
+  border: 0.1em solid #6b6b76;
+  background: transparent;
+  display: grid;
+  place-content: center;
+  cursor: pointer;
+}
+
+.revert-radio input::before {
+  content: "";
+  width: 0.65em;
+  height: 0.65em;
+  border-radius: 50%;
+  transform: scale(0);
+  transition: 120ms transform ease-in-out;
+  background-color: var(--warning);
+}
+
+.revert-radio input:checked {
+  border-color: var(--warning);
+}
+.revert-radio input:checked::before {
+  transform: scale(1);
+}
+
+.revert-graph {
+  width: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-right: 12px;
+}
+.graph-node.revert {
+  width: 12px;
+  height: 12px;
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  border-radius: 50%;
+}
+
+.revert-info {
+  flex: 1;
+  min-width: 0;
+}
+.revert-message {
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.revert-meta {
+  display: flex;
+  gap: 12px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.revert-hash {
+  font-family: "JetBrains Mono", monospace;
+  color: var(--warning);
+}
+
+/* ===== Revert Preview Hash ===== */
+.preview-hash.warning {
+  color: var(--warning);
+}
