@@ -91,6 +91,12 @@ pub enum GitError {
 
     #[error("failed to rebase: {0}")]
     RebaseFailed(#[source] Box<dyn std::error::Error + Send + Sync>),
+
+    #[error("failed to cherry-pick: {0}")]
+    CherryPickFailed(#[source] Box<dyn std::error::Error + Send + Sync>),
+
+    #[error("failed to revert: {0}")]
+    RevertFailed(#[source] Box<dyn std::error::Error + Send + Sync>),
 }
 
 pub type GitResult<T> = Result<T, GitError>;

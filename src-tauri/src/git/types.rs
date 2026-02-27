@@ -375,3 +375,37 @@ pub struct MergeBaseContent {
     pub ours_content: String,
     pub theirs_content: String,
 }
+
+// === Cherry-pick types ===
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum CherryPickMode {
+    Normal,
+    NoCommit,
+    Merge,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CherryPickResult {
+    pub completed: bool,
+    pub conflicts: Vec<String>,
+    pub oid: Option<String>,
+}
+
+// === Revert types ===
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum RevertMode {
+    Auto,
+    NoCommit,
+    Edit,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct RevertResult {
+    pub completed: bool,
+    pub conflicts: Vec<String>,
+    pub oid: Option<String>,
+}
