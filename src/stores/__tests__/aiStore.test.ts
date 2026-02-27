@@ -101,6 +101,8 @@ describe("aiStore", () => {
         commit_message_style: "conventional",
         commit_message_language: "en",
         provider_priority: [],
+        prefer_local_llm: false,
+        exclude_patterns: [],
       };
       mockedInvoke.mockResolvedValueOnce(mockConfig);
 
@@ -125,6 +127,8 @@ describe("aiStore", () => {
         commit_message_style: "detailed" as const,
         commit_message_language: "ja" as const,
         provider_priority: ["Claude Code"],
+        prefer_local_llm: false,
+        exclude_patterns: [] as string[],
       };
       mockedInvoke.mockResolvedValueOnce(undefined);
 
@@ -144,6 +148,8 @@ describe("aiStore", () => {
           commit_message_style: "conventional",
           commit_message_language: "en",
           provider_priority: [],
+          prefer_local_llm: false,
+          exclude_patterns: [],
         }),
       ).rejects.toThrow();
 

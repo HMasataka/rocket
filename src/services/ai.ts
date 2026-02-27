@@ -19,6 +19,8 @@ export interface AiConfig {
   commit_message_style: CommitMessageStyle;
   commit_message_language: Language;
   provider_priority: string[];
+  prefer_local_llm: boolean;
+  exclude_patterns: string[];
 }
 
 export function detectCliAdapters(): Promise<CliAdapterInfo[]> {

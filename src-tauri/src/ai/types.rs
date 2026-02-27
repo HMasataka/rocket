@@ -25,6 +25,10 @@ pub struct AiConfig {
     pub commit_message_language: Language,
     #[serde(default)]
     pub provider_priority: Vec<String>,
+    #[serde(default)]
+    pub prefer_local_llm: bool,
+    #[serde(default)]
+    pub exclude_patterns: Vec<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -70,6 +74,8 @@ mod tests {
         assert_eq!(config.commit_message_style, CommitMessageStyle::Conventional);
         assert_eq!(config.commit_message_language, Language::En);
         assert!(config.provider_priority.is_empty());
+        assert!(!config.prefer_local_llm);
+        assert!(config.exclude_patterns.is_empty());
     }
 
     #[test]
@@ -78,12 +84,16 @@ mod tests {
             commit_message_style: CommitMessageStyle::Detailed,
             commit_message_language: Language::Ja,
             provider_priority: vec!["Claude Code".to_string(), "LLM CLI".to_string()],
+            prefer_local_llm: true,
+            exclude_patterns: vec![".env".to_string(), "*.key".to_string()],
         };
         let serialized = toml::to_string(&config).unwrap();
         let deserialized: AiConfig = toml::from_str(&serialized).unwrap();
         assert_eq!(deserialized.commit_message_style, CommitMessageStyle::Detailed);
         assert_eq!(deserialized.commit_message_language, Language::Ja);
         assert_eq!(deserialized.provider_priority, vec!["Claude Code", "LLM CLI"]);
+        assert!(deserialized.prefer_local_llm);
+        assert_eq!(deserialized.exclude_patterns, vec![".env", "*.key"]);
     }
 
     #[test]
@@ -92,6 +102,8 @@ mod tests {
         assert_eq!(config.commit_message_style, CommitMessageStyle::Conventional);
         assert_eq!(config.commit_message_language, Language::En);
         assert!(config.provider_priority.is_empty());
+        assert!(!config.prefer_local_llm);
+        assert!(config.exclude_patterns.is_empty());
     }
 
     #[test]
@@ -106,5 +118,32 @@ mod tests {
         let lang = Language::Ja;
         let serialized = serde_json::to_string(&lang).unwrap();
         assert_eq!(serialized, "\"ja\"");
+    }
+
+    #[test]
+    fn ai_config_privacy_fields_serialize_to_json() {
+        let config = AiConfig {
+            prefer_local_llm: true,
+            exclude_patterns: vec![".env".to_string(), "credentials.*".to_string()],
+            ..AiConfig::default()
+        };
+        let json = serde_json::to_value(&config).unwrap();
+        assert_eq!(json["prefer_local_llm"], true);
+        assert_eq!(
+            json["exclude_patterns"],
+            serde_json::json!([".env", "credentials.*"])
+        );
+    }
+
+    #[test]
+    fn ai_config_deserializes_partial_toml_with_privacy_fields() {
+        let toml_str = r#"
+prefer_local_llm = true
+exclude_patterns = ["*.key"]
+"#;
+        let config: AiConfig = toml::from_str(toml_str).unwrap();
+        assert!(config.prefer_local_llm);
+        assert_eq!(config.exclude_patterns, vec!["*.key"]);
+        assert_eq!(config.commit_message_style, CommitMessageStyle::Conventional);
     }
 }

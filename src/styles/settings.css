@@ -180,3 +180,113 @@
   background: var(--bg-tertiary);
   color: var(--text-muted);
 }
+
+/* ===== CLI Adapter List ===== */
+.cli-adapter-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.cli-adapter-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--border);
+  transition: background-color 0.15s ease;
+}
+
+.cli-adapter-item:hover {
+  background: var(--bg-tertiary);
+}
+
+.cli-adapter-item:last-child {
+  border-bottom: none;
+}
+
+.cli-adapter-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cli-adapter-name {
+  font-size: 13px;
+  color: var(--text-primary);
+  min-width: 110px;
+}
+
+.cli-adapter-cmd {
+  font-size: 11px;
+  padding: 2px 6px;
+  background: var(--bg-tertiary);
+  border-radius: 4px;
+  color: var(--text-secondary);
+}
+
+/* ===== Settings Toggle ===== */
+.settings-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 0;
+}
+
+.settings-toggle-row label {
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.settings-toggle {
+  width: 36px;
+  height: 20px;
+  background: var(--bg-hover);
+  border-radius: 10px;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.2s;
+  flex-shrink: 0;
+  border: none;
+}
+
+.settings-toggle.active {
+  background: var(--accent);
+}
+
+.settings-toggle-knob {
+  width: 16px;
+  height: 16px;
+  background: #fff;
+  border-radius: 50%;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transition: left 0.2s;
+}
+
+.settings-toggle.active .settings-toggle-knob {
+  left: 18px;
+}
+
+/* ===== Settings Input ===== */
+.settings-input {
+  flex: 1;
+  padding: 8px 12px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  transition: border-color 0.15s ease;
+}
+
+.settings-input:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.settings-input::placeholder {
+  color: var(--text-muted);
+}

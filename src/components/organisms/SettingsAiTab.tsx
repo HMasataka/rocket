@@ -1,6 +1,7 @@
 import {
   type ChangeEvent,
   type DragEvent,
+  type FocusEvent,
   useCallback,
   useEffect,
   useMemo,
@@ -116,6 +117,46 @@ export function SettingsAiTab() {
     [config, saveConfig, addToast],
   );
 
+  const [excludePatternsLocal, setExcludePatternsLocal] = useState("");
+
+  useEffect(() => {
+    if (config) {
+      setExcludePatternsLocal(config.exclude_patterns.join(", "));
+    }
+  }, [config]);
+
+  const handlePreferLocalLlmToggle = useCallback(() => {
+    if (!config) return;
+    saveConfig({ ...config, prefer_local_llm: !config.prefer_local_llm }).catch(
+      (err: unknown) => {
+        addToast(String(err), "error");
+      },
+    );
+  }, [config, saveConfig, addToast]);
+
+  const handleExcludePatternsChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      setExcludePatternsLocal(e.target.value);
+    },
+    [],
+  );
+
+  const handleExcludePatternsBlur = useCallback(
+    (e: FocusEvent<HTMLInputElement>) => {
+      if (!config) return;
+      const patterns = e.target.value
+        .split(",")
+        .map((p) => p.trim())
+        .filter((p) => p.length > 0);
+      saveConfig({ ...config, exclude_patterns: patterns }).catch(
+        (err: unknown) => {
+          addToast(String(err), "error");
+        },
+      );
+    },
+    [config, saveConfig, addToast],
+  );
+
   return (
     <div className="settings-tab">
       <div className="settings-section">
@@ -150,6 +191,28 @@ export function SettingsAiTab() {
       </div>
 
       <div className="settings-section">
+        <h3>LLM CLI Adapters</h3>
+        <div className="settings-hint">
+          CLI tools detected in PATH. Per-feature assignment available.
+        </div>
+        <div className="cli-adapter-list">
+          {adapters.map((adapter) => (
+            <div key={adapter.name} className="cli-adapter-item">
+              <div className="cli-adapter-info">
+                <span className="cli-adapter-name">{adapter.name}</span>
+                <code className="cli-adapter-cmd">{adapter.command}</code>
+              </div>
+              <span
+                className={`provider-priority-status ${adapter.available ? "available" : "unavailable"}`}
+              >
+                {adapter.available ? "Detected" : "Not found"}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="settings-section">
         <h3>Commit Message</h3>
         <div className="setting-row">
           <label htmlFor="commit-style-select">Style</label>
@@ -175,6 +238,37 @@ export function SettingsAiTab() {
             <option value="en">English</option>
             <option value="ja">Japanese</option>
           </select>
+        </div>
+      </div>
+
+      <div className="settings-section">
+        <h3>Privacy</h3>
+        <div className="settings-toggle-row">
+          <label htmlFor="prefer-local-llm-toggle">Prefer Local LLM</label>
+          <button
+            id="prefer-local-llm-toggle"
+            type="button"
+            className={`settings-toggle${config?.prefer_local_llm ? " active" : ""}`}
+            onClick={handlePreferLocalLlmToggle}
+          >
+            <div className="settings-toggle-knob" />
+          </button>
+        </div>
+        <div className="setting-row">
+          <label htmlFor="exclude-patterns-input">Exclude Patterns</label>
+          <input
+            id="exclude-patterns-input"
+            type="text"
+            className="settings-input"
+            value={excludePatternsLocal}
+            onChange={handleExcludePatternsChange}
+            onBlur={handleExcludePatternsBlur}
+            placeholder="Glob patterns to exclude"
+          />
+        </div>
+        <div className="settings-hint">
+          Files matching these patterns will never be sent to external AI
+          providers.
         </div>
       </div>
     </div>

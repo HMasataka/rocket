@@ -27,6 +27,8 @@ describe("AI Settings integration", () => {
         commit_message_style: "conventional",
         commit_message_language: "en",
         provider_priority: [],
+        prefer_local_llm: false,
+        exclude_patterns: [],
       };
       const mockAdapters = [
         { name: "Claude Code", command: "claude -p", available: true },
@@ -49,6 +51,8 @@ describe("AI Settings integration", () => {
         commit_message_style: "conventional" as const,
         commit_message_language: "en" as const,
         provider_priority: [] as string[],
+        prefer_local_llm: false,
+        exclude_patterns: [] as string[],
       };
       useAiStore.setState({ config: baseConfig });
 
@@ -63,12 +67,16 @@ describe("AI Settings integration", () => {
         commit_message_style: "detailed",
         commit_message_language: "en",
         provider_priority: [],
+        prefer_local_llm: false,
+        exclude_patterns: [],
       });
       expect(mockedInvoke).toHaveBeenCalledWith("save_ai_config", {
         aiConfig: {
           commit_message_style: "detailed",
           commit_message_language: "en",
           provider_priority: [],
+          prefer_local_llm: false,
+          exclude_patterns: [],
         },
       });
     });
@@ -78,6 +86,8 @@ describe("AI Settings integration", () => {
         commit_message_style: "conventional" as const,
         commit_message_language: "en" as const,
         provider_priority: [] as string[],
+        prefer_local_llm: false,
+        exclude_patterns: [] as string[],
       };
       useAiStore.setState({ config: baseConfig });
 
@@ -92,12 +102,16 @@ describe("AI Settings integration", () => {
         commit_message_style: "conventional",
         commit_message_language: "ja",
         provider_priority: [],
+        prefer_local_llm: false,
+        exclude_patterns: [],
       });
       expect(mockedInvoke).toHaveBeenCalledWith("save_ai_config", {
         aiConfig: {
           commit_message_style: "conventional",
           commit_message_language: "ja",
           provider_priority: [],
+          prefer_local_llm: false,
+          exclude_patterns: [],
         },
       });
     });
@@ -107,6 +121,8 @@ describe("AI Settings integration", () => {
         commit_message_style: "conventional" as const,
         commit_message_language: "en" as const,
         provider_priority: [] as string[],
+        prefer_local_llm: false,
+        exclude_patterns: [] as string[],
       };
       useAiStore.setState({ config: initialConfig });
 
@@ -128,6 +144,8 @@ describe("AI Settings integration", () => {
         commit_message_style: "conventional" as const,
         commit_message_language: "en" as const,
         provider_priority: ["Claude Code", "LLM CLI"],
+        prefer_local_llm: false,
+        exclude_patterns: [] as string[],
       };
       useAiStore.setState({ config: baseConfig });
 
@@ -141,6 +159,50 @@ describe("AI Settings integration", () => {
       expect(useAiStore.getState().config?.provider_priority).toEqual([
         "LLM CLI",
         "Claude Code",
+      ]);
+    });
+
+    it("saves config with toggled prefer_local_llm", async () => {
+      const baseConfig = {
+        commit_message_style: "conventional" as const,
+        commit_message_language: "en" as const,
+        provider_priority: [] as string[],
+        prefer_local_llm: false,
+        exclude_patterns: [] as string[],
+      };
+      useAiStore.setState({ config: baseConfig });
+
+      mockedInvoke.mockResolvedValueOnce(undefined);
+
+      await useAiStore.getState().saveConfig({
+        ...baseConfig,
+        prefer_local_llm: true,
+      });
+
+      expect(useAiStore.getState().config?.prefer_local_llm).toBe(true);
+    });
+
+    it("saves config with updated exclude_patterns", async () => {
+      const baseConfig = {
+        commit_message_style: "conventional" as const,
+        commit_message_language: "en" as const,
+        provider_priority: [] as string[],
+        prefer_local_llm: false,
+        exclude_patterns: [] as string[],
+      };
+      useAiStore.setState({ config: baseConfig });
+
+      mockedInvoke.mockResolvedValueOnce(undefined);
+
+      await useAiStore.getState().saveConfig({
+        ...baseConfig,
+        exclude_patterns: [".env", "*.key", "credentials.*"],
+      });
+
+      expect(useAiStore.getState().config?.exclude_patterns).toEqual([
+        ".env",
+        "*.key",
+        "credentials.*",
       ]);
     });
   });
