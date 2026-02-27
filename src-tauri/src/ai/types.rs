@@ -121,7 +121,10 @@ mod tests {
     #[test]
     fn default_ai_config_has_expected_values() {
         let config = AiConfig::default();
-        assert_eq!(config.commit_message_style, CommitMessageStyle::Conventional);
+        assert_eq!(
+            config.commit_message_style,
+            CommitMessageStyle::Conventional
+        );
         assert_eq!(config.commit_message_language, Language::En);
         assert!(config.provider_priority.is_empty());
         assert!(!config.prefer_local_llm);
@@ -139,9 +142,15 @@ mod tests {
         };
         let serialized = toml::to_string(&config).unwrap();
         let deserialized: AiConfig = toml::from_str(&serialized).unwrap();
-        assert_eq!(deserialized.commit_message_style, CommitMessageStyle::Detailed);
+        assert_eq!(
+            deserialized.commit_message_style,
+            CommitMessageStyle::Detailed
+        );
         assert_eq!(deserialized.commit_message_language, Language::Ja);
-        assert_eq!(deserialized.provider_priority, vec!["Claude Code", "LLM CLI"]);
+        assert_eq!(
+            deserialized.provider_priority,
+            vec!["Claude Code", "LLM CLI"]
+        );
         assert!(deserialized.prefer_local_llm);
         assert_eq!(deserialized.exclude_patterns, vec![".env", "*.key"]);
     }
@@ -149,7 +158,10 @@ mod tests {
     #[test]
     fn ai_config_deserializes_empty_toml() {
         let config: AiConfig = toml::from_str("").unwrap();
-        assert_eq!(config.commit_message_style, CommitMessageStyle::Conventional);
+        assert_eq!(
+            config.commit_message_style,
+            CommitMessageStyle::Conventional
+        );
         assert_eq!(config.commit_message_language, Language::En);
         assert!(config.provider_priority.is_empty());
         assert!(!config.prefer_local_llm);
@@ -194,7 +206,10 @@ exclude_patterns = ["*.key"]
         let config: AiConfig = toml::from_str(toml_str).unwrap();
         assert!(config.prefer_local_llm);
         assert_eq!(config.exclude_patterns, vec!["*.key"]);
-        assert_eq!(config.commit_message_style, CommitMessageStyle::Conventional);
+        assert_eq!(
+            config.commit_message_style,
+            CommitMessageStyle::Conventional
+        );
     }
 
     #[test]

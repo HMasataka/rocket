@@ -56,8 +56,7 @@ mod tests {
 
     #[test]
     fn build_prompt_with_base() {
-        let prompt =
-            build_conflict_resolve_prompt("our code", "their code", Some("base code"));
+        let prompt = build_conflict_resolve_prompt("our code", "their code", Some("base code"));
         assert!(prompt.contains("base code"));
         assert!(prompt.contains("Base (common ancestor)"));
     }
@@ -72,7 +71,8 @@ mod tests {
 
     #[test]
     fn parse_valid_conflict_response() {
-        let json = r#"{"resolved_code":"merged","confidence":"high","reason":"Compatible changes"}"#;
+        let json =
+            r#"{"resolved_code":"merged","confidence":"high","reason":"Compatible changes"}"#;
         let result = parse_conflict_response(json).unwrap();
         assert_eq!(result.resolved_code, "merged");
         assert_eq!(result.confidence, ConfidenceLevel::High);
@@ -96,7 +96,8 @@ mod tests {
 
     #[test]
     fn parse_response_with_code_fences() {
-        let raw = "```json\n{\"resolved_code\":\"x\",\"confidence\":\"high\",\"reason\":\"y\"}\n```";
+        let raw =
+            "```json\n{\"resolved_code\":\"x\",\"confidence\":\"high\",\"reason\":\"y\"}\n```";
         let result = parse_conflict_response(raw).unwrap();
         assert_eq!(result.resolved_code, "x");
     }

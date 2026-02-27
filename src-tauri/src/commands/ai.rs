@@ -40,15 +40,11 @@ fn format_diff_text(diffs: &[FileDiff]) -> String {
 }
 
 fn get_adapter() -> Result<crate::ai::adapter::CliAdapter, String> {
-    let ai_config = config::load_config()
-        .map(|c| c.ai)
-        .unwrap_or_default();
+    let ai_config = config::load_config().map(|c| c.ai).unwrap_or_default();
 
-    detector::first_available_adapter_with_priority(&ai_config.provider_priority)
-        .ok_or_else(|| {
-            "No AI CLI adapter available. Install one of: claude, codex, gemini, aider, llm"
-                .to_string()
-        })
+    detector::first_available_adapter_with_priority(&ai_config.provider_priority).ok_or_else(|| {
+        "No AI CLI adapter available. Install one of: claude, codex, gemini, aider, llm".to_string()
+    })
 }
 
 #[tauri::command]
@@ -62,9 +58,8 @@ pub fn generate_commit_message(
     language: String,
     state: State<'_, AppState>,
 ) -> Result<GenerateResult, String> {
-    let style: CommitMessageStyle =
-        serde_json::from_value(serde_json::Value::String(format))
-            .map_err(|e| format!("Invalid format: {e}"))?;
+    let style: CommitMessageStyle = serde_json::from_value(serde_json::Value::String(format))
+        .map_err(|e| format!("Invalid format: {e}"))?;
     let lang: Language = serde_json::from_value(serde_json::Value::String(language))
         .map_err(|e| format!("Invalid language: {e}"))?;
 
