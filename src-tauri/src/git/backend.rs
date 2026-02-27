@@ -112,7 +112,6 @@ pub trait GitBackend: Send + Sync {
 
     // Search operations
     fn search_code(&self, query: &str, is_regex: bool) -> GitResult<Vec<CodeSearchResult>>;
-    fn search_commits(&self, query: &str, search_diff: bool)
-        -> GitResult<Vec<CommitSearchResult>>;
+    fn search_commits(&self, query: &str, search_diff: bool) -> GitResult<Vec<CommitSearchResult>>;
     fn search_filenames(&self, query: &str) -> GitResult<Vec<FilenameSearchResult>>;
 }

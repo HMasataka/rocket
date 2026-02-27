@@ -2034,11 +2034,7 @@ impl GitBackend for Git2Backend {
         search::search_code(&self.workdir, query, is_regex)
     }
 
-    fn search_commits(
-        &self,
-        query: &str,
-        search_diff: bool,
-    ) -> GitResult<Vec<CommitSearchResult>> {
+    fn search_commits(&self, query: &str, search_diff: bool) -> GitResult<Vec<CommitSearchResult>> {
         search::search_commits(&self.workdir, query, search_diff)
     }
 

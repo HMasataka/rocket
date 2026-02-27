@@ -97,10 +97,7 @@ pub fn search_commits(
     Ok(parse_commit_log_output(&stdout))
 }
 
-pub fn search_filenames(
-    workdir: &Path,
-    query: &str,
-) -> GitResult<Vec<FilenameSearchResult>> {
+pub fn search_filenames(workdir: &Path, query: &str) -> GitResult<Vec<FilenameSearchResult>> {
     if query.is_empty() {
         return Ok(Vec::new());
     }

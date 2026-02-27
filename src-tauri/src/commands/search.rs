@@ -45,7 +45,5 @@ pub fn search_filenames(
         .lock()
         .map_err(|e| format!("Lock poisoned: {e}"))?;
     let backend = repo_lock.as_ref().ok_or("No repository opened")?;
-    backend
-        .search_filenames(&query)
-        .map_err(|e| e.to_string())
+    backend.search_filenames(&query).map_err(|e| e.to_string())
 }
