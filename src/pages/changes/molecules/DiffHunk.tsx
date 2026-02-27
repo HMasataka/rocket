@@ -1,8 +1,10 @@
+import type { ReviewComment } from "../../../services/ai";
 import type {
   DiffHunk as DiffHunkType,
   HunkIdentifier,
 } from "../../../services/git";
 import { toHunkIdentifier } from "../utils/diffUtils";
+import { AiReviewComment } from "./AiReviewComment";
 import { DiffLineRow } from "./DiffLine";
 
 interface DiffHunkProps {
@@ -10,11 +12,13 @@ interface DiffHunkProps {
   hunkIndex: number;
   staged?: boolean;
   selectedLines?: Set<string>;
+  reviewComments?: ReviewComment[];
   onStageHunk?: (hunk: HunkIdentifier) => void;
   onDiscardHunk?: (hunk: HunkIdentifier) => void;
   onToggleLine?: (lineKey: string) => void;
   onStageLines?: (hunkIndex: number) => void;
   onDiscardLines?: (hunkIndex: number) => void;
+  onDismissReviewComment?: (comment: ReviewComment) => void;
 }
 
 function hasSelectedLinesInHunk(
@@ -35,11 +39,13 @@ export function DiffHunkView({
   hunkIndex,
   staged,
   selectedLines,
+  reviewComments,
   onStageHunk,
   onDiscardHunk,
   onToggleLine,
   onStageLines,
   onDiscardLines,
+  onDismissReviewComment,
 }: DiffHunkProps) {
   const hunkId = toHunkIdentifier(hunk);
   const hasSelected =
@@ -109,14 +115,28 @@ export function DiffHunkView({
       </div>
       {hunk.lines.map((line, lineIndex) => {
         const lineKey = `${hunkIndex}-${lineIndex}`;
+        const lineNo = line.new_lineno ?? line.old_lineno ?? 0;
+        const commentsAfterLine = reviewComments?.filter(
+          (c) => c.line_end === lineNo,
+        );
         return (
-          <DiffLineRow
-            key={lineKey}
-            line={line}
-            lineKey={lineKey}
-            selected={selectedLines?.has(lineKey)}
-            onToggleLine={onToggleLine}
-          />
+          <div key={lineKey}>
+            <DiffLineRow
+              line={line}
+              lineKey={lineKey}
+              selected={selectedLines?.has(lineKey)}
+              onToggleLine={onToggleLine}
+            />
+            {commentsAfterLine?.map((comment) => (
+              <AiReviewComment
+                key={`review-${comment.file}-${comment.line_start}-${comment.line_end}`}
+                comment={comment}
+                onDismiss={() => {
+                  onDismissReviewComment?.(comment);
+                }}
+              />
+            ))}
+          </div>
         );
       })}
     </div>

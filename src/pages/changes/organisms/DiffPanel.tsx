@@ -1,5 +1,6 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import type { FileDiff, HunkIdentifier } from "../../../services/git";
+import { useAiStore } from "../../../stores/aiStore";
 import type { DiffViewMode } from "../../../stores/uiStore";
 import { DiffHunkView } from "../molecules/DiffHunk";
 import { SplitDiffView } from "../molecules/SplitDiffView";
@@ -82,6 +83,14 @@ export function DiffPanel({
     [collectSelectedIndices, onDiscardLines],
   );
 
+  const reviewComments = useAiStore((s) => s.reviewComments);
+  const dismissReviewComment = useAiStore((s) => s.dismissReviewComment);
+
+  const fileReviewComments = useMemo(() => {
+    if (!selectedFile || reviewComments.length === 0) return [];
+    return reviewComments.filter((c) => c.file === selectedFile);
+  }, [selectedFile, reviewComments]);
+
   // Compute global hunk index across file diffs
   let globalHunkIndex = 0;
 
@@ -123,11 +132,13 @@ export function DiffPanel({
                       hunkIndex={currentHunkIndex}
                       staged={staged}
                       selectedLines={selectedLines}
+                      reviewComments={fileReviewComments}
                       onStageHunk={onStageHunk}
                       onDiscardHunk={onDiscardHunk}
                       onToggleLine={handleToggleLine}
                       onStageLines={handleStageLines}
                       onDiscardLines={handleDiscardLines}
+                      onDismissReviewComment={dismissReviewComment}
                     />
                   );
                 })}

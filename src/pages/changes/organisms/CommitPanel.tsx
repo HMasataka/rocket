@@ -6,12 +6,14 @@ import { useUIStore } from "../../../stores/uiStore";
 interface CommitPanelProps {
   onCommit: (message: string, amend: boolean) => void;
   hasStagedFiles: boolean;
+  hasChanges: boolean;
   onLoadHeadMessage?: () => Promise<string>;
 }
 
 export function CommitPanel({
   onCommit,
   hasStagedFiles,
+  hasChanges,
   onLoadHeadMessage,
 }: CommitPanelProps) {
   const [subject, setSubject] = useState("");
@@ -19,8 +21,10 @@ export function CommitPanel({
   const [amend, setAmend] = useState(false);
 
   const generating = useAiStore((s) => s.generating);
+  const reviewing = useAiStore((s) => s.reviewing);
   const fetchConfig = useAiStore((s) => s.fetchConfig);
   const generateCommitMessage = useAiStore((s) => s.generateCommitMessage);
+  const reviewDiff = useAiStore((s) => s.reviewDiff);
   const addToast = useUIStore((s) => s.addToast);
 
   const handleCommit = () => {
@@ -58,6 +62,19 @@ export function CommitPanel({
       addToast(String(e), "error");
     }
   }, [fetchConfig, generateCommitMessage, addToast]);
+
+  const handleAiReview = useCallback(async () => {
+    try {
+      const result = await reviewDiff();
+      if (result.comments.length === 0) {
+        addToast("AI Review: No issues found", "success");
+      } else {
+        addToast(`AI Review: ${result.comments.length} issue(s) found`, "info");
+      }
+    } catch (e) {
+      addToast(String(e), "error");
+    }
+  }, [reviewDiff, addToast]);
 
   const canCommit = subject.trim().length > 0 && (hasStagedFiles || amend);
 
@@ -107,6 +124,21 @@ export function CommitPanel({
           onChange={(e) => setBody(e.target.value)}
         />
         <div className="commit-actions">
+          <button
+            type="button"
+            className="ai-review-btn"
+            onClick={handleAiReview}
+            disabled={!hasChanges || reviewing}
+          >
+            {reviewing ? (
+              <div className="ai-spinner" />
+            ) : (
+              <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                <path d="M6 12.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5ZM3 8.062C3 6.76 4.235 5.765 5.53 5.886a26.58 26.58 0 0 0 4.94 0C11.765 5.765 13 6.76 13 8.062v1.157a.933.933 0 0 1-.765.935c-.845.147-2.34.346-4.235.346-1.895 0-3.39-.2-4.235-.346A.933.933 0 0 1 3 9.219V8.062Z" />
+              </svg>
+            )}
+            AI Review
+          </button>
           <Button
             variant="primary"
             onClick={handleCommit}
