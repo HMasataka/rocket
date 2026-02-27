@@ -21,6 +21,11 @@
 }
 
 .settings-nav-item {
+  background: transparent;
+  border: none;
+  font-family: inherit;
+  font-weight: inherit;
+  text-align: left;
   padding: 8px 12px;
   font-size: 13px;
   color: var(--text-secondary);
