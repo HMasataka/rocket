@@ -53,7 +53,7 @@ export function SettingsAiTab() {
   }, []);
 
   const handleDragOver = useCallback(
-    (e: DragEvent<HTMLDivElement>, index: number) => {
+    (e: DragEvent<HTMLLIElement>, index: number) => {
       e.preventDefault();
       setDragOverIndex(index);
     },
