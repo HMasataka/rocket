@@ -1658,8 +1658,8 @@ impl GitBackend for Git2Backend {
         let repo = self.repo.lock().unwrap();
 
         for oid_str in oids {
-            let oid = Oid::from_str(oid_str)
-                .map_err(|e| GitError::CherryPickFailed(Box::new(e)))?;
+            let oid =
+                Oid::from_str(oid_str).map_err(|e| GitError::CherryPickFailed(Box::new(e)))?;
             let commit = repo
                 .find_commit(oid)
                 .map_err(|e| GitError::CherryPickFailed(Box::new(e)))?;
@@ -1716,15 +1716,8 @@ impl GitBackend for Git2Backend {
                 CherryPickMode::NoCommit => unreachable!(),
             };
 
-            repo.commit(
-                Some("HEAD"),
-                &sig,
-                &sig,
-                &message,
-                &tree,
-                &[&head_commit],
-            )
-            .map_err(|e| GitError::CherryPickFailed(Box::new(e)))?;
+            repo.commit(Some("HEAD"), &sig, &sig, &message, &tree, &[&head_commit])
+                .map_err(|e| GitError::CherryPickFailed(Box::new(e)))?;
 
             let _ = repo.cleanup_state();
         }
@@ -1805,14 +1798,7 @@ impl GitBackend for Git2Backend {
         );
 
         let oid = repo
-            .commit(
-                Some("HEAD"),
-                &sig,
-                &sig,
-                &message,
-                &tree,
-                &[&head_commit],
-            )
+            .commit(Some("HEAD"), &sig, &sig, &message, &tree, &[&head_commit])
             .map_err(|e| GitError::CherryPickFailed(Box::new(e)))?;
 
         let _ = repo.cleanup_state();
@@ -1827,8 +1813,7 @@ impl GitBackend for Git2Backend {
     fn revert(&self, oid_str: &str, mode: RevertMode) -> GitResult<RevertResult> {
         let repo = self.repo.lock().unwrap();
 
-        let oid = Oid::from_str(oid_str)
-            .map_err(|e| GitError::RevertFailed(Box::new(e)))?;
+        let oid = Oid::from_str(oid_str).map_err(|e| GitError::RevertFailed(Box::new(e)))?;
         let commit = repo
             .find_commit(oid)
             .map_err(|e| GitError::RevertFailed(Box::new(e)))?;
@@ -1879,14 +1864,7 @@ impl GitBackend for Git2Backend {
         let message = format!("Revert \"{original_msg}\"\n\nThis reverts commit {oid_str}.");
 
         let new_oid = repo
-            .commit(
-                Some("HEAD"),
-                &sig,
-                &sig,
-                &message,
-                &tree,
-                &[&head_commit],
-            )
+            .commit(Some("HEAD"), &sig, &sig, &message, &tree, &[&head_commit])
             .map_err(|e| GitError::RevertFailed(Box::new(e)))?;
 
         let _ = repo.cleanup_state();
@@ -1920,9 +1898,7 @@ impl GitBackend for Git2Backend {
             .map_err(|e| GitError::RevertFailed(Box::new(e)))?;
 
         if index.has_conflicts() {
-            return Err(GitError::RevertFailed(
-                "unresolved conflicts remain".into(),
-            ));
+            return Err(GitError::RevertFailed("unresolved conflicts remain".into()));
         }
 
         let mut index = repo
@@ -1963,14 +1939,7 @@ impl GitBackend for Git2Backend {
         );
 
         let oid = repo
-            .commit(
-                Some("HEAD"),
-                &sig,
-                &sig,
-                &message,
-                &tree,
-                &[&head_commit],
-            )
+            .commit(Some("HEAD"), &sig, &sig, &message, &tree, &[&head_commit])
             .map_err(|e| GitError::RevertFailed(Box::new(e)))?;
 
         let _ = repo.cleanup_state();

@@ -1578,7 +1578,10 @@ fn cherry_pick_normal_mode() {
         .cherry_pick(&[&feature_oid], CherryPickMode::Normal)
         .unwrap();
 
-    assert!(result.completed, "Cherry-pick should complete without conflicts");
+    assert!(
+        result.completed,
+        "Cherry-pick should complete without conflicts"
+    );
     assert!(result.oid.is_some(), "Should produce a new commit OID");
     assert!(result.conflicts.is_empty(), "Should have no conflicts");
 
@@ -1599,8 +1602,14 @@ fn cherry_pick_no_commit_mode() {
         .cherry_pick(&[&feature_oid], CherryPickMode::NoCommit)
         .unwrap();
 
-    assert!(result.completed, "Cherry-pick should complete without conflicts");
-    assert!(result.oid.is_none(), "NoCommit mode should not produce a commit OID");
+    assert!(
+        result.completed,
+        "Cherry-pick should complete without conflicts"
+    );
+    assert!(
+        result.oid.is_none(),
+        "NoCommit mode should not produce a commit OID"
+    );
 
     // Verify the file is in the worktree
     let content = fs::read_to_string(tmp.path().join("cherry.txt")).unwrap();
@@ -1609,8 +1618,11 @@ fn cherry_pick_no_commit_mode() {
     // Verify changes are staged
     let status = backend.status().unwrap();
     assert!(
-        status.files.iter().any(|f| f.path == "cherry.txt"
-            && f.staging == app_lib::git::types::StagingState::Staged),
+        status
+            .files
+            .iter()
+            .any(|f| f.path == "cherry.txt"
+                && f.staging == app_lib::git::types::StagingState::Staged),
         "cherry.txt should be staged"
     );
 }
@@ -1631,7 +1643,9 @@ fn cherry_pick_conflict_and_abort() {
     backend.checkout_branch("feature").unwrap();
     fs::write(tmp.path().join("conflict.txt"), "feature content\n").unwrap();
     backend.stage(Path::new("conflict.txt")).unwrap();
-    backend.commit("feature: modify conflict.txt", false).unwrap();
+    backend
+        .commit("feature: modify conflict.txt", false)
+        .unwrap();
 
     let log_filter = LogFilter {
         author: None,
@@ -1647,7 +1661,9 @@ fn cherry_pick_conflict_and_abort() {
     backend.checkout_branch(&default_branch).unwrap();
     fs::write(tmp.path().join("conflict.txt"), "different main content\n").unwrap();
     backend.stage(Path::new("conflict.txt")).unwrap();
-    backend.commit("main: modify conflict.txt differently", false).unwrap();
+    backend
+        .commit("main: modify conflict.txt differently", false)
+        .unwrap();
 
     // Cherry-pick should detect conflicts
     let result = backend
@@ -1655,12 +1671,21 @@ fn cherry_pick_conflict_and_abort() {
         .unwrap();
 
     assert!(!result.completed, "Should have conflicts");
-    assert!(!result.conflicts.is_empty(), "Should list conflicting files");
-    assert!(backend.is_cherry_picking().unwrap(), "Should be in cherry-pick state");
+    assert!(
+        !result.conflicts.is_empty(),
+        "Should list conflicting files"
+    );
+    assert!(
+        backend.is_cherry_picking().unwrap(),
+        "Should be in cherry-pick state"
+    );
 
     // Abort the cherry-pick
     backend.abort_cherry_pick().unwrap();
-    assert!(!backend.is_cherry_picking().unwrap(), "Should no longer be in cherry-pick state");
+    assert!(
+        !backend.is_cherry_picking().unwrap(),
+        "Should no longer be in cherry-pick state"
+    );
 
     // Working directory should be clean (back to main content)
     let content = fs::read_to_string(tmp.path().join("conflict.txt")).unwrap();
@@ -1738,7 +1763,10 @@ fn revert_no_commit_mode() {
     let result = backend.revert(&target_oid, RevertMode::NoCommit).unwrap();
 
     assert!(result.completed, "Revert should complete without conflicts");
-    assert!(result.oid.is_none(), "NoCommit mode should not produce a commit OID");
+    assert!(
+        result.oid.is_none(),
+        "NoCommit mode should not produce a commit OID"
+    );
 
     // File should be removed in worktree
     assert!(
@@ -1776,12 +1804,18 @@ fn revert_conflict_and_abort() {
     let result = backend.revert(&add_oid, RevertMode::Auto).unwrap();
 
     assert!(!result.completed, "Revert should have conflicts");
-    assert!(!result.conflicts.is_empty(), "Should list conflicting files");
+    assert!(
+        !result.conflicts.is_empty(),
+        "Should list conflicting files"
+    );
     assert!(backend.is_reverting().unwrap(), "Should be in revert state");
 
     // Abort
     backend.abort_revert().unwrap();
-    assert!(!backend.is_reverting().unwrap(), "Should no longer be in revert state");
+    assert!(
+        !backend.is_reverting().unwrap(),
+        "Should no longer be in revert state"
+    );
 
     // File should be restored
     let content = fs::read_to_string(tmp.path().join("revert_conflict.txt")).unwrap();
@@ -1812,7 +1846,9 @@ fn continue_cherry_pick_after_conflict_resolution() {
     backend.checkout_branch("feature").unwrap();
     fs::write(tmp.path().join("conflict.txt"), "feature content\n").unwrap();
     backend.stage(Path::new("conflict.txt")).unwrap();
-    backend.commit("feature: modify conflict.txt", false).unwrap();
+    backend
+        .commit("feature: modify conflict.txt", false)
+        .unwrap();
 
     let log_filter = LogFilter {
         author: None,
@@ -1828,7 +1864,9 @@ fn continue_cherry_pick_after_conflict_resolution() {
     backend.checkout_branch(&default_branch).unwrap();
     fs::write(tmp.path().join("conflict.txt"), "different main content\n").unwrap();
     backend.stage(Path::new("conflict.txt")).unwrap();
-    backend.commit("main: modify conflict.txt differently", false).unwrap();
+    backend
+        .commit("main: modify conflict.txt differently", false)
+        .unwrap();
 
     // Cherry-pick should detect conflicts
     let result = backend
