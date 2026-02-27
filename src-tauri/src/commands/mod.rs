@@ -10,5 +10,6 @@ pub mod rebase;
 pub mod remote;
 pub mod reset;
 pub mod revert;
+pub mod search;
 pub mod stash;
 pub mod tag;
