@@ -10,11 +10,13 @@ import { useTheme } from "./hooks/useTheme";
 import { BlamePage } from "./pages/blame";
 import { BranchesPage } from "./pages/branches";
 import { ChangesPage } from "./pages/changes";
+import { CherryPickPage } from "./pages/cherry-pick";
 import { ConflictModal } from "./pages/conflict";
 import { FileHistoryPage } from "./pages/file-history";
 import { HistoryPage } from "./pages/history";
 import { HostingPage } from "./pages/hosting";
 import { RebasePage } from "./pages/rebase";
+import { RevertPage } from "./pages/revert";
 import { StashPage } from "./pages/stash";
 import type { PullOption } from "./services/git";
 import { useConfigStore } from "./stores/configStore";
@@ -35,6 +37,8 @@ export function App() {
   const rebasing = useGitStore((s) => s.rebasing);
   const fetchMergeState = useGitStore((s) => s.fetchMergeState);
   const fetchRebaseState = useGitStore((s) => s.fetchRebaseState);
+  const fetchCherryPickState = useGitStore((s) => s.fetchCherryPickState);
+  const fetchRevertState = useGitStore((s) => s.fetchRevertState);
   const fetchStashes = useGitStore((s) => s.fetchStashes);
   const loadConfig = useConfigStore((s) => s.loadConfig);
   const addToast = useUIStore((s) => s.addToast);
@@ -64,6 +68,12 @@ export function App() {
     fetchRebaseState().catch((e: unknown) => {
       addToast(String(e), "error");
     });
+    fetchCherryPickState().catch((e: unknown) => {
+      addToast(String(e), "error");
+    });
+    fetchRevertState().catch((e: unknown) => {
+      addToast(String(e), "error");
+    });
   }, [
     loadConfig,
     fetchBranch,
@@ -71,6 +81,8 @@ export function App() {
     fetchStashes,
     fetchMergeState,
     fetchRebaseState,
+    fetchCherryPickState,
+    fetchRevertState,
     addToast,
   ]);
 
@@ -87,7 +99,20 @@ export function App() {
     fetchRebaseState().catch((e: unknown) => {
       console.error("Auto-refresh rebase state failed:", e);
     });
-  }, [fetchStatus, fetchBranch, fetchMergeState, fetchRebaseState]);
+    fetchCherryPickState().catch((e: unknown) => {
+      console.error("Auto-refresh cherry-pick state failed:", e);
+    });
+    fetchRevertState().catch((e: unknown) => {
+      console.error("Auto-refresh revert state failed:", e);
+    });
+  }, [
+    fetchStatus,
+    fetchBranch,
+    fetchMergeState,
+    fetchRebaseState,
+    fetchCherryPickState,
+    fetchRevertState,
+  ]);
 
   useFileWatcher(handleRepoChanged);
 
@@ -158,6 +183,8 @@ export function App() {
         {activePage === "file-history" && <FileHistoryPage />}
         {activePage === "stash" && <StashPage />}
         {activePage === "rebase" && <RebasePage />}
+        {activePage === "cherry-pick" && <CherryPickPage />}
+        {activePage === "revert" && <RevertPage />}
         {activePage === "hosting" && <HostingPage />}
       </AppShell>
       <ToastContainer />

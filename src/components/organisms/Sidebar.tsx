@@ -99,6 +99,40 @@ export function Sidebar({ changesCount }: SidebarProps) {
         </button>
       </div>
       <div className="sidebar-section">
+        <div className="section-label">Advanced</div>
+        <button
+          type="button"
+          className={`nav-item${activePage === "cherry-pick" ? " active" : ""}`}
+          onClick={() => setActivePage("cherry-pick")}
+        >
+          <svg
+            viewBox="0 0 16 16"
+            fill="currentColor"
+            role="img"
+            aria-label="Cherry-pick"
+          >
+            <path d="M4 1.5a2.5 2.5 0 1 1 5 0 2.5 2.5 0 0 1-5 0zM6.5 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm4 4.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM9 7a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0zm-7 5.5a2.5 2.5 0 1 1 5 0 2.5 2.5 0 0 1-5 0zM4.5 11a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z" />
+          </svg>
+          Cherry-pick
+        </button>
+        <button
+          type="button"
+          className={`nav-item${activePage === "revert" ? " active" : ""}`}
+          onClick={() => setActivePage("revert")}
+        >
+          <svg
+            viewBox="0 0 16 16"
+            fill="currentColor"
+            role="img"
+            aria-label="Revert"
+          >
+            <path d="M8 3a5 5 0 1 1-4.546 2.914.5.5 0 0 0-.908-.417A6 6 0 1 0 8 2v1z" />
+            <path d="M8 4.466V.534a.25.25 0 0 0-.41-.192L5.23 2.308a.25.25 0 0 0 0 .384l2.36 1.966A.25.25 0 0 0 8 4.466z" />
+          </svg>
+          Revert
+        </button>
+      </div>
+      <div className="sidebar-section">
         <div className="section-label">Hosting</div>
         <button
           type="button"

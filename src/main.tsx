@@ -17,6 +17,9 @@ import "./styles/conflict.css";
 import "./styles/ai.css";
 import "./styles/settings.css";
 import "./styles/hosting.css";
+import "./styles/operation.css";
+import "./styles/cherry-pick.css";
+import "./styles/revert.css";
 
 const root = document.getElementById("root");
 if (!root) throw new Error("Root element not found");
