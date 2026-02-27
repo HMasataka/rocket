@@ -170,6 +170,9 @@ pub fn run() {
             commands::hosting::get_default_branch,
             commands::hosting::create_pull_request_url,
             commands::hosting::open_in_browser,
+            commands::search::search_code,
+            commands::search::search_commits,
+            commands::search::search_filenames,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

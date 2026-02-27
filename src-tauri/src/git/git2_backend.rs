@@ -8,6 +8,7 @@ use git2::{
 use crate::git::auth::create_credentials_callback;
 use crate::git::backend::GitBackend;
 use crate::git::error::{GitError, GitResult};
+use crate::git::search::{self, CodeSearchResult, CommitSearchResult, FilenameSearchResult};
 use crate::git::types::{
     BlameLine, BlameResult, BranchInfo, CherryPickMode, CherryPickResult, CommitDetail,
     CommitFileChange, CommitFileStatus, CommitGraphRow, CommitInfo, CommitLogResult, CommitRef,
@@ -2027,6 +2028,18 @@ impl GitBackend for Git2Backend {
         }
 
         Ok(entries)
+    }
+
+    fn search_code(&self, query: &str, is_regex: bool) -> GitResult<Vec<CodeSearchResult>> {
+        search::search_code(&self.workdir, query, is_regex)
+    }
+
+    fn search_commits(&self, query: &str, search_diff: bool) -> GitResult<Vec<CommitSearchResult>> {
+        search::search_commits(&self.workdir, query, search_diff)
+    }
+
+    fn search_filenames(&self, query: &str) -> GitResult<Vec<FilenameSearchResult>> {
+        search::search_filenames(&self.workdir, query)
     }
 }
 
