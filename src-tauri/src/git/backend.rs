@@ -1,6 +1,7 @@
 use std::path::Path;
 
 use crate::git::error::GitResult;
+use crate::git::search::{CodeSearchResult, CommitSearchResult, FilenameSearchResult};
 use crate::git::types::{
     BlameResult, BranchInfo, CherryPickMode, CherryPickResult, CommitDetail, CommitInfo,
     CommitLogResult, CommitResult, ConflictFile, ConflictResolution, DiffOptions, FetchResult,
@@ -108,4 +109,10 @@ pub trait GitBackend: Send + Sync {
 
     // Reflog operations
     fn get_reflog(&self, ref_name: &str, limit: usize) -> GitResult<Vec<ReflogEntry>>;
+
+    // Search operations
+    fn search_code(&self, query: &str, is_regex: bool) -> GitResult<Vec<CodeSearchResult>>;
+    fn search_commits(&self, query: &str, search_diff: bool)
+        -> GitResult<Vec<CommitSearchResult>>;
+    fn search_filenames(&self, query: &str) -> GitResult<Vec<FilenameSearchResult>>;
 }

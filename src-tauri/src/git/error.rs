@@ -103,6 +103,9 @@ pub enum GitError {
 
     #[error("failed to read reflog: {0}")]
     ReflogFailed(#[source] Box<dyn std::error::Error + Send + Sync>),
+
+    #[error("search failed: {0}")]
+    SearchFailed(#[source] Box<dyn std::error::Error + Send + Sync>),
 }
 
 pub type GitResult<T> = Result<T, GitError>;
