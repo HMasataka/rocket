@@ -68,21 +68,6 @@ export function Sidebar({ changesCount }: SidebarProps) {
         </button>
         <button
           type="button"
-          className={`nav-item${activePage === "rebase" ? " active" : ""}`}
-          onClick={() => setActivePage("rebase")}
-        >
-          <svg
-            viewBox="0 0 16 16"
-            fill="currentColor"
-            role="img"
-            aria-label="Rebase"
-          >
-            <path d="M5 3.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0zM1.75 3.25a2.5 2.5 0 1 0 4.134 1.885l3.866 2.573a2.5 2.5 0 1 0 .832-1.248L6.716 3.887A2.5 2.5 0 0 0 1.75 3.25zM12.5 8.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0z" />
-          </svg>
-          Rebase
-        </button>
-        <button
-          type="button"
           className={`nav-item${activePage === "stash" ? " active" : ""}`}
           onClick={() => setActivePage("stash")}
         >
@@ -96,6 +81,55 @@ export function Sidebar({ changesCount }: SidebarProps) {
           </svg>
           Stash
           {stashCount > 0 && <span className="nav-badge">{stashCount}</span>}
+        </button>
+      </div>
+      <div className="sidebar-section">
+        <div className="section-label">Advanced</div>
+        <button
+          type="button"
+          className={`nav-item${activePage === "cherry-pick" ? " active" : ""}`}
+          onClick={() => setActivePage("cherry-pick")}
+        >
+          <svg
+            viewBox="0 0 16 16"
+            fill="currentColor"
+            role="img"
+            aria-label="Cherry-pick"
+          >
+            <path d="M4 1.5a2.5 2.5 0 1 1 5 0 2.5 2.5 0 0 1-5 0zM6.5 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm4 4.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM9 7a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0zm-7 5.5a2.5 2.5 0 1 1 5 0 2.5 2.5 0 0 1-5 0zM4.5 11a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z" />
+          </svg>
+          Cherry-pick
+        </button>
+        <button
+          type="button"
+          className={`nav-item${activePage === "revert" ? " active" : ""}`}
+          onClick={() => setActivePage("revert")}
+        >
+          <svg
+            viewBox="0 0 16 16"
+            fill="currentColor"
+            role="img"
+            aria-label="Revert"
+          >
+            <path d="M8 3a5 5 0 1 1-4.546 2.914.5.5 0 0 0-.908-.417A6 6 0 1 0 8 2v1z" />
+            <path d="M8 4.466V.534a.25.25 0 0 0-.41-.192L5.23 2.308a.25.25 0 0 0 0 .384l2.36 1.966A.25.25 0 0 0 8 4.466z" />
+          </svg>
+          Revert
+        </button>
+        <button
+          type="button"
+          className={`nav-item${activePage === "rebase" ? " active" : ""}`}
+          onClick={() => setActivePage("rebase")}
+        >
+          <svg
+            viewBox="0 0 16 16"
+            fill="currentColor"
+            role="img"
+            aria-label="Rebase"
+          >
+            <path d="M5 3.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0zM1.75 3.25a2.5 2.5 0 1 0 4.134 1.885l3.866 2.573a2.5 2.5 0 1 0 .832-1.248L6.716 3.887A2.5 2.5 0 0 0 1.75 3.25zM12.5 8.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0z" />
+          </svg>
+          Rebase
         </button>
       </div>
       <div className="sidebar-section">

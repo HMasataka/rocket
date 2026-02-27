@@ -9,13 +9,14 @@ use crate::git::auth::create_credentials_callback;
 use crate::git::backend::GitBackend;
 use crate::git::error::{GitError, GitResult};
 use crate::git::types::{
-    BlameLine, BlameResult, BranchInfo, CommitDetail, CommitFileChange, CommitFileStatus,
-    CommitGraphRow, CommitInfo, CommitLogResult, CommitRef, CommitRefKind, CommitResult,
-    CommitStats, ConflictBlock, ConflictFile, ConflictResolution, DiffHunk, DiffLine, DiffLineKind,
-    DiffOptions, FetchResult, FileDiff, FileStatus, FileStatusKind, GraphEdge, GraphNodeType,
-    HunkIdentifier, LineRange, LogFilter, MergeBaseContent, MergeKind, MergeOption, MergeResult,
-    PullOption, PushResult, RebaseAction, RebaseResult, RebaseState, RebaseTodoEntry, RemoteInfo,
-    RepoStatus, StagingState, StashEntry, TagInfo, WordSegment,
+    BlameLine, BlameResult, BranchInfo, CherryPickMode, CherryPickResult, CommitDetail,
+    CommitFileChange, CommitFileStatus, CommitGraphRow, CommitInfo, CommitLogResult, CommitRef,
+    CommitRefKind, CommitResult, CommitStats, ConflictBlock, ConflictFile, ConflictResolution,
+    DiffHunk, DiffLine, DiffLineKind, DiffOptions, FetchResult, FileDiff, FileStatus,
+    FileStatusKind, GraphEdge, GraphNodeType, HunkIdentifier, LineRange, LogFilter,
+    MergeBaseContent, MergeKind, MergeOption, MergeResult, PullOption, PushResult, RebaseAction,
+    RebaseResult, RebaseState, RebaseTodoEntry, RemoteInfo, RepoStatus, RevertMode, RevertResult,
+    StagingState, StashEntry, TagInfo, WordSegment,
 };
 
 pub struct Git2Backend {
@@ -1650,6 +1651,303 @@ impl GitBackend for Git2Backend {
             base_content,
             ours_content,
             theirs_content,
+        })
+    }
+
+    fn cherry_pick(&self, oids: &[&str], mode: CherryPickMode) -> GitResult<CherryPickResult> {
+        let repo = self.repo.lock().unwrap();
+
+        for oid_str in oids {
+            let oid =
+                Oid::from_str(oid_str).map_err(|e| GitError::CherryPickFailed(Box::new(e)))?;
+            let commit = repo
+                .find_commit(oid)
+                .map_err(|e| GitError::CherryPickFailed(Box::new(e)))?;
+
+            let mut opts = git2::CherrypickOptions::new();
+            if mode == CherryPickMode::Merge {
+                opts.mainline(1);
+            }
+            repo.cherrypick(&commit, Some(&mut opts))
+                .map_err(|e| GitError::CherryPickFailed(Box::new(e)))?;
+
+            let index = repo
+                .index()
+                .map_err(|e| GitError::CherryPickFailed(Box::new(e)))?;
+
+            if index.has_conflicts() {
+                let conflicts = collect_conflict_paths(&index);
+                return Ok(CherryPickResult {
+                    completed: false,
+                    conflicts,
+                    oid: None,
+                });
+            }
+
+            if mode == CherryPickMode::NoCommit {
+                let _ = repo.cleanup_state();
+                continue;
+            }
+
+            // Create commit manually since git2 cherrypick only applies to worktree
+            let mut index = repo
+                .index()
+                .map_err(|e| GitError::CherryPickFailed(Box::new(e)))?;
+            let tree_oid = index
+                .write_tree()
+                .map_err(|e| GitError::CherryPickFailed(Box::new(e)))?;
+            let tree = repo
+                .find_tree(tree_oid)
+                .map_err(|e| GitError::CherryPickFailed(Box::new(e)))?;
+            let sig = repo
+                .signature()
+                .map_err(|e| GitError::CherryPickFailed(Box::new(e)))?;
+            let head_commit = repo
+                .head()
+                .and_then(|h| h.peel_to_commit())
+                .map_err(|e| GitError::CherryPickFailed(Box::new(e)))?;
+
+            let original_msg = commit.message().unwrap_or("");
+            let message = match mode {
+                CherryPickMode::Normal => {
+                    format!("{original_msg}\n\n(cherry picked from commit {oid_str})")
+                }
+                CherryPickMode::Merge => original_msg.to_string(),
+                CherryPickMode::NoCommit => unreachable!(),
+            };
+
+            repo.commit(Some("HEAD"), &sig, &sig, &message, &tree, &[&head_commit])
+                .map_err(|e| GitError::CherryPickFailed(Box::new(e)))?;
+
+            let _ = repo.cleanup_state();
+        }
+
+        let head_oid = if mode == CherryPickMode::NoCommit {
+            None
+        } else {
+            repo.head()
+                .ok()
+                .and_then(|h| h.target())
+                .map(|o| o.to_string())
+        };
+
+        Ok(CherryPickResult {
+            completed: true,
+            conflicts: Vec::new(),
+            oid: head_oid,
+        })
+    }
+
+    fn is_cherry_picking(&self) -> GitResult<bool> {
+        let repo = self.repo.lock().unwrap();
+        Ok(repo.state() == git2::RepositoryState::CherryPick)
+    }
+
+    fn abort_cherry_pick(&self) -> GitResult<()> {
+        let repo = self.repo.lock().unwrap();
+        repo.cleanup_state()
+            .map_err(|e| GitError::CherryPickFailed(Box::new(e)))?;
+        repo.checkout_head(Some(git2::build::CheckoutBuilder::default().force()))
+            .map_err(|e| GitError::CherryPickFailed(Box::new(e)))?;
+        Ok(())
+    }
+
+    fn continue_cherry_pick(&self) -> GitResult<CherryPickResult> {
+        let repo = self.repo.lock().unwrap();
+
+        let index = repo
+            .index()
+            .map_err(|e| GitError::CherryPickFailed(Box::new(e)))?;
+
+        if index.has_conflicts() {
+            return Err(GitError::CherryPickFailed(
+                "unresolved conflicts remain".into(),
+            ));
+        }
+
+        let mut index = repo
+            .index()
+            .map_err(|e| GitError::CherryPickFailed(Box::new(e)))?;
+        let tree_oid = index
+            .write_tree()
+            .map_err(|e| GitError::CherryPickFailed(Box::new(e)))?;
+        let tree = repo
+            .find_tree(tree_oid)
+            .map_err(|e| GitError::CherryPickFailed(Box::new(e)))?;
+        let sig = repo
+            .signature()
+            .map_err(|e| GitError::CherryPickFailed(Box::new(e)))?;
+        let head_commit = repo
+            .head()
+            .and_then(|h| h.peel_to_commit())
+            .map_err(|e| GitError::CherryPickFailed(Box::new(e)))?;
+
+        let cherry_head_path = repo.path().join("CHERRY_PICK_HEAD");
+        let cherry_head_content = std::fs::read_to_string(&cherry_head_path)
+            .map_err(|e| GitError::CherryPickFailed(Box::new(e)))?;
+        let cherry_oid = Oid::from_str(cherry_head_content.trim())
+            .map_err(|e| GitError::CherryPickFailed(Box::new(e)))?;
+        let cherry_commit = repo
+            .find_commit(cherry_oid)
+            .map_err(|e| GitError::CherryPickFailed(Box::new(e)))?;
+
+        let original_msg = cherry_commit.message().unwrap_or("");
+        let message = format!(
+            "{original_msg}\n\n(cherry picked from commit {})",
+            cherry_oid
+        );
+
+        let oid = repo
+            .commit(Some("HEAD"), &sig, &sig, &message, &tree, &[&head_commit])
+            .map_err(|e| GitError::CherryPickFailed(Box::new(e)))?;
+
+        let _ = repo.cleanup_state();
+
+        Ok(CherryPickResult {
+            completed: true,
+            conflicts: Vec::new(),
+            oid: Some(oid.to_string()),
+        })
+    }
+
+    fn revert(&self, oid_str: &str, mode: RevertMode) -> GitResult<RevertResult> {
+        let repo = self.repo.lock().unwrap();
+
+        let oid = Oid::from_str(oid_str).map_err(|e| GitError::RevertFailed(Box::new(e)))?;
+        let commit = repo
+            .find_commit(oid)
+            .map_err(|e| GitError::RevertFailed(Box::new(e)))?;
+
+        repo.revert(&commit, None)
+            .map_err(|e| GitError::RevertFailed(Box::new(e)))?;
+
+        let index = repo
+            .index()
+            .map_err(|e| GitError::RevertFailed(Box::new(e)))?;
+
+        if index.has_conflicts() {
+            let conflicts = collect_conflict_paths(&index);
+            return Ok(RevertResult {
+                completed: false,
+                conflicts,
+                oid: None,
+            });
+        }
+
+        if mode == RevertMode::NoCommit || mode == RevertMode::Edit {
+            let _ = repo.cleanup_state();
+            return Ok(RevertResult {
+                completed: true,
+                conflicts: Vec::new(),
+                oid: None,
+            });
+        }
+
+        let mut index = repo
+            .index()
+            .map_err(|e| GitError::RevertFailed(Box::new(e)))?;
+        let tree_oid = index
+            .write_tree()
+            .map_err(|e| GitError::RevertFailed(Box::new(e)))?;
+        let tree = repo
+            .find_tree(tree_oid)
+            .map_err(|e| GitError::RevertFailed(Box::new(e)))?;
+        let sig = repo
+            .signature()
+            .map_err(|e| GitError::RevertFailed(Box::new(e)))?;
+        let head_commit = repo
+            .head()
+            .and_then(|h| h.peel_to_commit())
+            .map_err(|e| GitError::RevertFailed(Box::new(e)))?;
+
+        let original_msg = commit.message().unwrap_or("").lines().next().unwrap_or("");
+        let message = format!("Revert \"{original_msg}\"\n\nThis reverts commit {oid_str}.");
+
+        let new_oid = repo
+            .commit(Some("HEAD"), &sig, &sig, &message, &tree, &[&head_commit])
+            .map_err(|e| GitError::RevertFailed(Box::new(e)))?;
+
+        let _ = repo.cleanup_state();
+
+        Ok(RevertResult {
+            completed: true,
+            conflicts: Vec::new(),
+            oid: Some(new_oid.to_string()),
+        })
+    }
+
+    fn is_reverting(&self) -> GitResult<bool> {
+        let repo = self.repo.lock().unwrap();
+        Ok(repo.state() == git2::RepositoryState::Revert)
+    }
+
+    fn abort_revert(&self) -> GitResult<()> {
+        let repo = self.repo.lock().unwrap();
+        repo.cleanup_state()
+            .map_err(|e| GitError::RevertFailed(Box::new(e)))?;
+        repo.checkout_head(Some(git2::build::CheckoutBuilder::default().force()))
+            .map_err(|e| GitError::RevertFailed(Box::new(e)))?;
+        Ok(())
+    }
+
+    fn continue_revert(&self) -> GitResult<RevertResult> {
+        let repo = self.repo.lock().unwrap();
+
+        let index = repo
+            .index()
+            .map_err(|e| GitError::RevertFailed(Box::new(e)))?;
+
+        if index.has_conflicts() {
+            return Err(GitError::RevertFailed("unresolved conflicts remain".into()));
+        }
+
+        let mut index = repo
+            .index()
+            .map_err(|e| GitError::RevertFailed(Box::new(e)))?;
+        let tree_oid = index
+            .write_tree()
+            .map_err(|e| GitError::RevertFailed(Box::new(e)))?;
+        let tree = repo
+            .find_tree(tree_oid)
+            .map_err(|e| GitError::RevertFailed(Box::new(e)))?;
+        let sig = repo
+            .signature()
+            .map_err(|e| GitError::RevertFailed(Box::new(e)))?;
+        let head_commit = repo
+            .head()
+            .and_then(|h| h.peel_to_commit())
+            .map_err(|e| GitError::RevertFailed(Box::new(e)))?;
+
+        let revert_head_path = repo.path().join("REVERT_HEAD");
+        let revert_head_content = std::fs::read_to_string(&revert_head_path)
+            .map_err(|e| GitError::RevertFailed(Box::new(e)))?;
+        let revert_oid = Oid::from_str(revert_head_content.trim())
+            .map_err(|e| GitError::RevertFailed(Box::new(e)))?;
+        let revert_commit = repo
+            .find_commit(revert_oid)
+            .map_err(|e| GitError::RevertFailed(Box::new(e)))?;
+
+        let original_msg = revert_commit
+            .message()
+            .unwrap_or("")
+            .lines()
+            .next()
+            .unwrap_or("");
+        let message = format!(
+            "Revert \"{original_msg}\"\n\nThis reverts commit {}.",
+            revert_oid
+        );
+
+        let oid = repo
+            .commit(Some("HEAD"), &sig, &sig, &message, &tree, &[&head_commit])
+            .map_err(|e| GitError::RevertFailed(Box::new(e)))?;
+
+        let _ = repo.cleanup_state();
+
+        Ok(RevertResult {
+            completed: true,
+            conflicts: Vec::new(),
+            oid: Some(oid.to_string()),
         })
     }
 }

@@ -9,6 +9,8 @@ export type PageId =
   | "file-history"
   | "stash"
   | "rebase"
+  | "cherry-pick"
+  | "revert"
   | "hosting";
 
 interface BlameTarget {

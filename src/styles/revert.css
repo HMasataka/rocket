@@ -1,33 +1,40 @@
-/* ===== Stash List ===== */
-.stash-list {
+/* ===== Revert Commit List ===== */
+.revert-commit-list {
   flex: 1;
   overflow-y: auto;
 }
 
-.stash-row {
+.revert-commit-row {
   display: flex;
   align-items: flex-start;
+  width: 100%;
   padding: 14px 16px;
+  border: none;
   border-bottom: 1px solid var(--border);
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
   cursor: pointer;
   transition: background-color 0.15s ease;
 }
 
-.stash-row:hover { background: var(--bg-tertiary); }
-
-.stash-row.selected {
-  background: var(--accent-dim);
-  border-left: 3px solid var(--accent);
+.revert-commit-row:hover {
+  background: var(--bg-hover);
+}
+.revert-commit-row.selected {
+  background: var(--warning-dim);
+  border-left: 3px solid var(--warning);
+}
+.revert-commit-row.selected:hover {
+  background: var(--warning-dim);
 }
 
-.stash-row.selected:hover { background: var(--accent-dim); }
-
-.stash-radio {
+.revert-radio {
   margin-right: 12px;
   padding-top: 2px;
 }
-
-.stash-radio input {
+.revert-radio input {
   width: 1.15em;
   height: 1.15em;
   appearance: none;
@@ -35,50 +42,47 @@
   border-radius: 50%;
   border: 0.1em solid #6b6b76;
   background: transparent;
-  cursor: pointer;
   display: grid;
   place-content: center;
+  cursor: pointer;
 }
 
-.stash-radio input::before {
+.revert-radio input::before {
   content: "";
   width: 0.65em;
   height: 0.65em;
   border-radius: 50%;
   transform: scale(0);
   transition: 120ms transform ease-in-out;
-  background-color: var(--accent);
+  background-color: var(--warning);
 }
 
-.stash-radio input:checked {
-  border-color: var(--accent);
+.revert-radio input:checked {
+  border-color: var(--warning);
 }
-
-.stash-radio input:checked::before {
+.revert-radio input:checked::before {
   transform: scale(1);
 }
 
-.stash-graph {
+.revert-graph {
   width: 24px;
   display: flex;
   flex-direction: column;
   align-items: center;
   margin-right: 12px;
 }
-
-.graph-node.stash {
+.graph-node.revert {
   width: 12px;
   height: 12px;
-  background: linear-gradient(135deg, #60a5fa, #3b82f6);
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
   border-radius: 50%;
 }
 
-.stash-info {
+.revert-info {
   flex: 1;
   min-width: 0;
 }
-
-.stash-message {
+.revert-message {
   font-size: 13px;
   font-weight: 500;
   margin-bottom: 6px;
@@ -86,26 +90,18 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
-.stash-meta {
+.revert-meta {
   display: flex;
   gap: 12px;
   font-size: 11px;
   color: var(--text-muted);
 }
-
-.stash-index-label {
-  font-family: 'JetBrains Mono', monospace;
-  color: var(--accent);
+.revert-hash {
+  font-family: "JetBrains Mono", monospace;
+  color: var(--warning);
 }
 
-/* ===== Stash Page Actions ===== */
-.page-actions {
-  display: flex;
-  gap: 8px;
-}
-
-/* ===== Stash Preview Hash ===== */
-.preview-hash.stash {
-  color: var(--accent);
+/* ===== Revert Preview Hash ===== */
+.preview-hash.warning {
+  color: var(--warning);
 }

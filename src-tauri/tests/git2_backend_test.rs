@@ -5,8 +5,8 @@ use std::process::Command;
 use app_lib::git::backend::GitBackend;
 use app_lib::git::git2_backend::Git2Backend;
 use app_lib::git::types::{
-    ConflictResolution, DiffLineKind, DiffOptions, HunkIdentifier, LineRange, LogFilter,
-    MergeOption, PullOption,
+    CherryPickMode, ConflictResolution, DiffLineKind, DiffOptions, HunkIdentifier, LineRange,
+    LogFilter, MergeOption, PullOption, RevertMode,
 };
 
 fn init_test_repo(dir: &Path) {
@@ -1531,4 +1531,411 @@ fn resolve_conflict_block_resolves_single_block() {
     let content = fs::read_to_string(tmp.path().join("shared.txt")).unwrap();
     assert!(content.contains("feature-change"));
     assert!(!content.contains("<<<<<<<"));
+}
+
+// ============================
+// Cherry-pick tests
+// ============================
+
+/// Helper: create a repo with a main branch containing an initial commit,
+/// then create a feature branch with one extra commit, and switch back to main.
+/// Returns (backend, feature_commit_oid).
+fn setup_cherry_pick_repo(dir: &Path) -> (Git2Backend, String) {
+    let backend = init_repo_with_commit(dir);
+    let default_branch = backend.current_branch().unwrap();
+
+    // Create feature branch with a new commit
+    backend.create_branch("feature").unwrap();
+    backend.checkout_branch("feature").unwrap();
+
+    fs::write(dir.join("cherry.txt"), "cherry content\n").unwrap();
+    backend.stage(Path::new("cherry.txt")).unwrap();
+    backend.commit("feature: add cherry.txt", false).unwrap();
+
+    // Get the OID of the feature commit
+    let log_filter = LogFilter {
+        author: None,
+        since: None,
+        until: None,
+        message: None,
+        path: None,
+    };
+    let log = backend.get_commit_log(&log_filter, 1, 0).unwrap();
+    let feature_oid = log.commits[0].oid.clone();
+
+    // Switch back to main branch
+    backend.checkout_branch(&default_branch).unwrap();
+
+    (backend, feature_oid)
+}
+
+#[test]
+fn cherry_pick_normal_mode() {
+    let tmp = tempfile::tempdir().unwrap();
+    let (backend, feature_oid) = setup_cherry_pick_repo(tmp.path());
+
+    let result = backend
+        .cherry_pick(&[&feature_oid], CherryPickMode::Normal)
+        .unwrap();
+
+    assert!(
+        result.completed,
+        "Cherry-pick should complete without conflicts"
+    );
+    assert!(result.oid.is_some(), "Should produce a new commit OID");
+    assert!(result.conflicts.is_empty(), "Should have no conflicts");
+
+    // Verify the file was applied
+    let content = fs::read_to_string(tmp.path().join("cherry.txt")).unwrap();
+    assert_eq!(content, "cherry content\n");
+
+    // Verify not in cherry-pick state
+    assert!(!backend.is_cherry_picking().unwrap());
+}
+
+#[test]
+fn cherry_pick_no_commit_mode() {
+    let tmp = tempfile::tempdir().unwrap();
+    let (backend, feature_oid) = setup_cherry_pick_repo(tmp.path());
+
+    let result = backend
+        .cherry_pick(&[&feature_oid], CherryPickMode::NoCommit)
+        .unwrap();
+
+    assert!(
+        result.completed,
+        "Cherry-pick should complete without conflicts"
+    );
+    assert!(
+        result.oid.is_none(),
+        "NoCommit mode should not produce a commit OID"
+    );
+
+    // Verify the file is in the worktree
+    let content = fs::read_to_string(tmp.path().join("cherry.txt")).unwrap();
+    assert_eq!(content, "cherry content\n");
+
+    // Verify changes are staged
+    let status = backend.status().unwrap();
+    assert!(
+        status
+            .files
+            .iter()
+            .any(|f| f.path == "cherry.txt"
+                && f.staging == app_lib::git::types::StagingState::Staged),
+        "cherry.txt should be staged"
+    );
+}
+
+#[test]
+fn cherry_pick_conflict_and_abort() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+    let default_branch = backend.current_branch().unwrap();
+
+    // Create a file on main
+    fs::write(tmp.path().join("conflict.txt"), "main content\n").unwrap();
+    backend.stage(Path::new("conflict.txt")).unwrap();
+    backend.commit("main: add conflict.txt", false).unwrap();
+
+    // Create feature branch and modify the same file
+    backend.create_branch("feature").unwrap();
+    backend.checkout_branch("feature").unwrap();
+    fs::write(tmp.path().join("conflict.txt"), "feature content\n").unwrap();
+    backend.stage(Path::new("conflict.txt")).unwrap();
+    backend
+        .commit("feature: modify conflict.txt", false)
+        .unwrap();
+
+    let log_filter = LogFilter {
+        author: None,
+        since: None,
+        until: None,
+        message: None,
+        path: None,
+    };
+    let log = backend.get_commit_log(&log_filter, 1, 0).unwrap();
+    let feature_oid = log.commits[0].oid.clone();
+
+    // Switch to main and modify the same file differently
+    backend.checkout_branch(&default_branch).unwrap();
+    fs::write(tmp.path().join("conflict.txt"), "different main content\n").unwrap();
+    backend.stage(Path::new("conflict.txt")).unwrap();
+    backend
+        .commit("main: modify conflict.txt differently", false)
+        .unwrap();
+
+    // Cherry-pick should detect conflicts
+    let result = backend
+        .cherry_pick(&[&feature_oid], CherryPickMode::Normal)
+        .unwrap();
+
+    assert!(!result.completed, "Should have conflicts");
+    assert!(
+        !result.conflicts.is_empty(),
+        "Should list conflicting files"
+    );
+    assert!(
+        backend.is_cherry_picking().unwrap(),
+        "Should be in cherry-pick state"
+    );
+
+    // Abort the cherry-pick
+    backend.abort_cherry_pick().unwrap();
+    assert!(
+        !backend.is_cherry_picking().unwrap(),
+        "Should no longer be in cherry-pick state"
+    );
+
+    // Working directory should be clean (back to main content)
+    let content = fs::read_to_string(tmp.path().join("conflict.txt")).unwrap();
+    assert_eq!(content, "different main content\n");
+}
+
+#[test]
+fn is_cherry_picking_false_by_default() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+
+    assert!(!backend.is_cherry_picking().unwrap());
+}
+
+// ============================
+// Revert tests
+// ============================
+
+#[test]
+fn revert_auto_mode() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+
+    // Create a file and commit
+    fs::write(tmp.path().join("revert_target.txt"), "to be reverted\n").unwrap();
+    backend.stage(Path::new("revert_target.txt")).unwrap();
+    backend.commit("add revert_target.txt", false).unwrap();
+
+    // Get the OID of the commit to revert
+    let log_filter = LogFilter {
+        author: None,
+        since: None,
+        until: None,
+        message: None,
+        path: None,
+    };
+    let log = backend.get_commit_log(&log_filter, 1, 0).unwrap();
+    let target_oid = log.commits[0].oid.clone();
+
+    let result = backend.revert(&target_oid, RevertMode::Auto).unwrap();
+
+    assert!(result.completed, "Revert should complete without conflicts");
+    assert!(result.oid.is_some(), "Should produce a new commit OID");
+    assert!(result.conflicts.is_empty(), "Should have no conflicts");
+
+    // The file should be deleted since the commit that added it was reverted
+    assert!(
+        !tmp.path().join("revert_target.txt").exists(),
+        "File should be removed by revert"
+    );
+
+    assert!(!backend.is_reverting().unwrap());
+}
+
+#[test]
+fn revert_no_commit_mode() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+
+    // Create a file and commit
+    fs::write(tmp.path().join("revert_nc.txt"), "no-commit revert\n").unwrap();
+    backend.stage(Path::new("revert_nc.txt")).unwrap();
+    backend.commit("add revert_nc.txt", false).unwrap();
+
+    let log_filter = LogFilter {
+        author: None,
+        since: None,
+        until: None,
+        message: None,
+        path: None,
+    };
+    let log = backend.get_commit_log(&log_filter, 1, 0).unwrap();
+    let target_oid = log.commits[0].oid.clone();
+
+    let result = backend.revert(&target_oid, RevertMode::NoCommit).unwrap();
+
+    assert!(result.completed, "Revert should complete without conflicts");
+    assert!(
+        result.oid.is_none(),
+        "NoCommit mode should not produce a commit OID"
+    );
+
+    // File should be removed in worktree
+    assert!(
+        !tmp.path().join("revert_nc.txt").exists(),
+        "File should be removed in worktree"
+    );
+}
+
+#[test]
+fn revert_conflict_and_abort() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+
+    // Create a file and commit
+    fs::write(tmp.path().join("revert_conflict.txt"), "original\n").unwrap();
+    backend.stage(Path::new("revert_conflict.txt")).unwrap();
+    backend.commit("add revert_conflict.txt", false).unwrap();
+
+    let log_filter = LogFilter {
+        author: None,
+        since: None,
+        until: None,
+        message: None,
+        path: None,
+    };
+    let log = backend.get_commit_log(&log_filter, 1, 0).unwrap();
+    let add_oid = log.commits[0].oid.clone();
+
+    // Modify the file in a later commit (this will conflict with reverting the addition)
+    fs::write(tmp.path().join("revert_conflict.txt"), "modified content\n").unwrap();
+    backend.stage(Path::new("revert_conflict.txt")).unwrap();
+    backend.commit("modify revert_conflict.txt", false).unwrap();
+
+    // Try to revert the original addition commit — should conflict
+    let result = backend.revert(&add_oid, RevertMode::Auto).unwrap();
+
+    assert!(!result.completed, "Revert should have conflicts");
+    assert!(
+        !result.conflicts.is_empty(),
+        "Should list conflicting files"
+    );
+    assert!(backend.is_reverting().unwrap(), "Should be in revert state");
+
+    // Abort
+    backend.abort_revert().unwrap();
+    assert!(
+        !backend.is_reverting().unwrap(),
+        "Should no longer be in revert state"
+    );
+
+    // File should be restored
+    let content = fs::read_to_string(tmp.path().join("revert_conflict.txt")).unwrap();
+    assert_eq!(content, "modified content\n");
+}
+
+#[test]
+fn is_reverting_false_by_default() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+
+    assert!(!backend.is_reverting().unwrap());
+}
+
+#[test]
+fn continue_cherry_pick_after_conflict_resolution() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+    let default_branch = backend.current_branch().unwrap();
+
+    // Create a file on main
+    fs::write(tmp.path().join("conflict.txt"), "main content\n").unwrap();
+    backend.stage(Path::new("conflict.txt")).unwrap();
+    backend.commit("main: add conflict.txt", false).unwrap();
+
+    // Create feature branch and modify the same file
+    backend.create_branch("feature").unwrap();
+    backend.checkout_branch("feature").unwrap();
+    fs::write(tmp.path().join("conflict.txt"), "feature content\n").unwrap();
+    backend.stage(Path::new("conflict.txt")).unwrap();
+    backend
+        .commit("feature: modify conflict.txt", false)
+        .unwrap();
+
+    let log_filter = LogFilter {
+        author: None,
+        since: None,
+        until: None,
+        message: None,
+        path: None,
+    };
+    let log = backend.get_commit_log(&log_filter, 1, 0).unwrap();
+    let feature_oid = log.commits[0].oid.clone();
+
+    // Switch to main and modify the same file differently
+    backend.checkout_branch(&default_branch).unwrap();
+    fs::write(tmp.path().join("conflict.txt"), "different main content\n").unwrap();
+    backend.stage(Path::new("conflict.txt")).unwrap();
+    backend
+        .commit("main: modify conflict.txt differently", false)
+        .unwrap();
+
+    // Cherry-pick should detect conflicts
+    let result = backend
+        .cherry_pick(&[&feature_oid], CherryPickMode::Normal)
+        .unwrap();
+    assert!(!result.completed);
+    assert!(backend.is_cherry_picking().unwrap());
+
+    // Resolve the conflict and mark resolved
+    backend
+        .resolve_conflict("conflict.txt", ConflictResolution::Theirs)
+        .unwrap();
+    backend.mark_resolved("conflict.txt").unwrap();
+
+    // Continue cherry-pick
+    let result = backend.continue_cherry_pick().unwrap();
+    assert!(result.completed);
+    assert!(result.oid.is_some());
+    assert!(!backend.is_cherry_picking().unwrap());
+
+    let content = fs::read_to_string(tmp.path().join("conflict.txt")).unwrap();
+    assert_eq!(content, "feature content\n");
+}
+
+#[test]
+fn continue_revert_after_conflict_resolution() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+
+    // Create a file and commit
+    fs::write(tmp.path().join("revert_cont.txt"), "original\n").unwrap();
+    backend.stage(Path::new("revert_cont.txt")).unwrap();
+    backend.commit("add revert_cont.txt", false).unwrap();
+
+    let log_filter = LogFilter {
+        author: None,
+        since: None,
+        until: None,
+        message: None,
+        path: None,
+    };
+    let log = backend.get_commit_log(&log_filter, 1, 0).unwrap();
+    let add_oid = log.commits[0].oid.clone();
+
+    // Modify the file in a later commit to cause conflict on revert
+    fs::write(tmp.path().join("revert_cont.txt"), "modified content\n").unwrap();
+    backend.stage(Path::new("revert_cont.txt")).unwrap();
+    backend.commit("modify revert_cont.txt", false).unwrap();
+
+    // Revert the original addition — should conflict
+    let result = backend.revert(&add_oid, RevertMode::Auto).unwrap();
+    assert!(!result.completed);
+    assert!(backend.is_reverting().unwrap());
+
+    // Resolve the conflict manually and mark resolved
+    backend
+        .resolve_conflict(
+            "revert_cont.txt",
+            ConflictResolution::Manual("resolved content\n".to_string()),
+        )
+        .unwrap();
+    backend.mark_resolved("revert_cont.txt").unwrap();
+
+    // Continue revert
+    let result = backend.continue_revert().unwrap();
+    assert!(result.completed);
+    assert!(result.oid.is_some());
+    assert!(!backend.is_reverting().unwrap());
+
+    let content = fs::read_to_string(tmp.path().join("revert_cont.txt")).unwrap();
+    assert_eq!(content, "resolved content\n");
 }

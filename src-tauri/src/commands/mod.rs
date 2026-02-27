@@ -1,5 +1,6 @@
 pub mod ai;
 pub mod branch;
+pub mod cherry_pick;
 pub mod config;
 pub mod conflict;
 pub mod git;
@@ -7,5 +8,6 @@ pub mod history;
 pub mod hosting;
 pub mod rebase;
 pub mod remote;
+pub mod revert;
 pub mod stash;
 pub mod tag;

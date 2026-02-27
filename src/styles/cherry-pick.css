@@ -1,0 +1,159 @@
+/* ===== Branch Selector ===== */
+.cherry-branch-selector {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.cherry-branch-selector label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.cherry-branch-selector select {
+  appearance: none;
+  -webkit-appearance: none;
+  flex: 1;
+  max-width: 300px;
+  padding: 6px 32px 6px 10px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%238b949e'%3E%3Cpath d='M4.646 6.646a.5.5 0 0 1 .708 0L8 9.293l2.646-2.647a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 16px;
+  transition: border-color 0.15s ease;
+}
+
+.cherry-branch-selector select:hover {
+  border-color: var(--accent);
+}
+
+.cherry-branch-selector select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-dim);
+}
+
+.cherry-branch-selector select option {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  padding: 8px;
+}
+
+/* ===== Cherry-pick Commit List ===== */
+.cherry-commit-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.cherry-commit-row {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+  padding: 14px 16px;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.cherry-commit-row:hover {
+  background: var(--bg-hover);
+}
+.cherry-commit-row.selected {
+  background: var(--accent-dim);
+  border-left: 3px solid #ec4899;
+}
+.cherry-commit-row.selected:hover {
+  background: var(--accent-dim);
+}
+
+.cherry-checkbox {
+  margin-right: 12px;
+  padding-top: 2px;
+}
+.cherry-checkbox input {
+  width: 1.15em;
+  height: 1.15em;
+  appearance: none;
+  -webkit-appearance: none;
+  border-radius: 50%;
+  border: 0.1em solid #6b6b76;
+  background: transparent;
+  display: grid;
+  place-content: center;
+  cursor: pointer;
+}
+
+.cherry-checkbox input::before {
+  content: "";
+  width: 0.65em;
+  height: 0.65em;
+  border-radius: 50%;
+  transform: scale(0);
+  transition: 120ms transform ease-in-out;
+  background-color: #ec4899;
+}
+
+.cherry-checkbox input:checked {
+  border-color: #ec4899;
+}
+.cherry-checkbox input:checked::before {
+  transform: scale(1);
+}
+
+.cherry-graph {
+  width: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-right: 12px;
+}
+.graph-node.cherry {
+  width: 12px;
+  height: 12px;
+  background: linear-gradient(135deg, #f472b6, #ec4899);
+  border-radius: 50%;
+}
+
+.cherry-info {
+  flex: 1;
+  min-width: 0;
+}
+.cherry-message {
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cherry-meta {
+  display: flex;
+  gap: 12px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.cherry-hash {
+  font-family: "JetBrains Mono", monospace;
+  color: #ec4899;
+}
+
+/* ===== Cherry-pick Preview Hash ===== */
+.preview-hash.cherry {
+  color: #ec4899;
+}

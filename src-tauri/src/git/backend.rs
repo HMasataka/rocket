@@ -2,10 +2,11 @@ use std::path::Path;
 
 use crate::git::error::GitResult;
 use crate::git::types::{
-    BlameResult, BranchInfo, CommitDetail, CommitInfo, CommitLogResult, CommitResult, ConflictFile,
-    ConflictResolution, DiffOptions, FetchResult, FileDiff, HunkIdentifier, LineRange, LogFilter,
-    MergeBaseContent, MergeOption, MergeResult, PullOption, PushResult, RebaseResult, RebaseState,
-    RebaseTodoEntry, RemoteInfo, RepoStatus, StashEntry, TagInfo,
+    BlameResult, BranchInfo, CherryPickMode, CherryPickResult, CommitDetail, CommitInfo,
+    CommitLogResult, CommitResult, ConflictFile, ConflictResolution, DiffOptions, FetchResult,
+    FileDiff, HunkIdentifier, LineRange, LogFilter, MergeBaseContent, MergeOption, MergeResult,
+    PullOption, PushResult, RebaseResult, RebaseState, RebaseTodoEntry, RemoteInfo, RepoStatus,
+    RevertMode, RevertResult, StashEntry, TagInfo,
 };
 
 pub trait GitBackend: Send + Sync {
@@ -88,4 +89,16 @@ pub trait GitBackend: Send + Sync {
     fn get_rebase_state(&self) -> GitResult<Option<RebaseState>>;
     fn get_rebase_todo(&self, onto: &str, limit: usize) -> GitResult<Vec<RebaseTodoEntry>>;
     fn get_merge_base_content(&self, path: &str) -> GitResult<MergeBaseContent>;
+
+    // Cherry-pick operations
+    fn cherry_pick(&self, oids: &[&str], mode: CherryPickMode) -> GitResult<CherryPickResult>;
+    fn is_cherry_picking(&self) -> GitResult<bool>;
+    fn abort_cherry_pick(&self) -> GitResult<()>;
+    fn continue_cherry_pick(&self) -> GitResult<CherryPickResult>;
+
+    // Revert operations
+    fn revert(&self, oid: &str, mode: RevertMode) -> GitResult<RevertResult>;
+    fn is_reverting(&self) -> GitResult<bool>;
+    fn abort_revert(&self) -> GitResult<()>;
+    fn continue_revert(&self) -> GitResult<RevertResult>;
 }
