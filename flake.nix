@@ -20,6 +20,8 @@
             nodejs
             pnpm
             cargo-tauri
+            openssl
+            pkg-config
           ];
           RUST_SRC_PATH = "${pkgs.rustPlatform.rustLibSrc}";
         };
