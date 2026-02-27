@@ -65,15 +65,27 @@ fn parse_gitlab(url: &str) -> Option<HostingInfo> {
 fn parse_owner_repo(
     path: &str,
     provider: HostingProviderKind,
-    original_url: &str,
+    _original_url: &str,
 ) -> Option<HostingInfo> {
     let parts: Vec<&str> = path.splitn(2, '/').collect();
     if parts.len() == 2 && !parts[0].is_empty() && !parts[1].is_empty() {
+        let owner = parts[0];
+        let repo = parts[1];
+        let base = match provider {
+            HostingProviderKind::Github => "https://github.com",
+            HostingProviderKind::Gitlab => "https://gitlab.com",
+            HostingProviderKind::Unknown => "",
+        };
+        let url = if base.is_empty() {
+            _original_url.to_string()
+        } else {
+            format!("{base}/{owner}/{repo}")
+        };
         Some(HostingInfo {
             provider,
-            owner: parts[0].to_string(),
-            repo: parts[1].to_string(),
-            url: original_url.to_string(),
+            owner: owner.to_string(),
+            repo: repo.to_string(),
+            url,
         })
     } else {
         None
@@ -90,6 +102,7 @@ mod tests {
         assert_eq!(info.provider, HostingProviderKind::Github);
         assert_eq!(info.owner, "HMasataka");
         assert_eq!(info.repo, "rocket");
+        assert_eq!(info.url, "https://github.com/HMasataka/rocket");
     }
 
     #[test]
@@ -98,6 +111,7 @@ mod tests {
         assert_eq!(info.provider, HostingProviderKind::Github);
         assert_eq!(info.owner, "HMasataka");
         assert_eq!(info.repo, "rocket");
+        assert_eq!(info.url, "https://github.com/HMasataka/rocket");
     }
 
     #[test]
@@ -106,6 +120,7 @@ mod tests {
         assert_eq!(info.provider, HostingProviderKind::Github);
         assert_eq!(info.owner, "owner");
         assert_eq!(info.repo, "repo");
+        assert_eq!(info.url, "https://github.com/owner/repo");
     }
 
     #[test]
@@ -114,6 +129,7 @@ mod tests {
         assert_eq!(info.provider, HostingProviderKind::Gitlab);
         assert_eq!(info.owner, "owner");
         assert_eq!(info.repo, "repo");
+        assert_eq!(info.url, "https://gitlab.com/owner/repo");
     }
 
     #[test]
@@ -122,6 +138,7 @@ mod tests {
         assert_eq!(info.provider, HostingProviderKind::Gitlab);
         assert_eq!(info.owner, "owner");
         assert_eq!(info.repo, "repo");
+        assert_eq!(info.url, "https://gitlab.com/owner/repo");
     }
 
     #[test]
