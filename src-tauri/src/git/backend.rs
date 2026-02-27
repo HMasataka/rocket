@@ -5,8 +5,8 @@ use crate::git::types::{
     BlameResult, BranchInfo, CherryPickMode, CherryPickResult, CommitDetail, CommitInfo,
     CommitLogResult, CommitResult, ConflictFile, ConflictResolution, DiffOptions, FetchResult,
     FileDiff, HunkIdentifier, LineRange, LogFilter, MergeBaseContent, MergeOption, MergeResult,
-    PullOption, PushResult, RebaseResult, RebaseState, RebaseTodoEntry, RemoteInfo, RepoStatus,
-    RevertMode, RevertResult, StashEntry, TagInfo,
+    PullOption, PushResult, RebaseResult, RebaseState, RebaseTodoEntry, ReflogEntry, RemoteInfo,
+    RepoStatus, ResetMode, ResetResult, RevertMode, RevertResult, StashEntry, TagInfo,
 };
 
 pub trait GitBackend: Send + Sync {
@@ -101,4 +101,11 @@ pub trait GitBackend: Send + Sync {
     fn is_reverting(&self) -> GitResult<bool>;
     fn abort_revert(&self) -> GitResult<()>;
     fn continue_revert(&self) -> GitResult<RevertResult>;
+
+    // Reset operations
+    fn reset(&self, oid: &str, mode: ResetMode) -> GitResult<ResetResult>;
+    fn reset_file(&self, path: &str, oid: &str) -> GitResult<()>;
+
+    // Reflog operations
+    fn get_reflog(&self, ref_name: &str, limit: usize) -> GitResult<Vec<ReflogEntry>>;
 }

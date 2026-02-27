@@ -393,6 +393,35 @@ pub struct CherryPickResult {
     pub oid: Option<String>,
 }
 
+// === Reset types ===
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum ResetMode {
+    Soft,
+    Mixed,
+    Hard,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ResetResult {
+    pub oid: String,
+}
+
+// === Reflog types ===
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ReflogEntry {
+    pub index: usize,
+    pub old_oid: String,
+    pub new_oid: String,
+    pub new_short_oid: String,
+    pub action: String,
+    pub message: String,
+    pub committer_name: String,
+    pub committer_date: i64,
+}
+
 // === Revert types ===
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]

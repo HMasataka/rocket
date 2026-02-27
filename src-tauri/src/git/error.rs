@@ -97,6 +97,12 @@ pub enum GitError {
 
     #[error("failed to revert: {0}")]
     RevertFailed(#[source] Box<dyn std::error::Error + Send + Sync>),
+
+    #[error("failed to reset: {0}")]
+    ResetFailed(#[source] Box<dyn std::error::Error + Send + Sync>),
+
+    #[error("failed to read reflog: {0}")]
+    ReflogFailed(#[source] Box<dyn std::error::Error + Send + Sync>),
 }
 
 pub type GitResult<T> = Result<T, GitError>;
