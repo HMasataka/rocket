@@ -1,4 +1,11 @@
 import { create } from "zustand";
+import type { CherryPickMode, CherryPickResult } from "../services/cherryPick";
+import {
+  abortCherryPick as abortCherryPickService,
+  cherryPick as cherryPickService,
+  continueCherryPick as continueCherryPickService,
+  isCherryPicking as isCherryPickingService,
+} from "../services/cherryPick";
 import type { ConflictFile, ConflictResolution } from "../services/conflict";
 import {
   abortMerge as abortMergeService,
@@ -66,6 +73,13 @@ import {
   isRebasing as isRebasingService,
   rebase as rebaseService,
 } from "../services/rebase";
+import type { RevertMode, RevertResult } from "../services/revert";
+import {
+  abortRevert as abortRevertService,
+  continueRevert as continueRevertService,
+  isReverting as isRevertingService,
+  revertCommit as revertCommitService,
+} from "../services/revert";
 import type { StashEntry } from "../services/stash";
 import {
   applyStash as applyStashService,
@@ -95,6 +109,8 @@ interface GitState {
   merging: boolean;
   rebasing: boolean;
   rebaseState: RebaseState | null;
+  cherryPicking: boolean;
+  reverting: boolean;
   conflictFiles: ConflictFile[];
   loading: boolean;
   error: string | null;
@@ -164,6 +180,17 @@ interface GitActions {
   abortRebase: () => Promise<void>;
   continueRebase: () => Promise<RebaseResult>;
   getRebaseTodo: (onto: string) => Promise<RebaseTodoEntry[]>;
+  cherryPick: (
+    oids: string[],
+    mode: CherryPickMode,
+  ) => Promise<CherryPickResult>;
+  fetchCherryPickState: () => Promise<void>;
+  abortCherryPick: () => Promise<void>;
+  continueCherryPick: () => Promise<CherryPickResult>;
+  revertCommit: (oid: string, mode: RevertMode) => Promise<RevertResult>;
+  fetchRevertState: () => Promise<void>;
+  abortRevert: () => Promise<void>;
+  continueRevert: () => Promise<RevertResult>;
   clearError: () => void;
 }
 
@@ -178,6 +205,8 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
   merging: false,
   rebasing: false,
   rebaseState: null,
+  cherryPicking: false,
+  reverting: false,
   conflictFiles: [],
   loading: false,
   error: null,
@@ -651,6 +680,102 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
   getRebaseTodo: async (onto: string) => {
     try {
       return await getRebaseTodoService(onto, REBASE_TODO_DEFAULT_LIMIT);
+    } catch (e) {
+      set({ error: String(e) });
+      throw e;
+    }
+  },
+
+  cherryPick: async (oids: string[], mode: CherryPickMode) => {
+    try {
+      const result = await cherryPickService(oids, mode);
+      if (result.completed) {
+        set({ cherryPicking: false });
+      } else {
+        set({ cherryPicking: true });
+      }
+      return result;
+    } catch (e) {
+      set({ error: String(e) });
+      throw e;
+    }
+  },
+
+  fetchCherryPickState: async () => {
+    try {
+      const cherryPicking = await isCherryPickingService();
+      set({ cherryPicking });
+    } catch (e) {
+      set({ error: String(e) });
+      throw e;
+    }
+  },
+
+  abortCherryPick: async () => {
+    try {
+      await abortCherryPickService();
+      set({ cherryPicking: false, conflictFiles: [] });
+    } catch (e) {
+      set({ error: String(e) });
+      throw e;
+    }
+  },
+
+  continueCherryPick: async () => {
+    try {
+      const result = await continueCherryPickService();
+      if (result.completed) {
+        set({ cherryPicking: false, conflictFiles: [] });
+      }
+      return result;
+    } catch (e) {
+      set({ error: String(e) });
+      throw e;
+    }
+  },
+
+  revertCommit: async (oid: string, mode: RevertMode) => {
+    try {
+      const result = await revertCommitService(oid, mode);
+      if (result.completed) {
+        set({ reverting: false });
+      } else {
+        set({ reverting: true });
+      }
+      return result;
+    } catch (e) {
+      set({ error: String(e) });
+      throw e;
+    }
+  },
+
+  fetchRevertState: async () => {
+    try {
+      const reverting = await isRevertingService();
+      set({ reverting });
+    } catch (e) {
+      set({ error: String(e) });
+      throw e;
+    }
+  },
+
+  abortRevert: async () => {
+    try {
+      await abortRevertService();
+      set({ reverting: false, conflictFiles: [] });
+    } catch (e) {
+      set({ error: String(e) });
+      throw e;
+    }
+  },
+
+  continueRevert: async () => {
+    try {
+      const result = await continueRevertService();
+      if (result.completed) {
+        set({ reverting: false, conflictFiles: [] });
+      }
+      return result;
     } catch (e) {
       set({ error: String(e) });
       throw e;
