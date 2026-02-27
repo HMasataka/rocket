@@ -6,15 +6,18 @@ import { TagsModal } from "./components/organisms/TagsModal";
 import { ToastContainer } from "./components/organisms/ToastContainer";
 import { AppShell } from "./components/templates/AppShell";
 import { useFileWatcher } from "./hooks/useFileWatcher";
+import { useTheme } from "./hooks/useTheme";
 import { BlamePage } from "./pages/blame";
 import { BranchesPage } from "./pages/branches";
 import { ChangesPage } from "./pages/changes";
 import { ConflictModal } from "./pages/conflict";
 import { FileHistoryPage } from "./pages/file-history";
 import { HistoryPage } from "./pages/history";
+import { HostingPage } from "./pages/hosting";
 import { RebasePage } from "./pages/rebase";
 import { StashPage } from "./pages/stash";
 import type { PullOption } from "./services/git";
+import { useConfigStore } from "./stores/configStore";
 import { useGitStore } from "./stores/gitStore";
 import { useUIStore } from "./stores/uiStore";
 
@@ -33,13 +36,19 @@ export function App() {
   const fetchMergeState = useGitStore((s) => s.fetchMergeState);
   const fetchRebaseState = useGitStore((s) => s.fetchRebaseState);
   const fetchStashes = useGitStore((s) => s.fetchStashes);
+  const loadConfig = useConfigStore((s) => s.loadConfig);
   const addToast = useUIStore((s) => s.addToast);
   const activePage = useUIStore((s) => s.activePage);
   const activeModal = useUIStore((s) => s.activeModal);
   const openModal = useUIStore((s) => s.openModal);
   const closeModal = useUIStore((s) => s.closeModal);
 
+  useTheme();
+
   useEffect(() => {
+    loadConfig().catch((e: unknown) => {
+      addToast(String(e), "error");
+    });
     fetchBranch().catch((e: unknown) => {
       addToast(String(e), "error");
     });
@@ -56,6 +65,7 @@ export function App() {
       addToast(String(e), "error");
     });
   }, [
+    loadConfig,
     fetchBranch,
     fetchRemotes,
     fetchStashes,
@@ -148,6 +158,7 @@ export function App() {
         {activePage === "file-history" && <FileHistoryPage />}
         {activePage === "stash" && <StashPage />}
         {activePage === "rebase" && <RebasePage />}
+        {activePage === "hosting" && <HostingPage />}
       </AppShell>
       <ToastContainer />
       {activeModal === "remotes" && <RemoteModal onClose={closeModal} />}
