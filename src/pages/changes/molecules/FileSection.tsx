@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import type { ReviewComment } from "../../../services/ai";
 import type { FileStatus, StagingState } from "../../../services/git";
 import { FileItem } from "./FileItem";
 
@@ -7,6 +8,7 @@ interface FileSectionProps {
   files: FileStatus[];
   selectedFile: string | null;
   selectedFileStaged: boolean;
+  reviewComments?: ReviewComment[];
   onSelectFile: (path: string, staged: boolean) => void;
   onFileAction: (path: string, staging: StagingState) => void;
 }
@@ -16,10 +18,23 @@ export function FileSection({
   files,
   selectedFile,
   selectedFileStaged,
+  reviewComments,
   onSelectFile,
   onFileAction,
 }: FileSectionProps) {
   const [collapsed, setCollapsed] = useState(false);
+
+  const commentsByFile = useMemo(() => {
+    if (!reviewComments || reviewComments.length === 0) return {};
+    const map: Record<string, ReviewComment[]> = {};
+    for (const comment of reviewComments) {
+      if (!map[comment.file]) {
+        map[comment.file] = [];
+      }
+      map[comment.file].push(comment);
+    }
+    return map;
+  }, [reviewComments]);
 
   if (files.length === 0) return null;
 
@@ -52,6 +67,7 @@ export function FileSection({
               selected={
                 selectedFile === file.path && selectedFileStaged === isStaged
               }
+              reviewComments={commentsByFile[file.path]}
               onSelect={onSelectFile}
               onAction={onFileAction}
             />

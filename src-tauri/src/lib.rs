@@ -145,6 +145,9 @@ pub fn run() {
             commands::rebase::get_merge_base_content,
             commands::ai::detect_cli_adapters,
             commands::ai::generate_commit_message,
+            commands::ai::review_diff,
+            commands::ai::ai_resolve_conflict,
+            commands::ai::generate_pr_description,
             commands::ai::get_ai_config,
             commands::ai::save_ai_config,
         ])

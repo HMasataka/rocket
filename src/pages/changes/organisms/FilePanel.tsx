@@ -1,5 +1,6 @@
 import { Button } from "../../../components/atoms/Button";
 import type { FileStatus, StagingState } from "../../../services/git";
+import { useAiStore } from "../../../stores/aiStore";
 import { FileSection } from "../molecules/FileSection";
 
 interface FilePanelProps {
@@ -21,6 +22,8 @@ export function FilePanel({
   onStageAll,
   onUnstageAll,
 }: FilePanelProps) {
+  const reviewComments = useAiStore((s) => s.reviewComments);
+
   const staged = files.filter((f) => f.staging === "staged");
   const modified = files.filter(
     (f) => f.staging === "unstaged" && f.kind !== "untracked",
@@ -47,6 +50,7 @@ export function FilePanel({
         files={staged}
         selectedFile={selectedFile}
         selectedFileStaged={selectedFileStaged}
+        reviewComments={reviewComments}
         onSelectFile={onSelectFile}
         onFileAction={onFileAction}
       />
@@ -55,6 +59,7 @@ export function FilePanel({
         files={modified}
         selectedFile={selectedFile}
         selectedFileStaged={selectedFileStaged}
+        reviewComments={reviewComments}
         onSelectFile={onSelectFile}
         onFileAction={onFileAction}
       />
@@ -63,6 +68,7 @@ export function FilePanel({
         files={untracked}
         selectedFile={selectedFile}
         selectedFileStaged={selectedFileStaged}
+        reviewComments={reviewComments}
         onSelectFile={onSelectFile}
         onFileAction={onFileAction}
       />

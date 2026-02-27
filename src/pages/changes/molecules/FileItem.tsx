@@ -1,9 +1,11 @@
 import { StatusBadge } from "../../../components/atoms/StatusBadge";
+import type { ReviewComment } from "../../../services/ai";
 import type { FileStatus, StagingState } from "../../../services/git";
 
 interface FileItemProps {
   file: FileStatus;
   selected: boolean;
+  reviewComments?: ReviewComment[];
   onSelect: (path: string, staged: boolean) => void;
   onAction: (path: string, staging: StagingState) => void;
 }
@@ -11,12 +13,18 @@ interface FileItemProps {
 export function FileItem({
   file,
   selected,
+  reviewComments,
   onSelect,
   onAction,
 }: FileItemProps) {
   const isStaged = file.staging === "staged";
   const actionTitle = isStaged ? "Unstage" : "Stage";
   const actionLabel = isStaged ? "\u2212" : "+";
+
+  const warningCount =
+    reviewComments?.filter((c) => c.type === "warning").length ?? 0;
+  const errorCount =
+    reviewComments?.filter((c) => c.type === "error").length ?? 0;
 
   return (
     // biome-ignore lint/a11y/useSemanticElements: contains nested button for stage/unstage action
@@ -34,6 +42,12 @@ export function FileItem({
     >
       <StatusBadge kind={file.kind} />
       <span className="file-name">{file.path}</span>
+      {warningCount > 0 && (
+        <span className="file-review-badge warning">{warningCount}</span>
+      )}
+      {errorCount > 0 && (
+        <span className="file-review-badge danger">{errorCount}</span>
+      )}
       <button
         type="button"
         className="file-action"

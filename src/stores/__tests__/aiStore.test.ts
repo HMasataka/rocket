@@ -18,6 +18,9 @@ describe("aiStore", () => {
       config: null,
       lastResult: null,
       error: null,
+      reviewComments: [],
+      reviewing: false,
+      resolving: false,
     });
   });
 
@@ -180,6 +183,182 @@ describe("aiStore", () => {
       useAiStore.getState().clearError();
 
       expect(useAiStore.getState().error).toBeNull();
+    });
+  });
+
+  describe("reviewDiff", () => {
+    it("sets reviewComments on success", async () => {
+      const mockResult = {
+        comments: [
+          {
+            file: "src/main.rs",
+            line_start: 10,
+            line_end: 12,
+            type: "warning" as const,
+            message: "Unused variable",
+          },
+        ],
+      };
+      mockedInvoke.mockResolvedValueOnce(mockResult);
+
+      const result = await useAiStore.getState().reviewDiff();
+
+      expect(result).toEqual(mockResult);
+      expect(useAiStore.getState().reviewComments).toEqual(mockResult.comments);
+      expect(useAiStore.getState().reviewing).toBe(false);
+      expect(mockedInvoke).toHaveBeenCalledWith("review_diff");
+    });
+
+    it("sets reviewing to true during request", async () => {
+      let capturedReviewing = false;
+      mockedInvoke.mockImplementationOnce(() => {
+        capturedReviewing = useAiStore.getState().reviewing;
+        return Promise.resolve({ comments: [] });
+      });
+
+      await useAiStore.getState().reviewDiff();
+
+      expect(capturedReviewing).toBe(true);
+      expect(useAiStore.getState().reviewing).toBe(false);
+    });
+
+    it("sets error and resets reviewing on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("review error"));
+
+      await expect(useAiStore.getState().reviewDiff()).rejects.toThrow();
+
+      expect(useAiStore.getState().error).toContain("review error");
+      expect(useAiStore.getState().reviewing).toBe(false);
+    });
+  });
+
+  describe("resolveConflict", () => {
+    it("returns suggestion on success", async () => {
+      const mockSuggestion = {
+        resolved_code: "merged code",
+        confidence: "high" as const,
+        reason: "Compatible changes",
+      };
+      mockedInvoke.mockResolvedValueOnce(mockSuggestion);
+
+      const result = await useAiStore
+        .getState()
+        .resolveConflict("ours", "theirs", null);
+
+      expect(result).toEqual(mockSuggestion);
+      expect(useAiStore.getState().resolving).toBe(false);
+      expect(mockedInvoke).toHaveBeenCalledWith("ai_resolve_conflict", {
+        ours: "ours",
+        theirs: "theirs",
+        base: null,
+      });
+    });
+
+    it("sets resolving to true during request", async () => {
+      let capturedResolving = false;
+      mockedInvoke.mockImplementationOnce(() => {
+        capturedResolving = useAiStore.getState().resolving;
+        return Promise.resolve({
+          resolved_code: "code",
+          confidence: "high",
+          reason: "ok",
+        });
+      });
+
+      await useAiStore.getState().resolveConflict("a", "b", null);
+
+      expect(capturedResolving).toBe(true);
+      expect(useAiStore.getState().resolving).toBe(false);
+    });
+
+    it("sets error and resets resolving on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("resolve error"));
+
+      await expect(
+        useAiStore.getState().resolveConflict("a", "b", null),
+      ).rejects.toThrow();
+
+      expect(useAiStore.getState().error).toContain("resolve error");
+      expect(useAiStore.getState().resolving).toBe(false);
+    });
+  });
+
+  describe("dismissReviewComment", () => {
+    it("removes the specified comment by identity", () => {
+      const comments = [
+        {
+          file: "a.rs",
+          line_start: 1,
+          line_end: 2,
+          type: "warning" as const,
+          message: "msg1",
+        },
+        {
+          file: "b.rs",
+          line_start: 5,
+          line_end: 5,
+          type: "error" as const,
+          message: "msg2",
+        },
+        {
+          file: "a.rs",
+          line_start: 10,
+          line_end: 12,
+          type: "info" as const,
+          message: "msg3",
+        },
+      ];
+      useAiStore.setState({ reviewComments: comments });
+
+      useAiStore.getState().dismissReviewComment(comments[1]);
+
+      const remaining = useAiStore.getState().reviewComments;
+      expect(remaining).toHaveLength(2);
+      expect(remaining[0].message).toBe("msg1");
+      expect(remaining[1].message).toBe("msg3");
+    });
+
+    it("does not remove other comments with different identity", () => {
+      const comments = [
+        {
+          file: "a.rs",
+          line_start: 1,
+          line_end: 2,
+          type: "warning" as const,
+          message: "msg1",
+        },
+      ];
+      useAiStore.setState({ reviewComments: comments });
+
+      useAiStore.getState().dismissReviewComment({
+        file: "a.rs",
+        line_start: 1,
+        line_end: 2,
+        type: "warning",
+        message: "different message",
+      });
+
+      expect(useAiStore.getState().reviewComments).toHaveLength(1);
+    });
+  });
+
+  describe("clearReviewComments", () => {
+    it("clears all review comments", () => {
+      useAiStore.setState({
+        reviewComments: [
+          {
+            file: "a.rs",
+            line_start: 1,
+            line_end: 2,
+            type: "warning" as const,
+            message: "msg",
+          },
+        ],
+      });
+
+      useAiStore.getState().clearReviewComments();
+
+      expect(useAiStore.getState().reviewComments).toEqual([]);
     });
   });
 });

@@ -191,6 +191,7 @@ export function ChangesPage() {
 
   const files = status?.files ?? [];
   const hasStagedFiles = files.some((f) => f.staging === "staged");
+  const hasChanges = files.length > 0;
 
   return (
     <div className="changes-layout">
@@ -217,6 +218,7 @@ export function ChangesPage() {
       <CommitPanel
         onCommit={handleCommit}
         hasStagedFiles={hasStagedFiles}
+        hasChanges={hasChanges}
         onLoadHeadMessage={getHeadCommitMessage}
       />
     </div>

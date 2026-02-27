@@ -7,6 +7,7 @@ pub trait LlmAdapter: Send + Sync {
     fn name(&self) -> &str;
     fn is_available(&self) -> bool;
     fn generate(&self, request: &GenerateRequest) -> Result<GenerateResult, AiError>;
+    fn execute_prompt(&self, prompt: &str) -> Result<String, AiError>;
 }
 
 pub struct CliAdapter {
@@ -25,18 +26,8 @@ impl CliAdapter {
     }
 }
 
-impl LlmAdapter for CliAdapter {
-    fn name(&self) -> &str {
-        &self.adapter_name
-    }
-
-    fn is_available(&self) -> bool {
-        which::which(&self.command).is_ok()
-    }
-
-    fn generate(&self, request: &GenerateRequest) -> Result<GenerateResult, AiError> {
-        let prompt = super::prompt::build_commit_message_prompt(request);
-
+impl CliAdapter {
+    fn run_prompt(&self, prompt: &str) -> Result<String, AiError> {
         let mut child = Command::new(&self.command)
             .args(&self.args)
             .stdin(Stdio::piped())
@@ -64,8 +55,31 @@ impl LlmAdapter for CliAdapter {
             )));
         }
 
-        let raw = String::from_utf8_lossy(&output.stdout);
+        let raw = String::from_utf8_lossy(&output.stdout).trim().to_string();
+        if raw.is_empty() {
+            return Err(AiError::ParseFailed("empty response".to_string()));
+        }
+        Ok(raw)
+    }
+}
+
+impl LlmAdapter for CliAdapter {
+    fn name(&self) -> &str {
+        &self.adapter_name
+    }
+
+    fn is_available(&self) -> bool {
+        which::which(&self.command).is_ok()
+    }
+
+    fn generate(&self, request: &GenerateRequest) -> Result<GenerateResult, AiError> {
+        let prompt = super::prompt::build_commit_message_prompt(request);
+        let raw = self.run_prompt(&prompt)?;
         parse_generate_response(&raw)
+    }
+
+    fn execute_prompt(&self, prompt: &str) -> Result<String, AiError> {
+        self.run_prompt(prompt)
     }
 }
 
