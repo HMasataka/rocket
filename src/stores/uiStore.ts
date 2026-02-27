@@ -8,7 +8,8 @@ export type PageId =
   | "blame"
   | "file-history"
   | "stash"
-  | "rebase";
+  | "rebase"
+  | "hosting";
 
 interface BlameTarget {
   path: string;

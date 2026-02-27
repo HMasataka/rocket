@@ -1,4 +1,4 @@
-/* ===== CSS Variables ===== */
+/* ===== CSS Variables (Dark mode = default) ===== */
 :root {
   --bg-primary: #0f1419;
   --bg-secondary: #151b22;
@@ -22,6 +22,58 @@
   --diff-add-line: rgba(63, 185, 80, 0.4);
   --diff-del-bg: rgba(248, 81, 73, 0.15);
   --diff-del-line: rgba(248, 81, 73, 0.4);
+}
+
+/* ===== Light Mode ===== */
+[data-theme="light"] {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f6f8fa;
+  --bg-tertiary: #eaeef2;
+  --bg-hover: #d0d7de;
+  --text-primary: #1f2328;
+  --text-secondary: #656d76;
+  --text-muted: #8b949e;
+  --border: #d0d7de;
+  --accent: #0969da;
+  --accent-dim: rgba(9, 105, 218, 0.1);
+  --success: #1a7f37;
+  --success-dim: rgba(26, 127, 55, 0.1);
+  --warning: #9a6700;
+  --warning-dim: rgba(154, 103, 0, 0.1);
+  --danger: #cf222e;
+  --danger-dim: rgba(207, 34, 46, 0.1);
+  --purple: #8250df;
+  --purple-dim: rgba(130, 80, 223, 0.1);
+  --diff-add-bg: rgba(26, 127, 55, 0.1);
+  --diff-add-line: rgba(26, 127, 55, 0.3);
+  --diff-del-bg: rgba(207, 34, 46, 0.1);
+  --diff-del-line: rgba(207, 34, 46, 0.3);
+}
+
+/* ===== Color Themes ===== */
+[data-color-theme="emerald"] {
+  --accent: #34d399;
+  --accent-dim: rgba(52, 211, 153, 0.15);
+}
+
+[data-color-theme="rose"] {
+  --accent: #f472b6;
+  --accent-dim: rgba(244, 114, 182, 0.15);
+}
+
+[data-color-theme="amber"] {
+  --accent: #f59e0b;
+  --accent-dim: rgba(245, 158, 11, 0.15);
+}
+
+[data-color-theme="slate"] {
+  --accent: #a5a5b4;
+  --accent-dim: rgba(165, 165, 180, 0.15);
+}
+
+[data-color-theme="violet"] {
+  --accent: #a78bfa;
+  --accent-dim: rgba(167, 139, 250, 0.15);
 }
 
 /* ===== Reset & Base ===== */

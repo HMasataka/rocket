@@ -9,6 +9,7 @@ use crate::git::types::{
 };
 
 pub trait GitBackend: Send + Sync {
+    fn workdir(&self) -> &Path;
     fn status(&self) -> GitResult<RepoStatus>;
     fn diff(&self, path: Option<&Path>, options: &DiffOptions) -> GitResult<Vec<FileDiff>>;
     fn stage(&self, path: &Path) -> GitResult<()>;

@@ -49,6 +49,10 @@ impl Git2Backend {
 }
 
 impl GitBackend for Git2Backend {
+    fn workdir(&self) -> &Path {
+        &self.workdir
+    }
+
     fn status(&self) -> GitResult<RepoStatus> {
         let repo = self.repo.lock().unwrap();
 

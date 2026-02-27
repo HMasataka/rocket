@@ -2,6 +2,7 @@ pub mod ai;
 pub mod commands;
 mod config;
 pub mod git;
+pub mod hosting;
 pub mod state;
 mod watcher;
 
@@ -54,6 +55,7 @@ pub fn run() {
     });
 
     tauri::Builder::default()
+        .plugin(tauri_plugin_opener::init())
         .manage(AppState {
             repo: Mutex::new(repo),
             watcher: Mutex::new(None),
@@ -150,6 +152,13 @@ pub fn run() {
             commands::ai::generate_pr_description,
             commands::ai::get_ai_config,
             commands::ai::save_ai_config,
+            commands::hosting::detect_hosting_provider,
+            commands::hosting::list_pull_requests,
+            commands::hosting::get_pull_request_detail,
+            commands::hosting::list_issues,
+            commands::hosting::get_default_branch,
+            commands::hosting::create_pull_request_url,
+            commands::hosting::open_in_browser,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
