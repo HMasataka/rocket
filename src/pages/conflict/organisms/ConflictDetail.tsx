@@ -1,7 +1,11 @@
+import { useCallback, useState } from "react";
+import { AiIcon } from "../../../components/atoms/AiIcon";
 import type {
   ConflictFile,
   ConflictResolution,
 } from "../../../services/conflict";
+import { useAiStore } from "../../../stores/aiStore";
+import { useUIStore } from "../../../stores/uiStore";
 import { ConflictSection } from "../molecules/ConflictSection";
 
 interface ConflictDetailProps {
@@ -21,6 +25,33 @@ export function ConflictDetail({
   onMarkResolved,
   onOpenMergeViewer,
 }: ConflictDetailProps) {
+  const [resolvingAll, setResolvingAll] = useState(false);
+  const resolveConflict = useAiStore((s) => s.resolveConflict);
+  const addToast = useUIStore((s) => s.addToast);
+
+  const handleAiResolveAll = useCallback(async () => {
+    setResolvingAll(true);
+    try {
+      for (let i = 0; i < file.conflicts.length; i++) {
+        const block = file.conflicts[i];
+        const suggestion = await resolveConflict(
+          block.ours,
+          block.theirs,
+          block.base,
+        );
+        onResolveBlock(i, {
+          type: "Manual",
+          content: suggestion.resolved_code,
+        });
+      }
+      addToast("AI resolved all conflicts", "success");
+    } catch (e) {
+      addToast(String(e), "error");
+    } finally {
+      setResolvingAll(false);
+    }
+  }, [file.conflicts, resolveConflict, onResolveBlock, addToast]);
+
   return (
     <div className="conflict-detail">
       <div className="conflict-detail-header">
@@ -43,6 +74,16 @@ export function ConflictDetail({
       </div>
 
       <div className="conflict-detail-actions">
+        <button
+          type="button"
+          className="ai-resolve-all-btn"
+          onClick={handleAiResolveAll}
+          disabled={resolvingAll}
+        >
+          {resolvingAll ? <div className="ai-spinner" /> : <AiIcon />}
+          AI Resolve All
+        </button>
+        <div className="conflict-detail-actions-sep" />
         <button
           type="button"
           className="btn btn-secondary btn-sm"
