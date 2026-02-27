@@ -16,6 +16,8 @@ import { FileHistoryPage } from "./pages/file-history";
 import { HistoryPage } from "./pages/history";
 import { HostingPage } from "./pages/hosting";
 import { RebasePage } from "./pages/rebase";
+import { ReflogPage } from "./pages/reflog";
+import { ResetPage } from "./pages/reset";
 import { RevertPage } from "./pages/revert";
 import { StashPage } from "./pages/stash";
 import type { PullOption } from "./services/git";
@@ -185,6 +187,8 @@ export function App() {
         {activePage === "rebase" && <RebasePage />}
         {activePage === "cherry-pick" && <CherryPickPage />}
         {activePage === "revert" && <RevertPage />}
+        {activePage === "reset" && <ResetPage />}
+        {activePage === "reflog" && <ReflogPage />}
         {activePage === "hosting" && <HostingPage />}
       </AppShell>
       <ToastContainer />

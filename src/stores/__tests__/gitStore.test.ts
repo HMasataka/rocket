@@ -1397,6 +1397,56 @@ describe("gitStore", () => {
     });
   });
 
+  describe("resetToCommit", () => {
+    it("returns result on success", async () => {
+      const mockResult = { oid: "abc123" };
+      mockedInvoke.mockResolvedValueOnce(mockResult);
+
+      const result = await useGitStore
+        .getState()
+        .resetToCommit("abc123", "mixed");
+
+      expect(result).toEqual(mockResult);
+      expect(mockedInvoke).toHaveBeenCalledWith("reset", {
+        oid: "abc123",
+        mode: "mixed",
+      });
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("reset error"));
+
+      await expect(
+        useGitStore.getState().resetToCommit("abc", "soft"),
+      ).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("reset error");
+    });
+  });
+
+  describe("resetFile", () => {
+    it("calls invoke on success", async () => {
+      mockedInvoke.mockResolvedValueOnce(undefined);
+
+      await useGitStore.getState().resetFile("file.txt", "abc123");
+
+      expect(mockedInvoke).toHaveBeenCalledWith("reset_file", {
+        path: "file.txt",
+        oid: "abc123",
+      });
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("reset file error"));
+
+      await expect(
+        useGitStore.getState().resetFile("file.txt", "abc"),
+      ).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("reset file error");
+    });
+  });
+
   describe("clearError", () => {
     it("clears the error state", async () => {
       mockedInvoke.mockRejectedValueOnce(new Error("some error"));

@@ -73,6 +73,11 @@ import {
   isRebasing as isRebasingService,
   rebase as rebaseService,
 } from "../services/rebase";
+import type { ResetMode, ResetResult } from "../services/reset";
+import {
+  resetFile as resetFileService,
+  resetToCommit as resetToCommitService,
+} from "../services/reset";
 import type { RevertMode, RevertResult } from "../services/revert";
 import {
   abortRevert as abortRevertService,
@@ -191,6 +196,8 @@ interface GitActions {
   fetchRevertState: () => Promise<void>;
   abortRevert: () => Promise<void>;
   continueRevert: () => Promise<RevertResult>;
+  resetToCommit: (oid: string, mode: ResetMode) => Promise<ResetResult>;
+  resetFile: (path: string, oid: string) => Promise<void>;
   clearError: () => void;
 }
 
@@ -776,6 +783,24 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
         set({ reverting: false, conflictFiles: [] });
       }
       return result;
+    } catch (e) {
+      set({ error: String(e) });
+      throw e;
+    }
+  },
+
+  resetToCommit: async (oid: string, mode: ResetMode) => {
+    try {
+      return await resetToCommitService(oid, mode);
+    } catch (e) {
+      set({ error: String(e) });
+      throw e;
+    }
+  },
+
+  resetFile: async (path: string, oid: string) => {
+    try {
+      await resetFileService(path, oid);
     } catch (e) {
       set({ error: String(e) });
       throw e;

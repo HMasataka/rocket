@@ -15,8 +15,8 @@ use crate::git::types::{
     DiffHunk, DiffLine, DiffLineKind, DiffOptions, FetchResult, FileDiff, FileStatus,
     FileStatusKind, GraphEdge, GraphNodeType, HunkIdentifier, LineRange, LogFilter,
     MergeBaseContent, MergeKind, MergeOption, MergeResult, PullOption, PushResult, RebaseAction,
-    RebaseResult, RebaseState, RebaseTodoEntry, RemoteInfo, RepoStatus, RevertMode, RevertResult,
-    StagingState, StashEntry, TagInfo, WordSegment,
+    RebaseResult, RebaseState, RebaseTodoEntry, ReflogEntry, RemoteInfo, RepoStatus, ResetMode,
+    ResetResult, RevertMode, RevertResult, StagingState, StashEntry, TagInfo, WordSegment,
 };
 
 pub struct Git2Backend {
@@ -1950,6 +1950,84 @@ impl GitBackend for Git2Backend {
             oid: Some(oid.to_string()),
         })
     }
+
+    fn reset(&self, oid_str: &str, mode: ResetMode) -> GitResult<ResetResult> {
+        let repo = self.repo.lock().unwrap();
+
+        let oid = Oid::from_str(oid_str).map_err(|e| GitError::ResetFailed(Box::new(e)))?;
+        let commit = repo
+            .find_commit(oid)
+            .map_err(|e| GitError::ResetFailed(Box::new(e)))?;
+
+        let reset_type = match mode {
+            ResetMode::Soft => git2::ResetType::Soft,
+            ResetMode::Mixed => git2::ResetType::Mixed,
+            ResetMode::Hard => git2::ResetType::Hard,
+        };
+
+        repo.reset(commit.as_object(), reset_type, None)
+            .map_err(|e| GitError::ResetFailed(Box::new(e)))?;
+
+        Ok(ResetResult {
+            oid: oid_str.to_string(),
+        })
+    }
+
+    fn reset_file(&self, path: &str, oid_str: &str) -> GitResult<()> {
+        let repo = self.repo.lock().unwrap();
+
+        let oid = Oid::from_str(oid_str).map_err(|e| GitError::ResetFailed(Box::new(e)))?;
+        let commit = repo
+            .find_commit(oid)
+            .map_err(|e| GitError::ResetFailed(Box::new(e)))?;
+
+        repo.reset_default(Some(commit.as_object()), [path])
+            .map_err(|e| GitError::ResetFailed(Box::new(e)))?;
+
+        Ok(())
+    }
+
+    fn get_reflog(&self, ref_name: &str, limit: usize) -> GitResult<Vec<ReflogEntry>> {
+        let repo = self.repo.lock().unwrap();
+
+        let reflog = repo
+            .reflog(ref_name)
+            .map_err(|e| GitError::ReflogFailed(Box::new(e)))?;
+
+        let mut entries = Vec::new();
+        for i in 0..reflog.len() {
+            if entries.len() >= limit {
+                break;
+            }
+            let entry = reflog.get(i).ok_or_else(|| {
+                GitError::ReflogFailed(format!("reflog entry {i} not found").into())
+            })?;
+
+            let old_oid = entry.id_old().to_string();
+            let new_oid = entry.id_new().to_string();
+            let new_short_oid = new_oid[..7.min(new_oid.len())].to_string();
+
+            let raw_message = entry.message().unwrap_or("").to_string();
+            let (action, message) = parse_reflog_message(&raw_message);
+
+            let committer = entry.committer();
+            let committer_name = committer.name().unwrap_or("").to_string();
+            let committer_date = committer.when().seconds();
+
+            entries.push(ReflogEntry {
+                index: i,
+                old_oid,
+                new_oid,
+                new_short_oid,
+                action,
+                message,
+                committer_name,
+                committer_date,
+            });
+        }
+
+        Ok(entries)
+    }
 }
 
 impl Git2Backend {
@@ -2665,6 +2743,15 @@ fn compute_word_diff_pair(
     }
 
     (del_segments, add_segments)
+}
+
+/// Parse reflog message into action and description.
+/// Format: "action: description" (e.g. "commit: initial commit", "checkout: moving from main to feature")
+fn parse_reflog_message(message: &str) -> (String, String) {
+    match message.find(": ") {
+        Some(pos) => (message[..pos].to_string(), message[pos + 2..].to_string()),
+        None => (message.to_string(), String::new()),
+    }
 }
 
 /// Parse branch name from git stash message.

@@ -11,6 +11,8 @@ export type PageId =
   | "rebase"
   | "cherry-pick"
   | "revert"
+  | "reset"
+  | "reflog"
   | "hosting";
 
 interface BlameTarget {

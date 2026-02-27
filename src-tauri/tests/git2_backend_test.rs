@@ -6,7 +6,7 @@ use app_lib::git::backend::GitBackend;
 use app_lib::git::git2_backend::Git2Backend;
 use app_lib::git::types::{
     CherryPickMode, ConflictResolution, DiffLineKind, DiffOptions, HunkIdentifier, LineRange,
-    LogFilter, MergeOption, PullOption, RevertMode,
+    LogFilter, MergeOption, PullOption, ResetMode, RevertMode,
 };
 
 fn init_test_repo(dir: &Path) {
@@ -1938,4 +1938,189 @@ fn continue_revert_after_conflict_resolution() {
 
     let content = fs::read_to_string(tmp.path().join("revert_cont.txt")).unwrap();
     assert_eq!(content, "resolved content\n");
+}
+
+// === Reset tests ===
+
+#[test]
+fn reset_soft_moves_head_preserves_staging() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+
+    // Create a second commit
+    fs::write(tmp.path().join("second.txt"), "second").unwrap();
+    backend.stage(Path::new("second.txt")).unwrap();
+    backend.commit("second commit", false).unwrap();
+
+    let log_filter = LogFilter {
+        author: None,
+        since: None,
+        until: None,
+        message: None,
+        path: None,
+    };
+    let log = backend.get_commit_log(&log_filter, 2, 0).unwrap();
+    let first_oid = log.commits[1].oid.clone();
+
+    let result = backend.reset(&first_oid, ResetMode::Soft).unwrap();
+    assert_eq!(result.oid, first_oid);
+
+    // second.txt should still exist in working tree
+    assert!(tmp.path().join("second.txt").exists());
+
+    // second.txt should be staged (soft reset keeps index)
+    let status = backend.status().unwrap();
+    let staged_files: Vec<_> = status
+        .files
+        .iter()
+        .filter(|f| f.staging == app_lib::git::types::StagingState::Staged)
+        .collect();
+    assert!(
+        !staged_files.is_empty(),
+        "Soft reset should keep changes staged"
+    );
+}
+
+#[test]
+fn reset_mixed_moves_head_unstages_changes() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+
+    fs::write(tmp.path().join("mixed.txt"), "mixed content").unwrap();
+    backend.stage(Path::new("mixed.txt")).unwrap();
+    backend.commit("mixed commit", false).unwrap();
+
+    let log_filter = LogFilter {
+        author: None,
+        since: None,
+        until: None,
+        message: None,
+        path: None,
+    };
+    let log = backend.get_commit_log(&log_filter, 2, 0).unwrap();
+    let first_oid = log.commits[1].oid.clone();
+
+    let result = backend.reset(&first_oid, ResetMode::Mixed).unwrap();
+    assert_eq!(result.oid, first_oid);
+
+    // File should still exist in working tree
+    assert!(tmp.path().join("mixed.txt").exists());
+
+    // File should be unstaged
+    let status = backend.status().unwrap();
+    let unstaged: Vec<_> = status
+        .files
+        .iter()
+        .filter(|f| {
+            f.path == "mixed.txt" && f.staging == app_lib::git::types::StagingState::Unstaged
+        })
+        .collect();
+    assert!(!unstaged.is_empty(), "Mixed reset should unstage changes");
+}
+
+#[test]
+fn reset_hard_discards_all_changes() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+
+    fs::write(tmp.path().join("hard.txt"), "hard content").unwrap();
+    backend.stage(Path::new("hard.txt")).unwrap();
+    backend.commit("hard commit", false).unwrap();
+
+    let log_filter = LogFilter {
+        author: None,
+        since: None,
+        until: None,
+        message: None,
+        path: None,
+    };
+    let log = backend.get_commit_log(&log_filter, 2, 0).unwrap();
+    let first_oid = log.commits[1].oid.clone();
+
+    let result = backend.reset(&first_oid, ResetMode::Hard).unwrap();
+    assert_eq!(result.oid, first_oid);
+
+    // File should be removed from working tree
+    assert!(!tmp.path().join("hard.txt").exists());
+}
+
+#[test]
+fn reset_file_restores_file_in_index() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+
+    // Create and commit a file
+    fs::write(tmp.path().join("resetfile.txt"), "original\n").unwrap();
+    backend.stage(Path::new("resetfile.txt")).unwrap();
+    backend.commit("add resetfile", false).unwrap();
+
+    let log_filter = LogFilter {
+        author: None,
+        since: None,
+        until: None,
+        message: None,
+        path: None,
+    };
+    let log = backend.get_commit_log(&log_filter, 1, 0).unwrap();
+    let commit_oid = log.commits[0].oid.clone();
+
+    // Modify and stage again
+    fs::write(tmp.path().join("resetfile.txt"), "modified\n").unwrap();
+    backend.stage(Path::new("resetfile.txt")).unwrap();
+
+    // Reset file to original commit
+    backend.reset_file("resetfile.txt", &commit_oid).unwrap();
+
+    // After reset_file, the index should be reverted but working tree should still have modified content
+    let status = backend.status().unwrap();
+    // The file should show as modified in working tree (unstaged)
+    let has_changes = status.files.iter().any(|f| f.path == "resetfile.txt");
+    assert!(has_changes, "File should show changes after reset_file");
+}
+
+// === Reflog tests ===
+
+#[test]
+fn get_reflog_returns_entries() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+
+    let entries = backend.get_reflog("HEAD", 10).unwrap();
+    assert!(!entries.is_empty(), "Reflog should have at least one entry");
+    assert_eq!(entries[0].index, 0);
+    assert!(!entries[0].new_oid.is_empty());
+    assert!(!entries[0].new_short_oid.is_empty());
+}
+
+#[test]
+fn get_reflog_respects_limit() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+
+    // Create additional commits to have multiple reflog entries
+    fs::write(tmp.path().join("a.txt"), "a").unwrap();
+    backend.stage(Path::new("a.txt")).unwrap();
+    backend.commit("commit a", false).unwrap();
+
+    fs::write(tmp.path().join("b.txt"), "b").unwrap();
+    backend.stage(Path::new("b.txt")).unwrap();
+    backend.commit("commit b", false).unwrap();
+
+    // Limit to 2 entries
+    let entries = backend.get_reflog("HEAD", 2).unwrap();
+    assert_eq!(entries.len(), 2);
+}
+
+#[test]
+fn get_reflog_has_action_and_message() {
+    let tmp = tempfile::tempdir().unwrap();
+    let backend = init_repo_with_commit(tmp.path());
+
+    let entries = backend.get_reflog("HEAD", 10).unwrap();
+    // The first commit's reflog entry should have "commit" as action
+    let has_commit_action = entries.iter().any(|e| e.action.contains("commit"));
+    assert!(
+        has_commit_action,
+        "Reflog should contain commit action entries"
+    );
 }
