@@ -93,6 +93,14 @@ import {
   popStash as popStashService,
   stashSave as stashSaveService,
 } from "../services/stash";
+import type { SubmoduleInfo } from "../services/submodule";
+import {
+  addSubmodule as addSubmoduleService,
+  listSubmodules,
+  removeSubmodule as removeSubmoduleService,
+  updateAllSubmodules as updateAllSubmodulesService,
+  updateSubmodule as updateSubmoduleService,
+} from "../services/submodule";
 import type { TagInfo } from "../services/tag";
 import {
   checkoutTag as checkoutTagService,
@@ -100,6 +108,12 @@ import {
   deleteTag as deleteTagService,
   listTags,
 } from "../services/tag";
+import type { WorktreeInfo } from "../services/worktree";
+import {
+  addWorktree as addWorktreeService,
+  listWorktrees,
+  removeWorktree as removeWorktreeService,
+} from "../services/worktree";
 
 const REBASE_TODO_DEFAULT_LIMIT = 100;
 
@@ -111,6 +125,8 @@ interface GitState {
   remotes: RemoteInfo[];
   stashes: StashEntry[];
   tags: TagInfo[];
+  submodules: SubmoduleInfo[];
+  worktrees: WorktreeInfo[];
   merging: boolean;
   rebasing: boolean;
   rebaseState: RebaseState | null;
@@ -198,6 +214,14 @@ interface GitActions {
   continueRevert: () => Promise<RevertResult>;
   resetToCommit: (oid: string, mode: ResetMode) => Promise<ResetResult>;
   resetFile: (path: string, oid: string) => Promise<void>;
+  fetchSubmodules: () => Promise<void>;
+  addSubmodule: (url: string, path: string) => Promise<void>;
+  updateSubmodule: (path: string) => Promise<void>;
+  updateAllSubmodules: () => Promise<void>;
+  removeSubmodule: (path: string) => Promise<void>;
+  fetchWorktrees: () => Promise<void>;
+  addWorktree: (path: string, branch: string) => Promise<void>;
+  removeWorktree: (path: string) => Promise<void>;
   clearError: () => void;
 }
 
@@ -209,6 +233,8 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
   remotes: [],
   stashes: [],
   tags: [],
+  submodules: [],
+  worktrees: [],
   merging: false,
   rebasing: false,
   rebaseState: null,
@@ -801,6 +827,80 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
   resetFile: async (path: string, oid: string) => {
     try {
       await resetFileService(path, oid);
+    } catch (e) {
+      set({ error: String(e) });
+      throw e;
+    }
+  },
+
+  fetchSubmodules: async () => {
+    try {
+      const submodules = await listSubmodules();
+      set({ submodules });
+    } catch (e) {
+      set({ error: String(e) });
+      throw e;
+    }
+  },
+
+  addSubmodule: async (url: string, path: string) => {
+    try {
+      await addSubmoduleService(url, path);
+    } catch (e) {
+      set({ error: String(e) });
+      throw e;
+    }
+  },
+
+  updateSubmodule: async (path: string) => {
+    try {
+      await updateSubmoduleService(path);
+    } catch (e) {
+      set({ error: String(e) });
+      throw e;
+    }
+  },
+
+  updateAllSubmodules: async () => {
+    try {
+      await updateAllSubmodulesService();
+    } catch (e) {
+      set({ error: String(e) });
+      throw e;
+    }
+  },
+
+  removeSubmodule: async (path: string) => {
+    try {
+      await removeSubmoduleService(path);
+    } catch (e) {
+      set({ error: String(e) });
+      throw e;
+    }
+  },
+
+  fetchWorktrees: async () => {
+    try {
+      const worktrees = await listWorktrees();
+      set({ worktrees });
+    } catch (e) {
+      set({ error: String(e) });
+      throw e;
+    }
+  },
+
+  addWorktree: async (path: string, branch: string) => {
+    try {
+      await addWorktreeService(path, branch);
+    } catch (e) {
+      set({ error: String(e) });
+      throw e;
+    }
+  },
+
+  removeWorktree: async (path: string) => {
+    try {
+      await removeWorktreeService(path);
     } catch (e) {
       set({ error: String(e) });
       throw e;

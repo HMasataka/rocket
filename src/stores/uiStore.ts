@@ -13,7 +13,9 @@ export type PageId =
   | "revert"
   | "reset"
   | "reflog"
-  | "hosting";
+  | "hosting"
+  | "submodules"
+  | "worktrees";
 
 interface BlameTarget {
   path: string;

@@ -23,6 +23,8 @@ import "./styles/revert.css";
 import "./styles/reset.css";
 import "./styles/reflog.css";
 import "./styles/search.css";
+import "./styles/submodules.css";
+import "./styles/worktrees.css";
 
 const root = document.getElementById("root");
 if (!root) throw new Error("Root element not found");
