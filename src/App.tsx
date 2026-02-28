@@ -21,6 +21,8 @@ import { ReflogPage } from "./pages/reflog";
 import { ResetPage } from "./pages/reset";
 import { RevertPage } from "./pages/revert";
 import { StashPage } from "./pages/stash";
+import { SubmodulesPage } from "./pages/submodules";
+import { WorktreesPage } from "./pages/worktrees";
 import type { PullOption } from "./services/git";
 import { useConfigStore } from "./stores/configStore";
 import { useGitStore } from "./stores/gitStore";
@@ -190,6 +192,8 @@ export function App() {
         {activePage === "revert" && <RevertPage />}
         {activePage === "reset" && <ResetPage />}
         {activePage === "reflog" && <ReflogPage />}
+        {activePage === "submodules" && <SubmodulesPage />}
+        {activePage === "worktrees" && <WorktreesPage />}
         {activePage === "hosting" && <HostingPage />}
       </AppShell>
       <ToastContainer />
