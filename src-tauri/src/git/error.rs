@@ -106,6 +106,12 @@ pub enum GitError {
 
     #[error("search failed: {0}")]
     SearchFailed(#[source] Box<dyn std::error::Error + Send + Sync>),
+
+    #[error("submodule operation failed: {0}")]
+    SubmoduleFailed(#[source] Box<dyn std::error::Error + Send + Sync>),
+
+    #[error("worktree operation failed: {0}")]
+    WorktreeFailed(#[source] Box<dyn std::error::Error + Send + Sync>),
 }
 
 pub type GitResult<T> = Result<T, GitError>;

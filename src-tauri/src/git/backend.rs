@@ -7,7 +7,8 @@ use crate::git::types::{
     CommitLogResult, CommitResult, ConflictFile, ConflictResolution, DiffOptions, FetchResult,
     FileDiff, HunkIdentifier, LineRange, LogFilter, MergeBaseContent, MergeOption, MergeResult,
     PullOption, PushResult, RebaseResult, RebaseState, RebaseTodoEntry, ReflogEntry, RemoteInfo,
-    RepoStatus, ResetMode, ResetResult, RevertMode, RevertResult, StashEntry, TagInfo,
+    RepoStatus, ResetMode, ResetResult, RevertMode, RevertResult, StashEntry, SubmoduleInfo,
+    TagInfo, WorktreeInfo,
 };
 
 pub trait GitBackend: Send + Sync {
@@ -114,4 +115,16 @@ pub trait GitBackend: Send + Sync {
     fn search_code(&self, query: &str, is_regex: bool) -> GitResult<Vec<CodeSearchResult>>;
     fn search_commits(&self, query: &str, search_diff: bool) -> GitResult<Vec<CommitSearchResult>>;
     fn search_filenames(&self, query: &str) -> GitResult<Vec<FilenameSearchResult>>;
+
+    // Submodule operations
+    fn list_submodules(&self) -> GitResult<Vec<SubmoduleInfo>>;
+    fn add_submodule(&self, url: &str, path: &str) -> GitResult<()>;
+    fn update_submodule(&self, path: &str) -> GitResult<()>;
+    fn update_all_submodules(&self) -> GitResult<()>;
+    fn remove_submodule(&self, path: &str) -> GitResult<()>;
+
+    // Worktree operations
+    fn list_worktrees(&self) -> GitResult<Vec<WorktreeInfo>>;
+    fn add_worktree(&self, path: &str, branch: &str) -> GitResult<()>;
+    fn remove_worktree(&self, path: &str) -> GitResult<()>;
 }

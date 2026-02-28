@@ -4,4 +4,6 @@ pub mod dispatcher;
 pub mod error;
 pub mod git2_backend;
 pub mod search;
+pub mod submodule;
 pub mod types;
+pub mod worktree;
