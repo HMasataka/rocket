@@ -9,6 +9,8 @@ use crate::git::auth::create_credentials_callback;
 use crate::git::backend::GitBackend;
 use crate::git::error::{GitError, GitResult};
 use crate::git::search::{self, CodeSearchResult, CommitSearchResult, FilenameSearchResult};
+use crate::git::submodule;
+use crate::git::worktree;
 use crate::git::types::{
     BlameLine, BlameResult, BranchInfo, CherryPickMode, CherryPickResult, CommitDetail,
     CommitFileChange, CommitFileStatus, CommitGraphRow, CommitInfo, CommitLogResult, CommitRef,
@@ -17,7 +19,8 @@ use crate::git::types::{
     FileStatusKind, GraphEdge, GraphNodeType, HunkIdentifier, LineRange, LogFilter,
     MergeBaseContent, MergeKind, MergeOption, MergeResult, PullOption, PushResult, RebaseAction,
     RebaseResult, RebaseState, RebaseTodoEntry, ReflogEntry, RemoteInfo, RepoStatus, ResetMode,
-    ResetResult, RevertMode, RevertResult, StagingState, StashEntry, TagInfo, WordSegment,
+    ResetResult, RevertMode, RevertResult, StagingState, StashEntry, SubmoduleInfo, TagInfo,
+    WordSegment, WorktreeInfo,
 };
 
 pub struct Git2Backend {
@@ -2040,6 +2043,38 @@ impl GitBackend for Git2Backend {
 
     fn search_filenames(&self, query: &str) -> GitResult<Vec<FilenameSearchResult>> {
         search::search_filenames(&self.workdir, query)
+    }
+
+    fn list_submodules(&self) -> GitResult<Vec<SubmoduleInfo>> {
+        submodule::list_submodules(&self.workdir)
+    }
+
+    fn add_submodule(&self, url: &str, path: &str) -> GitResult<()> {
+        submodule::add_submodule(&self.workdir, url, path)
+    }
+
+    fn update_submodule(&self, path: &str) -> GitResult<()> {
+        submodule::update_submodule(&self.workdir, path)
+    }
+
+    fn update_all_submodules(&self) -> GitResult<()> {
+        submodule::update_all_submodules(&self.workdir)
+    }
+
+    fn remove_submodule(&self, path: &str) -> GitResult<()> {
+        submodule::remove_submodule(&self.workdir, path)
+    }
+
+    fn list_worktrees(&self) -> GitResult<Vec<WorktreeInfo>> {
+        worktree::list_worktrees(&self.workdir)
+    }
+
+    fn add_worktree(&self, path: &str, branch: &str) -> GitResult<()> {
+        worktree::add_worktree(&self.workdir, path, branch)
+    }
+
+    fn remove_worktree(&self, path: &str) -> GitResult<()> {
+        worktree::remove_worktree(&self.workdir, path)
     }
 }
 

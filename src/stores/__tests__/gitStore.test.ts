@@ -20,6 +20,8 @@ describe("gitStore", () => {
       remotes: [],
       stashes: [],
       tags: [],
+      submodules: [],
+      worktrees: [],
       merging: false,
       rebasing: false,
       rebaseState: null,
@@ -1444,6 +1446,204 @@ describe("gitStore", () => {
       ).rejects.toThrow();
 
       expect(useGitStore.getState().error).toContain("reset file error");
+    });
+  });
+
+  describe("fetchSubmodules", () => {
+    it("sets submodules on success", async () => {
+      const mockSubmodules = [
+        {
+          path: "vendor/lib-auth",
+          url: "https://example.com/lib-auth.git",
+          branch: "main",
+          head_oid: "abc1234567890",
+          head_short_oid: "abc1234",
+          status: "up_to_date",
+        },
+      ];
+      mockedInvoke.mockResolvedValueOnce(mockSubmodules);
+
+      await useGitStore.getState().fetchSubmodules();
+
+      expect(useGitStore.getState().submodules).toEqual(mockSubmodules);
+      expect(mockedInvoke).toHaveBeenCalledWith("list_submodules");
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("submodule error"));
+
+      await expect(useGitStore.getState().fetchSubmodules()).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("submodule error");
+    });
+  });
+
+  describe("addSubmodule", () => {
+    it("calls invoke on success", async () => {
+      mockedInvoke.mockResolvedValueOnce(undefined);
+
+      await useGitStore
+        .getState()
+        .addSubmodule("https://example.com/lib.git", "vendor/lib");
+
+      expect(mockedInvoke).toHaveBeenCalledWith("add_submodule", {
+        url: "https://example.com/lib.git",
+        path: "vendor/lib",
+      });
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("add submodule error"));
+
+      await expect(
+        useGitStore.getState().addSubmodule("url", "path"),
+      ).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("add submodule error");
+    });
+  });
+
+  describe("updateSubmodule", () => {
+    it("calls invoke on success", async () => {
+      mockedInvoke.mockResolvedValueOnce(undefined);
+
+      await useGitStore.getState().updateSubmodule("vendor/lib");
+
+      expect(mockedInvoke).toHaveBeenCalledWith("update_submodule", {
+        path: "vendor/lib",
+      });
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("update submodule error"));
+
+      await expect(
+        useGitStore.getState().updateSubmodule("vendor/lib"),
+      ).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("update submodule error");
+    });
+  });
+
+  describe("updateAllSubmodules", () => {
+    it("calls invoke on success", async () => {
+      mockedInvoke.mockResolvedValueOnce(undefined);
+
+      await useGitStore.getState().updateAllSubmodules();
+
+      expect(mockedInvoke).toHaveBeenCalledWith("update_all_submodules");
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(
+        new Error("update all submodules error"),
+      );
+
+      await expect(
+        useGitStore.getState().updateAllSubmodules(),
+      ).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain(
+        "update all submodules error",
+      );
+    });
+  });
+
+  describe("removeSubmodule", () => {
+    it("calls invoke on success", async () => {
+      mockedInvoke.mockResolvedValueOnce(undefined);
+
+      await useGitStore.getState().removeSubmodule("vendor/lib");
+
+      expect(mockedInvoke).toHaveBeenCalledWith("remove_submodule", {
+        path: "vendor/lib",
+      });
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("remove submodule error"));
+
+      await expect(
+        useGitStore.getState().removeSubmodule("vendor/lib"),
+      ).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("remove submodule error");
+    });
+  });
+
+  describe("fetchWorktrees", () => {
+    it("sets worktrees on success", async () => {
+      const mockWorktrees = [
+        {
+          path: "/Users/dev/rocket",
+          branch: "main",
+          head_oid: "abc1234567890",
+          head_short_oid: "abc1234",
+          is_main: true,
+          is_clean: true,
+        },
+      ];
+      mockedInvoke.mockResolvedValueOnce(mockWorktrees);
+
+      await useGitStore.getState().fetchWorktrees();
+
+      expect(useGitStore.getState().worktrees).toEqual(mockWorktrees);
+      expect(mockedInvoke).toHaveBeenCalledWith("list_worktrees");
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("worktree error"));
+
+      await expect(useGitStore.getState().fetchWorktrees()).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("worktree error");
+    });
+  });
+
+  describe("addWorktree", () => {
+    it("calls invoke on success", async () => {
+      mockedInvoke.mockResolvedValueOnce(undefined);
+
+      await useGitStore
+        .getState()
+        .addWorktree("/Users/dev/rocket-feature", "feature/auth");
+
+      expect(mockedInvoke).toHaveBeenCalledWith("add_worktree", {
+        path: "/Users/dev/rocket-feature",
+        branch: "feature/auth",
+      });
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("add worktree error"));
+
+      await expect(
+        useGitStore.getState().addWorktree("/path", "branch"),
+      ).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("add worktree error");
+    });
+  });
+
+  describe("removeWorktree", () => {
+    it("calls invoke on success", async () => {
+      mockedInvoke.mockResolvedValueOnce(undefined);
+
+      await useGitStore.getState().removeWorktree("/Users/dev/rocket-feature");
+
+      expect(mockedInvoke).toHaveBeenCalledWith("remove_worktree", {
+        path: "/Users/dev/rocket-feature",
+      });
+    });
+
+    it("sets error on failure", async () => {
+      mockedInvoke.mockRejectedValueOnce(new Error("remove worktree error"));
+
+      await expect(
+        useGitStore.getState().removeWorktree("/path"),
+      ).rejects.toThrow();
+
+      expect(useGitStore.getState().error).toContain("remove worktree error");
     });
   });
 

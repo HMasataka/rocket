@@ -8,7 +8,9 @@
         "Cherry-pick": "cherry-pick",
         "Rebase": "rebase",
         "Files": "file-tree",
-        "GitHub": "hosting"
+        "GitHub": "hosting",
+        "Submodules": "submodules",
+        "Worktrees": "worktrees"
       }
     },
     {

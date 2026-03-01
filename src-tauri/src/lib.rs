@@ -173,6 +173,14 @@ pub fn run() {
             commands::search::search_code,
             commands::search::search_commits,
             commands::search::search_filenames,
+            commands::submodule::list_submodules,
+            commands::submodule::add_submodule,
+            commands::submodule::update_submodule,
+            commands::submodule::update_all_submodules,
+            commands::submodule::remove_submodule,
+            commands::worktree::list_worktrees,
+            commands::worktree::add_worktree,
+            commands::worktree::remove_worktree,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

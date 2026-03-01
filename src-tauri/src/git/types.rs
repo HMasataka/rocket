@@ -438,3 +438,36 @@ pub struct RevertResult {
     pub conflicts: Vec<String>,
     pub oid: Option<String>,
 }
+
+// === Submodule types ===
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum SubmoduleStatus {
+    UpToDate,
+    Modified,
+    Uninitialized,
+    Conflict,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SubmoduleInfo {
+    pub path: String,
+    pub url: String,
+    pub branch: Option<String>,
+    pub head_oid: Option<String>,
+    pub head_short_oid: Option<String>,
+    pub status: SubmoduleStatus,
+}
+
+// === Worktree types ===
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct WorktreeInfo {
+    pub path: String,
+    pub branch: Option<String>,
+    pub head_oid: Option<String>,
+    pub head_short_oid: Option<String>,
+    pub is_main: bool,
+    pub is_clean: bool,
+}

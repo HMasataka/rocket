@@ -12,4 +12,6 @@ pub mod reset;
 pub mod revert;
 pub mod search;
 pub mod stash;
+pub mod submodule;
 pub mod tag;
+pub mod worktree;
