@@ -32,9 +32,7 @@ pub fn update_submodule(path: String, state: State<'_, AppState>) -> Result<(), 
         .lock()
         .map_err(|e| format!("Lock poisoned: {e}"))?;
     let backend = repo_lock.as_ref().ok_or("No repository opened")?;
-    backend
-        .update_submodule(&path)
-        .map_err(|e| e.to_string())
+    backend.update_submodule(&path).map_err(|e| e.to_string())
 }
 
 #[tauri::command]
@@ -54,7 +52,5 @@ pub fn remove_submodule(path: String, state: State<'_, AppState>) -> Result<(), 
         .lock()
         .map_err(|e| format!("Lock poisoned: {e}"))?;
     let backend = repo_lock.as_ref().ok_or("No repository opened")?;
-    backend
-        .remove_submodule(&path)
-        .map_err(|e| e.to_string())
+    backend.remove_submodule(&path).map_err(|e| e.to_string())
 }

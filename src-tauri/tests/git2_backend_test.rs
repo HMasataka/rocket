@@ -680,7 +680,9 @@ fn get_branch_commits_respects_limit() {
         let filename = format!("file{i}.txt");
         fs::write(tmp.path().join(&filename), format!("content {i}")).unwrap();
         backend.stage(Path::new(&filename)).unwrap();
-        backend.commit(&format!("commit {i}"), false, false).unwrap();
+        backend
+            .commit(&format!("commit {i}"), false, false)
+            .unwrap();
     }
 
     let branch_name = backend.current_branch().unwrap();
@@ -1550,7 +1552,9 @@ fn setup_cherry_pick_repo(dir: &Path) -> (Git2Backend, String) {
 
     fs::write(dir.join("cherry.txt"), "cherry content\n").unwrap();
     backend.stage(Path::new("cherry.txt")).unwrap();
-    backend.commit("feature: add cherry.txt", false, false).unwrap();
+    backend
+        .commit("feature: add cherry.txt", false, false)
+        .unwrap();
 
     // Get the OID of the feature commit
     let log_filter = LogFilter {
@@ -1636,7 +1640,9 @@ fn cherry_pick_conflict_and_abort() {
     // Create a file on main
     fs::write(tmp.path().join("conflict.txt"), "main content\n").unwrap();
     backend.stage(Path::new("conflict.txt")).unwrap();
-    backend.commit("main: add conflict.txt", false, false).unwrap();
+    backend
+        .commit("main: add conflict.txt", false, false)
+        .unwrap();
 
     // Create feature branch and modify the same file
     backend.create_branch("feature").unwrap();
@@ -1712,7 +1718,9 @@ fn revert_auto_mode() {
     // Create a file and commit
     fs::write(tmp.path().join("revert_target.txt"), "to be reverted\n").unwrap();
     backend.stage(Path::new("revert_target.txt")).unwrap();
-    backend.commit("add revert_target.txt", false, false).unwrap();
+    backend
+        .commit("add revert_target.txt", false, false)
+        .unwrap();
 
     // Get the OID of the commit to revert
     let log_filter = LogFilter {
@@ -1783,7 +1791,9 @@ fn revert_conflict_and_abort() {
     // Create a file and commit
     fs::write(tmp.path().join("revert_conflict.txt"), "original\n").unwrap();
     backend.stage(Path::new("revert_conflict.txt")).unwrap();
-    backend.commit("add revert_conflict.txt", false, false).unwrap();
+    backend
+        .commit("add revert_conflict.txt", false, false)
+        .unwrap();
 
     let log_filter = LogFilter {
         author: None,
@@ -1798,7 +1808,9 @@ fn revert_conflict_and_abort() {
     // Modify the file in a later commit (this will conflict with reverting the addition)
     fs::write(tmp.path().join("revert_conflict.txt"), "modified content\n").unwrap();
     backend.stage(Path::new("revert_conflict.txt")).unwrap();
-    backend.commit("modify revert_conflict.txt", false, false).unwrap();
+    backend
+        .commit("modify revert_conflict.txt", false, false)
+        .unwrap();
 
     // Try to revert the original addition commit — should conflict
     let result = backend.revert(&add_oid, RevertMode::Auto).unwrap();
@@ -1839,7 +1851,9 @@ fn continue_cherry_pick_after_conflict_resolution() {
     // Create a file on main
     fs::write(tmp.path().join("conflict.txt"), "main content\n").unwrap();
     backend.stage(Path::new("conflict.txt")).unwrap();
-    backend.commit("main: add conflict.txt", false, false).unwrap();
+    backend
+        .commit("main: add conflict.txt", false, false)
+        .unwrap();
 
     // Create feature branch and modify the same file
     backend.create_branch("feature").unwrap();
@@ -1914,7 +1928,9 @@ fn continue_revert_after_conflict_resolution() {
     // Modify the file in a later commit to cause conflict on revert
     fs::write(tmp.path().join("revert_cont.txt"), "modified content\n").unwrap();
     backend.stage(Path::new("revert_cont.txt")).unwrap();
-    backend.commit("modify revert_cont.txt", false, false).unwrap();
+    backend
+        .commit("modify revert_cont.txt", false, false)
+        .unwrap();
 
     // Revert the original addition — should conflict
     let result = backend.revert(&add_oid, RevertMode::Auto).unwrap();

@@ -36,7 +36,5 @@ pub fn remove_worktree(path: String, state: State<'_, AppState>) -> Result<(), S
         .lock()
         .map_err(|e| format!("Lock poisoned: {e}"))?;
     let backend = repo_lock.as_ref().ok_or("No repository opened")?;
-    backend
-        .remove_worktree(&path)
-        .map_err(|e| e.to_string())
+    backend.remove_worktree(&path).map_err(|e| e.to_string())
 }

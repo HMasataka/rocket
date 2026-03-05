@@ -131,8 +131,7 @@ pub trait GitBackend: Send + Sync {
     // Gitconfig operations
     fn get_gitconfig_entries(&self, scope: GitConfigScope) -> GitResult<Vec<GitConfigEntry>>;
     fn get_gitconfig_value(&self, scope: GitConfigScope, key: &str) -> GitResult<Option<String>>;
-    fn set_gitconfig_value(&self, scope: GitConfigScope, key: &str, value: &str)
-        -> GitResult<()>;
+    fn set_gitconfig_value(&self, scope: GitConfigScope, key: &str, value: &str) -> GitResult<()>;
     fn unset_gitconfig_value(&self, scope: GitConfigScope, key: &str) -> GitResult<()>;
     fn get_gitconfig_path(&self, scope: GitConfigScope) -> GitResult<String>;
 

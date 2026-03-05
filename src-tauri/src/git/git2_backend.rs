@@ -10,7 +10,6 @@ use crate::git::backend::GitBackend;
 use crate::git::error::{GitError, GitResult};
 use crate::git::search::{self, CodeSearchResult, CommitSearchResult, FilenameSearchResult};
 use crate::git::submodule;
-use crate::git::worktree;
 use crate::git::types::{
     BlameLine, BlameResult, BranchInfo, CherryPickMode, CherryPickResult, CommitDetail,
     CommitFileChange, CommitFileStatus, CommitGraphRow, CommitInfo, CommitLogResult, CommitRef,
@@ -22,6 +21,7 @@ use crate::git::types::{
     RepoStatus, ResetMode, ResetResult, RevertMode, RevertResult, SignatureStatus, StagingState,
     StashEntry, SubmoduleInfo, TagInfo, WordSegment, WorktreeInfo,
 };
+use crate::git::worktree;
 
 pub struct Git2Backend {
     repo: Mutex<Repository>,
@@ -2157,12 +2157,7 @@ impl GitBackend for Git2Backend {
         }
     }
 
-    fn set_gitconfig_value(
-        &self,
-        scope: GitConfigScope,
-        key: &str,
-        value: &str,
-    ) -> GitResult<()> {
+    fn set_gitconfig_value(&self, scope: GitConfigScope, key: &str, value: &str) -> GitResult<()> {
         let repo = self.repo.lock().unwrap();
         let config = repo
             .config()
@@ -2212,10 +2207,7 @@ impl GitBackend for Git2Backend {
         }
     }
 
-    fn verify_commit_signatures(
-        &self,
-        oids: &[&str],
-    ) -> GitResult<Vec<(String, SignatureStatus)>> {
+    fn verify_commit_signatures(&self, oids: &[&str]) -> GitResult<Vec<(String, SignatureStatus)>> {
         if oids.is_empty() {
             return Ok(Vec::new());
         }
@@ -3302,19 +3294,19 @@ fn create_signed_commit(
         .commit_create_buffer(sig, sig, message, tree, parents)
         .map_err(|e| GitError::SigningFailed(Box::new(e)))?;
 
-    let commit_content = std::str::from_utf8(&commit_buf)
-        .map_err(|e| GitError::SigningFailed(Box::new(e)))?;
+    let commit_content =
+        std::str::from_utf8(&commit_buf).map_err(|e| GitError::SigningFailed(Box::new(e)))?;
 
     let config = repo
         .config()
         .map_err(|e| GitError::SigningFailed(Box::new(e)))?;
 
-    let gpg_format = config.get_string("gpg.format").unwrap_or_else(|_| "openpgp".to_string());
+    let gpg_format = config
+        .get_string("gpg.format")
+        .unwrap_or_else(|_| "openpgp".to_string());
     let signing_key = config
         .get_string("user.signingKey")
-        .map_err(|_| {
-            GitError::SigningFailed("user.signingKey not configured".into())
-        })?;
+        .map_err(|_| GitError::SigningFailed("user.signingKey not configured".into()))?;
 
     let signature = match gpg_format.as_str() {
         "ssh" => sign_with_ssh(commit_content, &signing_key)?,
@@ -3366,15 +3358,11 @@ fn sign_with_gpg(content: &str, key: &str) -> GitResult<String> {
         ));
     }
 
-    String::from_utf8(output.stdout)
-        .map_err(|e| GitError::SigningFailed(Box::new(e)))
+    String::from_utf8(output.stdout).map_err(|e| GitError::SigningFailed(Box::new(e)))
 }
 
 fn sign_with_ssh(content: &str, key_path: &str) -> GitResult<String> {
-    let buf_path = std::env::temp_dir().join(format!(
-        "rocket-ssh-sign-{}",
-        std::process::id()
-    ));
+    let buf_path = std::env::temp_dir().join(format!("rocket-ssh-sign-{}", std::process::id()));
 
     std::fs::write(&buf_path, content.as_bytes())
         .map_err(|e| GitError::SigningFailed(Box::new(e)))?;
@@ -3398,8 +3386,8 @@ fn sign_with_ssh(content: &str, key_path: &str) -> GitResult<String> {
         ));
     }
 
-    let signature = std::fs::read_to_string(&sig_path)
-        .map_err(|e| GitError::SigningFailed(Box::new(e)))?;
+    let signature =
+        std::fs::read_to_string(&sig_path).map_err(|e| GitError::SigningFailed(Box::new(e)))?;
 
     let _ = std::fs::remove_file(&sig_path);
 

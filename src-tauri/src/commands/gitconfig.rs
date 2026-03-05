@@ -77,7 +77,5 @@ pub fn get_gitconfig_path(
         .lock()
         .map_err(|e| format!("Lock poisoned: {e}"))?;
     let backend = repo_lock.as_ref().ok_or("No repository opened")?;
-    backend
-        .get_gitconfig_path(scope)
-        .map_err(|e| e.to_string())
+    backend.get_gitconfig_path(scope).map_err(|e| e.to_string())
 }

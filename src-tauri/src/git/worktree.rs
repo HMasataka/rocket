@@ -62,9 +62,7 @@ fn check_worktree_clean(worktree_path: &str) -> bool {
         .output();
 
     match output {
-        Ok(o) if o.status.success() => {
-            String::from_utf8_lossy(&o.stdout).trim().is_empty()
-        }
+        Ok(o) if o.status.success() => String::from_utf8_lossy(&o.stdout).trim().is_empty(),
         _ => false,
     }
 }
@@ -140,9 +138,7 @@ fn parse_worktree_list(output: &str) -> Vec<WorktreeInfo> {
 }
 
 fn strip_refs_prefix(refname: &str) -> &str {
-    refname
-        .strip_prefix("refs/heads/")
-        .unwrap_or(refname)
+    refname.strip_prefix("refs/heads/").unwrap_or(refname)
 }
 
 #[cfg(test)]
