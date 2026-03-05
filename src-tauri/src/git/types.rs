@@ -179,6 +179,7 @@ pub struct CommitInfo {
     pub author_date: i64,
     pub parent_oids: Vec<String>,
     pub refs: Vec<CommitRef>,
+    pub signature_status: SignatureStatus,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -437,6 +438,34 @@ pub struct RevertResult {
     pub completed: bool,
     pub conflicts: Vec<String>,
     pub oid: Option<String>,
+}
+
+// === Gitconfig types ===
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum GitConfigScope {
+    Local,
+    Global,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct GitConfigEntry {
+    pub key: String,
+    pub value: String,
+}
+
+// === Signature types ===
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum SignatureStatus {
+    None,
+    Good,
+    Bad,
+    Untrusted,
+    Expired,
+    Error,
 }
 
 // === Submodule types ===

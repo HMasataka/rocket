@@ -5,10 +5,10 @@ use crate::git::search::{CodeSearchResult, CommitSearchResult, FilenameSearchRes
 use crate::git::types::{
     BlameResult, BranchInfo, CherryPickMode, CherryPickResult, CommitDetail, CommitInfo,
     CommitLogResult, CommitResult, ConflictFile, ConflictResolution, DiffOptions, FetchResult,
-    FileDiff, HunkIdentifier, LineRange, LogFilter, MergeBaseContent, MergeOption, MergeResult,
-    PullOption, PushResult, RebaseResult, RebaseState, RebaseTodoEntry, ReflogEntry, RemoteInfo,
-    RepoStatus, ResetMode, ResetResult, RevertMode, RevertResult, StashEntry, SubmoduleInfo,
-    TagInfo, WorktreeInfo,
+    FileDiff, GitConfigEntry, GitConfigScope, HunkIdentifier, LineRange, LogFilter,
+    MergeBaseContent, MergeOption, MergeResult, PullOption, PushResult, RebaseResult, RebaseState,
+    RebaseTodoEntry, ReflogEntry, RemoteInfo, RepoStatus, ResetMode, ResetResult, RevertMode,
+    RevertResult, SignatureStatus, StashEntry, SubmoduleInfo, TagInfo, WorktreeInfo,
 };
 
 pub trait GitBackend: Send + Sync {
@@ -20,7 +20,7 @@ pub trait GitBackend: Send + Sync {
     fn stage_all(&self) -> GitResult<()>;
     fn unstage_all(&self) -> GitResult<()>;
     fn current_branch(&self) -> GitResult<String>;
-    fn commit(&self, message: &str, amend: bool) -> GitResult<CommitResult>;
+    fn commit(&self, message: &str, amend: bool, sign: bool) -> GitResult<CommitResult>;
     fn list_branches(&self) -> GitResult<Vec<BranchInfo>>;
     fn create_branch(&self, name: &str) -> GitResult<()>;
     fn checkout_branch(&self, name: &str) -> GitResult<()>;
@@ -127,4 +127,15 @@ pub trait GitBackend: Send + Sync {
     fn list_worktrees(&self) -> GitResult<Vec<WorktreeInfo>>;
     fn add_worktree(&self, path: &str, branch: &str) -> GitResult<()>;
     fn remove_worktree(&self, path: &str) -> GitResult<()>;
+
+    // Gitconfig operations
+    fn get_gitconfig_entries(&self, scope: GitConfigScope) -> GitResult<Vec<GitConfigEntry>>;
+    fn get_gitconfig_value(&self, scope: GitConfigScope, key: &str) -> GitResult<Option<String>>;
+    fn set_gitconfig_value(&self, scope: GitConfigScope, key: &str, value: &str)
+        -> GitResult<()>;
+    fn unset_gitconfig_value(&self, scope: GitConfigScope, key: &str) -> GitResult<()>;
+    fn get_gitconfig_path(&self, scope: GitConfigScope) -> GitResult<String>;
+
+    // Signature verification
+    fn verify_commit_signatures(&self, oids: &[&str]) -> GitResult<Vec<(String, SignatureStatus)>>;
 }

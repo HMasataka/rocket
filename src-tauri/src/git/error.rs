@@ -112,6 +112,12 @@ pub enum GitError {
 
     #[error("worktree operation failed: {0}")]
     WorktreeFailed(#[source] Box<dyn std::error::Error + Send + Sync>),
+
+    #[error("gitconfig operation failed: {0}")]
+    GitConfigFailed(#[source] Box<dyn std::error::Error + Send + Sync>),
+
+    #[error("signing failed: {0}")]
+    SigningFailed(#[source] Box<dyn std::error::Error + Send + Sync>),
 }
 
 pub type GitResult<T> = Result<T, GitError>;

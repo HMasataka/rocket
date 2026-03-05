@@ -16,11 +16,11 @@ use crate::git::types::{
     CommitFileChange, CommitFileStatus, CommitGraphRow, CommitInfo, CommitLogResult, CommitRef,
     CommitRefKind, CommitResult, CommitStats, ConflictBlock, ConflictFile, ConflictResolution,
     DiffHunk, DiffLine, DiffLineKind, DiffOptions, FetchResult, FileDiff, FileStatus,
-    FileStatusKind, GraphEdge, GraphNodeType, HunkIdentifier, LineRange, LogFilter,
-    MergeBaseContent, MergeKind, MergeOption, MergeResult, PullOption, PushResult, RebaseAction,
-    RebaseResult, RebaseState, RebaseTodoEntry, ReflogEntry, RemoteInfo, RepoStatus, ResetMode,
-    ResetResult, RevertMode, RevertResult, StagingState, StashEntry, SubmoduleInfo, TagInfo,
-    WordSegment, WorktreeInfo,
+    FileStatusKind, GitConfigEntry, GitConfigScope, GraphEdge, GraphNodeType, HunkIdentifier,
+    LineRange, LogFilter, MergeBaseContent, MergeKind, MergeOption, MergeResult, PullOption,
+    PushResult, RebaseAction, RebaseResult, RebaseState, RebaseTodoEntry, ReflogEntry, RemoteInfo,
+    RepoStatus, ResetMode, ResetResult, RevertMode, RevertResult, SignatureStatus, StagingState,
+    StashEntry, SubmoduleInfo, TagInfo, WordSegment, WorktreeInfo,
 };
 
 pub struct Git2Backend {
@@ -260,7 +260,7 @@ impl GitBackend for Git2Backend {
         Ok(name)
     }
 
-    fn commit(&self, message: &str, amend: bool) -> GitResult<CommitResult> {
+    fn commit(&self, message: &str, amend: bool, sign: bool) -> GitResult<CommitResult> {
         let repo = self.repo.lock().unwrap();
 
         let mut index = repo
@@ -287,6 +287,16 @@ impl GitBackend for Git2Backend {
                 .peel_to_commit()
                 .map_err(|e| GitError::AmendFailed(Box::new(e)))?;
 
+            if sign {
+                let parents: Vec<git2::Commit> = (0..head_commit.parent_count())
+                    .map(|i| head_commit.parent(i))
+                    .collect::<Result<Vec<_>, _>>()
+                    .map_err(|e| GitError::AmendFailed(Box::new(e)))?;
+                let parent_refs: Vec<&git2::Commit> = parents.iter().collect();
+
+                return create_signed_commit(&repo, &sig, message, &tree, &parent_refs);
+            }
+
             let oid = head_commit
                 .amend(
                     Some("HEAD"),
@@ -310,10 +320,14 @@ impl GitBackend for Git2Backend {
                     .map_err(|e| GitError::CommitFailed(Box::new(e)))?;
                 vec![commit]
             }
-            Err(_) => vec![], // Initial commit — no parents
+            Err(_) => vec![], // Initial commit -- no parents
         };
 
         let parent_refs: Vec<&git2::Commit> = parents.iter().collect();
+
+        if sign {
+            return create_signed_commit(&repo, &sig, message, &tree, &parent_refs);
+        }
 
         let oid = repo
             .commit(Some("HEAD"), &sig, &sig, message, &tree, &parent_refs)
@@ -641,42 +655,60 @@ impl GitBackend for Git2Backend {
         limit: usize,
         skip: usize,
     ) -> GitResult<CommitLogResult> {
-        let repo = self.repo.lock().unwrap();
+        let mut commits = {
+            let repo = self.repo.lock().unwrap();
 
-        let mut revwalk = repo
-            .revwalk()
-            .map_err(|e| GitError::LogFailed(Box::new(e)))?;
-        revwalk
-            .set_sorting(Sort::TIME | Sort::TOPOLOGICAL)
-            .map_err(|e| GitError::LogFailed(Box::new(e)))?;
-        revwalk
-            .push_head()
-            .map_err(|e| GitError::LogFailed(Box::new(e)))?;
-
-        let ref_map = build_ref_map(&repo);
-        let mut commits = Vec::new();
-        let mut skipped = 0;
-
-        for oid_result in revwalk {
-            let oid = oid_result.map_err(|e| GitError::LogFailed(Box::new(e)))?;
-            let commit = repo
-                .find_commit(oid)
+            let mut revwalk = repo
+                .revwalk()
+                .map_err(|e| GitError::LogFailed(Box::new(e)))?;
+            revwalk
+                .set_sorting(Sort::TIME | Sort::TOPOLOGICAL)
+                .map_err(|e| GitError::LogFailed(Box::new(e)))?;
+            revwalk
+                .push_head()
                 .map_err(|e| GitError::LogFailed(Box::new(e)))?;
 
-            if !matches_filter(&repo, &commit, filter) {
-                continue;
+            let ref_map = build_ref_map(&repo);
+            let mut commits = Vec::new();
+            let mut skipped = 0;
+
+            for oid_result in revwalk {
+                let oid = oid_result.map_err(|e| GitError::LogFailed(Box::new(e)))?;
+                let commit = repo
+                    .find_commit(oid)
+                    .map_err(|e| GitError::LogFailed(Box::new(e)))?;
+
+                if !matches_filter(&repo, &commit, filter) {
+                    continue;
+                }
+
+                if skipped < skip {
+                    skipped += 1;
+                    continue;
+                }
+
+                let info = commit_to_info(&commit, &ref_map);
+                commits.push(info);
+
+                if commits.len() >= limit {
+                    break;
+                }
             }
 
-            if skipped < skip {
-                skipped += 1;
-                continue;
-            }
+            commits
+        };
 
-            let info = commit_to_info(&commit, &ref_map);
-            commits.push(info);
-
-            if commits.len() >= limit {
-                break;
+        let oids: Vec<String> = commits.iter().map(|c| c.oid.clone()).collect();
+        let oid_refs: Vec<&str> = oids.iter().map(|s| s.as_str()).collect();
+        if let Ok(sig_statuses) = self.verify_commit_signatures(&oid_refs) {
+            let status_map: std::collections::HashMap<&str, SignatureStatus> = sig_statuses
+                .iter()
+                .map(|(oid, status)| (oid.as_str(), *status))
+                .collect();
+            for commit in &mut commits {
+                if let Some(&status) = status_map.get(commit.oid.as_str()) {
+                    commit.signature_status = status;
+                }
             }
         }
 
@@ -2076,6 +2108,143 @@ impl GitBackend for Git2Backend {
     fn remove_worktree(&self, path: &str) -> GitResult<()> {
         worktree::remove_worktree(&self.workdir, path)
     }
+
+    fn get_gitconfig_entries(&self, scope: GitConfigScope) -> GitResult<Vec<GitConfigEntry>> {
+        let repo = self.repo.lock().unwrap();
+        let config = repo
+            .config()
+            .map_err(|e| GitError::GitConfigFailed(Box::new(e)))?;
+
+        let level = scope_to_level(scope);
+        let scoped = config
+            .open_level(level)
+            .map_err(|e| GitError::GitConfigFailed(Box::new(e)))?;
+
+        let mut entries_vec = Vec::new();
+        let mut iter = scoped
+            .entries(None)
+            .map_err(|e| GitError::GitConfigFailed(Box::new(e)))?;
+
+        while let Some(entry) = iter.next() {
+            let entry = entry.map_err(|e| GitError::GitConfigFailed(Box::new(e)))?;
+            if let (Some(name), Some(value)) = (entry.name(), entry.value()) {
+                entries_vec.push(GitConfigEntry {
+                    key: name.to_string(),
+                    value: value.to_string(),
+                });
+            }
+        }
+
+        Ok(entries_vec)
+    }
+
+    fn get_gitconfig_value(&self, scope: GitConfigScope, key: &str) -> GitResult<Option<String>> {
+        let repo = self.repo.lock().unwrap();
+        let config = repo
+            .config()
+            .map_err(|e| GitError::GitConfigFailed(Box::new(e)))?;
+
+        let level = scope_to_level(scope);
+        let scoped = match config.open_level(level) {
+            Ok(c) => c,
+            Err(_) => return Ok(None),
+        };
+
+        match scoped.get_string(key) {
+            Ok(v) => Ok(Some(v)),
+            Err(e) if e.code() == git2::ErrorCode::NotFound => Ok(None),
+            Err(e) => Err(GitError::GitConfigFailed(Box::new(e))),
+        }
+    }
+
+    fn set_gitconfig_value(
+        &self,
+        scope: GitConfigScope,
+        key: &str,
+        value: &str,
+    ) -> GitResult<()> {
+        let repo = self.repo.lock().unwrap();
+        let config = repo
+            .config()
+            .map_err(|e| GitError::GitConfigFailed(Box::new(e)))?;
+
+        let level = scope_to_level(scope);
+        let mut scoped = config
+            .open_level(level)
+            .map_err(|e| GitError::GitConfigFailed(Box::new(e)))?;
+
+        scoped
+            .set_str(key, value)
+            .map_err(|e| GitError::GitConfigFailed(Box::new(e)))
+    }
+
+    fn unset_gitconfig_value(&self, scope: GitConfigScope, key: &str) -> GitResult<()> {
+        let repo = self.repo.lock().unwrap();
+        let config = repo
+            .config()
+            .map_err(|e| GitError::GitConfigFailed(Box::new(e)))?;
+
+        let level = scope_to_level(scope);
+        let mut scoped = config
+            .open_level(level)
+            .map_err(|e| GitError::GitConfigFailed(Box::new(e)))?;
+
+        match scoped.remove(key) {
+            Ok(()) => Ok(()),
+            Err(e) if e.code() == git2::ErrorCode::NotFound => Ok(()),
+            Err(e) => Err(GitError::GitConfigFailed(Box::new(e))),
+        }
+    }
+
+    fn get_gitconfig_path(&self, scope: GitConfigScope) -> GitResult<String> {
+        match scope {
+            GitConfigScope::Local => {
+                let repo = self.repo.lock().unwrap();
+                let git_dir = repo.path();
+                let config_path = git_dir.join("config");
+                Ok(config_path.to_string_lossy().to_string())
+            }
+            GitConfigScope::Global => {
+                let path = git2::Config::find_global()
+                    .map_err(|e| GitError::GitConfigFailed(Box::new(e)))?;
+                Ok(path.to_string_lossy().to_string())
+            }
+        }
+    }
+
+    fn verify_commit_signatures(
+        &self,
+        oids: &[&str],
+    ) -> GitResult<Vec<(String, SignatureStatus)>> {
+        if oids.is_empty() {
+            return Ok(Vec::new());
+        }
+
+        let output = std::process::Command::new("git")
+            .args(["log", "--no-walk", "--format=%H %G?"])
+            .args(oids)
+            .current_dir(&self.workdir)
+            .output()
+            .map_err(|e| GitError::SigningFailed(Box::new(e)))?;
+
+        if !output.status.success() {
+            let stderr = String::from_utf8_lossy(&output.stderr);
+            return Err(GitError::SigningFailed(stderr.to_string().into()));
+        }
+
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        let mut results = Vec::new();
+
+        for line in stdout.lines() {
+            let Some((hash, status_char)) = line.split_once(' ') else {
+                continue;
+            };
+            let status = parse_signature_status(status_char);
+            results.push((hash.to_string(), status));
+        }
+
+        Ok(results)
+    }
 }
 
 impl Git2Backend {
@@ -2501,6 +2670,7 @@ fn commit_to_info(commit: &git2::Commit, ref_map: &RefMap) -> CommitInfo {
         author_date,
         parent_oids,
         refs,
+        signature_status: SignatureStatus::None,
     }
 }
 
@@ -3100,6 +3270,140 @@ fn compute_word_diffs(file_diffs: &mut [FileDiff]) {
             }
         }
     }
+}
+
+fn scope_to_level(scope: GitConfigScope) -> git2::ConfigLevel {
+    match scope {
+        GitConfigScope::Local => git2::ConfigLevel::Local,
+        GitConfigScope::Global => git2::ConfigLevel::Global,
+    }
+}
+
+fn parse_signature_status(status_char: &str) -> SignatureStatus {
+    match status_char.trim() {
+        "G" => SignatureStatus::Good,
+        "B" => SignatureStatus::Bad,
+        "U" => SignatureStatus::Untrusted,
+        "X" => SignatureStatus::Expired,
+        "E" => SignatureStatus::Error,
+        "N" => SignatureStatus::None,
+        _ => SignatureStatus::None,
+    }
+}
+
+fn create_signed_commit(
+    repo: &Repository,
+    sig: &git2::Signature,
+    message: &str,
+    tree: &git2::Tree,
+    parents: &[&git2::Commit],
+) -> GitResult<CommitResult> {
+    let commit_buf = repo
+        .commit_create_buffer(sig, sig, message, tree, parents)
+        .map_err(|e| GitError::SigningFailed(Box::new(e)))?;
+
+    let commit_content = std::str::from_utf8(&commit_buf)
+        .map_err(|e| GitError::SigningFailed(Box::new(e)))?;
+
+    let config = repo
+        .config()
+        .map_err(|e| GitError::SigningFailed(Box::new(e)))?;
+
+    let gpg_format = config.get_string("gpg.format").unwrap_or_else(|_| "openpgp".to_string());
+    let signing_key = config
+        .get_string("user.signingKey")
+        .map_err(|_| {
+            GitError::SigningFailed("user.signingKey not configured".into())
+        })?;
+
+    let signature = match gpg_format.as_str() {
+        "ssh" => sign_with_ssh(commit_content, &signing_key)?,
+        _ => sign_with_gpg(commit_content, &signing_key)?,
+    };
+
+    let oid = repo
+        .commit_signed(commit_content, &signature, Some("gpgsig"))
+        .map_err(|e| GitError::SigningFailed(Box::new(e)))?;
+
+    // Update HEAD to point to the new commit
+    repo.head()
+        .and_then(|head| {
+            let refname = head.name().unwrap_or("HEAD");
+            repo.reference(refname, oid, true, "commit (signed)")
+        })
+        .map_err(|e| GitError::SigningFailed(Box::new(e)))?;
+
+    Ok(CommitResult {
+        oid: oid.to_string(),
+    })
+}
+
+fn sign_with_gpg(content: &str, key: &str) -> GitResult<String> {
+    let mut child = std::process::Command::new("gpg")
+        .args(["--status-fd=2", "-bsau", key])
+        .stdin(std::process::Stdio::piped())
+        .stdout(std::process::Stdio::piped())
+        .stderr(std::process::Stdio::piped())
+        .spawn()
+        .map_err(|e| GitError::SigningFailed(Box::new(e)))?;
+
+    use std::io::Write;
+    child
+        .stdin
+        .take()
+        .unwrap()
+        .write_all(content.as_bytes())
+        .map_err(|e| GitError::SigningFailed(Box::new(e)))?;
+
+    let output = child
+        .wait_with_output()
+        .map_err(|e| GitError::SigningFailed(Box::new(e)))?;
+
+    if !output.status.success() {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        return Err(GitError::SigningFailed(
+            format!("GPG signing failed: {}", stderr).into(),
+        ));
+    }
+
+    String::from_utf8(output.stdout)
+        .map_err(|e| GitError::SigningFailed(Box::new(e)))
+}
+
+fn sign_with_ssh(content: &str, key_path: &str) -> GitResult<String> {
+    let buf_path = std::env::temp_dir().join(format!(
+        "rocket-ssh-sign-{}",
+        std::process::id()
+    ));
+
+    std::fs::write(&buf_path, content.as_bytes())
+        .map_err(|e| GitError::SigningFailed(Box::new(e)))?;
+
+    let sig_path = buf_path.with_extension("sig");
+
+    let output = std::process::Command::new("ssh-keygen")
+        .args(["-Y", "sign", "-n", "git", "-f", key_path])
+        .arg(&buf_path)
+        .output()
+        .map_err(|e| GitError::SigningFailed(Box::new(e)))?;
+
+    // Clean up temp file regardless of outcome
+    let _ = std::fs::remove_file(&buf_path);
+
+    if !output.status.success() {
+        let _ = std::fs::remove_file(&sig_path);
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        return Err(GitError::SigningFailed(
+            format!("SSH signing failed: {}", stderr).into(),
+        ));
+    }
+
+    let signature = std::fs::read_to_string(&sig_path)
+        .map_err(|e| GitError::SigningFailed(Box::new(e)))?;
+
+    let _ = std::fs::remove_file(&sig_path);
+
+    Ok(signature)
 }
 
 #[cfg(test)]

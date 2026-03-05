@@ -32,7 +32,7 @@ fn init_test_repo(dir: &Path) {
 fn create_file_with_multiple_changed_lines(dir: &Path, backend: &Git2Backend) {
     fs::write(dir.join("lines.txt"), "line1\nline2\nline3\nline4\nline5\n").unwrap();
     backend.stage(Path::new("lines.txt")).unwrap();
-    backend.commit("add lines", false).unwrap();
+    backend.commit("add lines", false, false).unwrap();
     fs::write(
         dir.join("lines.txt"),
         "line1\nchanged2\nline3\nchanged4\nline5\nnew6\n",
@@ -47,7 +47,7 @@ fn create_file_with_two_hunks(dir: &Path, backend: &Git2Backend) {
     }
     fs::write(dir.join("twohunk.txt"), &content).unwrap();
     backend.stage(Path::new("twohunk.txt")).unwrap();
-    backend.commit("add twohunk", false).unwrap();
+    backend.commit("add twohunk", false, false).unwrap();
     let mut modified = String::new();
     for i in 1..=20 {
         if i == 2 {
@@ -66,7 +66,7 @@ fn init_repo_with_commit(dir: &Path) -> Git2Backend {
     fs::write(dir.join("init.txt"), "init").unwrap();
     let backend = Git2Backend::open(dir).unwrap();
     backend.stage(Path::new("init.txt")).unwrap();
-    backend.commit("initial commit", false).unwrap();
+    backend.commit("initial commit", false, false).unwrap();
     backend
 }
 
@@ -160,7 +160,7 @@ fn commit_creates_oid() {
     let backend = Git2Backend::open(tmp.path()).unwrap();
     backend.stage(Path::new("file.txt")).unwrap();
 
-    let result = backend.commit("initial commit", false).unwrap();
+    let result = backend.commit("initial commit", false, false).unwrap();
     assert!(!result.oid.is_empty());
 }
 
@@ -173,7 +173,7 @@ fn current_branch_after_commit() {
 
     let backend = Git2Backend::open(tmp.path()).unwrap();
     backend.stage(Path::new("file.txt")).unwrap();
-    backend.commit("init", false).unwrap();
+    backend.commit("init", false, false).unwrap();
 
     let branch = backend.current_branch().unwrap();
     assert!(!branch.is_empty());
@@ -188,7 +188,7 @@ fn diff_unstaged_changes() {
 
     let backend = Git2Backend::open(tmp.path()).unwrap();
     backend.stage(Path::new("file.txt")).unwrap();
-    backend.commit("init", false).unwrap();
+    backend.commit("init", false, false).unwrap();
 
     fs::write(tmp.path().join("file.txt"), "line1\nline2\n").unwrap();
 
@@ -211,7 +211,7 @@ fn diff_staged_changes() {
 
     let backend = Git2Backend::open(tmp.path()).unwrap();
     backend.stage(Path::new("file.txt")).unwrap();
-    backend.commit("init", false).unwrap();
+    backend.commit("init", false, false).unwrap();
 
     fs::write(tmp.path().join("file.txt"), "modified\n").unwrap();
     backend.stage(Path::new("file.txt")).unwrap();
@@ -301,7 +301,7 @@ fn merge_fast_forward() {
 
     fs::write(tmp.path().join("feature.txt"), "feature work").unwrap();
     backend.stage(Path::new("feature.txt")).unwrap();
-    backend.commit("feature commit", false).unwrap();
+    backend.commit("feature commit", false, false).unwrap();
 
     backend.checkout_branch(&default_branch).unwrap();
 
@@ -441,12 +441,12 @@ fn merge_ff_only_fails_when_not_possible() {
     backend.checkout_branch("feature").unwrap();
     fs::write(tmp.path().join("feature.txt"), "feature").unwrap();
     backend.stage(Path::new("feature.txt")).unwrap();
-    backend.commit("feature commit", false).unwrap();
+    backend.commit("feature commit", false, false).unwrap();
 
     backend.checkout_branch(&default_branch).unwrap();
     fs::write(tmp.path().join("main.txt"), "main work").unwrap();
     backend.stage(Path::new("main.txt")).unwrap();
-    backend.commit("main commit", false).unwrap();
+    backend.commit("main commit", false, false).unwrap();
 
     let result = backend.merge_branch("feature", MergeOption::FastForwardOnly);
     assert!(result.is_err());
@@ -498,7 +498,7 @@ fn get_commit_log_returns_commits() {
 
     fs::write(tmp.path().join("second.txt"), "second").unwrap();
     backend.stage(Path::new("second.txt")).unwrap();
-    backend.commit("second commit", false).unwrap();
+    backend.commit("second commit", false, false).unwrap();
 
     let filter = LogFilter {
         author: None,
@@ -549,7 +549,7 @@ fn get_commit_detail_returns_info_and_files() {
 
     fs::write(tmp.path().join("detail.txt"), "detail content").unwrap();
     backend.stage(Path::new("detail.txt")).unwrap();
-    let commit_result = backend.commit("detail commit", false).unwrap();
+    let commit_result = backend.commit("detail commit", false, false).unwrap();
 
     let detail = backend.get_commit_detail(&commit_result.oid).unwrap();
 
@@ -579,7 +579,7 @@ fn get_blame_returns_correct_line_count() {
 
     let backend = Git2Backend::open(tmp.path()).unwrap();
     backend.stage(Path::new("blame.txt")).unwrap();
-    backend.commit("add blame file", false).unwrap();
+    backend.commit("add blame file", false, false).unwrap();
 
     let blame_result = backend.get_blame("blame.txt", None).unwrap();
 
@@ -602,11 +602,11 @@ fn get_blame_with_multiple_commits_tracks_authors() {
     fs::write(tmp.path().join("multi.txt"), "original\n").unwrap();
     let backend = Git2Backend::open(tmp.path()).unwrap();
     backend.stage(Path::new("multi.txt")).unwrap();
-    let first_commit = backend.commit("first", false).unwrap();
+    let first_commit = backend.commit("first", false, false).unwrap();
 
     fs::write(tmp.path().join("multi.txt"), "original\nadded\n").unwrap();
     backend.stage(Path::new("multi.txt")).unwrap();
-    backend.commit("second", false).unwrap();
+    backend.commit("second", false, false).unwrap();
 
     let blame_result = backend.get_blame("multi.txt", None).unwrap();
 
@@ -623,15 +623,15 @@ fn get_file_history_returns_only_touching_commits() {
 
     fs::write(tmp.path().join("tracked.txt"), "v1").unwrap();
     backend.stage(Path::new("tracked.txt")).unwrap();
-    backend.commit("add tracked", false).unwrap();
+    backend.commit("add tracked", false, false).unwrap();
 
     fs::write(tmp.path().join("other.txt"), "other").unwrap();
     backend.stage(Path::new("other.txt")).unwrap();
-    backend.commit("add other", false).unwrap();
+    backend.commit("add other", false, false).unwrap();
 
     fs::write(tmp.path().join("tracked.txt"), "v2").unwrap();
     backend.stage(Path::new("tracked.txt")).unwrap();
-    backend.commit("update tracked", false).unwrap();
+    backend.commit("update tracked", false, false).unwrap();
 
     let history = backend.get_file_history("tracked.txt", 100, 0).unwrap();
 
@@ -662,7 +662,7 @@ fn get_branch_commits_returns_commits_for_branch() {
 
     fs::write(tmp.path().join("feature.txt"), "feature work").unwrap();
     backend.stage(Path::new("feature.txt")).unwrap();
-    backend.commit("feature commit", false).unwrap();
+    backend.commit("feature commit", false, false).unwrap();
 
     let commits = backend.get_branch_commits("feature", 10).unwrap();
 
@@ -680,7 +680,7 @@ fn get_branch_commits_respects_limit() {
         let filename = format!("file{i}.txt");
         fs::write(tmp.path().join(&filename), format!("content {i}")).unwrap();
         backend.stage(Path::new(&filename)).unwrap();
-        backend.commit(&format!("commit {i}"), false).unwrap();
+        backend.commit(&format!("commit {i}"), false, false).unwrap();
     }
 
     let branch_name = backend.current_branch().unwrap();
@@ -705,7 +705,7 @@ fn diff_includes_hunk_range_fields() {
 
     fs::write(tmp.path().join("file.txt"), "line1\nline2\nline3\n").unwrap();
     backend.stage(Path::new("file.txt")).unwrap();
-    backend.commit("add file", false).unwrap();
+    backend.commit("add file", false, false).unwrap();
 
     fs::write(tmp.path().join("file.txt"), "line1\nmodified\nline3\n").unwrap();
 
@@ -730,7 +730,7 @@ fn create_two_hunk_file(dir: &Path, backend: &Git2Backend) {
     }
     fs::write(dir.join("multi.txt"), &content).unwrap();
     backend.stage(Path::new("multi.txt")).unwrap();
-    backend.commit("add multi", false).unwrap();
+    backend.commit("add multi", false, false).unwrap();
 
     let mut modified = String::new();
     for i in 1..=20 {
@@ -1075,7 +1075,7 @@ fn commit_amend_changes_message() {
     let msg = backend.get_head_commit_message().unwrap();
     assert_eq!(msg.trim(), "initial commit");
 
-    backend.commit("amended message", true).unwrap();
+    backend.commit("amended message", true, false).unwrap();
 
     let msg_after = backend.get_head_commit_message().unwrap();
     assert_eq!(msg_after.trim(), "amended message");
@@ -1089,7 +1089,7 @@ fn commit_amend_includes_new_staged_changes() {
     fs::write(tmp.path().join("new.txt"), "new content").unwrap();
     backend.stage(Path::new("new.txt")).unwrap();
 
-    backend.commit("amend with new file", true).unwrap();
+    backend.commit("amend with new file", true, false).unwrap();
 
     let detail = backend.get_head_commit_message().unwrap();
     assert_eq!(detail.trim(), "amend with new file");
@@ -1306,20 +1306,20 @@ fn setup_conflict_repo(dir: &Path) -> (Git2Backend, String) {
     // Create shared file on default branch
     fs::write(dir.join("shared.txt"), "line1\nline2\nline3\n").unwrap();
     backend.stage(Path::new("shared.txt")).unwrap();
-    backend.commit("add shared", false).unwrap();
+    backend.commit("add shared", false, false).unwrap();
 
     // Create feature branch and modify shared.txt
     backend.create_branch("conflict-branch").unwrap();
     backend.checkout_branch("conflict-branch").unwrap();
     fs::write(dir.join("shared.txt"), "line1\nfeature-change\nline3\n").unwrap();
     backend.stage(Path::new("shared.txt")).unwrap();
-    backend.commit("feature change", false).unwrap();
+    backend.commit("feature change", false, false).unwrap();
 
     // Go back to default branch and make a conflicting change
     backend.checkout_branch(&default_branch).unwrap();
     fs::write(dir.join("shared.txt"), "line1\nmain-change\nline3\n").unwrap();
     backend.stage(Path::new("shared.txt")).unwrap();
-    backend.commit("main change", false).unwrap();
+    backend.commit("main change", false, false).unwrap();
 
     (backend, default_branch)
 }
@@ -1550,7 +1550,7 @@ fn setup_cherry_pick_repo(dir: &Path) -> (Git2Backend, String) {
 
     fs::write(dir.join("cherry.txt"), "cherry content\n").unwrap();
     backend.stage(Path::new("cherry.txt")).unwrap();
-    backend.commit("feature: add cherry.txt", false).unwrap();
+    backend.commit("feature: add cherry.txt", false, false).unwrap();
 
     // Get the OID of the feature commit
     let log_filter = LogFilter {
@@ -1636,7 +1636,7 @@ fn cherry_pick_conflict_and_abort() {
     // Create a file on main
     fs::write(tmp.path().join("conflict.txt"), "main content\n").unwrap();
     backend.stage(Path::new("conflict.txt")).unwrap();
-    backend.commit("main: add conflict.txt", false).unwrap();
+    backend.commit("main: add conflict.txt", false, false).unwrap();
 
     // Create feature branch and modify the same file
     backend.create_branch("feature").unwrap();
@@ -1644,7 +1644,7 @@ fn cherry_pick_conflict_and_abort() {
     fs::write(tmp.path().join("conflict.txt"), "feature content\n").unwrap();
     backend.stage(Path::new("conflict.txt")).unwrap();
     backend
-        .commit("feature: modify conflict.txt", false)
+        .commit("feature: modify conflict.txt", false, false)
         .unwrap();
 
     let log_filter = LogFilter {
@@ -1662,7 +1662,7 @@ fn cherry_pick_conflict_and_abort() {
     fs::write(tmp.path().join("conflict.txt"), "different main content\n").unwrap();
     backend.stage(Path::new("conflict.txt")).unwrap();
     backend
-        .commit("main: modify conflict.txt differently", false)
+        .commit("main: modify conflict.txt differently", false, false)
         .unwrap();
 
     // Cherry-pick should detect conflicts
@@ -1712,7 +1712,7 @@ fn revert_auto_mode() {
     // Create a file and commit
     fs::write(tmp.path().join("revert_target.txt"), "to be reverted\n").unwrap();
     backend.stage(Path::new("revert_target.txt")).unwrap();
-    backend.commit("add revert_target.txt", false).unwrap();
+    backend.commit("add revert_target.txt", false, false).unwrap();
 
     // Get the OID of the commit to revert
     let log_filter = LogFilter {
@@ -1748,7 +1748,7 @@ fn revert_no_commit_mode() {
     // Create a file and commit
     fs::write(tmp.path().join("revert_nc.txt"), "no-commit revert\n").unwrap();
     backend.stage(Path::new("revert_nc.txt")).unwrap();
-    backend.commit("add revert_nc.txt", false).unwrap();
+    backend.commit("add revert_nc.txt", false, false).unwrap();
 
     let log_filter = LogFilter {
         author: None,
@@ -1783,7 +1783,7 @@ fn revert_conflict_and_abort() {
     // Create a file and commit
     fs::write(tmp.path().join("revert_conflict.txt"), "original\n").unwrap();
     backend.stage(Path::new("revert_conflict.txt")).unwrap();
-    backend.commit("add revert_conflict.txt", false).unwrap();
+    backend.commit("add revert_conflict.txt", false, false).unwrap();
 
     let log_filter = LogFilter {
         author: None,
@@ -1798,7 +1798,7 @@ fn revert_conflict_and_abort() {
     // Modify the file in a later commit (this will conflict with reverting the addition)
     fs::write(tmp.path().join("revert_conflict.txt"), "modified content\n").unwrap();
     backend.stage(Path::new("revert_conflict.txt")).unwrap();
-    backend.commit("modify revert_conflict.txt", false).unwrap();
+    backend.commit("modify revert_conflict.txt", false, false).unwrap();
 
     // Try to revert the original addition commit — should conflict
     let result = backend.revert(&add_oid, RevertMode::Auto).unwrap();
@@ -1839,7 +1839,7 @@ fn continue_cherry_pick_after_conflict_resolution() {
     // Create a file on main
     fs::write(tmp.path().join("conflict.txt"), "main content\n").unwrap();
     backend.stage(Path::new("conflict.txt")).unwrap();
-    backend.commit("main: add conflict.txt", false).unwrap();
+    backend.commit("main: add conflict.txt", false, false).unwrap();
 
     // Create feature branch and modify the same file
     backend.create_branch("feature").unwrap();
@@ -1847,7 +1847,7 @@ fn continue_cherry_pick_after_conflict_resolution() {
     fs::write(tmp.path().join("conflict.txt"), "feature content\n").unwrap();
     backend.stage(Path::new("conflict.txt")).unwrap();
     backend
-        .commit("feature: modify conflict.txt", false)
+        .commit("feature: modify conflict.txt", false, false)
         .unwrap();
 
     let log_filter = LogFilter {
@@ -1865,7 +1865,7 @@ fn continue_cherry_pick_after_conflict_resolution() {
     fs::write(tmp.path().join("conflict.txt"), "different main content\n").unwrap();
     backend.stage(Path::new("conflict.txt")).unwrap();
     backend
-        .commit("main: modify conflict.txt differently", false)
+        .commit("main: modify conflict.txt differently", false, false)
         .unwrap();
 
     // Cherry-pick should detect conflicts
@@ -1899,7 +1899,7 @@ fn continue_revert_after_conflict_resolution() {
     // Create a file and commit
     fs::write(tmp.path().join("revert_cont.txt"), "original\n").unwrap();
     backend.stage(Path::new("revert_cont.txt")).unwrap();
-    backend.commit("add revert_cont.txt", false).unwrap();
+    backend.commit("add revert_cont.txt", false, false).unwrap();
 
     let log_filter = LogFilter {
         author: None,
@@ -1914,7 +1914,7 @@ fn continue_revert_after_conflict_resolution() {
     // Modify the file in a later commit to cause conflict on revert
     fs::write(tmp.path().join("revert_cont.txt"), "modified content\n").unwrap();
     backend.stage(Path::new("revert_cont.txt")).unwrap();
-    backend.commit("modify revert_cont.txt", false).unwrap();
+    backend.commit("modify revert_cont.txt", false, false).unwrap();
 
     // Revert the original addition — should conflict
     let result = backend.revert(&add_oid, RevertMode::Auto).unwrap();
@@ -1950,7 +1950,7 @@ fn reset_soft_moves_head_preserves_staging() {
     // Create a second commit
     fs::write(tmp.path().join("second.txt"), "second").unwrap();
     backend.stage(Path::new("second.txt")).unwrap();
-    backend.commit("second commit", false).unwrap();
+    backend.commit("second commit", false, false).unwrap();
 
     let log_filter = LogFilter {
         author: None,
@@ -1988,7 +1988,7 @@ fn reset_mixed_moves_head_unstages_changes() {
 
     fs::write(tmp.path().join("mixed.txt"), "mixed content").unwrap();
     backend.stage(Path::new("mixed.txt")).unwrap();
-    backend.commit("mixed commit", false).unwrap();
+    backend.commit("mixed commit", false, false).unwrap();
 
     let log_filter = LogFilter {
         author: None,
@@ -2025,7 +2025,7 @@ fn reset_hard_discards_all_changes() {
 
     fs::write(tmp.path().join("hard.txt"), "hard content").unwrap();
     backend.stage(Path::new("hard.txt")).unwrap();
-    backend.commit("hard commit", false).unwrap();
+    backend.commit("hard commit", false, false).unwrap();
 
     let log_filter = LogFilter {
         author: None,
@@ -2052,7 +2052,7 @@ fn reset_file_restores_file_in_index() {
     // Create and commit a file
     fs::write(tmp.path().join("resetfile.txt"), "original\n").unwrap();
     backend.stage(Path::new("resetfile.txt")).unwrap();
-    backend.commit("add resetfile", false).unwrap();
+    backend.commit("add resetfile", false, false).unwrap();
 
     let log_filter = LogFilter {
         author: None,
@@ -2100,11 +2100,11 @@ fn get_reflog_respects_limit() {
     // Create additional commits to have multiple reflog entries
     fs::write(tmp.path().join("a.txt"), "a").unwrap();
     backend.stage(Path::new("a.txt")).unwrap();
-    backend.commit("commit a", false).unwrap();
+    backend.commit("commit a", false, false).unwrap();
 
     fs::write(tmp.path().join("b.txt"), "b").unwrap();
     backend.stage(Path::new("b.txt")).unwrap();
-    backend.commit("commit b", false).unwrap();
+    backend.commit("commit b", false, false).unwrap();
 
     // Limit to 2 entries
     let entries = backend.get_reflog("HEAD", 2).unwrap();
