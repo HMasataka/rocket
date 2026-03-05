@@ -102,8 +102,9 @@ export function unstageAll(): Promise<void> {
 export function commitChanges(
   message: string,
   amend: boolean,
+  sign: boolean,
 ): Promise<CommitResult> {
-  return invoke<CommitResult>("commit", { message, amend });
+  return invoke<CommitResult>("commit", { message, amend, sign });
 }
 
 export function getCurrentBranch(): Promise<string> {

@@ -33,7 +33,7 @@ fn init_repo_with_commit(dir: &Path) -> Box<dyn GitBackend> {
     fs::write(dir.join("init.txt"), "init").unwrap();
     let backend = Git2Backend::open(dir).unwrap();
     backend.stage(Path::new("init.txt")).unwrap();
-    backend.commit("initial commit", false).unwrap();
+    backend.commit("initial commit", false, false).unwrap();
     Box::new(backend)
 }
 
@@ -102,6 +102,11 @@ fn build_test_app(state: AppState) -> tauri::App<tauri::test::MockRuntime> {
             commands::rebase::get_rebase_state,
             commands::rebase::get_rebase_todo,
             commands::rebase::get_merge_base_content,
+            commands::gitconfig::get_gitconfig_entries,
+            commands::gitconfig::get_gitconfig_value,
+            commands::gitconfig::set_gitconfig_value,
+            commands::gitconfig::unset_gitconfig_value,
+            commands::gitconfig::get_gitconfig_path,
         ])
         .build(tauri::generate_context!())
         .unwrap()
@@ -316,7 +321,7 @@ fn test_commit() {
     // When: commit is called
     let request = make_request(
         "commit",
-        serde_json::json!({ "message": "test commit", "amend": false }),
+        serde_json::json!({ "message": "test commit", "amend": false, "sign": false }),
     );
     let body = tauri::test::get_ipc_response(&webview, request).expect("commit should succeed");
 

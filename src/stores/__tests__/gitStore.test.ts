@@ -102,16 +102,38 @@ describe("gitStore", () => {
     it("returns oid on success", async () => {
       mockedInvoke.mockResolvedValueOnce({ oid: "abc123" });
 
-      const oid = await useGitStore.getState().commit("test message", false);
+      const oid = await useGitStore
+        .getState()
+        .commit("test message", false, false);
 
       expect(oid).toBe("abc123");
+      expect(mockedInvoke).toHaveBeenCalledWith("commit", {
+        message: "test message",
+        amend: false,
+        sign: false,
+      });
+    });
+
+    it("passes sign parameter", async () => {
+      mockedInvoke.mockResolvedValueOnce({ oid: "def456" });
+
+      const oid = await useGitStore
+        .getState()
+        .commit("signed commit", false, true);
+
+      expect(oid).toBe("def456");
+      expect(mockedInvoke).toHaveBeenCalledWith("commit", {
+        message: "signed commit",
+        amend: false,
+        sign: true,
+      });
     });
 
     it("sets error on failure", async () => {
       mockedInvoke.mockRejectedValueOnce(new Error("commit error"));
 
       await expect(
-        useGitStore.getState().commit("test", false),
+        useGitStore.getState().commit("test", false, false),
       ).rejects.toThrow();
 
       expect(useGitStore.getState().error).toContain("commit error");

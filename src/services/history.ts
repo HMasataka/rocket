@@ -1,6 +1,14 @@
 import { invoke } from "@tauri-apps/api/core";
 import type { FileDiff } from "./git";
 
+export type SignatureStatus =
+  | "none"
+  | "good"
+  | "bad"
+  | "untrusted"
+  | "expired"
+  | "error";
+
 export type CommitRefKind = "head" | "local_branch" | "remote_branch" | "tag";
 
 export interface CommitRef {
@@ -33,6 +41,7 @@ export interface CommitInfo {
   author_date: number;
   parent_oids: string[];
   refs: CommitRef[];
+  signature_status: SignatureStatus;
 }
 
 export type CommitFileStatus = "added" | "modified" | "deleted" | "renamed";

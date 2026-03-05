@@ -76,9 +76,9 @@ export function ChangesPage() {
   }, [unstageAllAction, fetchStatus]);
 
   const handleCommit = useCallback(
-    async (message: string, amend: boolean) => {
+    async (message: string, amend: boolean, sign: boolean) => {
       try {
-        await commitAction(message, amend);
+        await commitAction(message, amend, sign);
         addToast(
           amend ? "Commit amended successfully" : "Commit created successfully",
           "success",

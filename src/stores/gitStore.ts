@@ -146,7 +146,7 @@ interface GitActions {
   unstageFile: (path: string) => Promise<void>;
   stageAll: () => Promise<void>;
   unstageAll: () => Promise<void>;
-  commit: (message: string, amend: boolean) => Promise<string>;
+  commit: (message: string, amend: boolean, sign: boolean) => Promise<string>;
   createBranch: (name: string) => Promise<void>;
   checkoutBranch: (name: string) => Promise<void>;
   deleteBranch: (name: string) => Promise<void>;
@@ -321,9 +321,9 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
     }
   },
 
-  commit: async (message: string, amend: boolean) => {
+  commit: async (message: string, amend: boolean, sign: boolean) => {
     try {
-      const result = await commitChanges(message, amend);
+      const result = await commitChanges(message, amend, sign);
       return result.oid;
     } catch (e) {
       set({ error: String(e) });

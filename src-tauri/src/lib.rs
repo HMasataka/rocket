@@ -181,6 +181,11 @@ pub fn run() {
             commands::worktree::list_worktrees,
             commands::worktree::add_worktree,
             commands::worktree::remove_worktree,
+            commands::gitconfig::get_gitconfig_entries,
+            commands::gitconfig::get_gitconfig_value,
+            commands::gitconfig::set_gitconfig_value,
+            commands::gitconfig::unset_gitconfig_value,
+            commands::gitconfig::get_gitconfig_path,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

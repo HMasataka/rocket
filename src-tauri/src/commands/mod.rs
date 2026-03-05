@@ -4,6 +4,7 @@ pub mod cherry_pick;
 pub mod config;
 pub mod conflict;
 pub mod git;
+pub mod gitconfig;
 pub mod history;
 pub mod hosting;
 pub mod rebase;

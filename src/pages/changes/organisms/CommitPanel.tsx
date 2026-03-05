@@ -4,7 +4,7 @@ import { useAiStore } from "../../../stores/aiStore";
 import { useUIStore } from "../../../stores/uiStore";
 
 interface CommitPanelProps {
-  onCommit: (message: string, amend: boolean) => void;
+  onCommit: (message: string, amend: boolean, sign: boolean) => void;
   hasStagedFiles: boolean;
   hasChanges: boolean;
   onLoadHeadMessage?: () => Promise<string>;
@@ -19,6 +19,7 @@ export function CommitPanel({
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
   const [amend, setAmend] = useState(false);
+  const [sign, setSign] = useState(false);
 
   const generating = useAiStore((s) => s.generating);
   const reviewing = useAiStore((s) => s.reviewing);
@@ -29,7 +30,7 @@ export function CommitPanel({
 
   const handleCommit = () => {
     const message = body.trim() ? `${subject}\n\n${body}` : subject;
-    onCommit(message, amend);
+    onCommit(message, amend, sign);
     setSubject("");
     setBody("");
     setAmend(false);
@@ -82,6 +83,14 @@ export function CommitPanel({
     <div className="commit-panel">
       <div className="panel-header">
         <span className="panel-title">Commit</span>
+        <label className="amend-toggle">
+          <input
+            type="checkbox"
+            checked={sign}
+            onChange={() => setSign(!sign)}
+          />
+          <span>Sign</span>
+        </label>
         <label className="amend-toggle">
           <input type="checkbox" checked={amend} onChange={handleAmendToggle} />
           <span>Amend</span>

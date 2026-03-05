@@ -3,14 +3,22 @@ import { Modal } from "./Modal";
 import { SettingsAiTab } from "./SettingsAiTab";
 import { SettingsAppearanceTab } from "./SettingsAppearanceTab";
 import { SettingsEditorTab } from "./SettingsEditorTab";
+import { SettingsGitConfigTab } from "./SettingsGitConfigTab";
 import { SettingsKeybindingsTab } from "./SettingsKeybindingsTab";
 import { SettingsToolsTab } from "./SettingsToolsTab";
 
-type SettingsTabId = "appearance" | "editor" | "keybindings" | "tools" | "ai";
+type SettingsTabId =
+  | "appearance"
+  | "editor"
+  | "gitconfig"
+  | "keybindings"
+  | "tools"
+  | "ai";
 
 const TABS: { id: SettingsTabId; label: string }[] = [
   { id: "appearance", label: "Appearance" },
   { id: "editor", label: "Editor" },
+  { id: "gitconfig", label: "Git Config" },
   { id: "keybindings", label: "Keybindings" },
   { id: "tools", label: "External Tools" },
   { id: "ai", label: "AI Settings" },
@@ -41,6 +49,7 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
         <div className="settings-content">
           {activeTab === "appearance" && <SettingsAppearanceTab />}
           {activeTab === "editor" && <SettingsEditorTab />}
+          {activeTab === "gitconfig" && <SettingsGitConfigTab />}
           {activeTab === "keybindings" && <SettingsKeybindingsTab />}
           {activeTab === "tools" && <SettingsToolsTab />}
           {activeTab === "ai" && <SettingsAiTab />}
