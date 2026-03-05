@@ -16,6 +16,7 @@ import "./styles/tags.css";
 import "./styles/conflict.css";
 import "./styles/ai.css";
 import "./styles/settings.css";
+import "./styles/gitconfig.css";
 import "./styles/hosting.css";
 import "./styles/operation.css";
 import "./styles/cherry-pick.css";

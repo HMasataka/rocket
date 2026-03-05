@@ -1,0 +1,105 @@
+/* ===== Git Config Scope Bar ===== */
+.gitconfig-scope-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.gitconfig-scope-toggle {
+  display: flex;
+  background: var(--bg-secondary);
+  border-radius: 6px;
+  padding: 2px;
+}
+
+.gitconfig-scope-btn {
+  padding: 4px 12px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.gitconfig-scope-btn:hover {
+  color: var(--text-secondary);
+}
+
+.gitconfig-scope-btn.active {
+  background: var(--accent);
+  color: #fff;
+}
+
+.gitconfig-scope-path {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* ===== Git Config Rows ===== */
+.gitconfig-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 0;
+}
+
+.gitconfig-row + .gitconfig-row {
+  border-top: 1px solid var(--border);
+}
+
+.gitconfig-key {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  color: var(--text-secondary);
+  min-width: 180px;
+  flex-shrink: 0;
+}
+
+.gitconfig-row .settings-input {
+  flex: 1;
+}
+
+.gitconfig-row .modal-select {
+  min-width: 140px;
+}
+
+/* ===== Alias List ===== */
+.gitconfig-alias-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.gitconfig-alias-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.gitconfig-alias-row:last-child {
+  border-bottom: none;
+}
+
+.gitconfig-alias-name {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  min-width: 60px;
+}
+
+.gitconfig-alias-value {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+}
