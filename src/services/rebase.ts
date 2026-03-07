@@ -29,36 +29,38 @@ export interface RebaseResult {
   conflicts: string[];
 }
 
-export function rebase(onto: string): Promise<RebaseResult> {
-  return invoke<RebaseResult>("rebase", { onto });
+export function rebase(tabId: string, onto: string): Promise<RebaseResult> {
+  return invoke<RebaseResult>("rebase", { tabId, onto });
 }
 
 export function interactiveRebase(
+  tabId: string,
   onto: string,
   todo: RebaseTodoEntry[],
 ): Promise<RebaseResult> {
-  return invoke<RebaseResult>("interactive_rebase", { onto, todo });
+  return invoke<RebaseResult>("interactive_rebase", { tabId, onto, todo });
 }
 
-export function isRebasing(): Promise<boolean> {
-  return invoke<boolean>("is_rebasing");
+export function isRebasing(tabId: string): Promise<boolean> {
+  return invoke<boolean>("is_rebasing", { tabId });
 }
 
-export function abortRebase(): Promise<void> {
-  return invoke<void>("abort_rebase");
+export function abortRebase(tabId: string): Promise<void> {
+  return invoke<void>("abort_rebase", { tabId });
 }
 
-export function continueRebase(): Promise<RebaseResult> {
-  return invoke<RebaseResult>("continue_rebase");
+export function continueRebase(tabId: string): Promise<RebaseResult> {
+  return invoke<RebaseResult>("continue_rebase", { tabId });
 }
 
-export function getRebaseState(): Promise<RebaseState | null> {
-  return invoke<RebaseState | null>("get_rebase_state");
+export function getRebaseState(tabId: string): Promise<RebaseState | null> {
+  return invoke<RebaseState | null>("get_rebase_state", { tabId });
 }
 
 export function getRebaseTodo(
+  tabId: string,
   onto: string,
   limit: number,
 ): Promise<RebaseTodoEntry[]> {
-  return invoke<RebaseTodoEntry[]>("get_rebase_todo", { onto, limit });
+  return invoke<RebaseTodoEntry[]>("get_rebase_todo", { tabId, onto, limit });
 }

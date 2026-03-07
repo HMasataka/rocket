@@ -14,6 +14,7 @@ import {
   getCommitLog,
   getFileHistory,
 } from "../services/history";
+import { getActiveTabId } from "./tabStore";
 
 interface HistoryState {
   commits: CommitInfo[];
@@ -83,7 +84,12 @@ export const useHistoryStore = create<HistoryState & HistoryActions>((set) => ({
     set({ loading: true, error: null });
     try {
       const state = useHistoryStore.getState();
-      const result = await getCommitLog(state.filter, limit, skip);
+      const result = await getCommitLog(
+        getActiveTabId(),
+        state.filter,
+        limit,
+        skip,
+      );
       set({
         commits: result.commits,
         graph: result.graph,
@@ -98,7 +104,7 @@ export const useHistoryStore = create<HistoryState & HistoryActions>((set) => ({
   selectCommit: async (oid: string) => {
     set({ selectedCommitOid: oid, expandedFileDiffs: {} });
     try {
-      const detail = await getCommitDetail(oid);
+      const detail = await getCommitDetail(getActiveTabId(), oid);
       set({ commitDetail: detail });
     } catch (e) {
       set({ error: String(e) });
@@ -120,7 +126,7 @@ export const useHistoryStore = create<HistoryState & HistoryActions>((set) => ({
 
   fetchFileDiff: async (oid: string, path: string) => {
     try {
-      const diffs = await getCommitFileDiff(oid, path);
+      const diffs = await getCommitFileDiff(getActiveTabId(), oid, path);
       set((state) => ({
         expandedFileDiffs: { ...state.expandedFileDiffs, [path]: diffs },
       }));
@@ -141,7 +147,7 @@ export const useHistoryStore = create<HistoryState & HistoryActions>((set) => ({
   fetchBlame: async (path: string, commitOid: string | null) => {
     set({ blameLoading: true });
     try {
-      const result = await getBlame(path, commitOid);
+      const result = await getBlame(getActiveTabId(), path, commitOid);
       set({ blameResult: result, blameLoading: false });
     } catch (e) {
       set({ error: String(e), blameLoading: false });
@@ -152,7 +158,7 @@ export const useHistoryStore = create<HistoryState & HistoryActions>((set) => ({
   fetchFileHistory: async (path: string, limit: number, skip: number) => {
     set({ fileHistoryLoading: true });
     try {
-      const commits = await getFileHistory(path, limit, skip);
+      const commits = await getFileHistory(getActiveTabId(), path, limit, skip);
       set({ fileHistoryCommits: commits, fileHistoryLoading: false });
     } catch (e) {
       set({ error: String(e), fileHistoryLoading: false });
@@ -163,7 +169,7 @@ export const useHistoryStore = create<HistoryState & HistoryActions>((set) => ({
   selectFileHistoryCommit: async (oid: string) => {
     set({ fileHistorySelectedOid: oid });
     try {
-      const detail = await getCommitDetail(oid);
+      const detail = await getCommitDetail(getActiveTabId(), oid);
       set({ fileHistoryDetail: detail });
     } catch (e) {
       set({ error: String(e) });

@@ -94,35 +94,52 @@ export interface CommitLogResult {
 }
 
 export function getCommitLog(
+  tabId: string,
   filter: LogFilter,
   limit: number,
   skip: number,
 ): Promise<CommitLogResult> {
-  return invoke<CommitLogResult>("get_commit_log", { filter, limit, skip });
+  return invoke<CommitLogResult>("get_commit_log", {
+    tabId,
+    filter,
+    limit,
+    skip,
+  });
 }
 
-export function getCommitDetail(oid: string): Promise<CommitDetail> {
-  return invoke<CommitDetail>("get_commit_detail", { oid });
+export function getCommitDetail(
+  tabId: string,
+  oid: string,
+): Promise<CommitDetail> {
+  return invoke<CommitDetail>("get_commit_detail", { tabId, oid });
 }
 
 export function getCommitFileDiff(
+  tabId: string,
   oid: string,
   path: string,
 ): Promise<FileDiff[]> {
-  return invoke<FileDiff[]>("get_commit_file_diff", { oid, path });
+  return invoke<FileDiff[]>("get_commit_file_diff", { tabId, oid, path });
 }
 
 export function getBlame(
+  tabId: string,
   path: string,
   commitOid: string | null,
 ): Promise<BlameResult> {
-  return invoke<BlameResult>("get_blame", { path, commitOid });
+  return invoke<BlameResult>("get_blame", { tabId, path, commitOid });
 }
 
 export function getFileHistory(
+  tabId: string,
   path: string,
   limit: number,
   skip: number,
 ): Promise<CommitInfo[]> {
-  return invoke<CommitInfo[]>("get_file_history", { path, limit, skip });
+  return invoke<CommitInfo[]>("get_file_history", {
+    tabId,
+    path,
+    limit,
+    skip,
+  });
 }

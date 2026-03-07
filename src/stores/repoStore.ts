@@ -7,6 +7,7 @@ import {
   openRepository as openRepositoryService,
   removeRecentRepo as removeRecentRepoService,
 } from "../services/repo";
+import { getActiveTabId } from "./tabStore";
 
 interface RepoState {
   recentRepos: RecentRepo[];
@@ -40,7 +41,7 @@ export const useRepoStore = create<RepoState & RepoActions>((set) => ({
   openRepository: async (path: string) => {
     set({ loading: true, error: null });
     try {
-      await openRepositoryService(path);
+      await openRepositoryService(path, getActiveTabId());
       set({ loading: false });
     } catch (e) {
       set({ error: String(e), loading: false });
@@ -51,7 +52,7 @@ export const useRepoStore = create<RepoState & RepoActions>((set) => ({
   initRepository: async (path: string, gitignoreTemplate?: string) => {
     set({ loading: true, error: null });
     try {
-      await initRepositoryService(path, gitignoreTemplate);
+      await initRepositoryService(path, getActiveTabId(), gitignoreTemplate);
       set({ loading: false });
     } catch (e) {
       set({ error: String(e), loading: false });
@@ -62,7 +63,7 @@ export const useRepoStore = create<RepoState & RepoActions>((set) => ({
   cloneRepository: async (url: string, path: string) => {
     set({ loading: true, error: null });
     try {
-      await cloneRepositoryService(url, path);
+      await cloneRepositoryService(url, path, getActiveTabId());
       set({ loading: false });
     } catch (e) {
       set({ error: String(e), loading: false });

@@ -12,6 +12,7 @@ import {
   listIssues,
   listPullRequests,
 } from "../services/hosting";
+import { getActiveTabId } from "./tabStore";
 
 type HostingTab = "pulls" | "issues";
 
@@ -51,7 +52,7 @@ export const useHostingStore = create<HostingState & HostingActions>((set) => ({
   fetchHostingInfo: async () => {
     set({ loading: true, error: null });
     try {
-      const hostingInfo = await detectHostingProvider();
+      const hostingInfo = await detectHostingProvider(getActiveTabId());
       set({ hostingInfo, loading: false });
     } catch (e) {
       set({ error: String(e), loading: false });
@@ -61,7 +62,7 @@ export const useHostingStore = create<HostingState & HostingActions>((set) => ({
 
   fetchDefaultBranch: async () => {
     try {
-      const defaultBranch = await getDefaultBranch();
+      const defaultBranch = await getDefaultBranch(getActiveTabId());
       set({ defaultBranch });
     } catch (_e) {
       // デフォルトブランチ取得失敗は致命的ではないのでエラーを設定しない
@@ -72,7 +73,7 @@ export const useHostingStore = create<HostingState & HostingActions>((set) => ({
   fetchPullRequests: async () => {
     set({ loading: true, error: null });
     try {
-      const pullRequests = await listPullRequests();
+      const pullRequests = await listPullRequests(getActiveTabId());
       set({ pullRequests, loading: false });
     } catch (e) {
       set({ error: String(e), loading: false });
@@ -83,7 +84,7 @@ export const useHostingStore = create<HostingState & HostingActions>((set) => ({
   fetchIssues: async () => {
     set({ loading: true, error: null });
     try {
-      const issues = await listIssues();
+      const issues = await listIssues(getActiveTabId());
       set({ issues, loading: false });
     } catch (e) {
       set({ error: String(e), loading: false });
@@ -94,7 +95,10 @@ export const useHostingStore = create<HostingState & HostingActions>((set) => ({
   selectPr: async (number: number) => {
     set({ selectedPrNumber: number, loading: true });
     try {
-      const selectedPrDetail = await getPullRequestDetail(number);
+      const selectedPrDetail = await getPullRequestDetail(
+        getActiveTabId(),
+        number,
+      );
       set({ selectedPrDetail, loading: false });
     } catch (e) {
       set({ error: String(e), loading: false });

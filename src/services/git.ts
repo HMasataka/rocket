@@ -72,43 +72,45 @@ export interface CommitResult {
   oid: string;
 }
 
-export function getStatus(): Promise<RepoStatus> {
-  return invoke<RepoStatus>("get_status");
+export function getStatus(tabId: string): Promise<RepoStatus> {
+  return invoke<RepoStatus>("get_status", { tabId });
 }
 
 export function getDiff(
+  tabId: string,
   path: string | null,
   staged: boolean,
 ): Promise<FileDiff[]> {
-  return invoke<FileDiff[]>("get_diff", { path, staged });
+  return invoke<FileDiff[]>("get_diff", { tabId, path, staged });
 }
 
-export function stageFile(path: string): Promise<void> {
-  return invoke<void>("stage_file", { path });
+export function stageFile(tabId: string, path: string): Promise<void> {
+  return invoke<void>("stage_file", { tabId, path });
 }
 
-export function unstageFile(path: string): Promise<void> {
-  return invoke<void>("unstage_file", { path });
+export function unstageFile(tabId: string, path: string): Promise<void> {
+  return invoke<void>("unstage_file", { tabId, path });
 }
 
-export function stageAll(): Promise<void> {
-  return invoke<void>("stage_all");
+export function stageAll(tabId: string): Promise<void> {
+  return invoke<void>("stage_all", { tabId });
 }
 
-export function unstageAll(): Promise<void> {
-  return invoke<void>("unstage_all");
+export function unstageAll(tabId: string): Promise<void> {
+  return invoke<void>("unstage_all", { tabId });
 }
 
 export function commitChanges(
+  tabId: string,
   message: string,
   amend: boolean,
   sign: boolean,
 ): Promise<CommitResult> {
-  return invoke<CommitResult>("commit", { message, amend, sign });
+  return invoke<CommitResult>("commit", { tabId, message, amend, sign });
 }
 
-export function getCurrentBranch(): Promise<string> {
-  return invoke<string>("get_current_branch");
+export function getCurrentBranch(tabId: string): Promise<string> {
+  return invoke<string>("get_current_branch", { tabId });
 }
 
 export interface BranchInfo {
@@ -136,31 +138,36 @@ export interface MergeResult {
 
 export type MergeOption = "default" | "fast_forward_only" | "no_fast_forward";
 
-export function listBranches(): Promise<BranchInfo[]> {
-  return invoke<BranchInfo[]>("list_branches");
+export function listBranches(tabId: string): Promise<BranchInfo[]> {
+  return invoke<BranchInfo[]>("list_branches", { tabId });
 }
 
-export function createBranch(name: string): Promise<void> {
-  return invoke<void>("create_branch", { name });
+export function createBranch(tabId: string, name: string): Promise<void> {
+  return invoke<void>("create_branch", { tabId, name });
 }
 
-export function checkoutBranch(name: string): Promise<void> {
-  return invoke<void>("checkout_branch", { name });
+export function checkoutBranch(tabId: string, name: string): Promise<void> {
+  return invoke<void>("checkout_branch", { tabId, name });
 }
 
-export function deleteBranch(name: string): Promise<void> {
-  return invoke<void>("delete_branch", { name });
+export function deleteBranch(tabId: string, name: string): Promise<void> {
+  return invoke<void>("delete_branch", { tabId, name });
 }
 
-export function renameBranch(oldName: string, newName: string): Promise<void> {
-  return invoke<void>("rename_branch", { oldName, newName });
+export function renameBranch(
+  tabId: string,
+  oldName: string,
+  newName: string,
+): Promise<void> {
+  return invoke<void>("rename_branch", { tabId, oldName, newName });
 }
 
 export function mergeBranch(
+  tabId: string,
   branchName: string,
   option: MergeOption,
 ): Promise<MergeResult> {
-  return invoke<MergeResult>("merge_branch", { branchName, option });
+  return invoke<MergeResult>("merge_branch", { tabId, branchName, option });
 }
 
 export interface RemoteInfo {
@@ -179,74 +186,112 @@ export interface PushResult {
   branch: string;
 }
 
-export function fetchRemote(remoteName: string): Promise<FetchResult> {
-  return invoke<FetchResult>("fetch_remote", { remoteName });
+export function fetchRemote(
+  tabId: string,
+  remoteName: string,
+): Promise<FetchResult> {
+  return invoke<FetchResult>("fetch_remote", { tabId, remoteName });
 }
 
 export function pullRemote(
+  tabId: string,
   remoteName: string,
   option: PullOption,
 ): Promise<MergeResult> {
-  return invoke<MergeResult>("pull_remote", { remoteName, option });
+  return invoke<MergeResult>("pull_remote", { tabId, remoteName, option });
 }
 
-export function pushRemote(remoteName: string): Promise<PushResult> {
-  return invoke<PushResult>("push_remote", { remoteName });
+export function pushRemote(
+  tabId: string,
+  remoteName: string,
+): Promise<PushResult> {
+  return invoke<PushResult>("push_remote", { tabId, remoteName });
 }
 
-export function listRemotes(): Promise<RemoteInfo[]> {
-  return invoke<RemoteInfo[]>("list_remotes");
+export function listRemotes(tabId: string): Promise<RemoteInfo[]> {
+  return invoke<RemoteInfo[]>("list_remotes", { tabId });
 }
 
-export function addRemote(name: string, url: string): Promise<void> {
-  return invoke<void>("add_remote", { name, url });
+export function addRemote(
+  tabId: string,
+  name: string,
+  url: string,
+): Promise<void> {
+  return invoke<void>("add_remote", { tabId, name, url });
 }
 
-export function removeRemote(name: string): Promise<void> {
-  return invoke<void>("remove_remote", { name });
+export function removeRemote(tabId: string, name: string): Promise<void> {
+  return invoke<void>("remove_remote", { tabId, name });
 }
 
-export function editRemote(name: string, newUrl: string): Promise<void> {
-  return invoke<void>("edit_remote", { name, newUrl });
+export function editRemote(
+  tabId: string,
+  name: string,
+  newUrl: string,
+): Promise<void> {
+  return invoke<void>("edit_remote", { tabId, name, newUrl });
 }
 
-export function stageHunk(path: string, hunk: HunkIdentifier): Promise<void> {
-  return invoke<void>("stage_hunk", { path, hunk });
+export function stageHunk(
+  tabId: string,
+  path: string,
+  hunk: HunkIdentifier,
+): Promise<void> {
+  return invoke<void>("stage_hunk", { tabId, path, hunk });
 }
 
-export function unstageHunk(path: string, hunk: HunkIdentifier): Promise<void> {
-  return invoke<void>("unstage_hunk", { path, hunk });
+export function unstageHunk(
+  tabId: string,
+  path: string,
+  hunk: HunkIdentifier,
+): Promise<void> {
+  return invoke<void>("unstage_hunk", { tabId, path, hunk });
 }
 
-export function discardHunk(path: string, hunk: HunkIdentifier): Promise<void> {
-  return invoke<void>("discard_hunk", { path, hunk });
+export function discardHunk(
+  tabId: string,
+  path: string,
+  hunk: HunkIdentifier,
+): Promise<void> {
+  return invoke<void>("discard_hunk", { tabId, path, hunk });
 }
 
-export function stageLines(path: string, lineRange: LineRange): Promise<void> {
-  return invoke<void>("stage_lines", { path, lineRange });
+export function stageLines(
+  tabId: string,
+  path: string,
+  lineRange: LineRange,
+): Promise<void> {
+  return invoke<void>("stage_lines", { tabId, path, lineRange });
 }
 
 export function unstageLines(
+  tabId: string,
   path: string,
   lineRange: LineRange,
 ): Promise<void> {
-  return invoke<void>("unstage_lines", { path, lineRange });
+  return invoke<void>("unstage_lines", { tabId, path, lineRange });
 }
 
 export function discardLines(
+  tabId: string,
   path: string,
   lineRange: LineRange,
 ): Promise<void> {
-  return invoke<void>("discard_lines", { path, lineRange });
+  return invoke<void>("discard_lines", { tabId, path, lineRange });
 }
 
-export function getHeadCommitMessage(): Promise<string> {
-  return invoke<string>("get_head_commit_message");
+export function getHeadCommitMessage(tabId: string): Promise<string> {
+  return invoke<string>("get_head_commit_message", { tabId });
 }
 
 export function getBranchCommits(
+  tabId: string,
   branchName: string,
   limit: number,
 ): Promise<CommitInfo[]> {
-  return invoke<CommitInfo[]>("get_branch_commits", { branchName, limit });
+  return invoke<CommitInfo[]>("get_branch_commits", {
+    tabId,
+    branchName,
+    limit,
+  });
 }
