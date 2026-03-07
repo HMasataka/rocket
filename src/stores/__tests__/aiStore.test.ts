@@ -64,6 +64,7 @@ describe("aiStore", () => {
       expect(useAiStore.getState().lastResult).toEqual(mockResult);
       expect(useAiStore.getState().generating).toBe(false);
       expect(mockedInvoke).toHaveBeenCalledWith("generate_commit_message", {
+        tabId: "default",
         format: "conventional",
         language: "en",
       });
@@ -206,7 +207,9 @@ describe("aiStore", () => {
       expect(result).toEqual(mockResult);
       expect(useAiStore.getState().reviewComments).toEqual(mockResult.comments);
       expect(useAiStore.getState().reviewing).toBe(false);
-      expect(mockedInvoke).toHaveBeenCalledWith("review_diff");
+      expect(mockedInvoke).toHaveBeenCalledWith("review_diff", {
+        tabId: "default",
+      });
     });
 
     it("sets reviewing to true during request", async () => {

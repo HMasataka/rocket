@@ -108,6 +108,7 @@ describe("gitStore", () => {
 
       expect(oid).toBe("abc123");
       expect(mockedInvoke).toHaveBeenCalledWith("commit", {
+        tabId: "default",
         message: "test message",
         amend: false,
         sign: false,
@@ -123,6 +124,7 @@ describe("gitStore", () => {
 
       expect(oid).toBe("def456");
       expect(mockedInvoke).toHaveBeenCalledWith("commit", {
+        tabId: "default",
         message: "signed commit",
         amend: false,
         sign: true,
@@ -169,6 +171,7 @@ describe("gitStore", () => {
       await useGitStore.getState().createBranch("new-branch");
 
       expect(mockedInvoke).toHaveBeenCalledWith("create_branch", {
+        tabId: "default",
         name: "new-branch",
       });
     });
@@ -191,6 +194,7 @@ describe("gitStore", () => {
       await useGitStore.getState().checkoutBranch("feature");
 
       expect(mockedInvoke).toHaveBeenCalledWith("checkout_branch", {
+        tabId: "default",
         name: "feature",
       });
     });
@@ -213,6 +217,7 @@ describe("gitStore", () => {
       await useGitStore.getState().deleteBranch("old-branch");
 
       expect(mockedInvoke).toHaveBeenCalledWith("delete_branch", {
+        tabId: "default",
         name: "old-branch",
       });
     });
@@ -235,6 +240,7 @@ describe("gitStore", () => {
       await useGitStore.getState().renameBranch("old", "new");
 
       expect(mockedInvoke).toHaveBeenCalledWith("rename_branch", {
+        tabId: "default",
         oldName: "old",
         newName: "new",
       });
@@ -262,6 +268,7 @@ describe("gitStore", () => {
 
       expect(result).toEqual(mockResult);
       expect(mockedInvoke).toHaveBeenCalledWith("merge_branch", {
+        tabId: "default",
         branchName: "feature",
         option: "default",
       });
@@ -287,6 +294,7 @@ describe("gitStore", () => {
 
       expect(result).toEqual(mockResult);
       expect(mockedInvoke).toHaveBeenCalledWith("fetch_remote", {
+        tabId: "default",
         remoteName: "origin",
       });
     });
@@ -311,6 +319,7 @@ describe("gitStore", () => {
 
       expect(result).toEqual(mockResult);
       expect(mockedInvoke).toHaveBeenCalledWith("pull_remote", {
+        tabId: "default",
         remoteName: "origin",
         option: "merge",
       });
@@ -336,6 +345,7 @@ describe("gitStore", () => {
 
       expect(result).toEqual(mockResult);
       expect(mockedInvoke).toHaveBeenCalledWith("push_remote", {
+        tabId: "default",
         remoteName: "origin",
       });
     });
@@ -379,6 +389,7 @@ describe("gitStore", () => {
       await useGitStore.getState().addRemote("upstream", "https://example.com");
 
       expect(mockedInvoke).toHaveBeenCalledWith("add_remote", {
+        tabId: "default",
         name: "upstream",
         url: "https://example.com",
       });
@@ -402,6 +413,7 @@ describe("gitStore", () => {
       await useGitStore.getState().removeRemote("origin");
 
       expect(mockedInvoke).toHaveBeenCalledWith("remove_remote", {
+        tabId: "default",
         name: "origin",
       });
     });
@@ -424,6 +436,7 @@ describe("gitStore", () => {
       await useGitStore.getState().editRemote("origin", "https://new-url.com");
 
       expect(mockedInvoke).toHaveBeenCalledWith("edit_remote", {
+        tabId: "default",
         name: "origin",
         newUrl: "https://new-url.com",
       });
@@ -453,6 +466,7 @@ describe("gitStore", () => {
       await useGitStore.getState().stageHunk("file.txt", hunk);
 
       expect(mockedInvoke).toHaveBeenCalledWith("stage_hunk", {
+        tabId: "default",
         path: "file.txt",
         hunk,
       });
@@ -488,6 +502,7 @@ describe("gitStore", () => {
       await useGitStore.getState().unstageHunk("file.txt", hunk);
 
       expect(mockedInvoke).toHaveBeenCalledWith("unstage_hunk", {
+        tabId: "default",
         path: "file.txt",
         hunk,
       });
@@ -523,6 +538,7 @@ describe("gitStore", () => {
       await useGitStore.getState().discardHunk("file.txt", hunk);
 
       expect(mockedInvoke).toHaveBeenCalledWith("discard_hunk", {
+        tabId: "default",
         path: "file.txt",
         hunk,
       });
@@ -556,6 +572,7 @@ describe("gitStore", () => {
       await useGitStore.getState().stageLines("file.txt", lineRange);
 
       expect(mockedInvoke).toHaveBeenCalledWith("stage_lines", {
+        tabId: "default",
         path: "file.txt",
         lineRange,
       });
@@ -587,6 +604,7 @@ describe("gitStore", () => {
       await useGitStore.getState().unstageLines("file.txt", lineRange);
 
       expect(mockedInvoke).toHaveBeenCalledWith("unstage_lines", {
+        tabId: "default",
         path: "file.txt",
         lineRange,
       });
@@ -618,6 +636,7 @@ describe("gitStore", () => {
       await useGitStore.getState().discardLines("file.txt", lineRange);
 
       expect(mockedInvoke).toHaveBeenCalledWith("discard_lines", {
+        tabId: "default",
         path: "file.txt",
         lineRange,
       });
@@ -645,7 +664,9 @@ describe("gitStore", () => {
       const message = await useGitStore.getState().getHeadCommitMessage();
 
       expect(message).toBe("commit message");
-      expect(mockedInvoke).toHaveBeenCalledWith("get_head_commit_message");
+      expect(mockedInvoke).toHaveBeenCalledWith("get_head_commit_message", {
+        tabId: "default",
+      });
     });
 
     it("sets error on failure", async () => {
@@ -692,6 +713,7 @@ describe("gitStore", () => {
       await useGitStore.getState().stashSave("test message");
 
       expect(mockedInvoke).toHaveBeenCalledWith("stash_save", {
+        tabId: "default",
         message: "test message",
       });
     });
@@ -711,7 +733,10 @@ describe("gitStore", () => {
 
       await useGitStore.getState().applyStash(0);
 
-      expect(mockedInvoke).toHaveBeenCalledWith("apply_stash", { index: 0 });
+      expect(mockedInvoke).toHaveBeenCalledWith("apply_stash", {
+        tabId: "default",
+        index: 0,
+      });
     });
 
     it("sets error on failure", async () => {
@@ -729,7 +754,10 @@ describe("gitStore", () => {
 
       await useGitStore.getState().popStash(0);
 
-      expect(mockedInvoke).toHaveBeenCalledWith("pop_stash", { index: 0 });
+      expect(mockedInvoke).toHaveBeenCalledWith("pop_stash", {
+        tabId: "default",
+        index: 0,
+      });
     });
 
     it("sets error on failure", async () => {
@@ -747,7 +775,10 @@ describe("gitStore", () => {
 
       await useGitStore.getState().dropStash(0);
 
-      expect(mockedInvoke).toHaveBeenCalledWith("drop_stash", { index: 0 });
+      expect(mockedInvoke).toHaveBeenCalledWith("drop_stash", {
+        tabId: "default",
+        index: 0,
+      });
     });
 
     it("sets error on failure", async () => {
@@ -795,6 +826,7 @@ describe("gitStore", () => {
       await useGitStore.getState().createTag("v1.0.0", "Release 1.0");
 
       expect(mockedInvoke).toHaveBeenCalledWith("create_tag", {
+        tabId: "default",
         name: "v1.0.0",
         message: "Release 1.0",
       });
@@ -818,6 +850,7 @@ describe("gitStore", () => {
       await useGitStore.getState().deleteTag("v1.0.0");
 
       expect(mockedInvoke).toHaveBeenCalledWith("delete_tag", {
+        tabId: "default",
         name: "v1.0.0",
       });
     });
@@ -838,6 +871,7 @@ describe("gitStore", () => {
       await useGitStore.getState().checkoutTag("v1.0.0");
 
       expect(mockedInvoke).toHaveBeenCalledWith("checkout_tag", {
+        tabId: "default",
         name: "v1.0.0",
       });
     });
@@ -857,7 +891,9 @@ describe("gitStore", () => {
 
       await useGitStore.getState().fetchMergeState();
 
-      expect(mockedInvoke).toHaveBeenCalledWith("is_merging");
+      expect(mockedInvoke).toHaveBeenCalledWith("is_merging", {
+        tabId: "default",
+      });
       expect(useGitStore.getState().merging).toBe(true);
     });
 
@@ -879,7 +915,9 @@ describe("gitStore", () => {
 
       await useGitStore.getState().fetchConflictFiles();
 
-      expect(mockedInvoke).toHaveBeenCalledWith("get_conflict_files");
+      expect(mockedInvoke).toHaveBeenCalledWith("get_conflict_files", {
+        tabId: "default",
+      });
       expect(useGitStore.getState().conflictFiles).toEqual(mockFiles);
     });
 
@@ -903,6 +941,7 @@ describe("gitStore", () => {
         .resolveConflict("file.txt", { type: "Ours" });
 
       expect(mockedInvoke).toHaveBeenCalledWith("resolve_conflict", {
+        tabId: "default",
         path: "file.txt",
         resolution: { type: "Ours" },
       });
@@ -928,6 +967,7 @@ describe("gitStore", () => {
         .resolveConflictBlock("file.txt", 0, { type: "Ours" });
 
       expect(mockedInvoke).toHaveBeenCalledWith("resolve_conflict_block", {
+        tabId: "default",
         path: "file.txt",
         blockIndex: 0,
         resolution: { type: "Ours" },
@@ -954,6 +994,7 @@ describe("gitStore", () => {
       await useGitStore.getState().markResolved("file.txt");
 
       expect(mockedInvoke).toHaveBeenCalledWith("mark_resolved", {
+        tabId: "default",
         path: "file.txt",
       });
     });
@@ -976,7 +1017,9 @@ describe("gitStore", () => {
 
       await useGitStore.getState().abortMerge();
 
-      expect(mockedInvoke).toHaveBeenCalledWith("abort_merge");
+      expect(mockedInvoke).toHaveBeenCalledWith("abort_merge", {
+        tabId: "default",
+      });
       expect(useGitStore.getState().merging).toBe(false);
       expect(useGitStore.getState().conflictFiles).toEqual([]);
     });
@@ -998,6 +1041,7 @@ describe("gitStore", () => {
       const oid = await useGitStore.getState().continueMerge("msg");
 
       expect(mockedInvoke).toHaveBeenCalledWith("continue_merge", {
+        tabId: "default",
         message: "msg",
       });
       expect(oid).toBe("abc123");
@@ -1051,7 +1095,10 @@ describe("gitStore", () => {
       const result = await useGitStore.getState().rebase("main");
 
       expect(result).toEqual(mockResult);
-      expect(mockedInvoke).toHaveBeenCalledWith("rebase", { onto: "main" });
+      expect(mockedInvoke).toHaveBeenCalledWith("rebase", {
+        tabId: "default",
+        onto: "main",
+      });
     });
 
     it("sets error on failure", async () => {
@@ -1083,6 +1130,7 @@ describe("gitStore", () => {
 
       expect(result).toEqual(mockResult);
       expect(mockedInvoke).toHaveBeenCalledWith("interactive_rebase", {
+        tabId: "default",
         onto: "main",
         todo,
       });
@@ -1106,7 +1154,9 @@ describe("gitStore", () => {
 
       await useGitStore.getState().abortRebase();
 
-      expect(mockedInvoke).toHaveBeenCalledWith("abort_rebase");
+      expect(mockedInvoke).toHaveBeenCalledWith("abort_rebase", {
+        tabId: "default",
+      });
       expect(useGitStore.getState().rebasing).toBe(false);
       expect(useGitStore.getState().rebaseState).toBeNull();
       expect(useGitStore.getState().conflictFiles).toEqual([]);
@@ -1128,7 +1178,9 @@ describe("gitStore", () => {
 
       const result = await useGitStore.getState().continueRebase();
 
-      expect(mockedInvoke).toHaveBeenCalledWith("continue_rebase");
+      expect(mockedInvoke).toHaveBeenCalledWith("continue_rebase", {
+        tabId: "default",
+      });
       expect(result.completed).toBe(true);
       expect(useGitStore.getState().rebasing).toBe(false);
       expect(useGitStore.getState().rebaseState).toBeNull();
@@ -1173,6 +1225,7 @@ describe("gitStore", () => {
 
       expect(result).toEqual(mockTodo);
       expect(mockedInvoke).toHaveBeenCalledWith("get_rebase_todo", {
+        tabId: "default",
         onto: "main",
         limit: 100,
       });
@@ -1432,6 +1485,7 @@ describe("gitStore", () => {
 
       expect(result).toEqual(mockResult);
       expect(mockedInvoke).toHaveBeenCalledWith("reset", {
+        tabId: "default",
         oid: "abc123",
         mode: "mixed",
       });
@@ -1455,6 +1509,7 @@ describe("gitStore", () => {
       await useGitStore.getState().resetFile("file.txt", "abc123");
 
       expect(mockedInvoke).toHaveBeenCalledWith("reset_file", {
+        tabId: "default",
         path: "file.txt",
         oid: "abc123",
       });
@@ -1488,7 +1543,9 @@ describe("gitStore", () => {
       await useGitStore.getState().fetchSubmodules();
 
       expect(useGitStore.getState().submodules).toEqual(mockSubmodules);
-      expect(mockedInvoke).toHaveBeenCalledWith("list_submodules");
+      expect(mockedInvoke).toHaveBeenCalledWith("list_submodules", {
+        tabId: "default",
+      });
     });
 
     it("sets error on failure", async () => {
@@ -1509,6 +1566,7 @@ describe("gitStore", () => {
         .addSubmodule("https://example.com/lib.git", "vendor/lib");
 
       expect(mockedInvoke).toHaveBeenCalledWith("add_submodule", {
+        tabId: "default",
         url: "https://example.com/lib.git",
         path: "vendor/lib",
       });
@@ -1532,6 +1590,7 @@ describe("gitStore", () => {
       await useGitStore.getState().updateSubmodule("vendor/lib");
 
       expect(mockedInvoke).toHaveBeenCalledWith("update_submodule", {
+        tabId: "default",
         path: "vendor/lib",
       });
     });
@@ -1553,7 +1612,9 @@ describe("gitStore", () => {
 
       await useGitStore.getState().updateAllSubmodules();
 
-      expect(mockedInvoke).toHaveBeenCalledWith("update_all_submodules");
+      expect(mockedInvoke).toHaveBeenCalledWith("update_all_submodules", {
+        tabId: "default",
+      });
     });
 
     it("sets error on failure", async () => {
@@ -1578,6 +1639,7 @@ describe("gitStore", () => {
       await useGitStore.getState().removeSubmodule("vendor/lib");
 
       expect(mockedInvoke).toHaveBeenCalledWith("remove_submodule", {
+        tabId: "default",
         path: "vendor/lib",
       });
     });
@@ -1610,7 +1672,9 @@ describe("gitStore", () => {
       await useGitStore.getState().fetchWorktrees();
 
       expect(useGitStore.getState().worktrees).toEqual(mockWorktrees);
-      expect(mockedInvoke).toHaveBeenCalledWith("list_worktrees");
+      expect(mockedInvoke).toHaveBeenCalledWith("list_worktrees", {
+        tabId: "default",
+      });
     });
 
     it("sets error on failure", async () => {
@@ -1631,6 +1695,7 @@ describe("gitStore", () => {
         .addWorktree("/Users/dev/rocket-feature", "feature/auth");
 
       expect(mockedInvoke).toHaveBeenCalledWith("add_worktree", {
+        tabId: "default",
         path: "/Users/dev/rocket-feature",
         branch: "feature/auth",
       });
@@ -1654,6 +1719,7 @@ describe("gitStore", () => {
       await useGitStore.getState().removeWorktree("/Users/dev/rocket-feature");
 
       expect(mockedInvoke).toHaveBeenCalledWith("remove_worktree", {
+        tabId: "default",
         path: "/Users/dev/rocket-feature",
       });
     });

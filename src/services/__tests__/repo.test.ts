@@ -24,10 +24,11 @@ describe("repo service", () => {
     it("invokes with path", async () => {
       mockedInvoke.mockResolvedValueOnce(undefined);
 
-      await openRepository("/home/user/project");
+      await openRepository("/home/user/project", "tab-1");
 
       expect(mockedInvoke).toHaveBeenCalledWith("open_repository", {
         path: "/home/user/project",
+        tabId: "tab-1",
       });
     });
   });
@@ -36,22 +37,24 @@ describe("repo service", () => {
     it("invokes with path and null template", async () => {
       mockedInvoke.mockResolvedValueOnce(undefined);
 
-      await initRepository("/home/user/new-repo");
+      await initRepository("/home/user/new-repo", "tab-1");
 
       expect(mockedInvoke).toHaveBeenCalledWith("init_repository", {
         path: "/home/user/new-repo",
         gitignoreTemplate: null,
+        tabId: "tab-1",
       });
     });
 
     it("invokes with path and template name", async () => {
       mockedInvoke.mockResolvedValueOnce(undefined);
 
-      await initRepository("/home/user/new-repo", "Rust");
+      await initRepository("/home/user/new-repo", "tab-1", "Rust");
 
       expect(mockedInvoke).toHaveBeenCalledWith("init_repository", {
         path: "/home/user/new-repo",
         gitignoreTemplate: "Rust",
+        tabId: "tab-1",
       });
     });
   });
@@ -60,11 +63,16 @@ describe("repo service", () => {
     it("invokes with url and path", async () => {
       mockedInvoke.mockResolvedValueOnce(undefined);
 
-      await cloneRepository("https://example.com/repo.git", "/home/user/repo");
+      await cloneRepository(
+        "https://example.com/repo.git",
+        "/home/user/repo",
+        "tab-1",
+      );
 
       expect(mockedInvoke).toHaveBeenCalledWith("clone_repository", {
         url: "https://example.com/repo.git",
         path: "/home/user/repo",
+        tabId: "tab-1",
       });
     });
   });

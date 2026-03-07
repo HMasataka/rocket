@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
 use std::process::Command;
@@ -6,7 +7,7 @@ use std::sync::Mutex;
 use app_lib::commands;
 use app_lib::git::backend::GitBackend;
 use app_lib::git::git2_backend::Git2Backend;
-use app_lib::state::AppState;
+use app_lib::state::{AppState, RepoContext};
 
 fn init_test_repo(dir: &Path) {
     Command::new("git")
@@ -138,14 +139,15 @@ fn make_request(cmd: &str, body: serde_json::Value) -> tauri::webview::InvokeReq
 fn test_no_repo_returns_error() {
     // Given: AppState with no repository
     let state = AppState {
-        repo: Mutex::new(None),
-        watcher: Mutex::new(None),
+        tabs: Mutex::new(HashMap::new()),
+        active_tab: Mutex::new(None),
+        auto_fetch_handle: Mutex::new(None),
     };
     let app = build_test_app(state);
     let webview = build_test_webview(&app);
 
     // When: get_status is called
-    let request = make_request("get_status", serde_json::json!({}));
+    let request = make_request("get_status", serde_json::json!({ "tabId": "test" }));
     let response = tauri::test::get_ipc_response(&webview, request);
 
     // Then: error containing "No repository opened"
@@ -165,15 +167,26 @@ fn test_get_status_empty_repo() {
     let tmp = tempfile::tempdir().unwrap();
     init_test_repo(tmp.path());
     let backend = Git2Backend::open(tmp.path()).unwrap();
+    let mut tabs = HashMap::new();
+    tabs.insert(
+        "test".to_string(),
+        RepoContext {
+            backend: Box::new(backend),
+            watcher: None,
+            path: tmp.path().to_string_lossy().to_string(),
+            name: "test-repo".to_string(),
+        },
+    );
     let state = AppState {
-        repo: Mutex::new(Some(Box::new(backend))),
-        watcher: Mutex::new(None),
+        tabs: Mutex::new(tabs),
+        active_tab: Mutex::new(Some("test".to_string())),
+        auto_fetch_handle: Mutex::new(None),
     };
     let app = build_test_app(state);
     let webview = build_test_webview(&app);
 
     // When: get_status is called
-    let request = make_request("get_status", serde_json::json!({}));
+    let request = make_request("get_status", serde_json::json!({ "tabId": "test" }));
     let response = tauri::test::get_ipc_response(&webview, request);
 
     // Then: empty files list
@@ -191,15 +204,26 @@ fn test_get_status_with_files() {
     init_test_repo(tmp.path());
     fs::write(tmp.path().join("hello.txt"), "hello").unwrap();
     let backend = Git2Backend::open(tmp.path()).unwrap();
+    let mut tabs = HashMap::new();
+    tabs.insert(
+        "test".to_string(),
+        RepoContext {
+            backend: Box::new(backend),
+            watcher: None,
+            path: tmp.path().to_string_lossy().to_string(),
+            name: "test-repo".to_string(),
+        },
+    );
     let state = AppState {
-        repo: Mutex::new(Some(Box::new(backend))),
-        watcher: Mutex::new(None),
+        tabs: Mutex::new(tabs),
+        active_tab: Mutex::new(Some("test".to_string())),
+        auto_fetch_handle: Mutex::new(None),
     };
     let app = build_test_app(state);
     let webview = build_test_webview(&app);
 
     // When: get_status is called
-    let request = make_request("get_status", serde_json::json!({}));
+    let request = make_request("get_status", serde_json::json!({ "tabId": "test" }));
     let response = tauri::test::get_ipc_response(&webview, request);
 
     // Then: one untracked file
@@ -218,19 +242,33 @@ fn test_stage_and_unstage_file() {
     init_test_repo(tmp.path());
     fs::write(tmp.path().join("a.txt"), "content").unwrap();
     let backend = Git2Backend::open(tmp.path()).unwrap();
+    let mut tabs = HashMap::new();
+    tabs.insert(
+        "test".to_string(),
+        RepoContext {
+            backend: Box::new(backend),
+            watcher: None,
+            path: tmp.path().to_string_lossy().to_string(),
+            name: "test-repo".to_string(),
+        },
+    );
     let state = AppState {
-        repo: Mutex::new(Some(Box::new(backend))),
-        watcher: Mutex::new(None),
+        tabs: Mutex::new(tabs),
+        active_tab: Mutex::new(Some("test".to_string())),
+        auto_fetch_handle: Mutex::new(None),
     };
     let app = build_test_app(state);
     let webview = build_test_webview(&app);
 
     // When: stage_file is called
-    let request = make_request("stage_file", serde_json::json!({ "path": "a.txt" }));
+    let request = make_request(
+        "stage_file",
+        serde_json::json!({ "tabId": "test", "path": "a.txt" }),
+    );
     tauri::test::get_ipc_response(&webview, request).expect("stage_file should succeed");
 
     // Then: file is staged
-    let request = make_request("get_status", serde_json::json!({}));
+    let request = make_request("get_status", serde_json::json!({ "tabId": "test" }));
     let body = tauri::test::get_ipc_response(&webview, request).expect("get_status should succeed");
     let status = body
         .deserialize::<app_lib::git::types::RepoStatus>()
@@ -241,11 +279,14 @@ fn test_stage_and_unstage_file() {
         .any(|f| f.path == "a.txt" && f.staging == app_lib::git::types::StagingState::Staged));
 
     // When: unstage_file is called
-    let request = make_request("unstage_file", serde_json::json!({ "path": "a.txt" }));
+    let request = make_request(
+        "unstage_file",
+        serde_json::json!({ "tabId": "test", "path": "a.txt" }),
+    );
     tauri::test::get_ipc_response(&webview, request).expect("unstage_file should succeed");
 
     // Then: file is unstaged
-    let request = make_request("get_status", serde_json::json!({}));
+    let request = make_request("get_status", serde_json::json!({ "tabId": "test" }));
     let body = tauri::test::get_ipc_response(&webview, request).expect("get_status should succeed");
     let status = body
         .deserialize::<app_lib::git::types::RepoStatus>()
@@ -264,19 +305,30 @@ fn test_stage_all_and_unstage_all() {
     fs::write(tmp.path().join("a.txt"), "a").unwrap();
     fs::write(tmp.path().join("b.txt"), "b").unwrap();
     let backend = Git2Backend::open(tmp.path()).unwrap();
+    let mut tabs = HashMap::new();
+    tabs.insert(
+        "test".to_string(),
+        RepoContext {
+            backend: Box::new(backend),
+            watcher: None,
+            path: tmp.path().to_string_lossy().to_string(),
+            name: "test-repo".to_string(),
+        },
+    );
     let state = AppState {
-        repo: Mutex::new(Some(Box::new(backend))),
-        watcher: Mutex::new(None),
+        tabs: Mutex::new(tabs),
+        active_tab: Mutex::new(Some("test".to_string())),
+        auto_fetch_handle: Mutex::new(None),
     };
     let app = build_test_app(state);
     let webview = build_test_webview(&app);
 
     // When: stage_all is called
-    let request = make_request("stage_all", serde_json::json!({}));
+    let request = make_request("stage_all", serde_json::json!({ "tabId": "test" }));
     tauri::test::get_ipc_response(&webview, request).expect("stage_all should succeed");
 
     // Then: all files are staged
-    let request = make_request("get_status", serde_json::json!({}));
+    let request = make_request("get_status", serde_json::json!({ "tabId": "test" }));
     let body = tauri::test::get_ipc_response(&webview, request).expect("get_status should succeed");
     let status = body
         .deserialize::<app_lib::git::types::RepoStatus>()
@@ -287,11 +339,11 @@ fn test_stage_all_and_unstage_all() {
         .all(|f| f.staging == app_lib::git::types::StagingState::Staged));
 
     // When: unstage_all is called
-    let request = make_request("unstage_all", serde_json::json!({}));
+    let request = make_request("unstage_all", serde_json::json!({ "tabId": "test" }));
     tauri::test::get_ipc_response(&webview, request).expect("unstage_all should succeed");
 
     // Then: all files are unstaged
-    let request = make_request("get_status", serde_json::json!({}));
+    let request = make_request("get_status", serde_json::json!({ "tabId": "test" }));
     let body = tauri::test::get_ipc_response(&webview, request).expect("get_status should succeed");
     let status = body
         .deserialize::<app_lib::git::types::RepoStatus>()
@@ -308,20 +360,34 @@ fn test_commit() {
     let tmp = tempfile::tempdir().unwrap();
     let backend = init_repo_with_commit(tmp.path());
     fs::write(tmp.path().join("new.txt"), "new content").unwrap();
+    let mut tabs = HashMap::new();
+    tabs.insert(
+        "test".to_string(),
+        RepoContext {
+            backend: backend,
+            watcher: None,
+            path: tmp.path().to_string_lossy().to_string(),
+            name: "test-repo".to_string(),
+        },
+    );
     let state = AppState {
-        repo: Mutex::new(Some(backend)),
-        watcher: Mutex::new(None),
+        tabs: Mutex::new(tabs),
+        active_tab: Mutex::new(Some("test".to_string())),
+        auto_fetch_handle: Mutex::new(None),
     };
     let app = build_test_app(state);
     let webview = build_test_webview(&app);
 
-    let request = make_request("stage_file", serde_json::json!({ "path": "new.txt" }));
+    let request = make_request(
+        "stage_file",
+        serde_json::json!({ "tabId": "test", "path": "new.txt" }),
+    );
     tauri::test::get_ipc_response(&webview, request).expect("stage_file should succeed");
 
     // When: commit is called
     let request = make_request(
         "commit",
-        serde_json::json!({ "message": "test commit", "amend": false, "sign": false }),
+        serde_json::json!({ "tabId": "test", "message": "test commit", "amend": false, "sign": false }),
     );
     let body = tauri::test::get_ipc_response(&webview, request).expect("commit should succeed");
 
@@ -337,15 +403,26 @@ fn test_get_current_branch() {
     // Given: a repository with at least one commit
     let tmp = tempfile::tempdir().unwrap();
     let backend = init_repo_with_commit(tmp.path());
+    let mut tabs = HashMap::new();
+    tabs.insert(
+        "test".to_string(),
+        RepoContext {
+            backend: backend,
+            watcher: None,
+            path: tmp.path().to_string_lossy().to_string(),
+            name: "test-repo".to_string(),
+        },
+    );
     let state = AppState {
-        repo: Mutex::new(Some(backend)),
-        watcher: Mutex::new(None),
+        tabs: Mutex::new(tabs),
+        active_tab: Mutex::new(Some("test".to_string())),
+        auto_fetch_handle: Mutex::new(None),
     };
     let app = build_test_app(state);
     let webview = build_test_webview(&app);
 
     // When: get_current_branch is called
-    let request = make_request("get_current_branch", serde_json::json!({}));
+    let request = make_request("get_current_branch", serde_json::json!({ "tabId": "test" }));
     let body = tauri::test::get_ipc_response(&webview, request)
         .expect("get_current_branch should succeed");
 
@@ -362,9 +439,20 @@ fn test_get_diff() {
     let tmp = tempfile::tempdir().unwrap();
     let backend = init_repo_with_commit(tmp.path());
     fs::write(tmp.path().join("init.txt"), "modified content").unwrap();
+    let mut tabs = HashMap::new();
+    tabs.insert(
+        "test".to_string(),
+        RepoContext {
+            backend: backend,
+            watcher: None,
+            path: tmp.path().to_string_lossy().to_string(),
+            name: "test-repo".to_string(),
+        },
+    );
     let state = AppState {
-        repo: Mutex::new(Some(backend)),
-        watcher: Mutex::new(None),
+        tabs: Mutex::new(tabs),
+        active_tab: Mutex::new(Some("test".to_string())),
+        auto_fetch_handle: Mutex::new(None),
     };
     let app = build_test_app(state);
     let webview = build_test_webview(&app);
@@ -372,7 +460,7 @@ fn test_get_diff() {
     // When: get_diff is called for unstaged changes
     let request = make_request(
         "get_diff",
-        serde_json::json!({ "path": "init.txt", "staged": false }),
+        serde_json::json!({ "tabId": "test", "path": "init.txt", "staged": false }),
     );
     let body = tauri::test::get_ipc_response(&webview, request).expect("get_diff should succeed");
 
@@ -389,15 +477,29 @@ fn test_get_head_commit_message() {
     // Given: a repository with a commit
     let tmp = tempfile::tempdir().unwrap();
     let backend = init_repo_with_commit(tmp.path());
+    let mut tabs = HashMap::new();
+    tabs.insert(
+        "test".to_string(),
+        RepoContext {
+            backend: backend,
+            watcher: None,
+            path: tmp.path().to_string_lossy().to_string(),
+            name: "test-repo".to_string(),
+        },
+    );
     let state = AppState {
-        repo: Mutex::new(Some(backend)),
-        watcher: Mutex::new(None),
+        tabs: Mutex::new(tabs),
+        active_tab: Mutex::new(Some("test".to_string())),
+        auto_fetch_handle: Mutex::new(None),
     };
     let app = build_test_app(state);
     let webview = build_test_webview(&app);
 
     // When: get_head_commit_message is called
-    let request = make_request("get_head_commit_message", serde_json::json!({}));
+    let request = make_request(
+        "get_head_commit_message",
+        serde_json::json!({ "tabId": "test" }),
+    );
     let body = tauri::test::get_ipc_response(&webview, request)
         .expect("get_head_commit_message should succeed");
 
@@ -415,15 +517,26 @@ fn test_list_branches() {
     // Given: a repository with at least one commit
     let tmp = tempfile::tempdir().unwrap();
     let backend = init_repo_with_commit(tmp.path());
+    let mut tabs = HashMap::new();
+    tabs.insert(
+        "test".to_string(),
+        RepoContext {
+            backend: backend,
+            watcher: None,
+            path: tmp.path().to_string_lossy().to_string(),
+            name: "test-repo".to_string(),
+        },
+    );
     let state = AppState {
-        repo: Mutex::new(Some(backend)),
-        watcher: Mutex::new(None),
+        tabs: Mutex::new(tabs),
+        active_tab: Mutex::new(Some("test".to_string())),
+        auto_fetch_handle: Mutex::new(None),
     };
     let app = build_test_app(state);
     let webview = build_test_webview(&app);
 
     // When: list_branches is called
-    let request = make_request("list_branches", serde_json::json!({}));
+    let request = make_request("list_branches", serde_json::json!({ "tabId": "test" }));
     let body =
         tauri::test::get_ipc_response(&webview, request).expect("list_branches should succeed");
 
@@ -440,23 +553,40 @@ fn test_create_and_checkout_branch() {
     // Given: a repository with at least one commit
     let tmp = tempfile::tempdir().unwrap();
     let backend = init_repo_with_commit(tmp.path());
+    let mut tabs = HashMap::new();
+    tabs.insert(
+        "test".to_string(),
+        RepoContext {
+            backend: backend,
+            watcher: None,
+            path: tmp.path().to_string_lossy().to_string(),
+            name: "test-repo".to_string(),
+        },
+    );
     let state = AppState {
-        repo: Mutex::new(Some(backend)),
-        watcher: Mutex::new(None),
+        tabs: Mutex::new(tabs),
+        active_tab: Mutex::new(Some("test".to_string())),
+        auto_fetch_handle: Mutex::new(None),
     };
     let app = build_test_app(state);
     let webview = build_test_webview(&app);
 
     // When: create_branch is called
-    let request = make_request("create_branch", serde_json::json!({ "name": "feature" }));
+    let request = make_request(
+        "create_branch",
+        serde_json::json!({ "tabId": "test", "name": "feature" }),
+    );
     tauri::test::get_ipc_response(&webview, request).expect("create_branch should succeed");
 
     // When: checkout_branch is called
-    let request = make_request("checkout_branch", serde_json::json!({ "name": "feature" }));
+    let request = make_request(
+        "checkout_branch",
+        serde_json::json!({ "tabId": "test", "name": "feature" }),
+    );
     tauri::test::get_ipc_response(&webview, request).expect("checkout_branch should succeed");
 
     // Then: current branch is "feature"
-    let request = make_request("get_current_branch", serde_json::json!({}));
+    let request = make_request("get_current_branch", serde_json::json!({ "tabId": "test" }));
     let body = tauri::test::get_ipc_response(&webview, request)
         .expect("get_current_branch should succeed");
     let branch = body
@@ -472,15 +602,26 @@ fn test_list_remotes_empty() {
     // Given: a repository with no remotes
     let tmp = tempfile::tempdir().unwrap();
     let backend = init_repo_with_commit(tmp.path());
+    let mut tabs = HashMap::new();
+    tabs.insert(
+        "test".to_string(),
+        RepoContext {
+            backend: backend,
+            watcher: None,
+            path: tmp.path().to_string_lossy().to_string(),
+            name: "test-repo".to_string(),
+        },
+    );
     let state = AppState {
-        repo: Mutex::new(Some(backend)),
-        watcher: Mutex::new(None),
+        tabs: Mutex::new(tabs),
+        active_tab: Mutex::new(Some("test".to_string())),
+        auto_fetch_handle: Mutex::new(None),
     };
     let app = build_test_app(state);
     let webview = build_test_webview(&app);
 
     // When: list_remotes is called
-    let request = make_request("list_remotes", serde_json::json!({}));
+    let request = make_request("list_remotes", serde_json::json!({ "tabId": "test" }));
     let body =
         tauri::test::get_ipc_response(&webview, request).expect("list_remotes should succeed");
 
@@ -496,9 +637,20 @@ fn test_add_and_list_remote() {
     // Given: a repository with no remotes
     let tmp = tempfile::tempdir().unwrap();
     let backend = init_repo_with_commit(tmp.path());
+    let mut tabs = HashMap::new();
+    tabs.insert(
+        "test".to_string(),
+        RepoContext {
+            backend: backend,
+            watcher: None,
+            path: tmp.path().to_string_lossy().to_string(),
+            name: "test-repo".to_string(),
+        },
+    );
     let state = AppState {
-        repo: Mutex::new(Some(backend)),
-        watcher: Mutex::new(None),
+        tabs: Mutex::new(tabs),
+        active_tab: Mutex::new(Some("test".to_string())),
+        auto_fetch_handle: Mutex::new(None),
     };
     let app = build_test_app(state);
     let webview = build_test_webview(&app);
@@ -506,12 +658,12 @@ fn test_add_and_list_remote() {
     // When: add_remote is called
     let request = make_request(
         "add_remote",
-        serde_json::json!({ "name": "origin", "url": "https://example.com/repo.git" }),
+        serde_json::json!({ "tabId": "test", "name": "origin", "url": "https://example.com/repo.git" }),
     );
     tauri::test::get_ipc_response(&webview, request).expect("add_remote should succeed");
 
     // Then: list_remotes returns the added remote
-    let request = make_request("list_remotes", serde_json::json!({}));
+    let request = make_request("list_remotes", serde_json::json!({ "tabId": "test" }));
     let body =
         tauri::test::get_ipc_response(&webview, request).expect("list_remotes should succeed");
     let remotes = body
@@ -529,15 +681,26 @@ fn test_list_tags_empty() {
     // Given: a repository with no tags
     let tmp = tempfile::tempdir().unwrap();
     let backend = init_repo_with_commit(tmp.path());
+    let mut tabs = HashMap::new();
+    tabs.insert(
+        "test".to_string(),
+        RepoContext {
+            backend: backend,
+            watcher: None,
+            path: tmp.path().to_string_lossy().to_string(),
+            name: "test-repo".to_string(),
+        },
+    );
     let state = AppState {
-        repo: Mutex::new(Some(backend)),
-        watcher: Mutex::new(None),
+        tabs: Mutex::new(tabs),
+        active_tab: Mutex::new(Some("test".to_string())),
+        auto_fetch_handle: Mutex::new(None),
     };
     let app = build_test_app(state);
     let webview = build_test_webview(&app);
 
     // When: list_tags is called
-    let request = make_request("list_tags", serde_json::json!({}));
+    let request = make_request("list_tags", serde_json::json!({ "tabId": "test" }));
     let body = tauri::test::get_ipc_response(&webview, request).expect("list_tags should succeed");
 
     // Then: empty list
@@ -552,9 +715,20 @@ fn test_create_and_list_tag() {
     // Given: a repository with at least one commit
     let tmp = tempfile::tempdir().unwrap();
     let backend = init_repo_with_commit(tmp.path());
+    let mut tabs = HashMap::new();
+    tabs.insert(
+        "test".to_string(),
+        RepoContext {
+            backend: backend,
+            watcher: None,
+            path: tmp.path().to_string_lossy().to_string(),
+            name: "test-repo".to_string(),
+        },
+    );
     let state = AppState {
-        repo: Mutex::new(Some(backend)),
-        watcher: Mutex::new(None),
+        tabs: Mutex::new(tabs),
+        active_tab: Mutex::new(Some("test".to_string())),
+        auto_fetch_handle: Mutex::new(None),
     };
     let app = build_test_app(state);
     let webview = build_test_webview(&app);
@@ -562,12 +736,12 @@ fn test_create_and_list_tag() {
     // When: create_tag is called
     let request = make_request(
         "create_tag",
-        serde_json::json!({ "name": "v0.1.0", "message": null }),
+        serde_json::json!({ "tabId": "test", "name": "v0.1.0", "message": null }),
     );
     tauri::test::get_ipc_response(&webview, request).expect("create_tag should succeed");
 
     // Then: list_tags returns the created tag
-    let request = make_request("list_tags", serde_json::json!({}));
+    let request = make_request("list_tags", serde_json::json!({ "tabId": "test" }));
     let body = tauri::test::get_ipc_response(&webview, request).expect("list_tags should succeed");
     let tags = body
         .deserialize::<Vec<app_lib::git::types::TagInfo>>()
@@ -583,15 +757,26 @@ fn test_list_stashes_empty() {
     // Given: a repository with no stashes
     let tmp = tempfile::tempdir().unwrap();
     let backend = init_repo_with_commit(tmp.path());
+    let mut tabs = HashMap::new();
+    tabs.insert(
+        "test".to_string(),
+        RepoContext {
+            backend: backend,
+            watcher: None,
+            path: tmp.path().to_string_lossy().to_string(),
+            name: "test-repo".to_string(),
+        },
+    );
     let state = AppState {
-        repo: Mutex::new(Some(backend)),
-        watcher: Mutex::new(None),
+        tabs: Mutex::new(tabs),
+        active_tab: Mutex::new(Some("test".to_string())),
+        auto_fetch_handle: Mutex::new(None),
     };
     let app = build_test_app(state);
     let webview = build_test_webview(&app);
 
     // When: list_stashes is called
-    let request = make_request("list_stashes", serde_json::json!({}));
+    let request = make_request("list_stashes", serde_json::json!({ "tabId": "test" }));
     let body =
         tauri::test::get_ipc_response(&webview, request).expect("list_stashes should succeed");
 
@@ -609,9 +794,20 @@ fn test_get_commit_log() {
     // Given: a repository with commits
     let tmp = tempfile::tempdir().unwrap();
     let backend = init_repo_with_commit(tmp.path());
+    let mut tabs = HashMap::new();
+    tabs.insert(
+        "test".to_string(),
+        RepoContext {
+            backend: backend,
+            watcher: None,
+            path: tmp.path().to_string_lossy().to_string(),
+            name: "test-repo".to_string(),
+        },
+    );
     let state = AppState {
-        repo: Mutex::new(Some(backend)),
-        watcher: Mutex::new(None),
+        tabs: Mutex::new(tabs),
+        active_tab: Mutex::new(Some("test".to_string())),
+        auto_fetch_handle: Mutex::new(None),
     };
     let app = build_test_app(state);
     let webview = build_test_webview(&app);
@@ -619,8 +815,7 @@ fn test_get_commit_log() {
     // When: get_commit_log is called
     let request = make_request(
         "get_commit_log",
-        serde_json::json!({
-            "filter": {
+        serde_json::json!({ "tabId": "test", "filter": {
                 "author": null,
                 "since": null,
                 "until": null,
@@ -649,15 +844,26 @@ fn test_is_merging_false() {
     // Given: a repository in normal state
     let tmp = tempfile::tempdir().unwrap();
     let backend = init_repo_with_commit(tmp.path());
+    let mut tabs = HashMap::new();
+    tabs.insert(
+        "test".to_string(),
+        RepoContext {
+            backend: backend,
+            watcher: None,
+            path: tmp.path().to_string_lossy().to_string(),
+            name: "test-repo".to_string(),
+        },
+    );
     let state = AppState {
-        repo: Mutex::new(Some(backend)),
-        watcher: Mutex::new(None),
+        tabs: Mutex::new(tabs),
+        active_tab: Mutex::new(Some("test".to_string())),
+        auto_fetch_handle: Mutex::new(None),
     };
     let app = build_test_app(state);
     let webview = build_test_webview(&app);
 
     // When: is_merging is called
-    let request = make_request("is_merging", serde_json::json!({}));
+    let request = make_request("is_merging", serde_json::json!({ "tabId": "test" }));
     let body = tauri::test::get_ipc_response(&webview, request).expect("is_merging should succeed");
 
     // Then: false
@@ -672,15 +878,26 @@ fn test_is_rebasing_false() {
     // Given: a repository in normal state
     let tmp = tempfile::tempdir().unwrap();
     let backend = init_repo_with_commit(tmp.path());
+    let mut tabs = HashMap::new();
+    tabs.insert(
+        "test".to_string(),
+        RepoContext {
+            backend: backend,
+            watcher: None,
+            path: tmp.path().to_string_lossy().to_string(),
+            name: "test-repo".to_string(),
+        },
+    );
     let state = AppState {
-        repo: Mutex::new(Some(backend)),
-        watcher: Mutex::new(None),
+        tabs: Mutex::new(tabs),
+        active_tab: Mutex::new(Some("test".to_string())),
+        auto_fetch_handle: Mutex::new(None),
     };
     let app = build_test_app(state);
     let webview = build_test_webview(&app);
 
     // When: is_rebasing is called
-    let request = make_request("is_rebasing", serde_json::json!({}));
+    let request = make_request("is_rebasing", serde_json::json!({ "tabId": "test" }));
     let body =
         tauri::test::get_ipc_response(&webview, request).expect("is_rebasing should succeed");
 
