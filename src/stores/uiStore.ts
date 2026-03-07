@@ -15,7 +15,8 @@ export type PageId =
   | "reflog"
   | "hosting"
   | "submodules"
-  | "worktrees";
+  | "worktrees"
+  | "open-repository";
 
 interface BlameTarget {
   path: string;
