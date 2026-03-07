@@ -94,14 +94,6 @@ pub struct ConflictSuggestion {
     pub reason: String,
 }
 
-// === PR description types ===
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct PrDescription {
-    pub title: String,
-    pub body: String,
-}
-
 #[derive(Debug, thiserror::Error)]
 pub enum AiError {
     #[error("no adapter available")]
@@ -245,16 +237,6 @@ exclude_patterns = ["*.key"]
         let json = serde_json::to_value(&suggestion).unwrap();
         assert_eq!(json["confidence"], "high");
         assert_eq!(json["resolved_code"], "merged code");
-    }
-
-    #[test]
-    fn pr_description_serializes_to_json() {
-        let pr = PrDescription {
-            title: "Add auth handler".to_string(),
-            body: "This PR adds authentication.".to_string(),
-        };
-        let json = serde_json::to_value(&pr).unwrap();
-        assert_eq!(json["title"], "Add auth handler");
     }
 
     #[test]
