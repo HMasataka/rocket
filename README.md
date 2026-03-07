@@ -1,6 +1,33 @@
 # Rocket
 
-クロスプラットフォーム Git GUI クライアント。
+クロスプラットフォーム Git GUI クライアント。Rust + Tauri v2 で構築されたモダンな Git 操作環境を提供します。
+
+![Changes View](docs/screenshots/changes.png)
+
+## 特徴
+
+- 直感的な差分ビューア（インライン / サイドバイサイド）
+- 行・ハンク単位のステージング
+- コミットグラフ付きの履歴ビュー
+- ブランチ・タグ・スタッシュ・サブモジュール管理
+- AI によるコミットメッセージ生成・コードレビュー支援
+- GitHub / GitLab 連携（PR 作成、Issue 参照、CI/CD 状態表示）
+- ダーク / ライトテーマ、カラーテーマ切り替え
+- macOS / Linux / Windows 対応
+
+## スクリーンショット
+
+### 履歴ビュー
+
+コミットグラフとブランチ構造を視覚的に表示。コミット詳細や変更ファイルを確認できます。
+
+![History View](docs/screenshots/history.png)
+
+### ブランチ管理
+
+ブランチの一覧・作成・切り替え・マージ・削除を直感的に操作。
+
+![Branches View](docs/screenshots/branches.png)
 
 ## 技術スタック
 
@@ -19,18 +46,16 @@ pnpm install   # フロントエンドの依存をインストール
 
 ## 開発
 
+タスクランナーは [Task](https://taskfile.dev/) を使用。
+
 ```bash
-# Tauri アプリを開発モードで起動（ホットリロード付き）
-cargo tauri dev
-
-# フロントエンドのみ起動（ブラウザで確認）
-pnpm dev        # http://localhost:1420
-
-# フロントエンドビルド
-pnpm build
-
-# プロダクションビルド（バイナリ生成）
-cargo tauri build
+task dev          # Tauri アプリを開発モードで起動（ホットリロード付き）
+task dev:front    # フロントエンドのみ起動（http://localhost:1420）
+task build        # プロダクションビルド（バイナリ生成）
+task test         # 全テスト実行（Rust + フロントエンド）
+task lint         # Biome でリント・フォーマットチェック
+task clippy       # Rust 静的解析
+task check        # lint + clippy + test を一括実行
 ```
 
 ## デザインモック
