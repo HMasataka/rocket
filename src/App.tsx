@@ -73,6 +73,9 @@ export function App() {
     loadConfig().catch((e: unknown) => {
       addToast(String(e), "error");
     });
+    fetchStatus().catch((e: unknown) => {
+      addToast(String(e), "error");
+    });
     fetchBranch().catch((e: unknown) => {
       addToast(String(e), "error");
     });
@@ -97,6 +100,7 @@ export function App() {
   }, [
     activeTabId,
     loadConfig,
+    fetchStatus,
     fetchBranch,
     fetchRemotes,
     fetchStashes,
