@@ -7,6 +7,7 @@ import { TagsModal } from "./components/organisms/TagsModal";
 import { ToastContainer } from "./components/organisms/ToastContainer";
 import { AppShell } from "./components/templates/AppShell";
 import { useFileWatcher } from "./hooks/useFileWatcher";
+import { useSystemNotification } from "./hooks/useSystemNotification";
 import { useTheme } from "./hooks/useTheme";
 import { BlamePage } from "./pages/blame";
 import { BranchesPage } from "./pages/branches";
@@ -29,6 +30,7 @@ import { WorktreesPage } from "./pages/worktrees";
 import type { PullOption } from "./services/git";
 import { useConfigStore } from "./stores/configStore";
 import { useGitStore } from "./stores/gitStore";
+import { useTabStore } from "./stores/tabStore";
 import { useUIStore } from "./stores/uiStore";
 
 export function App() {
@@ -54,9 +56,19 @@ export function App() {
   const activeModal = useUIStore((s) => s.activeModal);
   const openModal = useUIStore((s) => s.openModal);
   const closeModal = useUIStore((s) => s.closeModal);
+  const activeTabId = useTabStore((s) => s.activeTabId);
+  const fetchTabs = useTabStore((s) => s.fetchTabs);
+  const fetchActiveTab = useTabStore((s) => s.fetchActiveTab);
 
   useTheme();
+  useSystemNotification();
 
+  useEffect(() => {
+    fetchTabs();
+    fetchActiveTab();
+  }, [fetchTabs, fetchActiveTab]);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: activeTabId triggers re-fetch on tab switch
   useEffect(() => {
     loadConfig().catch((e: unknown) => {
       addToast(String(e), "error");
@@ -83,6 +95,7 @@ export function App() {
       addToast(String(e), "error");
     });
   }, [
+    activeTabId,
     loadConfig,
     fetchBranch,
     fetchRemotes,

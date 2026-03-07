@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import type { ReflogEntry } from "../../services/reflog";
 import { getReflog } from "../../services/reflog";
 import { useGitStore } from "../../stores/gitStore";
+import { getActiveTabId } from "../../stores/tabStore";
 import { useUIStore } from "../../stores/uiStore";
 import { ReflogTable } from "./organisms/ReflogTable";
 
@@ -16,7 +17,7 @@ export function ReflogPage() {
   const addToast = useUIStore((s) => s.addToast);
 
   const loadReflog = useCallback(() => {
-    getReflog("HEAD", REFLOG_LIMIT)
+    getReflog(getActiveTabId(), "HEAD", REFLOG_LIMIT)
       .then(setEntries)
       .catch((e: unknown) => addToast(String(e), "error"));
   }, [addToast]);

@@ -3,6 +3,7 @@ import type { MergeOption } from "../../services/git";
 import { getBranchCommits } from "../../services/git";
 import type { CommitInfo } from "../../services/history";
 import { useGitStore } from "../../stores/gitStore";
+import { getActiveTabId } from "../../stores/tabStore";
 import { useUIStore } from "../../stores/uiStore";
 import { ConflictModal } from "../conflict";
 import { BranchDetailPanel } from "./organisms/BranchDetailPanel";
@@ -54,7 +55,7 @@ export function BranchesPage() {
       setBranchCommits([]);
       return;
     }
-    getBranchCommits(selectedBranch, 10)
+    getBranchCommits(getActiveTabId(), selectedBranch, 10)
       .then(setBranchCommits)
       .catch(() => setBranchCommits([]));
   }, [selectedBranch, branches]);

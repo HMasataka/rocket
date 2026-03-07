@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import type { FileDiff } from "../../../services/git";
 import type { StashEntry } from "../../../services/stash";
 import { getStashDiff } from "../../../services/stash";
+import { getActiveTabId } from "../../../stores/tabStore";
 
 interface StashDetailPanelProps {
   entry: StashEntry | null;
@@ -32,7 +33,7 @@ export function StashDetailPanel({ entry }: StashDetailPanelProps) {
       setExpandedFile(null);
       return;
     }
-    getStashDiff(entry.index)
+    getStashDiff(getActiveTabId(), entry.index)
       .then(setDiffs)
       .catch(() => setDiffs([]));
   }, [entry]);

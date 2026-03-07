@@ -4,6 +4,7 @@ import type { CommitDetail } from "../../services/history";
 import { getCommitDetail } from "../../services/history";
 import type { RevertMode } from "../../services/revert";
 import { useGitStore } from "../../stores/gitStore";
+import { getActiveTabId } from "../../stores/tabStore";
 import { useUIStore } from "../../stores/uiStore";
 import { RevertCommitList } from "./organisms/RevertCommitList";
 import { RevertOptions } from "./organisms/RevertOptions";
@@ -24,7 +25,7 @@ export function RevertPage() {
   const handleSelect = useCallback(
     (oid: string) => {
       setSelectedOid(oid);
-      getCommitDetail(oid)
+      getCommitDetail(getActiveTabId(), oid)
         .then(setPreviewDetail)
         .catch((e: unknown) => addToast(String(e), "error"));
     },

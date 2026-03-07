@@ -4,6 +4,7 @@ import { getBranchCommits } from "../../services/git";
 import type { CommitDetail, CommitInfo } from "../../services/history";
 import { getCommitDetail } from "../../services/history";
 import { useGitStore } from "../../stores/gitStore";
+import { getActiveTabId } from "../../stores/tabStore";
 import { useUIStore } from "../../stores/uiStore";
 import "../../styles/cherry-pick.css";
 import { CherryPickCommitList } from "./organisms/CherryPickCommitList";
@@ -46,7 +47,7 @@ export function CherryPickPage() {
         return;
       }
       try {
-        const result = await getBranchCommits(branch, 100);
+        const result = await getBranchCommits(getActiveTabId(), branch, 100);
         setCommits(result);
       } catch (e: unknown) {
         addToast(String(e), "error");
@@ -68,7 +69,7 @@ export function CherryPickPage() {
         return next;
       });
 
-      getCommitDetail(oid)
+      getCommitDetail(getActiveTabId(), oid)
         .then(setPreviewDetail)
         .catch((e: unknown) => addToast(String(e), "error"));
     },
