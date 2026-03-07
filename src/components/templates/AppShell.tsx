@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import type { RemoteInfo } from "../../services/git";
+import { useUIStore } from "../../stores/uiStore";
 import { Sidebar } from "../organisms/Sidebar";
 import { Statusbar } from "../organisms/Statusbar";
 import { Titlebar } from "../organisms/Titlebar";
@@ -35,6 +36,8 @@ export function AppShell({
   children,
 }: AppShellProps) {
   const defaultRemoteName = remotes[0]?.name ?? null;
+  const activePage = useUIStore((s) => s.activePage);
+  const hideSidebar = activePage === "open-repository";
 
   return (
     <div className="app">
@@ -50,7 +53,7 @@ export function AppShell({
         disabled={!hasRemotes}
       />
       <div className="main-layout">
-        <Sidebar changesCount={changesCount} />
+        {!hideSidebar && <Sidebar changesCount={changesCount} />}
         <main className="content">{children}</main>
       </div>
       <Statusbar branch={branch} merging={merging} rebasing={rebasing} />
