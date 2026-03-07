@@ -16,6 +16,9 @@ import { ConflictModal } from "./pages/conflict";
 import { FileHistoryPage } from "./pages/file-history";
 import { HistoryPage } from "./pages/history";
 import { HostingPage } from "./pages/hosting";
+import { OpenRepositoryPage } from "./pages/open-repository";
+import { CloneDialog } from "./pages/open-repository/organisms/CloneDialog";
+import { InitDialog } from "./pages/open-repository/organisms/InitDialog";
 import { RebasePage } from "./pages/rebase";
 import { ReflogPage } from "./pages/reflog";
 import { ResetPage } from "./pages/reset";
@@ -195,6 +198,7 @@ export function App() {
         {activePage === "submodules" && <SubmodulesPage />}
         {activePage === "worktrees" && <WorktreesPage />}
         {activePage === "hosting" && <HostingPage />}
+        {activePage === "open-repository" && <OpenRepositoryPage />}
       </AppShell>
       <ToastContainer />
       {activeModal === "remotes" && <RemoteModal onClose={closeModal} />}
@@ -209,6 +213,8 @@ export function App() {
       {activeModal === "conflict" && <ConflictModal />}
       {activeModal === "settings" && <SettingsModal onClose={closeModal} />}
       {activeModal === "search" && <SearchModal onClose={closeModal} />}
+      {activeModal === "clone" && <CloneDialog onClose={closeModal} />}
+      {activeModal === "init" && <InitDialog onClose={closeModal} />}
     </>
   );
 }

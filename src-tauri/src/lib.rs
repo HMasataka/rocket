@@ -1,10 +1,10 @@
 pub mod ai;
 pub mod commands;
-mod config;
+pub mod config;
 pub mod git;
 pub mod hosting;
 pub mod state;
-mod watcher;
+pub mod watcher;
 
 use std::sync::Mutex;
 
@@ -56,6 +56,7 @@ pub fn run() {
 
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_dialog::init())
         .manage(AppState {
             repo: Mutex::new(repo),
             watcher: Mutex::new(None),
@@ -186,6 +187,13 @@ pub fn run() {
             commands::gitconfig::set_gitconfig_value,
             commands::gitconfig::unset_gitconfig_value,
             commands::gitconfig::get_gitconfig_path,
+            commands::repo::open_repository,
+            commands::repo::init_repository,
+            commands::repo::get_recent_repos,
+            commands::repo::remove_recent_repo,
+            commands::repo::clone_repository,
+            commands::gitignore::list_gitignore_templates,
+            commands::gitignore::get_gitignore_template,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

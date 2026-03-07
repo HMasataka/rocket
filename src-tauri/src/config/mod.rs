@@ -6,9 +6,20 @@ use serde::{Deserialize, Serialize};
 use crate::ai::types::AiConfig;
 use crate::git::error::{GitError, GitResult};
 
+const MAX_RECENT_REPOS: usize = 20;
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct RecentRepo {
+    pub path: String,
+    pub name: String,
+    pub last_opened: String,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct AppConfig {
     pub last_opened_repo: Option<String>,
+    #[serde(default)]
+    pub recent_repos: Vec<RecentRepo>,
     #[serde(default)]
     pub ai: AiConfig,
     #[serde(default)]
@@ -138,6 +149,24 @@ pub fn save_config(config: &AppConfig) -> GitResult<()> {
     Ok(())
 }
 
+pub fn add_recent_repo(config: &mut AppConfig, path: &str, name: &str) {
+    let now = chrono::Utc::now().to_rfc3339();
+    config.recent_repos.retain(|r| r.path != path);
+    config.recent_repos.insert(
+        0,
+        RecentRepo {
+            path: path.to_string(),
+            name: name.to_string(),
+            last_opened: now,
+        },
+    );
+    config.recent_repos.truncate(MAX_RECENT_REPOS);
+}
+
+pub fn remove_recent_repo(config: &mut AppConfig, path: &str) {
+    config.recent_repos.retain(|r| r.path != path);
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -152,6 +181,7 @@ mod tests {
     fn config_serialization_roundtrip() {
         let config = AppConfig {
             last_opened_repo: Some("/tmp/test-repo".to_string()),
+            recent_repos: vec![],
             ai: AiConfig::default(),
             appearance: AppearanceConfig::default(),
             editor: EditorConfig::default(),
@@ -244,6 +274,7 @@ tab_style = "compact"
     fn config_full_roundtrip_with_all_sections() {
         let config = AppConfig {
             last_opened_repo: Some("/tmp/test".to_string()),
+            recent_repos: vec![],
             ai: AiConfig::default(),
             appearance: AppearanceConfig {
                 theme: "light".to_string(),
@@ -286,5 +317,77 @@ tab_style = "compact"
         assert_eq!(deserialized.keybindings.preset, "vim");
         assert_eq!(deserialized.tools.diff_tool, "vscode");
         assert!(!deserialized.tools.auto_fetch_on_open);
+    }
+
+    #[test]
+    fn default_config_has_empty_recent_repos() {
+        let config = AppConfig::default();
+        assert!(config.recent_repos.is_empty());
+    }
+
+    #[test]
+    fn add_recent_repo_inserts_at_front() {
+        let mut config = AppConfig::default();
+        add_recent_repo(&mut config, "/tmp/repo1", "repo1");
+        add_recent_repo(&mut config, "/tmp/repo2", "repo2");
+
+        assert_eq!(config.recent_repos.len(), 2);
+        assert_eq!(config.recent_repos[0].path, "/tmp/repo2");
+        assert_eq!(config.recent_repos[1].path, "/tmp/repo1");
+    }
+
+    #[test]
+    fn add_recent_repo_deduplicates() {
+        let mut config = AppConfig::default();
+        add_recent_repo(&mut config, "/tmp/repo1", "repo1");
+        add_recent_repo(&mut config, "/tmp/repo2", "repo2");
+        add_recent_repo(&mut config, "/tmp/repo1", "repo1");
+
+        assert_eq!(config.recent_repos.len(), 2);
+        assert_eq!(config.recent_repos[0].path, "/tmp/repo1");
+        assert_eq!(config.recent_repos[1].path, "/tmp/repo2");
+    }
+
+    #[test]
+    fn add_recent_repo_truncates_at_max() {
+        let mut config = AppConfig::default();
+        for i in 0..25 {
+            add_recent_repo(&mut config, &format!("/tmp/repo{i}"), &format!("repo{i}"));
+        }
+
+        assert_eq!(config.recent_repos.len(), MAX_RECENT_REPOS);
+        assert_eq!(config.recent_repos[0].path, "/tmp/repo24");
+    }
+
+    #[test]
+    fn remove_recent_repo_removes_matching() {
+        let mut config = AppConfig::default();
+        add_recent_repo(&mut config, "/tmp/repo1", "repo1");
+        add_recent_repo(&mut config, "/tmp/repo2", "repo2");
+        remove_recent_repo(&mut config, "/tmp/repo1");
+
+        assert_eq!(config.recent_repos.len(), 1);
+        assert_eq!(config.recent_repos[0].path, "/tmp/repo2");
+    }
+
+    #[test]
+    fn remove_recent_repo_noop_for_missing() {
+        let mut config = AppConfig::default();
+        add_recent_repo(&mut config, "/tmp/repo1", "repo1");
+        remove_recent_repo(&mut config, "/tmp/nonexistent");
+
+        assert_eq!(config.recent_repos.len(), 1);
+    }
+
+    #[test]
+    fn recent_repo_serialization_roundtrip() {
+        let mut config = AppConfig::default();
+        add_recent_repo(&mut config, "/tmp/repo1", "repo1");
+
+        let serialized = toml::to_string(&config).unwrap();
+        let deserialized: AppConfig = toml::from_str(&serialized).unwrap();
+        assert_eq!(deserialized.recent_repos.len(), 1);
+        assert_eq!(deserialized.recent_repos[0].path, "/tmp/repo1");
+        assert_eq!(deserialized.recent_repos[0].name, "repo1");
     }
 }
