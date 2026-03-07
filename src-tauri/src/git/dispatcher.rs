@@ -25,8 +25,7 @@ impl GitDispatcher {
 
     pub fn init(path: impl AsRef<Path>) -> GitResult<Box<dyn GitBackend>> {
         let path = path.as_ref();
-        git2::Repository::init(path)
-            .map_err(|e| GitError::InitFailed(Box::new(e)))?;
+        git2::Repository::init(path).map_err(|e| GitError::InitFailed(Box::new(e)))?;
         Self::open_default(path)
     }
 

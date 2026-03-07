@@ -151,9 +151,7 @@ pub fn save_config(config: &AppConfig) -> GitResult<()> {
 
 pub fn add_recent_repo(config: &mut AppConfig, path: &str, name: &str) {
     let now = chrono::Utc::now().to_rfc3339();
-    config
-        .recent_repos
-        .retain(|r| r.path != path);
+    config.recent_repos.retain(|r| r.path != path);
     config.recent_repos.insert(
         0,
         RecentRepo {
