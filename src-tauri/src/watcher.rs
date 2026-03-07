@@ -7,14 +7,16 @@ use tauri::{AppHandle, Emitter};
 pub fn start_watcher(
     app_handle: AppHandle,
     repo_path: &Path,
+    tab_id: &str,
 ) -> Result<Box<dyn std::any::Any + Send>, Box<dyn std::error::Error>> {
     let handle = app_handle.clone();
+    let tab_id_owned = tab_id.to_string();
 
     let mut debouncer = new_debouncer(
         Duration::from_millis(500),
         move |res: Result<Vec<notify_debouncer_mini::DebouncedEvent>, notify::Error>| {
             if res.is_ok() {
-                let _ = handle.emit("repo:changed", ());
+                let _ = handle.emit("repo:changed", &tab_id_owned);
             }
         },
     )?;
