@@ -4,8 +4,9 @@ use crate::ai::adapter::LlmAdapter;
 use crate::ai::detector;
 use crate::ai::types::{
     AiConfig, CliAdapterInfo, CommitMessageStyle, ConflictSuggestion, GenerateRequest,
-    GenerateResult, Language, PrDescription, ReviewResult,
+    GenerateResult, Language, ReviewResult,
 };
+use crate::commands::with_repo;
 use crate::config;
 use crate::git::types::FileDiff;
 use crate::state::AppState;
@@ -54,6 +55,7 @@ pub fn detect_cli_adapters() -> Result<Vec<CliAdapterInfo>, String> {
 
 #[tauri::command]
 pub fn generate_commit_message(
+    tab_id: String,
     format: String,
     language: String,
     state: State<'_, AppState>,
@@ -63,21 +65,16 @@ pub fn generate_commit_message(
     let lang: Language = serde_json::from_value(serde_json::Value::String(language))
         .map_err(|e| format!("Invalid language: {e}"))?;
 
-    let repo_lock = state
-        .repo
-        .lock()
-        .map_err(|e| format!("Lock poisoned: {e}"))?;
-    let backend = repo_lock.as_ref().ok_or("No repository opened")?;
-
-    let diff_options = crate::git::types::DiffOptions {
-        staged: true,
-        ..Default::default()
-    };
-    let diffs = backend
-        .diff(None, &diff_options)
-        .map_err(|e| e.to_string())?;
-
-    let diff_text = format_diff_text(&diffs);
+    let diff_text = with_repo(&state, &tab_id, |backend| {
+        let diff_options = crate::git::types::DiffOptions {
+            staged: true,
+            ..Default::default()
+        };
+        let diffs = backend
+            .diff(None, &diff_options)
+            .map_err(|e| e.to_string())?;
+        Ok(format_diff_text(&diffs))
+    })?;
 
     if diff_text.trim().is_empty() {
         return Err("No staged changes to generate a commit message from".to_string());
@@ -95,28 +92,25 @@ pub fn generate_commit_message(
 }
 
 #[tauri::command]
-pub fn review_diff(state: State<'_, AppState>) -> Result<ReviewResult, String> {
-    let repo_lock = state
-        .repo
-        .lock()
-        .map_err(|e| format!("Lock poisoned: {e}"))?;
-    let backend = repo_lock.as_ref().ok_or("No repository opened")?;
+pub fn review_diff(tab_id: String, state: State<'_, AppState>) -> Result<ReviewResult, String> {
+    let (staged_diffs, unstaged_diffs) = with_repo(&state, &tab_id, |backend| {
+        let staged_options = crate::git::types::DiffOptions {
+            staged: true,
+            ..Default::default()
+        };
+        let unstaged_options = crate::git::types::DiffOptions {
+            staged: false,
+            ..Default::default()
+        };
 
-    let staged_options = crate::git::types::DiffOptions {
-        staged: true,
-        ..Default::default()
-    };
-    let unstaged_options = crate::git::types::DiffOptions {
-        staged: false,
-        ..Default::default()
-    };
-
-    let staged_diffs = backend
-        .diff(None, &staged_options)
-        .map_err(|e| e.to_string())?;
-    let unstaged_diffs = backend
-        .diff(None, &unstaged_options)
-        .map_err(|e| e.to_string())?;
+        let staged = backend
+            .diff(None, &staged_options)
+            .map_err(|e| e.to_string())?;
+        let unstaged = backend
+            .diff(None, &unstaged_options)
+            .map_err(|e| e.to_string())?;
+        Ok((staged, unstaged))
+    })?;
 
     let mut all_diffs = staged_diffs;
     all_diffs.extend(unstaged_diffs);
@@ -146,36 +140,6 @@ pub fn ai_resolve_conflict(
         crate::ai::conflict::build_conflict_resolve_prompt(&ours, &theirs, base.as_deref());
     let raw = adapter.execute_prompt(&prompt).map_err(|e| e.to_string())?;
     crate::ai::conflict::parse_conflict_response(&raw).map_err(|e| e.to_string())
-}
-
-#[tauri::command]
-pub fn generate_pr_description(state: State<'_, AppState>) -> Result<PrDescription, String> {
-    let repo_lock = state
-        .repo
-        .lock()
-        .map_err(|e| format!("Lock poisoned: {e}"))?;
-    let backend = repo_lock.as_ref().ok_or("No repository opened")?;
-
-    let branch_name = backend.current_branch().map_err(|e| e.to_string())?;
-
-    let diff_options = crate::git::types::DiffOptions {
-        staged: true,
-        ..Default::default()
-    };
-    let diffs = backend
-        .diff(None, &diff_options)
-        .map_err(|e| e.to_string())?;
-
-    let diff_text = format_diff_text(&diffs);
-
-    if diff_text.trim().is_empty() {
-        return Err("No changes to generate a PR description from".to_string());
-    }
-
-    let adapter = get_adapter()?;
-    let prompt = crate::ai::pr::build_pr_description_prompt(&diff_text, &branch_name);
-    let raw = adapter.execute_prompt(&prompt).map_err(|e| e.to_string())?;
-    crate::ai::pr::parse_pr_description_response(&raw).map_err(|e| e.to_string())
 }
 
 #[tauri::command]
