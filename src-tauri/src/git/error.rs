@@ -118,6 +118,29 @@ pub enum GitError {
 
     #[error("signing failed: {0}")]
     SigningFailed(#[source] Box<dyn std::error::Error + Send + Sync>),
+
+    #[error("clone failed: {0}")]
+    CloneFailed(#[source] Box<dyn std::error::Error + Send + Sync>),
+
+    #[error("init failed: {0}")]
+    InitFailed(#[source] Box<dyn std::error::Error + Send + Sync>),
 }
 
 pub type GitResult<T> = Result<T, GitError>;
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn clone_failed_display() {
+        let err = GitError::CloneFailed("connection refused".into());
+        assert!(err.to_string().contains("clone failed"));
+    }
+
+    #[test]
+    fn init_failed_display() {
+        let err = GitError::InitFailed("permission denied".into());
+        assert!(err.to_string().contains("init failed"));
+    }
+}
