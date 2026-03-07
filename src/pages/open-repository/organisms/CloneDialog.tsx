@@ -1,7 +1,7 @@
 import { open } from "@tauri-apps/plugin-dialog";
 import { useCallback, useState } from "react";
 import { Modal } from "../../../components/organisms/Modal";
-import { useRepoStore } from "../../../stores/repoStore";
+import { useTabStore } from "../../../stores/tabStore";
 import { useUIStore } from "../../../stores/uiStore";
 
 interface CloneDialogProps {
@@ -12,7 +12,7 @@ export function CloneDialog({ onClose }: CloneDialogProps) {
   const [url, setUrl] = useState("");
   const [path, setPath] = useState("");
   const [loading, setLoading] = useState(false);
-  const cloneRepo = useRepoStore((s) => s.cloneRepository);
+  const cloneInNewTab = useTabStore((s) => s.cloneInNewTab);
   const addToast = useUIStore((s) => s.addToast);
   const setActivePage = useUIStore((s) => s.setActivePage);
 
@@ -27,7 +27,7 @@ export function CloneDialog({ onClose }: CloneDialogProps) {
     if (!url.trim() || !path.trim()) return;
     setLoading(true);
     try {
-      await cloneRepo(url.trim(), path.trim());
+      await cloneInNewTab(url.trim(), path.trim());
       addToast("Repository cloned successfully", "success");
       setActivePage("changes");
       onClose();
@@ -36,7 +36,7 @@ export function CloneDialog({ onClose }: CloneDialogProps) {
     } finally {
       setLoading(false);
     }
-  }, [url, path, cloneRepo, addToast, setActivePage, onClose]);
+  }, [url, path, cloneInNewTab, addToast, setActivePage, onClose]);
 
   const isValid = url.trim().length > 0 && path.trim().length > 0;
 

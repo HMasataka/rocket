@@ -1,4 +1,8 @@
 import { create } from "zustand";
+import {
+  cloneRepository as cloneRepositoryService,
+  initRepository as initRepositoryService,
+} from "../services/repo";
 import type { TabInfo } from "../services/tab";
 import {
   closeTab as closeTabService,
@@ -21,6 +25,8 @@ interface TabState {
 
 interface TabActions {
   openTab: (path: string) => Promise<void>;
+  cloneInNewTab: (url: string, path: string) => Promise<void>;
+  initInNewTab: (path: string, gitignoreTemplate?: string) => Promise<void>;
   closeTab: (tabId: string) => Promise<void>;
   setActiveTab: (tabId: string) => Promise<void>;
   reorderTabs: (fromIndex: number, toIndex: number) => void;
@@ -48,6 +54,30 @@ export const useTabStore = create<TabState & TabActions>((set) => ({
   openTab: async (path: string) => {
     const tabId = generateTabId();
     await openTabService(path, tabId);
+    const tabsResult = await listTabs();
+    const tabs: Tab[] = tabsResult.map((t: TabInfo) => ({
+      id: t.id,
+      name: t.name,
+      path: t.path,
+    }));
+    set({ tabs, activeTabId: tabId });
+  },
+
+  cloneInNewTab: async (url: string, path: string) => {
+    const tabId = generateTabId();
+    await cloneRepositoryService(url, path, tabId);
+    const tabsResult = await listTabs();
+    const tabs: Tab[] = tabsResult.map((t: TabInfo) => ({
+      id: t.id,
+      name: t.name,
+      path: t.path,
+    }));
+    set({ tabs, activeTabId: tabId });
+  },
+
+  initInNewTab: async (path: string, gitignoreTemplate?: string) => {
+    const tabId = generateTabId();
+    await initRepositoryService(path, tabId, gitignoreTemplate);
     const tabsResult = await listTabs();
     const tabs: Tab[] = tabsResult.map((t: TabInfo) => ({
       id: t.id,
