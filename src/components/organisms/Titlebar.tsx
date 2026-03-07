@@ -1,4 +1,6 @@
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { type DragEvent, useCallback, useState } from "react";
+import { useTabStore } from "../../stores/tabStore";
 import { useUIStore } from "../../stores/uiStore";
 
 const iconColor = "rgba(77,18,10,0.85)";
@@ -58,9 +60,93 @@ function MaximizeIcon() {
   );
 }
 
+function TabCloseIcon() {
+  return (
+    <svg
+      viewBox="0 0 8 8"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <path
+        d="M1.5 1.5L6.5 6.5M6.5 1.5L1.5 6.5"
+        stroke="currentColor"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+        fill="none"
+      />
+    </svg>
+  );
+}
+
+function PlusIcon() {
+  return (
+    <svg
+      viewBox="0 0 14 14"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <path
+        d="M7 2v10M2 7h10"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        fill="none"
+      />
+    </svg>
+  );
+}
+
 export function Titlebar() {
   const appWindow = getCurrentWindow();
   const openModal = useUIStore((s) => s.openModal);
+  const setActivePage = useUIStore((s) => s.setActivePage);
+  const tabs = useTabStore((s) => s.tabs);
+  const activeTabId = useTabStore((s) => s.activeTabId);
+  const setActiveTab = useTabStore((s) => s.setActiveTab);
+  const closeTab = useTabStore((s) => s.closeTab);
+  const reorderTabs = useTabStore((s) => s.reorderTabs);
+
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+
+  const handleDragStart = useCallback(
+    (e: DragEvent<HTMLButtonElement>, index: number) => {
+      setDragIndex(index);
+      e.dataTransfer.effectAllowed = "move";
+    },
+    [],
+  );
+
+  const handleDragOver = useCallback((e: DragEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  }, []);
+
+  const handleDrop = useCallback(
+    (e: DragEvent<HTMLButtonElement>, toIndex: number) => {
+      e.preventDefault();
+      if (dragIndex !== null && dragIndex !== toIndex) {
+        reorderTabs(dragIndex, toIndex);
+      }
+      setDragIndex(null);
+    },
+    [dragIndex, reorderTabs],
+  );
+
+  const handleDragEnd = useCallback(() => {
+    setDragIndex(null);
+  }, []);
+
+  const handleAddTab = useCallback(() => {
+    setActivePage("open-repository");
+  }, [setActivePage]);
+
+  const handleTabClose = useCallback(
+    (e: React.MouseEvent, tabId: string) => {
+      e.stopPropagation();
+      closeTab(tabId);
+    },
+    [closeTab],
+  );
 
   return (
     <div className="titlebar" data-tauri-drag-region>
@@ -90,9 +176,47 @@ export function Titlebar() {
           <MaximizeIcon />
         </button>
       </div>
-      <span className="titlebar-title" data-tauri-drag-region>
-        Rocket
-      </span>
+      {tabs.length > 0 ? (
+        <div className="titlebar-tabs">
+          {tabs.map((tab, index) => (
+            <button
+              key={tab.id}
+              type="button"
+              className={`tab${tab.id === activeTabId ? " active" : ""}`}
+              draggable
+              onDragStart={(e) => handleDragStart(e, index)}
+              onDragOver={handleDragOver}
+              onDrop={(e) => handleDrop(e, index)}
+              onDragEnd={handleDragEnd}
+              onClick={() => setActiveTab(tab.id)}
+            >
+              {tab.name}
+              {tabs.length > 1 && (
+                <button
+                  type="button"
+                  className="tab-close"
+                  tabIndex={-1}
+                  onClick={(e) => handleTabClose(e, tab.id)}
+                >
+                  <TabCloseIcon />
+                </button>
+              )}
+            </button>
+          ))}
+          <button
+            type="button"
+            className="tab tab-add"
+            aria-label="Open Repository"
+            onClick={handleAddTab}
+          >
+            <PlusIcon />
+          </button>
+        </div>
+      ) : (
+        <span className="titlebar-title" data-tauri-drag-region>
+          Rocket
+        </span>
+      )}
       <div className="titlebar-actions">
         <button
           type="button"

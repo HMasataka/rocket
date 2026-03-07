@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import type { MergeBaseContent } from "../../../services/conflict";
 import { getMergeBaseContent } from "../../../services/conflict";
+import { getActiveTabId } from "../../../stores/tabStore";
 import "../../../styles/merge-viewer.css";
 
 interface MergeViewerModalProps {
@@ -19,7 +20,7 @@ export function MergeViewerModal({
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    getMergeBaseContent(path)
+    getMergeBaseContent(getActiveTabId(), path)
       .then((data) => {
         setContent(data);
         setResult(data.ours_content);

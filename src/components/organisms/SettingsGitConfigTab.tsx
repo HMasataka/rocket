@@ -12,6 +12,7 @@ import {
   setGitconfigValue,
   unsetGitconfigValue,
 } from "../../services/gitconfig";
+import { getActiveTabId } from "../../stores/tabStore";
 import { useUIStore } from "../../stores/uiStore";
 
 interface ConfigSection {
@@ -155,8 +156,8 @@ export function SettingsGitConfigTab() {
     async (s: GitConfigScope) => {
       try {
         const [allEntries, path] = await Promise.all([
-          getGitconfigEntries(s),
-          getGitconfigPath(s),
+          getGitconfigEntries(getActiveTabId(), s),
+          getGitconfigPath(getActiveTabId(), s),
         ]);
         const map = new Map<string, string>();
         const aliasList: GitConfigEntry[] = [];
@@ -191,9 +192,9 @@ export function SettingsGitConfigTab() {
     async (key: string, value: string) => {
       try {
         if (value === "") {
-          await unsetGitconfigValue(scope, key);
+          await unsetGitconfigValue(getActiveTabId(), scope, key);
         } else {
-          await setGitconfigValue(scope, key, value);
+          await setGitconfigValue(getActiveTabId(), scope, key, value);
         }
         setEntries((prev) => {
           const next = new Map(prev);

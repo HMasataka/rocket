@@ -9,20 +9,21 @@ export interface CherryPickResult {
 }
 
 export function cherryPick(
+  tabId: string,
   oids: string[],
   mode: CherryPickMode,
 ): Promise<CherryPickResult> {
-  return invoke<CherryPickResult>("cherry_pick", { oids, mode });
+  return invoke<CherryPickResult>("cherry_pick", { tabId, oids, mode });
 }
 
-export function isCherryPicking(): Promise<boolean> {
-  return invoke<boolean>("is_cherry_picking");
+export function isCherryPicking(tabId: string): Promise<boolean> {
+  return invoke<boolean>("is_cherry_picking", { tabId });
 }
 
-export function abortCherryPick(): Promise<void> {
-  return invoke<void>("abort_cherry_pick");
+export function abortCherryPick(tabId: string): Promise<void> {
+  return invoke<void>("abort_cherry_pick", { tabId });
 }
 
-export function continueCherryPick(): Promise<CherryPickResult> {
-  return invoke<CherryPickResult>("continue_cherry_pick");
+export function continueCherryPick(tabId: string): Promise<CherryPickResult> {
+  return invoke<CherryPickResult>("continue_cherry_pick", { tabId });
 }

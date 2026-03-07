@@ -57,6 +57,7 @@ describe("repoStore", () => {
       expect(useRepoStore.getState().error).toBeNull();
       expect(mockedInvoke).toHaveBeenCalledWith("open_repository", {
         path: "/home/user/project",
+        tabId: "default",
       });
     });
 
@@ -83,6 +84,7 @@ describe("repoStore", () => {
       expect(mockedInvoke).toHaveBeenCalledWith("init_repository", {
         path: "/home/user/new-repo",
         gitignoreTemplate: null,
+        tabId: "default",
       });
     });
 
@@ -96,6 +98,7 @@ describe("repoStore", () => {
       expect(mockedInvoke).toHaveBeenCalledWith("init_repository", {
         path: "/home/user/new-repo",
         gitignoreTemplate: "Node",
+        tabId: "default",
       });
     });
 
@@ -124,6 +127,7 @@ describe("repoStore", () => {
       expect(mockedInvoke).toHaveBeenCalledWith("clone_repository", {
         url: "https://example.com/repo.git",
         path: "/home/user/repo",
+        tabId: "default",
       });
     });
 

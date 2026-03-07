@@ -15,22 +15,26 @@ export interface SubmoduleInfo {
   status: SubmoduleStatus;
 }
 
-export function listSubmodules(): Promise<SubmoduleInfo[]> {
-  return invoke<SubmoduleInfo[]>("list_submodules");
+export function listSubmodules(tabId: string): Promise<SubmoduleInfo[]> {
+  return invoke<SubmoduleInfo[]>("list_submodules", { tabId });
 }
 
-export function addSubmodule(url: string, path: string): Promise<void> {
-  return invoke<void>("add_submodule", { url, path });
+export function addSubmodule(
+  tabId: string,
+  url: string,
+  path: string,
+): Promise<void> {
+  return invoke<void>("add_submodule", { tabId, url, path });
 }
 
-export function updateSubmodule(path: string): Promise<void> {
-  return invoke<void>("update_submodule", { path });
+export function updateSubmodule(tabId: string, path: string): Promise<void> {
+  return invoke<void>("update_submodule", { tabId, path });
 }
 
-export function updateAllSubmodules(): Promise<void> {
-  return invoke<void>("update_all_submodules");
+export function updateAllSubmodules(tabId: string): Promise<void> {
+  return invoke<void>("update_all_submodules", { tabId });
 }
 
-export function removeSubmodule(path: string): Promise<void> {
-  return invoke<void>("remove_submodule", { path });
+export function removeSubmodule(tabId: string, path: string): Promise<void> {
+  return invoke<void>("remove_submodule", { tabId, path });
 }

@@ -59,31 +59,35 @@ export interface Issue {
   url: string;
 }
 
-export function detectHostingProvider(): Promise<HostingInfo> {
-  return invoke<HostingInfo>("detect_hosting_provider");
+export function detectHostingProvider(tabId: string): Promise<HostingInfo> {
+  return invoke<HostingInfo>("detect_hosting_provider", { tabId });
 }
 
-export function listPullRequests(): Promise<PullRequest[]> {
-  return invoke<PullRequest[]>("list_pull_requests");
+export function listPullRequests(tabId: string): Promise<PullRequest[]> {
+  return invoke<PullRequest[]>("list_pull_requests", { tabId });
 }
 
-export function getPullRequestDetail(number: number): Promise<PrDetail> {
-  return invoke<PrDetail>("get_pull_request_detail", { number });
+export function getPullRequestDetail(
+  tabId: string,
+  number: number,
+): Promise<PrDetail> {
+  return invoke<PrDetail>("get_pull_request_detail", { tabId, number });
 }
 
-export function listIssues(): Promise<Issue[]> {
-  return invoke<Issue[]>("list_issues");
+export function listIssues(tabId: string): Promise<Issue[]> {
+  return invoke<Issue[]>("list_issues", { tabId });
 }
 
-export function getDefaultBranch(): Promise<string> {
-  return invoke<string>("get_default_branch");
+export function getDefaultBranch(tabId: string): Promise<string> {
+  return invoke<string>("get_default_branch", { tabId });
 }
 
 export function createPullRequestUrl(
+  tabId: string,
   head: string,
   base: string,
 ): Promise<string> {
-  return invoke<string>("create_pull_request_url", { head, base });
+  return invoke<string>("create_pull_request_url", { tabId, head, base });
 }
 
 export function openInBrowser(url: string): Promise<void> {

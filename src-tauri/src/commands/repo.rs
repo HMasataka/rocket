@@ -1,57 +1,57 @@
 use tauri::{AppHandle, Emitter, State};
 
 use crate::config::{self, RecentRepo};
-use crate::git::backend::GitBackend;
 use crate::git::dispatcher::GitDispatcher;
-use crate::state::AppState;
+use crate::state::{self, AppState, RepoContext};
 use crate::watcher;
 
-fn repo_name_from_path(path: &str) -> String {
-    std::path::Path::new(path)
-        .file_name()
-        .map(|n| n.to_string_lossy().to_string())
-        .unwrap_or_else(|| path.to_string())
-}
-
-fn setup_repo_after_open(
-    backend: Box<dyn GitBackend>,
+pub(crate) fn setup_repo_after_open(
+    backend: Box<dyn crate::git::backend::GitBackend>,
     app_handle: &AppHandle,
     state: &State<'_, AppState>,
     path: &str,
+    tab_id: &str,
 ) -> Result<(), String> {
     let watch_path = backend.workdir().to_path_buf();
+    let name = state::repo_name_from_path(path);
 
-    {
-        let mut repo_lock = state
-            .repo
-            .lock()
-            .map_err(|e| format!("Lock poisoned: {e}"))?;
-        *repo_lock = Some(backend);
-    }
-
-    {
-        let mut watcher_lock = state
-            .watcher
-            .lock()
-            .map_err(|e| format!("Lock poisoned: {e}"))?;
-        *watcher_lock = None;
-
-        match watcher::start_watcher(app_handle.clone(), &watch_path) {
-            Ok(w) => {
-                *watcher_lock = Some(w);
-            }
-            Err(e) => {
-                log::error!("Failed to start watcher: {}", e);
-            }
+    let watcher_box = match watcher::start_watcher(app_handle.clone(), &watch_path, tab_id) {
+        Ok(w) => Some(w),
+        Err(e) => {
+            log::error!("Failed to start watcher: {}", e);
+            None
         }
-    }
+    };
 
     let mut cfg = config::load_config().map_err(|e| e.to_string())?;
     cfg.last_opened_repo = Some(path.to_string());
-    config::add_recent_repo(&mut cfg, path, &repo_name_from_path(path));
+    config::add_recent_repo(&mut cfg, path, &name);
+
+    let ctx = RepoContext {
+        backend,
+        watcher: watcher_box,
+        path: path.to_string(),
+        name,
+    };
+
+    {
+        let mut tabs = state
+            .tabs
+            .lock()
+            .map_err(|e| format!("Lock poisoned: {e}"))?;
+        tabs.insert(tab_id.to_string(), ctx);
+    }
+
+    {
+        let mut active = state
+            .active_tab
+            .lock()
+            .map_err(|e| format!("Lock poisoned: {e}"))?;
+        *active = Some(tab_id.to_string());
+    }
     config::save_config(&cfg).map_err(|e| e.to_string())?;
 
-    let _ = app_handle.emit("repo:changed", ());
+    let _ = app_handle.emit("repo:changed", tab_id.to_string());
 
     Ok(())
 }
@@ -59,17 +59,19 @@ fn setup_repo_after_open(
 #[tauri::command]
 pub fn open_repository(
     path: String,
+    tab_id: String,
     app_handle: AppHandle,
     state: State<'_, AppState>,
 ) -> Result<(), String> {
     let backend = GitDispatcher::open_default(&path).map_err(|e| e.to_string())?;
-    setup_repo_after_open(backend, &app_handle, &state, &path)
+    setup_repo_after_open(backend, &app_handle, &state, &path, &tab_id)
 }
 
 #[tauri::command]
 pub fn init_repository(
     path: String,
     gitignore_template: Option<String>,
+    tab_id: String,
     app_handle: AppHandle,
     state: State<'_, AppState>,
 ) -> Result<(), String> {
@@ -84,7 +86,7 @@ pub fn init_repository(
         }
     }
 
-    setup_repo_after_open(backend, &app_handle, &state, &path)
+    setup_repo_after_open(backend, &app_handle, &state, &path, &tab_id)
 }
 
 #[tauri::command]
@@ -105,9 +107,10 @@ pub fn remove_recent_repo(path: String) -> Result<(), String> {
 pub fn clone_repository(
     url: String,
     path: String,
+    tab_id: String,
     app_handle: AppHandle,
     state: State<'_, AppState>,
 ) -> Result<(), String> {
     let backend = GitDispatcher::clone_repo(&url, &path).map_err(|e| e.to_string())?;
-    setup_repo_after_open(backend, &app_handle, &state, &path)
+    setup_repo_after_open(backend, &app_handle, &state, &path, &tab_id)
 }

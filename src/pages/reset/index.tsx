@@ -4,6 +4,7 @@ import type { CommitDetail } from "../../services/history";
 import { getCommitDetail } from "../../services/history";
 import type { ResetMode } from "../../services/reset";
 import { useGitStore } from "../../stores/gitStore";
+import { getActiveTabId } from "../../stores/tabStore";
 import { useUIStore } from "../../stores/uiStore";
 import { HardResetDialog } from "./organisms/HardResetDialog";
 import { ResetCommitList } from "./organisms/ResetCommitList";
@@ -25,7 +26,7 @@ export function ResetPage() {
   const handleSelect = useCallback(
     (oid: string) => {
       setSelectedOid(oid);
-      getCommitDetail(oid)
+      getCommitDetail(getActiveTabId(), oid)
         .then(setPreviewDetail)
         .catch((e: unknown) => addToast(String(e), "error"));
     },

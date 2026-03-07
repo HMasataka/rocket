@@ -17,6 +17,7 @@ import {
   reviewDiff as reviewDiffService,
   saveAiConfig as saveAiConfigService,
 } from "../services/ai";
+import { getActiveTabId } from "./tabStore";
 
 interface AiState {
   adapters: CliAdapterInfo[];
@@ -75,7 +76,11 @@ export const useAiStore = create<AiState & AiActions>((set) => ({
   ) => {
     set({ generating: true, error: null });
     try {
-      const result = await generateCommitMessageService(format, language);
+      const result = await generateCommitMessageService(
+        getActiveTabId(),
+        format,
+        language,
+      );
       set({ lastResult: result, generating: false });
       return result;
     } catch (e) {
@@ -87,7 +92,7 @@ export const useAiStore = create<AiState & AiActions>((set) => ({
   reviewDiff: async () => {
     set({ reviewing: true, error: null });
     try {
-      const result = await reviewDiffService();
+      const result = await reviewDiffService(getActiveTabId());
       set({ reviewComments: result.comments, reviewing: false });
       return result;
     } catch (e) {

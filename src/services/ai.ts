@@ -49,29 +49,24 @@ export interface ConflictSuggestion {
   reason: string;
 }
 
-// === PR description types ===
-
-export interface PrDescription {
-  title: string;
-  body: string;
-}
-
 export function detectCliAdapters(): Promise<CliAdapterInfo[]> {
   return invoke<CliAdapterInfo[]>("detect_cli_adapters");
 }
 
 export function generateCommitMessage(
+  tabId: string,
   format: string,
   language: string,
 ): Promise<GenerateResult> {
   return invoke<GenerateResult>("generate_commit_message", {
+    tabId,
     format,
     language,
   });
 }
 
-export function reviewDiff(): Promise<ReviewResult> {
-  return invoke<ReviewResult>("review_diff");
+export function reviewDiff(tabId: string): Promise<ReviewResult> {
+  return invoke<ReviewResult>("review_diff", { tabId });
 }
 
 export function aiResolveConflict(
@@ -84,10 +79,6 @@ export function aiResolveConflict(
     theirs,
     base,
   });
-}
-
-export function generatePrDescription(): Promise<PrDescription> {
-  return invoke<PrDescription>("generate_pr_description");
 }
 
 export function getAiConfig(): Promise<AiConfig> {

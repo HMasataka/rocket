@@ -1,4 +1,5 @@
 pub mod ai;
+pub mod auto_fetch;
 pub mod commands;
 pub mod config;
 pub mod git;
@@ -6,19 +7,18 @@ pub mod hosting;
 pub mod state;
 pub mod watcher;
 
+use std::collections::HashMap;
 use std::sync::Mutex;
 
-use state::AppState;
+use state::{AppState, RepoContext, DEFAULT_TAB_ID};
 use tauri::Manager;
 
 /// CLI 引数 → last_opened_repo → カレントディレクトリ の優先順位でリポジトリパスを解決する
 fn resolve_repo_path() -> Option<std::path::PathBuf> {
-    // 1. CLI 引数にパスが指定されている場合
     if let Some(arg) = std::env::args().nth(1) {
         return std::fs::canonicalize(&arg).ok();
     }
 
-    // 2. last_opened_repo が設定されている場合
     if let Ok(cfg) = config::load_config() {
         if let Some(last) = cfg.last_opened_repo {
             let path = std::path::PathBuf::from(&last);
@@ -28,7 +28,6 @@ fn resolve_repo_path() -> Option<std::path::PathBuf> {
         }
     }
 
-    // 3. カレントディレクトリ
     std::env::current_dir().ok()
 }
 
@@ -39,27 +38,47 @@ pub fn run() {
         .as_ref()
         .and_then(|path| git::dispatcher::GitDispatcher::open_default(path).ok());
 
-    // リポジトリを正常に開けた場合、last_opened_repo に保存
-    if let (Some(path), Some(_)) = (&repo_path, &repo) {
+    let default_tab_id = DEFAULT_TAB_ID.to_string();
+    let mut tabs = HashMap::new();
+    let mut active_tab = None;
+
+    if let (Some(path), Some(backend)) = (&repo_path, repo) {
         if let Ok(mut cfg) = config::load_config() {
             cfg.last_opened_repo = Some(path.to_string_lossy().to_string());
             let _ = config::save_config(&cfg);
         }
+
+        let path_str = path.to_string_lossy().to_string();
+        let name = state::repo_name_from_path(&path_str);
+        let ctx = RepoContext {
+            backend,
+            watcher: None,
+            path: path_str,
+            name,
+        };
+        tabs.insert(default_tab_id.clone(), ctx);
+        active_tab = Some(default_tab_id.clone());
     }
 
-    // git2::Repository::discover で実際の workdir を解決する
-    let watch_path = repo_path.as_ref().and_then(|path| {
-        git2::Repository::discover(path)
-            .ok()
-            .and_then(|repo| repo.workdir().map(|p| p.to_path_buf()))
+    let watch_info: Option<(std::path::PathBuf, String)> = repo_path.as_ref().and_then(|path| {
+        git2::Repository::discover(path).ok().and_then(|repo| {
+            repo.workdir()
+                .map(|p| (p.to_path_buf(), default_tab_id.clone()))
+        })
     });
+
+    let auto_fetch_interval = config::load_config()
+        .map(|c| c.tools.auto_fetch_interval)
+        .unwrap_or(300);
 
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_notification::init())
         .manage(AppState {
-            repo: Mutex::new(repo),
-            watcher: Mutex::new(None),
+            tabs: Mutex::new(tabs),
+            active_tab: Mutex::new(active_tab),
+            auto_fetch_handle: Mutex::new(None),
         })
         .setup(move |app| {
             if cfg!(debug_assertions) {
@@ -70,11 +89,14 @@ pub fn run() {
                 )?;
             }
 
-            if let Some(path) = watch_path {
-                match watcher::start_watcher(app.handle().clone(), &path) {
+            if let Some((watch_path, tab_id)) = watch_info {
+                match watcher::start_watcher(app.handle().clone(), &watch_path, &tab_id) {
                     Ok(w) => {
                         let state = app.state::<AppState>();
-                        *state.watcher.lock().unwrap() = Some(w);
+                        let mut tabs = state.tabs.lock().unwrap();
+                        if let Some(ctx) = tabs.get_mut(&tab_id) {
+                            ctx.watcher = Some(w);
+                        }
                     }
                     Err(e) => {
                         log::error!("ファイル監視の起動に失敗: {}", e);
@@ -82,9 +104,27 @@ pub fn run() {
                 }
             }
 
+            // auto fetch の起動
+            let auto_fetch_enabled = config::load_config()
+                .map(|c| c.tools.auto_fetch_on_open)
+                .unwrap_or(true);
+
+            if auto_fetch_enabled && auto_fetch_interval > 0 {
+                let handle =
+                    auto_fetch::start_auto_fetch(app.handle().clone(), auto_fetch_interval as u64);
+                let state = app.state::<AppState>();
+                let mut auto_fetch_lock = state.auto_fetch_handle.lock().unwrap();
+                *auto_fetch_lock = Some(Box::new(handle));
+            }
+
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            commands::tab::open_tab,
+            commands::tab::close_tab,
+            commands::tab::set_active_tab,
+            commands::tab::list_tabs,
+            commands::tab::get_active_tab,
             commands::git::get_status,
             commands::git::get_diff,
             commands::git::stage_file,
@@ -161,7 +201,6 @@ pub fn run() {
             commands::ai::generate_commit_message,
             commands::ai::review_diff,
             commands::ai::ai_resolve_conflict,
-            commands::ai::generate_pr_description,
             commands::ai::get_ai_config,
             commands::ai::save_ai_config,
             commands::hosting::detect_hosting_provider,

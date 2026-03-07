@@ -2,6 +2,7 @@ import { useCallback, useEffect } from "react";
 import { createPullRequestUrl, openInBrowser } from "../../services/hosting";
 import { useGitStore } from "../../stores/gitStore";
 import { useHostingStore } from "../../stores/hostingStore";
+import { getActiveTabId } from "../../stores/tabStore";
 import { useUIStore } from "../../stores/uiStore";
 import { IssueList } from "./IssueList";
 import { PrDetailPanel } from "./PrDetailPanel";
@@ -54,7 +55,7 @@ export function HostingPage() {
   const handleCreatePr = useCallback(() => {
     if (!currentBranch) return;
     const base = defaultBranch ?? "main";
-    createPullRequestUrl(currentBranch, base)
+    createPullRequestUrl(getActiveTabId(), currentBranch, base)
       .then((url) => openInBrowser(url))
       .catch((e: unknown) => {
         addToast(String(e), "error");

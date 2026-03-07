@@ -9,14 +9,18 @@ export interface WorktreeInfo {
   is_clean: boolean;
 }
 
-export function listWorktrees(): Promise<WorktreeInfo[]> {
-  return invoke<WorktreeInfo[]>("list_worktrees");
+export function listWorktrees(tabId: string): Promise<WorktreeInfo[]> {
+  return invoke<WorktreeInfo[]>("list_worktrees", { tabId });
 }
 
-export function addWorktree(path: string, branch: string): Promise<void> {
-  return invoke<void>("add_worktree", { path, branch });
+export function addWorktree(
+  tabId: string,
+  path: string,
+  branch: string,
+): Promise<void> {
+  return invoke<void>("add_worktree", { tabId, path, branch });
 }
 
-export function removeWorktree(path: string): Promise<void> {
-  return invoke<void>("remove_worktree", { path });
+export function removeWorktree(tabId: string, path: string): Promise<void> {
+  return invoke<void>("remove_worktree", { tabId, path });
 }

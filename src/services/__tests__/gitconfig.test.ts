@@ -28,9 +28,10 @@ describe("gitconfig service", () => {
       ];
       mockedInvoke.mockResolvedValueOnce(mockEntries);
 
-      const result = await getGitconfigEntries("local");
+      const result = await getGitconfigEntries("tab-1", "local");
 
       expect(mockedInvoke).toHaveBeenCalledWith("get_gitconfig_entries", {
+        tabId: "tab-1",
         scope: "local",
       });
       expect(result).toEqual(mockEntries);
@@ -41,9 +42,10 @@ describe("gitconfig service", () => {
     it("invokes with scope and key", async () => {
       mockedInvoke.mockResolvedValueOnce("Test User");
 
-      const result = await getGitconfigValue("global", "user.name");
+      const result = await getGitconfigValue("tab-1", "global", "user.name");
 
       expect(mockedInvoke).toHaveBeenCalledWith("get_gitconfig_value", {
+        tabId: "tab-1",
         scope: "global",
         key: "user.name",
       });
@@ -53,7 +55,11 @@ describe("gitconfig service", () => {
     it("returns null for missing key", async () => {
       mockedInvoke.mockResolvedValueOnce(null);
 
-      const result = await getGitconfigValue("local", "nonexistent.key");
+      const result = await getGitconfigValue(
+        "tab-1",
+        "local",
+        "nonexistent.key",
+      );
 
       expect(result).toBeNull();
     });
@@ -63,9 +69,10 @@ describe("gitconfig service", () => {
     it("invokes with scope, key, and value", async () => {
       mockedInvoke.mockResolvedValueOnce(undefined);
 
-      await setGitconfigValue("local", "user.name", "New Name");
+      await setGitconfigValue("tab-1", "local", "user.name", "New Name");
 
       expect(mockedInvoke).toHaveBeenCalledWith("set_gitconfig_value", {
+        tabId: "tab-1",
         scope: "local",
         key: "user.name",
         value: "New Name",
@@ -77,9 +84,10 @@ describe("gitconfig service", () => {
     it("invokes with scope and key", async () => {
       mockedInvoke.mockResolvedValueOnce(undefined);
 
-      await unsetGitconfigValue("global", "user.signingKey");
+      await unsetGitconfigValue("tab-1", "global", "user.signingKey");
 
       expect(mockedInvoke).toHaveBeenCalledWith("unset_gitconfig_value", {
+        tabId: "tab-1",
         scope: "global",
         key: "user.signingKey",
       });
@@ -90,9 +98,10 @@ describe("gitconfig service", () => {
     it("invokes with scope", async () => {
       mockedInvoke.mockResolvedValueOnce("/home/user/.gitconfig");
 
-      const result = await getGitconfigPath("global");
+      const result = await getGitconfigPath("tab-1", "global");
 
       expect(mockedInvoke).toHaveBeenCalledWith("get_gitconfig_path", {
+        tabId: "tab-1",
         scope: "global",
       });
       expect(result).toBe("/home/user/.gitconfig");

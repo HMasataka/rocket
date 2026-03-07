@@ -1,13 +1,14 @@
 import { open } from "@tauri-apps/plugin-dialog";
 import { useCallback, useEffect } from "react";
 import { useRepoStore } from "../../stores/repoStore";
+import { useTabStore } from "../../stores/tabStore";
 import { useUIStore } from "../../stores/uiStore";
 import { RecentRepoList } from "./organisms/RecentRepoList";
 
 export function OpenRepositoryPage() {
   const recentRepos = useRepoStore((s) => s.recentRepos);
   const fetchRecentRepos = useRepoStore((s) => s.fetchRecentRepos);
-  const openRepo = useRepoStore((s) => s.openRepository);
+  const openTab = useTabStore((s) => s.openTab);
   const addToast = useUIStore((s) => s.addToast);
   const setActivePage = useUIStore((s) => s.setActivePage);
   const openModal = useUIStore((s) => s.openModal);
@@ -22,23 +23,23 @@ export function OpenRepositoryPage() {
     const selected = await open({ directory: true, multiple: false });
     if (!selected) return;
     try {
-      await openRepo(selected);
+      await openTab(selected);
       setActivePage("changes");
     } catch (e: unknown) {
       addToast(`Failed to open repository: ${String(e)}`, "error");
     }
-  }, [openRepo, setActivePage, addToast]);
+  }, [openTab, setActivePage, addToast]);
 
   const handleSelectRepo = useCallback(
     async (path: string) => {
       try {
-        await openRepo(path);
+        await openTab(path);
         setActivePage("changes");
       } catch (e: unknown) {
         addToast(`Failed to open repository: ${String(e)}`, "error");
       }
     },
-    [openRepo, setActivePage, addToast],
+    [openTab, setActivePage, addToast],
   );
 
   const handleClone = useCallback(() => {

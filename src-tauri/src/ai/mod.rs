@@ -1,7 +1,6 @@
 pub mod adapter;
 pub mod conflict;
 pub mod detector;
-pub mod pr;
 pub mod prompt;
 pub mod review;
 pub mod types;

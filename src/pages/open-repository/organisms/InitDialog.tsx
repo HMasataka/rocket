@@ -2,7 +2,7 @@ import { open } from "@tauri-apps/plugin-dialog";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Modal } from "../../../components/organisms/Modal";
 import { listGitignoreTemplates } from "../../../services/gitignore";
-import { useRepoStore } from "../../../stores/repoStore";
+import { useTabStore } from "../../../stores/tabStore";
 import { useUIStore } from "../../../stores/uiStore";
 
 interface InitDialogProps {
@@ -14,7 +14,7 @@ export function InitDialog({ onClose }: InitDialogProps) {
   const [gitignoreTemplate, setGitignoreTemplate] = useState("");
   const [templates, setTemplates] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
-  const initRepo = useRepoStore((s) => s.initRepository);
+  const initInNewTab = useTabStore((s) => s.initInNewTab);
   const addToast = useUIStore((s) => s.addToast);
   const setActivePage = useUIStore((s) => s.setActivePage);
 
@@ -43,7 +43,7 @@ export function InitDialog({ onClose }: InitDialogProps) {
     if (!path.trim()) return;
     setLoading(true);
     try {
-      await initRepo(path.trim(), gitignoreTemplate || undefined);
+      await initInNewTab(path.trim(), gitignoreTemplate || undefined);
       addToast("Repository initialized successfully", "success");
       setActivePage("changes");
       onClose();
@@ -52,7 +52,7 @@ export function InitDialog({ onClose }: InitDialogProps) {
     } finally {
       setLoading(false);
     }
-  }, [path, gitignoreTemplate, initRepo, addToast, setActivePage, onClose]);
+  }, [path, gitignoreTemplate, initInNewTab, addToast, setActivePage, onClose]);
 
   return (
     <Modal

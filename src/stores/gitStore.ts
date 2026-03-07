@@ -114,6 +114,7 @@ import {
   listWorktrees,
   removeWorktree as removeWorktreeService,
 } from "../services/worktree";
+import { getActiveTabId } from "./tabStore";
 
 const REBASE_TODO_DEFAULT_LIMIT = 100;
 
@@ -247,7 +248,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
   fetchStatus: async () => {
     set({ loading: true, error: null });
     try {
-      const status = await getStatus();
+      const status = await getStatus(getActiveTabId());
       set({ status, loading: false });
     } catch (e) {
       set({ error: String(e), loading: false });
@@ -257,7 +258,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   fetchBranch: async () => {
     try {
-      const currentBranch = await getCurrentBranch();
+      const currentBranch = await getCurrentBranch(getActiveTabId());
       set({ currentBranch });
     } catch (e) {
       set({ error: String(e) });
@@ -267,7 +268,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   fetchBranches: async () => {
     try {
-      const branches = await listBranches();
+      const branches = await listBranches(getActiveTabId());
       set({ branches });
     } catch (e) {
       set({ error: String(e) });
@@ -277,7 +278,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   fetchDiff: async (path: string | null, staged: boolean) => {
     try {
-      const diff = await getDiff(path, staged);
+      const diff = await getDiff(getActiveTabId(), path, staged);
       set({ diff });
     } catch (e) {
       set({ error: String(e) });
@@ -287,7 +288,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   stageFile: async (path: string) => {
     try {
-      await stageFileService(path);
+      await stageFileService(getActiveTabId(), path);
     } catch (e) {
       set({ error: String(e) });
       throw e;
@@ -296,7 +297,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   unstageFile: async (path: string) => {
     try {
-      await unstageFileService(path);
+      await unstageFileService(getActiveTabId(), path);
     } catch (e) {
       set({ error: String(e) });
       throw e;
@@ -305,7 +306,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   stageAll: async () => {
     try {
-      await stageAllService();
+      await stageAllService(getActiveTabId());
     } catch (e) {
       set({ error: String(e) });
       throw e;
@@ -314,7 +315,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   unstageAll: async () => {
     try {
-      await unstageAllService();
+      await unstageAllService(getActiveTabId());
     } catch (e) {
       set({ error: String(e) });
       throw e;
@@ -323,7 +324,12 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   commit: async (message: string, amend: boolean, sign: boolean) => {
     try {
-      const result = await commitChanges(message, amend, sign);
+      const result = await commitChanges(
+        getActiveTabId(),
+        message,
+        amend,
+        sign,
+      );
       return result.oid;
     } catch (e) {
       set({ error: String(e) });
@@ -333,7 +339,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   createBranch: async (name: string) => {
     try {
-      await createBranchService(name);
+      await createBranchService(getActiveTabId(), name);
     } catch (e) {
       set({ error: String(e) });
       throw e;
@@ -342,7 +348,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   checkoutBranch: async (name: string) => {
     try {
-      await checkoutBranchService(name);
+      await checkoutBranchService(getActiveTabId(), name);
     } catch (e) {
       set({ error: String(e) });
       throw e;
@@ -351,7 +357,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   deleteBranch: async (name: string) => {
     try {
-      await deleteBranchService(name);
+      await deleteBranchService(getActiveTabId(), name);
     } catch (e) {
       set({ error: String(e) });
       throw e;
@@ -360,7 +366,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   renameBranch: async (oldName: string, newName: string) => {
     try {
-      await renameBranchService(oldName, newName);
+      await renameBranchService(getActiveTabId(), oldName, newName);
     } catch (e) {
       set({ error: String(e) });
       throw e;
@@ -369,7 +375,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   mergeBranch: async (branchName: string, option: MergeOption) => {
     try {
-      return await mergeBranchService(branchName, option);
+      return await mergeBranchService(getActiveTabId(), branchName, option);
     } catch (e) {
       set({ error: String(e) });
       throw e;
@@ -378,7 +384,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   fetchRemote: async (remoteName: string) => {
     try {
-      return await fetchRemoteService(remoteName);
+      return await fetchRemoteService(getActiveTabId(), remoteName);
     } catch (e) {
       set({ error: String(e) });
       throw e;
@@ -387,7 +393,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   pullRemote: async (remoteName: string, option: PullOption) => {
     try {
-      return await pullRemoteService(remoteName, option);
+      return await pullRemoteService(getActiveTabId(), remoteName, option);
     } catch (e) {
       set({ error: String(e) });
       throw e;
@@ -396,7 +402,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   pushRemote: async (remoteName: string) => {
     try {
-      return await pushRemoteService(remoteName);
+      return await pushRemoteService(getActiveTabId(), remoteName);
     } catch (e) {
       set({ error: String(e) });
       throw e;
@@ -405,7 +411,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   fetchRemotes: async () => {
     try {
-      const remotes = await listRemotes();
+      const remotes = await listRemotes(getActiveTabId());
       set({ remotes });
     } catch (e) {
       set({ error: String(e) });
@@ -415,7 +421,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   addRemote: async (name: string, url: string) => {
     try {
-      await addRemoteService(name, url);
+      await addRemoteService(getActiveTabId(), name, url);
     } catch (e) {
       set({ error: String(e) });
       throw e;
@@ -424,7 +430,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   removeRemote: async (name: string) => {
     try {
-      await removeRemoteService(name);
+      await removeRemoteService(getActiveTabId(), name);
     } catch (e) {
       set({ error: String(e) });
       throw e;
@@ -433,7 +439,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   editRemote: async (name: string, newUrl: string) => {
     try {
-      await editRemoteService(name, newUrl);
+      await editRemoteService(getActiveTabId(), name, newUrl);
     } catch (e) {
       set({ error: String(e) });
       throw e;
@@ -442,7 +448,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   stageHunk: async (path: string, hunk: HunkIdentifier) => {
     try {
-      await stageHunkService(path, hunk);
+      await stageHunkService(getActiveTabId(), path, hunk);
     } catch (e) {
       set({ error: String(e) });
       throw e;
@@ -451,7 +457,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   unstageHunk: async (path: string, hunk: HunkIdentifier) => {
     try {
-      await unstageHunkService(path, hunk);
+      await unstageHunkService(getActiveTabId(), path, hunk);
     } catch (e) {
       set({ error: String(e) });
       throw e;
@@ -460,7 +466,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   discardHunk: async (path: string, hunk: HunkIdentifier) => {
     try {
-      await discardHunkService(path, hunk);
+      await discardHunkService(getActiveTabId(), path, hunk);
     } catch (e) {
       set({ error: String(e) });
       throw e;
@@ -469,7 +475,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   stageLines: async (path: string, lineRange: LineRange) => {
     try {
-      await stageLinesService(path, lineRange);
+      await stageLinesService(getActiveTabId(), path, lineRange);
     } catch (e) {
       set({ error: String(e) });
       throw e;
@@ -478,7 +484,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   unstageLines: async (path: string, lineRange: LineRange) => {
     try {
-      await unstageLinesService(path, lineRange);
+      await unstageLinesService(getActiveTabId(), path, lineRange);
     } catch (e) {
       set({ error: String(e) });
       throw e;
@@ -487,7 +493,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   discardLines: async (path: string, lineRange: LineRange) => {
     try {
-      await discardLinesService(path, lineRange);
+      await discardLinesService(getActiveTabId(), path, lineRange);
     } catch (e) {
       set({ error: String(e) });
       throw e;
@@ -496,7 +502,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   getHeadCommitMessage: async () => {
     try {
-      return await getHeadCommitMessage();
+      return await getHeadCommitMessage(getActiveTabId());
     } catch (e) {
       set({ error: String(e) });
       throw e;
@@ -505,7 +511,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   fetchStashes: async () => {
     try {
-      const stashes = await listStashes();
+      const stashes = await listStashes(getActiveTabId());
       set({ stashes });
     } catch (e) {
       set({ error: String(e) });
@@ -515,7 +521,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   stashSave: async (message: string | null) => {
     try {
-      await stashSaveService(message);
+      await stashSaveService(getActiveTabId(), message);
     } catch (e) {
       set({ error: String(e) });
       throw e;
@@ -524,7 +530,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   applyStash: async (index: number) => {
     try {
-      await applyStashService(index);
+      await applyStashService(getActiveTabId(), index);
     } catch (e) {
       set({ error: String(e) });
       throw e;
@@ -533,7 +539,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   popStash: async (index: number) => {
     try {
-      await popStashService(index);
+      await popStashService(getActiveTabId(), index);
     } catch (e) {
       set({ error: String(e) });
       throw e;
@@ -542,7 +548,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   dropStash: async (index: number) => {
     try {
-      await dropStashService(index);
+      await dropStashService(getActiveTabId(), index);
     } catch (e) {
       set({ error: String(e) });
       throw e;
@@ -551,7 +557,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   fetchTags: async () => {
     try {
-      const tags = await listTags();
+      const tags = await listTags(getActiveTabId());
       set({ tags });
     } catch (e) {
       set({ error: String(e) });
@@ -561,7 +567,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   createTag: async (name: string, message: string | null) => {
     try {
-      await createTagService(name, message);
+      await createTagService(getActiveTabId(), name, message);
     } catch (e) {
       set({ error: String(e) });
       throw e;
@@ -570,7 +576,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   deleteTag: async (name: string) => {
     try {
-      await deleteTagService(name);
+      await deleteTagService(getActiveTabId(), name);
     } catch (e) {
       set({ error: String(e) });
       throw e;
@@ -579,7 +585,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   checkoutTag: async (name: string) => {
     try {
-      await checkoutTagService(name);
+      await checkoutTagService(getActiveTabId(), name);
     } catch (e) {
       set({ error: String(e) });
       throw e;
@@ -588,7 +594,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   fetchMergeState: async () => {
     try {
-      const merging = await isMergingService();
+      const merging = await isMergingService(getActiveTabId());
       set({ merging });
     } catch (e) {
       set({ error: String(e) });
@@ -598,7 +604,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   fetchConflictFiles: async () => {
     try {
-      const conflictFiles = await getConflictFiles();
+      const conflictFiles = await getConflictFiles(getActiveTabId());
       set({ conflictFiles });
     } catch (e) {
       set({ error: String(e) });
@@ -608,7 +614,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   resolveConflict: async (path: string, resolution: ConflictResolution) => {
     try {
-      await resolveConflictService(path, resolution);
+      await resolveConflictService(getActiveTabId(), path, resolution);
     } catch (e) {
       set({ error: String(e) });
       throw e;
@@ -621,7 +627,12 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
     resolution: ConflictResolution,
   ) => {
     try {
-      await resolveConflictBlockService(path, blockIndex, resolution);
+      await resolveConflictBlockService(
+        getActiveTabId(),
+        path,
+        blockIndex,
+        resolution,
+      );
     } catch (e) {
       set({ error: String(e) });
       throw e;
@@ -630,7 +641,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   markResolved: async (path: string) => {
     try {
-      await markResolvedService(path);
+      await markResolvedService(getActiveTabId(), path);
     } catch (e) {
       set({ error: String(e) });
       throw e;
@@ -639,7 +650,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   abortMerge: async () => {
     try {
-      await abortMergeService();
+      await abortMergeService(getActiveTabId());
       set({ merging: false, conflictFiles: [] });
     } catch (e) {
       set({ error: String(e) });
@@ -649,7 +660,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   continueMerge: async (message: string) => {
     try {
-      const result = await continueMergeService(message);
+      const result = await continueMergeService(getActiveTabId(), message);
       set({ merging: false, conflictFiles: [] });
       return result.oid;
     } catch (e) {
@@ -660,8 +671,8 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   fetchRebaseState: async () => {
     try {
-      const rebasing = await isRebasingService();
-      const rebaseState = await getRebaseState();
+      const rebasing = await isRebasingService(getActiveTabId());
+      const rebaseState = await getRebaseState(getActiveTabId());
       set({ rebasing, rebaseState });
     } catch (e) {
       set({ error: String(e) });
@@ -671,7 +682,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   rebase: async (onto: string) => {
     try {
-      return await rebaseService(onto);
+      return await rebaseService(getActiveTabId(), onto);
     } catch (e) {
       set({ error: String(e) });
       throw e;
@@ -680,7 +691,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   interactiveRebase: async (onto: string, todo: RebaseTodoEntry[]) => {
     try {
-      return await interactiveRebaseService(onto, todo);
+      return await interactiveRebaseService(getActiveTabId(), onto, todo);
     } catch (e) {
       set({ error: String(e) });
       throw e;
@@ -689,7 +700,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   abortRebase: async () => {
     try {
-      await abortRebaseService();
+      await abortRebaseService(getActiveTabId());
       set({ rebasing: false, rebaseState: null, conflictFiles: [] });
     } catch (e) {
       set({ error: String(e) });
@@ -699,7 +710,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   continueRebase: async () => {
     try {
-      const result = await continueRebaseService();
+      const result = await continueRebaseService(getActiveTabId());
       if (result.completed) {
         set({ rebasing: false, rebaseState: null, conflictFiles: [] });
       }
@@ -712,7 +723,11 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   getRebaseTodo: async (onto: string) => {
     try {
-      return await getRebaseTodoService(onto, REBASE_TODO_DEFAULT_LIMIT);
+      return await getRebaseTodoService(
+        getActiveTabId(),
+        onto,
+        REBASE_TODO_DEFAULT_LIMIT,
+      );
     } catch (e) {
       set({ error: String(e) });
       throw e;
@@ -721,7 +736,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   cherryPick: async (oids: string[], mode: CherryPickMode) => {
     try {
-      const result = await cherryPickService(oids, mode);
+      const result = await cherryPickService(getActiveTabId(), oids, mode);
       if (result.completed) {
         set({ cherryPicking: false });
       } else {
@@ -736,7 +751,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   fetchCherryPickState: async () => {
     try {
-      const cherryPicking = await isCherryPickingService();
+      const cherryPicking = await isCherryPickingService(getActiveTabId());
       set({ cherryPicking });
     } catch (e) {
       set({ error: String(e) });
@@ -746,7 +761,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   abortCherryPick: async () => {
     try {
-      await abortCherryPickService();
+      await abortCherryPickService(getActiveTabId());
       set({ cherryPicking: false, conflictFiles: [] });
     } catch (e) {
       set({ error: String(e) });
@@ -756,7 +771,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   continueCherryPick: async () => {
     try {
-      const result = await continueCherryPickService();
+      const result = await continueCherryPickService(getActiveTabId());
       if (result.completed) {
         set({ cherryPicking: false, conflictFiles: [] });
       }
@@ -769,7 +784,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   revertCommit: async (oid: string, mode: RevertMode) => {
     try {
-      const result = await revertCommitService(oid, mode);
+      const result = await revertCommitService(getActiveTabId(), oid, mode);
       if (result.completed) {
         set({ reverting: false });
       } else {
@@ -784,7 +799,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   fetchRevertState: async () => {
     try {
-      const reverting = await isRevertingService();
+      const reverting = await isRevertingService(getActiveTabId());
       set({ reverting });
     } catch (e) {
       set({ error: String(e) });
@@ -794,7 +809,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   abortRevert: async () => {
     try {
-      await abortRevertService();
+      await abortRevertService(getActiveTabId());
       set({ reverting: false, conflictFiles: [] });
     } catch (e) {
       set({ error: String(e) });
@@ -804,7 +819,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   continueRevert: async () => {
     try {
-      const result = await continueRevertService();
+      const result = await continueRevertService(getActiveTabId());
       if (result.completed) {
         set({ reverting: false, conflictFiles: [] });
       }
@@ -817,7 +832,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   resetToCommit: async (oid: string, mode: ResetMode) => {
     try {
-      return await resetToCommitService(oid, mode);
+      return await resetToCommitService(getActiveTabId(), oid, mode);
     } catch (e) {
       set({ error: String(e) });
       throw e;
@@ -826,7 +841,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   resetFile: async (path: string, oid: string) => {
     try {
-      await resetFileService(path, oid);
+      await resetFileService(getActiveTabId(), path, oid);
     } catch (e) {
       set({ error: String(e) });
       throw e;
@@ -835,7 +850,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   fetchSubmodules: async () => {
     try {
-      const submodules = await listSubmodules();
+      const submodules = await listSubmodules(getActiveTabId());
       set({ submodules });
     } catch (e) {
       set({ error: String(e) });
@@ -845,7 +860,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   addSubmodule: async (url: string, path: string) => {
     try {
-      await addSubmoduleService(url, path);
+      await addSubmoduleService(getActiveTabId(), url, path);
     } catch (e) {
       set({ error: String(e) });
       throw e;
@@ -854,7 +869,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   updateSubmodule: async (path: string) => {
     try {
-      await updateSubmoduleService(path);
+      await updateSubmoduleService(getActiveTabId(), path);
     } catch (e) {
       set({ error: String(e) });
       throw e;
@@ -863,7 +878,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   updateAllSubmodules: async () => {
     try {
-      await updateAllSubmodulesService();
+      await updateAllSubmodulesService(getActiveTabId());
     } catch (e) {
       set({ error: String(e) });
       throw e;
@@ -872,7 +887,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   removeSubmodule: async (path: string) => {
     try {
-      await removeSubmoduleService(path);
+      await removeSubmoduleService(getActiveTabId(), path);
     } catch (e) {
       set({ error: String(e) });
       throw e;
@@ -881,7 +896,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   fetchWorktrees: async () => {
     try {
-      const worktrees = await listWorktrees();
+      const worktrees = await listWorktrees(getActiveTabId());
       set({ worktrees });
     } catch (e) {
       set({ error: String(e) });
@@ -891,7 +906,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   addWorktree: async (path: string, branch: string) => {
     try {
-      await addWorktreeService(path, branch);
+      await addWorktreeService(getActiveTabId(), path, branch);
     } catch (e) {
       set({ error: String(e) });
       throw e;
@@ -900,7 +915,7 @@ export const useGitStore = create<GitState & GitActions>((set) => ({
 
   removeWorktree: async (path: string) => {
     try {
-      await removeWorktreeService(path);
+      await removeWorktreeService(getActiveTabId(), path);
     } catch (e) {
       set({ error: String(e) });
       throw e;

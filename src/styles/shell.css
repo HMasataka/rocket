@@ -69,6 +69,88 @@
   -webkit-app-region: no-drag;
 }
 
+.titlebar-tabs {
+  display: flex;
+  gap: 4px;
+  -webkit-app-region: no-drag;
+}
+
+.tab {
+  padding: 6px 16px;
+  font-size: 12px;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tab:hover {
+  color: var(--text-secondary);
+}
+
+.tab.active {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.tab-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  padding: 0;
+  border: none;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.15s ease;
+}
+
+.tab:hover .tab-close {
+  opacity: 1;
+}
+
+.tab-close:hover {
+  background: var(--bg-quaternary);
+  color: var(--text-primary);
+}
+
+.tab-close svg {
+  width: 8px;
+  height: 8px;
+}
+
+.tab-add {
+  padding: 4px 6px;
+  border: 1px dashed var(--border);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.tab-add:hover {
+  border-color: var(--text-secondary);
+  color: var(--text-secondary);
+  background: var(--bg-tertiary);
+}
+
+.tab-add svg {
+  width: 14px;
+  height: 14px;
+}
+
 .titlebar-actions {
   margin-left: auto;
   -webkit-app-region: no-drag;

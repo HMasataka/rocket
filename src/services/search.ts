@@ -19,21 +19,28 @@ export interface FilenameSearchResult {
 }
 
 export function searchCode(
+  tabId: string,
   query: string,
   isRegex: boolean,
 ): Promise<CodeSearchResult[]> {
-  return invoke<CodeSearchResult[]>("search_code", { query, isRegex });
+  return invoke<CodeSearchResult[]>("search_code", { tabId, query, isRegex });
 }
 
 export function searchCommits(
+  tabId: string,
   query: string,
   searchDiff: boolean,
 ): Promise<CommitSearchResult[]> {
-  return invoke<CommitSearchResult[]>("search_commits", { query, searchDiff });
+  return invoke<CommitSearchResult[]>("search_commits", {
+    tabId,
+    query,
+    searchDiff,
+  });
 }
 
 export function searchFilenames(
+  tabId: string,
   query: string,
 ): Promise<FilenameSearchResult[]> {
-  return invoke<FilenameSearchResult[]>("search_filenames", { query });
+  return invoke<FilenameSearchResult[]>("search_filenames", { tabId, query });
 }

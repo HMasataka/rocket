@@ -12,10 +12,12 @@ export interface ReflogEntry {
 }
 
 export function getReflog(
+  tabId: string,
   refName: string,
   limit: number,
 ): Promise<ReflogEntry[]> {
   return invoke<ReflogEntry[]>("get_reflog", {
+    tabId,
     refName,
     limit,
   });

@@ -9,6 +9,7 @@ import {
   searchCommits,
   searchFilenames,
 } from "../../services/search";
+import { getActiveTabId } from "../../stores/tabStore";
 import { Modal } from "./Modal";
 
 type SearchTab = "code" | "commits" | "filenames";
@@ -78,19 +79,19 @@ export function SearchModal({ onClose }: SearchModalProps) {
       const searchPromise = (() => {
         switch (tab) {
           case "code":
-            return searchCode(q, regex).then((results) => {
+            return searchCode(getActiveTabId(), q, regex).then((results) => {
               if (requestIdRef.current === thisRequestId) {
                 setCodeResults(results);
               }
             });
           case "commits":
-            return searchCommits(q, diff).then((results) => {
+            return searchCommits(getActiveTabId(), q, diff).then((results) => {
               if (requestIdRef.current === thisRequestId) {
                 setCommitResults(results);
               }
             });
           case "filenames":
-            return searchFilenames(q).then((results) => {
+            return searchFilenames(getActiveTabId(), q).then((results) => {
               if (requestIdRef.current === thisRequestId) {
                 setFilenameResults(results);
               }

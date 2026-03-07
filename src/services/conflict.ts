@@ -28,45 +28,54 @@ export type ConflictResolution =
   | { type: "Both" }
   | { type: "Manual"; content: string };
 
-export function getConflictFiles(): Promise<ConflictFile[]> {
-  return invoke<ConflictFile[]>("get_conflict_files");
+export function getConflictFiles(tabId: string): Promise<ConflictFile[]> {
+  return invoke<ConflictFile[]>("get_conflict_files", { tabId });
 }
 
 export function resolveConflict(
+  tabId: string,
   path: string,
   resolution: ConflictResolution,
 ): Promise<void> {
-  return invoke<void>("resolve_conflict", { path, resolution });
+  return invoke<void>("resolve_conflict", { tabId, path, resolution });
 }
 
 export function resolveConflictBlock(
+  tabId: string,
   path: string,
   blockIndex: number,
   resolution: ConflictResolution,
 ): Promise<void> {
   return invoke<void>("resolve_conflict_block", {
+    tabId,
     path,
     blockIndex,
     resolution,
   });
 }
 
-export function markResolved(path: string): Promise<void> {
-  return invoke<void>("mark_resolved", { path });
+export function markResolved(tabId: string, path: string): Promise<void> {
+  return invoke<void>("mark_resolved", { tabId, path });
 }
 
-export function abortMerge(): Promise<void> {
-  return invoke<void>("abort_merge");
+export function abortMerge(tabId: string): Promise<void> {
+  return invoke<void>("abort_merge", { tabId });
 }
 
-export function continueMerge(message: string): Promise<CommitResult> {
-  return invoke<CommitResult>("continue_merge", { message });
+export function continueMerge(
+  tabId: string,
+  message: string,
+): Promise<CommitResult> {
+  return invoke<CommitResult>("continue_merge", { tabId, message });
 }
 
-export function isMerging(): Promise<boolean> {
-  return invoke<boolean>("is_merging");
+export function isMerging(tabId: string): Promise<boolean> {
+  return invoke<boolean>("is_merging", { tabId });
 }
 
-export function getMergeBaseContent(path: string): Promise<MergeBaseContent> {
-  return invoke<MergeBaseContent>("get_merge_base_content", { path });
+export function getMergeBaseContent(
+  tabId: string,
+  path: string,
+): Promise<MergeBaseContent> {
+  return invoke<MergeBaseContent>("get_merge_base_content", { tabId, path });
 }
